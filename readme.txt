@@ -14,7 +14,8 @@ Also 6128.h & amsdos.h files taken from wiituka (author:dantoine) http://code.go
 And of course for the RetroArch/Libretro team : "http://www.libretro.org/"
 
 
-You can download the caprice32 original source code here : http://sourceforge.net/projects/caprice32/
+You can download the caprice32 original source code here :
+	http://sourceforge.net/projects/caprice32/
 
 	
 It's a quick hack.
