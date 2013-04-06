@@ -8,34 +8,34 @@
 
 
 	
-	All the credit of the caprice32 Emulator to Ulrich Doewich 
-	Also 6128.h & amsdos.h files taken from wiituka (author:dantoine) http://code.google.com/p/wiituka/
+All the credit of the caprice32 Emulator to Ulrich Doewich 
+Also 6128.h & amsdos.h files taken from wiituka (author:dantoine) http://code.google.com/p/wiituka/
 
-	And of course for the RetroArch/Libretro team : "http://www.libretro.org/"
+And of course for the RetroArch/Libretro team : "http://www.libretro.org/"
 
 
-	You can download the caprice32 original source code here : http://sourceforge.net/projects/caprice32/
+You can download the caprice32 original source code here : http://sourceforge.net/projects/caprice32/
 
 	
-	It's a quick hack.
-	At this time , works the basis but buggy on linux /android.
+It's a quick hack.
+At this time , works the basis but buggy on linux /android.
 
-	Remember ,Everything not working well, It's a debug release , so expect to more bug.
+Remember ,Everything not working well, It's a debug release , so expect to more bug.
 
 
 
-	Compile:
+Compile:
 
 	Go to linux directory, and type make .
 
 
 
-	Usage:
+Usage:
 
 	Launch retroarch , select a startup dsk/sna , and cap32 sould boot.
 
 
-	Control:
+Control:
 
 	- Joy/Overlay
 
@@ -58,7 +58,7 @@
 	"Col" SWTICH FGCOL ON/OFF
 
 	
-	Knows Bugs: 
+Knows Bugs: 
  
 
 	- Everything not working well, It's a debug release , so expect to more bug.
