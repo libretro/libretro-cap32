@@ -240,11 +240,20 @@ typedef struct {
    unsigned int snd_pp_device;
    unsigned int snd_buffersize;
    unsigned char *snd_bufferptr;
+
+
    union {
+#ifndef PS3PORT
       struct {
          unsigned int low;
          unsigned int high;
       };
+#else     
+	struct {
+         unsigned int high;
+         unsigned int low;
+      };
+#endif
       int64_t both;
    } snd_cycle_count_init;
 
@@ -350,13 +359,22 @@ typedef struct {
 } t_PPI;
 
 typedef struct {
+
    union {
+#ifndef PS3PORT
       struct {
          unsigned int low;
          unsigned int high;
       };
+#else     
+	struct {
+         unsigned int high;
+         unsigned int low;
+      };
+#endif
       int64_t both;
    } cycle_count;
+
 	unsigned int buffer_full;
    unsigned char control;
    unsigned char reg_select;
@@ -433,7 +451,6 @@ typedef struct {
    unsigned char filler_byte; // default byte to use
    unsigned char sector_ids[2][16]; // sector IDs
 } t_disk_format;
-
 
 
 // cap32.cpp

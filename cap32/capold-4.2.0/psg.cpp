@@ -68,10 +68,18 @@ word Amplitudes_AY[16] = {
 int Level_PP[256];
 
 union {
+#ifndef PS3PORT
    struct {
       dword Lo;
       dword Hi;
    };
+#else
+   struct {
+      dword Hi;
+      dword Lo;
+   };
+#endif
+
    int64_t Re;
 } LoopCount;
 int64_t LoopCountInit;
@@ -81,25 +89,46 @@ bool Envelope_EnA, Envelope_EnB, Envelope_EnC;
 void (*Case_EnvType)(void);
 
 union TCounter {
-   struct {
-      word Lo;
-      word Hi;
-   };
-   dword Re;
-};
-TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
-union {
-   struct {
-      word Low;
-      word Val;
-   };
-   dword Seed;
-} Noise;
-union {
+  #ifndef PS3PORT
    struct {
       dword Lo;
       dword Hi;
    };
+#else
+   struct {
+      dword Hi;
+      dword Lo;
+   };
+#endif
+   dword Re;
+};
+TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
+union {
+ #ifndef PS3PORT
+   struct {
+      dword Low;
+      dword Val;
+   };
+#else
+   struct {
+      dword Val;
+      dword Low;
+   };
+#endif
+   dword Seed;
+} Noise;
+union {
+  #ifndef PS3PORT
+   struct {
+      dword Lo;
+      dword Hi;
+   };
+#else
+   struct {
+      dword Hi;
+      dword Lo;
+   };
+#endif
    int64_t Re;
 } Envelope_Counter;
 byte Ton_A, Ton_B, Ton_C;
@@ -700,7 +729,7 @@ void Calculate_Level_Tables(void)
       Level_CR[i * 2] = b;
       Level_CR[i * 2 + 1] = b;
    }
-   k = exp(CPC.snd_volume * log(2) / PreAmpMax) - 1;
+   k = exp(CPC.snd_volume * log(2.0) / PreAmpMax) - 1;
    for (i = 0; i < 32; i++) {
       Level_AL[i] = (int)rint(Level_AL[i] * k);
       Level_AR[i] = (int)rint(Level_AR[i] * k);

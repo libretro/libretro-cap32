@@ -511,14 +511,21 @@ void update_skew(void)
    }
 }
 
-
+#ifdef PS3PORT
+static __inline__ unsigned Swap32(unsigned x){
+unsigned result= ((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24));
+ return result;
+}
+#endif
 
 inline void change_mode(void)
 {
    if (CRTC.flag_hadhsync) { // have we had an HSYNC on this scan line?
       CRTC.flag_hadhsync = 0;
       GateArray.scr_mode = GateArray.requested_scr_mode; // execute mode change
-      ModeMap = ModeMaps[GateArray.scr_mode]; // update ModeMap pointer
+
+     ModeMap = ModeMaps[GateArray.scr_mode]; // update ModeMap pointer
+
    }
 }
 
@@ -840,19 +847,37 @@ void prerender_normal(void)
 
 void prerender_normal_half(void)
 {
+#ifdef PS3PORT
+   register byte bVidMem = *(pbRAM + CRTC.next_address);
+   *RendPos = *(ModeMap + bVidMem);
+	
+   *RendPos =Swap32(*RendPos);
+
+   bVidMem = *(pbRAM + CRTC.next_address+1);
+   *(RendPos + 1) = *(ModeMap + bVidMem);
+
+   *(RendPos + 1)=Swap32(*(RendPos + 1));
+
+   RendPos += 2;
+#else
    register byte bVidMem = *(pbRAM + CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
    bVidMem = *(pbRAM + CRTC.next_address + 1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
    RendPos += 2;
+#endif
 }
-
-
-
+ 
 void set_prerender(void)
 {
+
+#ifndef PS3PORT
    LastPreRend = flags1.combined;
    if (LastPreRend == 0x03ff0000) {
+#else
+   LastPreRend =flags1.combined;
+   if (LastPreRend == 0x0000ff03) {
+#endif
       PreRender = CPC.scr_prerendernorm;
    } else {
       if (!(word)LastPreRend) {
@@ -973,8 +998,6 @@ void render32bpp_doubleY(void)
    }
 }
 
-
-
 void crtc_cycle(int repeat_count)
 {
    while (repeat_count) {
@@ -992,6 +1015,7 @@ void crtc_cycle(int repeat_count)
       }
 
       CRTC.next_address = MAXlate[(CRTC.addr + CRTC.char_count) & 0x73ff] | CRTC.scr_base; // next address for PreRender
+
       flags1.dt.combined = new_dt.combined; // update the DISPTMG flags
 
       #ifdef DEBUG_CRTC
@@ -1294,7 +1318,7 @@ void crtc_reset(void)
    RendPos = (dword *)&RendBuff[0];
    RendOut = (byte *)RendStart;
    RendWid = &HorzPix[0];
-
+ 
    HorzPos = 0x500;
    HorzChar = 0x04;
    HorzMax = 48;

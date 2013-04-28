@@ -8,7 +8,17 @@
 #ifdef PS3PORT
 #include "sys/sys_time.h"
 #include "sys/timer.h"
+#include <sys/time.h>
+#include <time.h>
 #define usleep  sys_timer_usleep
+/*STATIC_INLINE*/ void gettimeofday (struct timeval *tv, void *blah)
+{
+    int64_t time = sys_time_get_system_time();
+
+    tv->tv_sec  = time / 1000000;
+    tv->tv_usec = time - (tv->tv_sec * 1000000);  // implicit rounding will take care of this for us
+}
+
 #else
 #include <sys/types.h>
 #include <sys/time.h>
@@ -82,7 +92,13 @@ void Emu_uninit(){
 #ifdef AND
 #define DEFAULT_PATH "/mnt/sdcard/amstrad/"
 #else
+
+#ifdef PS3PORT
+#define DEFAULT_PATH "/dev_hdd0/HOMEBREW/amstrad/"
+#else
 #define DEFAULT_PATH "/"
+#endif
+
 #endif
 
 #define MDEBUG
@@ -96,24 +112,9 @@ long GetTicks(void)
 {
 #ifndef _ANDROID_
 
-#ifdef PS3PORT
-
-	//#warning "GetTick PS3\n"
-
-	unsigned long	ticks_micro;
-	uint64_t secs;
-	uint64_t nsecs;
-
-	sys_time_get_current_time(&secs, &nsecs);
-	ticks_micro =  secs * 1000000UL + (nsecs / 1000);
-
-	return ticks_micro;
-#else
    	struct timeval tv;
    	gettimeofday (&tv, NULL);
    	return tv.tv_sec*1000000 + tv.tv_usec;
-#endif
-
 #else
 
     	struct timespec now;
@@ -154,7 +155,6 @@ void enter_gui(){
 	}		
 	
 }
-
 void Print_Statut(){
 
 	DrawFBoxBmp(bmp,0,CROP_HEIGHT,CROP_WIDTH,STAT_YSZ,RGB565(0,0,0));

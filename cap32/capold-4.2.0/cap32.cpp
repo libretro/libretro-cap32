@@ -164,6 +164,10 @@
 
 #include <zlib.h>
 
+#ifdef PS3PORT
+#define tmpnam(a)
+#endif
+
 //RETRO HACK C/C++ MIXING
 extern "C" void retro_key_down(int key);
 extern "C" void retro_key_up(int key);
@@ -291,7 +295,7 @@ FILE *pfoPrinter;
 
 #ifdef DEBUG
 //#define DEBUG_KEY SDLK_F9
-dword dwDebugFlag = 0;
+dword dwDebugFlag = 1;
 FILE *pfoDebug;
 #endif
 
@@ -1813,6 +1817,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
                   th.sector[sector][6] = drive->track[track][side].sector[sector].size & 0xff;
                   th.sector[sector][7] = (drive->track[track][side].sector[sector].size >> 8) & 0xff; // sector size in bytes
                }
+
                if (!fwrite(&th, sizeof(th), 1, pfileObject)) { // write track header
                   fclose(pfileObject);
                   return ERR_DSK_WRITE;
@@ -2034,6 +2039,8 @@ int tape_insert (char *pchFileName)
       tape_eject();
       return ERR_TAP_INVALID;
    }
+
+
 
    Tape_Rewind();
 
@@ -3275,7 +3282,11 @@ int capmain (int argc, char **argv)
    }
 
    #ifdef DEBUG
-   pfoDebug = fopen("./debug.txt", "wt");
+#ifdef PS3PORT
+   pfoDebug = fopen("/dev_hdd0/HOMEBREW/amstrad/debug.txt", "wt");
+#else
+pfoDebug = fopen("./debug.txt", "wt");
+#endif
    #endif
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
