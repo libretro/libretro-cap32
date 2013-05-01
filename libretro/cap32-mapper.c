@@ -26,8 +26,8 @@
 #endif
 
 extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL;
-extern unsigned char keyboard_translation[320];
-
+//extern unsigned char keyboard_translation[320];
+extern const int keyboard_translation[512];
 extern char * filebrowser(const char *path_and_name);
 
 extern MRES Mres[5];
@@ -38,7 +38,7 @@ extern unsigned dwFPS;
 unsigned short int bmp[TEX_WIDTH * TEX_HEIGHT];
 
 int NPAGE=-1, KCOL=1, BKGCOLOR=0, MAXPAS=6;
-int SHIFTON=-1,MOUSEMODE=-1,SHOWKEY=-1,PAS=2,STATUTON=-1;
+int CTRLON=-1,SHIFTON=-1,MOUSEMODE=-1,SHOWKEY=-1,PAS=2,STATUTON=-1;
 
 short signed int SNDBUF[1024*2];
 int snd_sampler = 44100 / 50;
@@ -365,6 +365,17 @@ void update_input(void)
 
 					SHIFTON=-SHIFTON;
 
+					//Screen_SetFullUpdate();
+					
+					oldi=-1;
+				}
+				else if(i==0x27){
+										
+					if(CTRLON == 1)retro_key_up(i);
+					else retro_key_down(i);
+
+					CTRLON=-CTRLON;		
+					
 					//Screen_SetFullUpdate();
 					
 					oldi=-1;

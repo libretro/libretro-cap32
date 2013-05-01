@@ -494,8 +494,6 @@ inline void Synthesizer_Mixer_Q(void)
    Right_Chan += LevR;
 }
 
-
-
 void Synthesizer_Stereo16(void)
 {
    int Tick_Counter = 0;
@@ -504,12 +502,22 @@ void Synthesizer_Stereo16(void)
       Synthesizer_Mixer_Q();
       Tick_Counter++;
       LoopCount.Hi--;
-   }
+   } 
    LoopCount.Re += LoopCountInit;
-   reg_pair val;
+   reg_pair val;  
+
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
+
+#ifdef PS3PORT
+//FIXME SOUND PS3
+*(word *)CPC.snd_bufferptr =Right_Chan / Tick_Counter;
+*(word *)(CPC.snd_bufferptr+2) =Left_Chan / Tick_Counter;
+//   *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+#else
    *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+#endif
+
    CPC.snd_bufferptr += 4;
    Left_Chan = 0;
    Right_Chan = Left_Chan;

@@ -11,7 +11,7 @@ extern int  UnInitOSGLU(void);
 extern void retro_loop();
 
 extern unsigned short int bmp[TEX_WIDTH * TEX_HEIGHT];
-extern int SHOWKEY,pauseg,SND ,SHIFTON,snd_sampler;
+extern int SHOWKEY,pauseg,SHIFTON,CTRLON,snd_sampler;
 extern short signed int SNDBUF[1024*2];
 extern char RPATH[512];
 
@@ -136,8 +136,7 @@ void retro_run(void)
 		
 		retro_loop();		
 		update_input();
-		if(SND==1)mixsnd();
-
+		//if(SND==1)mixsnd(); moved to cap32.cpp;
 	}
 	else enter_gui();
 
@@ -148,12 +147,12 @@ void retro_run(void)
  
 static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
 {
-	unsigned char retrok=keyboard_translation[keycode];
+	 int retrok=keyboard_translation[keycode];
 
   	// printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
   	//       down ? "yes" : "no", keycode, character, mod,retrok);
 
-	if (keycode>=320);
+	if (keycode>=321);
 	else{
 		if(SHOWKEY==1)return;
 
@@ -162,6 +161,13 @@ static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_
 			if(SHIFTON == 1)retro_key_up(retrok);
 			else retro_key_down(retrok);
 			SHIFTON=-SHIFTON;							
+			
+		}
+		else if(down && retrok==0x27){
+										
+			if(CTRLON == 1)retro_key_up(retrok);
+			else retro_key_down(retrok);
+			CTRLON=-CTRLON;							
 			
 		}
 		else {

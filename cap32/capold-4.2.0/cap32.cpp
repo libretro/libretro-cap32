@@ -189,7 +189,7 @@ extern "C" int HandleExtension(char *path,char *ext);
 
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
-
+extern int SND;
 int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0;
 int cmd_cpt=-1;
 
@@ -2042,6 +2042,7 @@ int tape_insert (char *pchFileName)
 
 
 
+
    Tape_Rewind();
 
    return 0;
@@ -2606,6 +2607,8 @@ void input_swap_joy (void) {
 int input_init (void)
 {
    return 0;
+
+
 }
 
 int getConfigValueInt (char* pchFileName, char* pchSection, char* pchKey, int iDefaultValue)
@@ -3034,9 +3037,11 @@ void retro_joy0(unsigned char joy0){
 
 void mixsnd (){
 
+	if(SND!=1)return;
+
 	int x;
         signed short int *p=(signed short int *)pbSndBuffer;
-
+	
   	for(x=0;x<882*2;x+=2)
 		retro_audio_cb(*p++,*p++);
  
@@ -3213,6 +3218,7 @@ void theloop(){
          if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT)) {
             int iTicksAdj = 0; // no adjustment necessary by default
             if (CPC.snd_enabled) {
+
                if (pbSndStream < CPC.snd_bufferptr) {
                   dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
                } else {
@@ -3244,10 +3250,12 @@ void theloop(){
          if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
             dwFrameCount++;
 		RLOOP=0; //exit retro_loop for retro_run
-
-         } else {
+		mixsnd();
+         } 
+	 else {
 
          }
+	
       }
    
 }

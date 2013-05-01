@@ -30,6 +30,13 @@ EMU = ../cap32/capold-4.2.0
 
 CORE_SRCS :=$(EMU)/z80.o $(EMU)/tape.o $(EMU)/psg.o $(EMU)/fdc.o $(EMU)/crtc.o $(EMU)/cap32.o 
 
+PS3SNDTST = 1
+
+ifeq ($(PS3SNDTST), 1)
+   CORE_SRCS +=  $(EMU)/wiitukapsg.o
+else
+   CORE_SRCS +=  $(EMU)/psg.o
+endif
 BUILD_APP = $(ZLIB_OBJECTS)  $(CORE_SRCS) 
 
 
