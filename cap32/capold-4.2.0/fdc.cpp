@@ -962,14 +962,17 @@ void fdc_writeID(void)
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
-   if (init_status_regs() == 0) { // drive Ready?
+   if (init_status_regs() == 0)
+   { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
-      if ((active_drive->flipped)) { // did the user request to access the "other" side?
+      if ((active_drive->flipped))
+      { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
       active_track = &active_drive->track[active_drive->current_track][side];
-      if (active_drive->write_protected) { // is write protect tab set?
+      if (active_drive->write_protected)
+      { // is write protect tab set?
          FDC.result[RES_ST0] |= 0x40; // AT
          FDC.result[RES_ST1] |= 0x02; // Not Writable
 
@@ -998,32 +1001,40 @@ void fdc_scan(void)
 {
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
-   if (init_status_regs() == 0) { // drive Ready?
+   if (init_status_regs() == 0)
+   {
+      // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
-      if ((active_drive->flipped)) { // did the user request to access the "other" side?
+
+      if ((active_drive->flipped))
+      { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
+
       active_track = &active_drive->track[active_drive->current_track][side];
-      if (active_track->sectors != 0) { // track is formatted?
+
+      if (active_track->sectors != 0)
+      { // track is formatted?
          if (FDC.command[CMD_STP] > 2) {
             FDC.command[CMD_STP] = 2; // step can only be 1 or 2
          }
          FDC.flags |= SCAN_flag; // scan command active
          cmd_scan();
       }
-      else { // unformatted track
+      else
+      { // unformatted track
          FDC.result[RES_ST0] |= 0x40; // AT
          FDC.result[RES_ST1] |= 0x01; // Missing AM
 
          LOAD_RESULT_WITH_CHRN
 
-         FDC.phase = RESULT_PHASE; // switch to result phase
+            FDC.phase = RESULT_PHASE; // switch to result phase
       }
    }
    else { // drive was not ready
       LOAD_RESULT_WITH_CHRN
 
-      FDC.phase = RESULT_PHASE; // switch to result phase
+         FDC.phase = RESULT_PHASE; // switch to result phase
    }
 }

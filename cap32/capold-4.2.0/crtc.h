@@ -23,30 +23,33 @@
 
 
 // The next 4 bytes must remain together
-typedef union {
+typedef union
+{
    dword combined;
    struct {
       byte monVSYNC;
       byte inHSYNC;
-//      byte inHSYNC;byte monVSYNC;
+      //      byte inHSYNC;byte monVSYNC;
       union {
          word combined;
          struct {
             byte DISPTIMG;
             byte HDSPTIMG;
 
-     //       byte HDSPTIMG;byte DISPTIMG;
+            //       byte HDSPTIMG;byte DISPTIMG;
          };
       } dt;
    };
 } t_flags1;
+
 // The next two bytes must remain together
-typedef union {
+typedef union
+{
    word combined;
    struct {
       byte NewDISPTIMG;
       byte NewHDSPTIMG;
-    
+
       //byte NewHDSPTIMG; byte NewDISPTIMG;
    };
 } t_new_dt;

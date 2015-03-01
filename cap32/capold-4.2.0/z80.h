@@ -22,8 +22,6 @@
 //retro hack
 // todo endianness
 
-//#include "SDL.h"
-
 typedef unsigned char byte;
 typedef unsigned short word;
 typedef unsigned int dword;

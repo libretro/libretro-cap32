@@ -2086,7 +2086,8 @@ int tape_insert_voc (char *pchFileName)
       #ifdef DEBUG_TAPE
       fprintf(pfoDebug, "%02x %d\r\n", *pbPtr, *(dword *)(pbPtr+0x01) & 0x00ffffff);
       #endif
-      switch(*pbPtr) {
+      switch(*pbPtr)
+      {
          case 0x0: // terminator
             bolDone = true;
             break;
@@ -2257,16 +2258,20 @@ int emulator_patch_ROM (void)
    strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
    strcat(chPath, "/");
    strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
-   if ((pfileObject = fopen(chPath, "rb")) != NULL) { // load CPC OS + Basic
+
+   if ((pfileObject = fopen(chPath, "rb")) != NULL)
+   { // load CPC OS + Basic
       fread(pbROMlo, 2*16384, 1, pfileObject);
       fclose(pfileObject);
-   } else {
-      return ERR_CPC_ROM_MISSING;
    }
+   else 
+      return ERR_CPC_ROM_MISSING;
 
-   if (CPC.keyboard) {
+   if (CPC.keyboard)
+   {
       pbPtr = pbROMlo;
-      switch(CPC.model) {
+      switch(CPC.model)
+      {
          case 0: // 464
             pbPtr += 0x1d69; // location of the keyboard translation table
             break;
@@ -2289,67 +2294,67 @@ void emulator_reset (bool bolMF2Reset)
 {
    int n;
 
-// Z80
+   // Z80
    memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
    _IX =
-  _IY = 0xffff; // IX and IY are FFFF after a reset!
+      _IY = 0xffff; // IX and IY are FFFF after a reset!
    _F = Zflag; // set zero flag
    z80.break_point = 0xffffffff; // clear break point
 
-// CPC
+   // CPC
    CPC.cycle_count = CYCLE_COUNT_INIT;
    memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix
    CPC.tape_motor = 0;
    CPC.tape_play_button = 0;
    CPC.printer_port = 0xff;
 
-// VDU
+   // VDU
    memset(&VDU, 0, sizeof(VDU)); // clear VDU data structure
    VDU.flag_drawing = 1;
 
-// CRTC
+   // CRTC
    crtc_reset();
 
-// Gate Array
+   // Gate Array
    memset(&GateArray, 0, sizeof(GateArray)); // clear GA data structure
    GateArray.scr_mode =
-   GateArray.requested_scr_mode = 1; // set to mode 1
+      GateArray.requested_scr_mode = 1; // set to mode 1
    ga_init_banking();
 
-// PPI
+   // PPI
    memset(&PPI, 0, sizeof(PPI)); // clear PPI data structure
 
-// PSG
+   // PSG
    PSG.control = 0;
    ResetAYChipEmulation();
 
-// FDC
+   // FDC
    memset(&FDC, 0, sizeof(FDC)); // clear FDC data structure
    FDC.phase = CMD_PHASE;
    FDC.flags = STATUSDRVA_flag | STATUSDRVB_flag;
 
-// memory
-   if (bolMF2Reset) {
+   // memory
+   if (bolMF2Reset)
       memset(pbRAM, 0, 64*1024); // clear only the first 64K of CPC memory
-   } else {
+   else
+   {
       memset(pbRAM, 0, CPC.ram_size*1024); // clear all memory used for CPC RAM
-      if (pbMF2ROM) {
+      if (pbMF2ROM)
          memset(pbMF2ROM+8192, 0, 8192); // clear the MF2's RAM area
-      }
    }
-   for (n = 0; n < 4; n++) { // initialize active read/write bank configuration
+   for (n = 0; n < 4; n++)
+   { // initialize active read/write bank configuration
       membank_read[n] = membank_config[0][n];
       membank_write[n] = membank_config[0][n];
    }
    membank_read[0] = pbROMlo; // 'page in' lower ROM
    membank_read[3] = pbROMhi; // 'page in' upper ROM
 
-// Multiface 2
+   // Multiface 2
    dwMF2Flags = 0;
    dwMF2ExitAddr = 0xffffffff; // clear MF2 return address
-   if ((pbMF2ROM) && (pbMF2ROMbackup)) {
+   if ((pbMF2ROM) && (pbMF2ROMbackup))
       memcpy(pbMF2ROM, pbMF2ROMbackup, 8192); // copy the MF2 ROM to its proper place
-   }
 }
 
 #include "rom/6128.h"
@@ -2366,24 +2371,22 @@ int emulator_init (void)
 
    pbROMlo=(byte *)&OS[0]; // CPC 6128
 
-   if ((!pbGPBuffer) || (!pbRAM) ){
+   if ((!pbGPBuffer) || (!pbRAM) )
       return ERR_OUT_OF_MEMORY;
-   }
-   
+
    pbROMhi = pbExpansionROM = (byte *)pbROMlo + 16384;
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
- 
+
    memmap_ROM[7] = (byte*)&AMSDOS[0];
-	   
+
    CPC.mf2 = 0;
    crtc_init();
 
    emulator_reset(false);
    CPC.paused &= ~1;
-   
-   return 0;
 
+   return 0;
 }
 
 void emulator_shutdown (void)
@@ -2393,6 +2396,7 @@ void emulator_shutdown (void)
    delete [] pbMF2ROMbackup;
    delete [] pbMF2ROM;
    pbMF2ROM = NULL;
+
    for (iRomNum = 2; iRomNum < 16; iRomNum++) // loop for ROMs 2-15
    {
       if (memmap_ROM[iRomNum] != NULL && iRomNum!=7) // was a ROM assigned to this slot?
@@ -2406,42 +2410,36 @@ void emulator_shutdown (void)
 
 int printer_start (void)
 {
-   if (!pfoPrinter) {
-      if(!(pfoPrinter = fopen(CPC.printer_file, "wb"))) {
+   if (!pfoPrinter)
+   {
+      if(!(pfoPrinter = fopen(CPC.printer_file, "wb")))
          return 0; // failed to open/create file
-      }
    }
    return 1; // ready to capture printer output
 }
 
 void printer_stop (void)
 {
-   if (pfoPrinter) {
+   if (pfoPrinter)
       fclose(pfoPrinter);
-   }
    pfoPrinter = NULL;
 }
 
-void audio_update (void *userdata, byte *stream, int len)
-{
-
-}
+void audio_update (void *userdata, byte *stream, int len) { }
 
 int audio_align_samples (int given)
 {
    int actual = 1;
-   while (actual < given) {
+   while (actual < given)
       actual <<= 1;
-   }
    return actual; // return the closest match as 2^n
 }
 
 int audio_init (void)
 {
 
-   if (!CPC.snd_enabled) {
+   if (!CPC.snd_enabled)
       return 0;
-   }
 
    CPC.snd_buffersize = 2*2*882;//audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
    pbSndBuffer = (byte *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
@@ -2451,33 +2449,15 @@ int audio_init (void)
 
    InitAY();
 
-   for (int n = 0; n < 16; n++) {
+   for (int n = 0; n < 16; n++)
       SetAYRegister(n, PSG.RegisterAY.Index[n]); // init sound emulation with valid values
-   }
 
    return 0;
 }
 
-void audio_shutdown (void)
-{
-
-}
-
-void audio_pause (void)
-{
-   if (CPC.snd_enabled) {
-     
-   }
-}
-
-
-
-void audio_resume (void)
-{
-   if (CPC.snd_enabled) {
-    
-   }
-}
+void audio_shutdown (void) {}
+void audio_pause (void) {}
+void audio_resume (void) {}
 
 int video_set_palette (void)
 {
@@ -2592,15 +2572,16 @@ int video_init (void)
   return 0;
 }
 
-void video_shutdown (void){
-
+void video_shutdown (void)
+{
 }
 
 void video_display (void){
  
 }
 
-void input_swap_joy (void) {
+void input_swap_joy (void)
+{
 
 }
 
@@ -2935,9 +2916,8 @@ void doCleanUp (void)
 
    tape_eject();
 
-   if (zip_info.pchFileNames) {
+   if (zip_info.pchFileNames)
       free(zip_info.pchFileNames);
-   }
 
    audio_shutdown();
    video_shutdown();
@@ -2948,15 +2928,18 @@ void doCleanUp (void)
 
 }
 
-void emu_reset (){
+void emu_reset(void)
+{
 	emulator_reset(false);
 }
 
-void retro_key_down(int key){
+void retro_key_down(int key)
+{
 	keyboard_matrix[key >> 4] &= ~bit_values[key & 7];	
 }
 
-void retro_key_up(int key){
+void retro_key_up(int key)
+{
 	keyboard_matrix[key >> 4] |= bit_values[key & 7];	
 }
 
@@ -3035,16 +3018,18 @@ void retro_joy0(unsigned char joy0){
 
 }
 
-void mixsnd (){
+void mixsnd(void)
+{
+   int x;
+   int16_t *p = NULL;
 
-	if(SND!=1)return;
+   if(SND != 1)
+      return;
 
-	int x;
-        signed short int *p=(signed short int *)pbSndBuffer;
-	
-  	for(x=0;x<882*2;x+=2)
-		retro_audio_cb(*p++,*p++);
- 
+   p = (int16_t*)pbSndBuffer;
+
+   for(x = 0; x < 882 * 2; x += 2)
+      retro_audio_cb(*p++,*p++);
 }
 
 int InitOSGLU(void)
@@ -3057,112 +3042,133 @@ int  UnInitOSGLU(void)
     doCleanUp();
 }
 
-void shortcut_check(){
+void shortcut_check(void)
+{
+   if(TYPE_CAT)
+   {
+      switch(cmd_cpt)
+      {
+         // C
+         case 0:
+            keyboard_matrix[0x76 >> 4] &= ~bit_values[0x76 & 7];// key is being held down
+            break;
+         case 1:
+            keyboard_matrix[0x76 >> 4] |= bit_values[0x76 & 7]; // key has been released
+            break;
+            // A
+         case 2:
+            keyboard_matrix[0x85 >> 4] &= ~bit_values[0x85 & 7];// key is being held down
+            break;
+         case 3:
+            keyboard_matrix[0x85 >> 4] |= bit_values[0x85 & 7]; // key has been released
+            break;
+            // T
+         case 4:
+            keyboard_matrix[0x63 >> 4] &= ~bit_values[0x63 & 7];// key is being held down
+            break;
+         case 5:
+            keyboard_matrix[0x63 >> 4] |= bit_values[0x63 & 7]; // key has been released
+            break;
+            // Enter
+         case 6:
+            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
+            break;
+         case 7:
+            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
+            break;
+         case 8:
+            TYPE_CAT=!TYPE_CAT;cmd_cpt=-1;
+            break;
+         default:
+            break;
+      }
+      cmd_cpt++;	
 
-    if(TYPE_CAT){
+   }
+   else if(TYPE_RUN)
+   {
+      switch(cmd_cpt)
+      {
+         // R
+         case 0:
+            keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
+            break;
+         case 1:
+            keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
+            break;
+            // U
+         case 2:
+            keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
+            break;
+         case 3:
+            keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
+            break;
+            // N
+         case 4:
+            keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
+            break;
+         case 5:
+            keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
+            break;
+            // shft+2 => "
+         case 6:
+            keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
+            keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
+            break;
+         case 7:
+            keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
+            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
+            break;
 
-	switch(cmd_cpt){
-		// C
-		case 0:keyboard_matrix[0x76 >> 4] &= ~bit_values[0x76 & 7];// key is being held down
-		break;
-		case 1:keyboard_matrix[0x76 >> 4] |= bit_values[0x76 & 7]; // key has been released
-		break;
-		// A
-		case 2:keyboard_matrix[0x85 >> 4] &= ~bit_values[0x85 & 7];// key is being held down
-		break;
-		case 3:keyboard_matrix[0x85 >> 4] |= bit_values[0x85 & 7]; // key has been released
-		break;
-		// T
-		case 4:keyboard_matrix[0x63 >> 4] &= ~bit_values[0x63 & 7];// key is being held down
-		break;
-		case 5:keyboard_matrix[0x63 >> 4] |= bit_values[0x63 & 7]; // key has been released
-		break;
-		// Enter
-	        case 6:keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
-		break;
-		case 7:keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
-		break;
+         case 8:TYPE_RUN=!TYPE_RUN;cmd_cpt=-1;
+                break;
 
-		case 8:TYPE_CAT=!TYPE_CAT;cmd_cpt=-1;
-		break;
-	
-		default: break;
-
-	}
-	cmd_cpt++;	
+         default: break;
 
       }
-   else if(TYPE_RUN){
+      cmd_cpt++;	
 
-	switch(cmd_cpt){
-		// R
-		case 0:keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
-		break;
-		case 1:keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
-		break;
-		// U
-		case 2:keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
-		break;
-		case 3:keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
-		break;
-		// N
-		case 4:keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
-		break;
-		case 5:keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
-		break;
-		// shft+2 => "
-	        case 6:keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
-		       keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
-		break;
-		case 7:keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
-		       keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
-		break;
-
-		case 8:TYPE_RUN=!TYPE_RUN;cmd_cpt=-1;
-		break;
-	
-		default: break;
-
-	}
-	cmd_cpt++;	
-
+   }
+   else  if(TYPE_ENTER)
+   {
+      switch(cmd_cpt)
+      {
+         /* ENTER */
+         case 0:
+            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
+            break;
+         case 1:
+            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
+            break;		
+         case 2:
+            TYPE_ENTER=!TYPE_ENTER;cmd_cpt=-1;
+            break;
+         default:
+            break;
       }
-     else  if(TYPE_ENTER){
-		
-	switch(cmd_cpt){
-		// ENTER
-		case 0:keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
-		break;
-		case 1:keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
-		break;		
+      cmd_cpt++;	
 
-		case 2:TYPE_ENTER=!TYPE_ENTER;cmd_cpt=-1;
-		break;
-	
-		default: break;
-
-	}
-	cmd_cpt++;	
-
+   }
+   else if(TYPE_DEL)
+   {
+      switch(cmd_cpt)
+      {
+         // DEL
+         case 0:
+            keyboard_matrix[0x97 >> 4] &= ~bit_values[0x97 & 7];// key is being held down
+            break;
+         case 1:
+            keyboard_matrix[0x97 >> 4] |= bit_values[0x97 & 7]; // key has been released
+            break;		
+         case 2:
+            TYPE_DEL=!TYPE_DEL;cmd_cpt=-1;
+            break;
+         default:
+            break;
       }
-      else if(TYPE_DEL){	
-	
-	switch(cmd_cpt){
-		// DEL
-		case 0:keyboard_matrix[0x97 >> 4] &= ~bit_values[0x97 & 7];// key is being held down
-		break;
-		case 1:keyboard_matrix[0x97 >> 4] |= bit_values[0x97 & 7]; // key has been released
-		break;		
+      cmd_cpt++;	
 
-		case 2:TYPE_DEL=!TYPE_DEL;cmd_cpt=-1;
-		break;
-	
-		default: break;
-
-	}
-	cmd_cpt++;	
-
-      }
+   }
 
 }
 
@@ -3195,112 +3201,112 @@ int loadadsk (char *arv,int drive)
 
 int RLOOP=1;
 
-void retro_loop(){
+void retro_loop(void)
+{
+   while(RLOOP==1)
+      theloop();
 
-	while(RLOOP==1)
-		theloop();
-	
-	RLOOP=1;
+   RLOOP=1;
 
-	shortcut_check();
+   shortcut_check();
 }
 
-void theloop(){
+void theloop()
+{
+   if (1/*!CPC.paused*/)
+   { // run the emulation, as long as the user doesn't pause it
+      dwTicks = /*SDL_*/GetTicks();
 
-      if (1/*!CPC.paused*/) { // run the emulation, as long as the user doesn't pause it
-         dwTicks = /*SDL_*/GetTicks();
-         if (dwTicks >= dwTicksTargetFPS) { // update FPS counter?
-            dwFPS = dwFrameCount;
-            dwFrameCount = 0;
-            dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
-         }
-
-         if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT)) {
-            int iTicksAdj = 0; // no adjustment necessary by default
-            if (CPC.snd_enabled) {
-
-               if (pbSndStream < CPC.snd_bufferptr) {
-                  dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-               } else {
-                  dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-               }
-               if (dwSndDist < dwSndMinSafeDist) {
-                  iTicksAdj = -5; // speed emulation up to compensate
-               } else if (dwSndDist > dwSndMaxSafeDist) {
-                  iTicksAdj = 5; // slow emulation down to compensate
-               }
-            }
-            dwTicks = /*SDL_*/GetTicks();
-            if (dwTicks < (dwTicksTarget+iTicksAdj)) { // limit speed?
-             return;// continue; // delay emulation
-            }
-            dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
-         }
-
-	dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
-         if (VDU.scrln > 0) {
-            CPC.scr_base = (dword *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
-         } else {
-            CPC.scr_base = (dword *)&bmp[0]; // reset to surface start
-         }
-         CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
-
-         iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-
-         if (iExitCondition == EC_FRAME_COMPLETE) { // emulation finished rendering a complete frame?
-            dwFrameCount++;
-		RLOOP=0; //exit retro_loop for retro_run
-		mixsnd();
-         } 
-	 else {
-
-         }
-	
+      if (dwTicks >= dwTicksTargetFPS)
+      { // update FPS counter?
+         dwFPS = dwFrameCount;
+         dwFrameCount = 0;
+         dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
       }
-   
+
+      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
+      {
+         int iTicksAdj = 0; // no adjustment necessary by default
+
+         if (CPC.snd_enabled)
+         {
+
+            if (pbSndStream < CPC.snd_bufferptr)
+               dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
+            else
+               dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
+
+            if (dwSndDist < dwSndMinSafeDist)
+               iTicksAdj = -5; // speed emulation up to compensate
+            else if (dwSndDist > dwSndMaxSafeDist)
+               iTicksAdj = 5; // slow emulation down to compensate
+         }
+         dwTicks = /*SDL_*/GetTicks();
+         if (dwTicks < (dwTicksTarget+iTicksAdj)) // limit speed?
+            return;// continue; // delay emulation
+         dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
+      }
+
+      dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+      if (VDU.scrln > 0)
+         CPC.scr_base = (dword *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
+      else
+         CPC.scr_base = (dword *)&bmp[0]; // reset to surface start
+
+      CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
+
+      iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+
+      if (iExitCondition == EC_FRAME_COMPLETE)
+      { // emulation finished rendering a complete frame?
+         dwFrameCount++;
+         RLOOP=0; //exit retro_loop for retro_run
+         mixsnd();
+      } 
+   }
 }
 
 int capmain (int argc, char **argv)
 {
-
    strcpy (chAppPath, "./");
 
    loadConfiguration(); // retrieve the emulator configuration
-   if (CPC.printer) {
-      if (!printer_start()) { // start capturing printer output, if enabled
+   if (CPC.printer)
+   {
+      if (!printer_start()) // start capturing printer output, if enabled
          CPC.printer = 0;
-      }
    }
 
    z80_init_tables(); // init Z80 emulation
 
-   if (video_init()) {
+   if (video_init())
+   {
       fprintf(stderr, "video_init() failed. Aborting.\n");
       exit(-1);
    }
 
-   if (audio_init()) {
+   if (audio_init())
+   {
       fprintf(stderr, "audio_init() failed. Disabling sound.\n");
       CPC.snd_enabled = 0; // disable sound emulation
    }
 
-   if (emulator_init()) {
+   if (emulator_init())
+   {
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
       exit(-1);
    }
 
-   #ifdef DEBUG
+#ifdef DEBUG
 #ifdef PS3PORT
    pfoDebug = fopen("/dev_hdd0/HOMEBREW/amstrad/debug.txt", "wt");
 #else
-pfoDebug = fopen("./debug.txt", "wt");
+   pfoDebug = fopen("./debug.txt", "wt");
 #endif
-   #endif
+#endif
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
-
-// ----------------------------------------------------------------------------
 
    dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
    dwTicksTarget = GetTicks();//SDL_GetTicks();
@@ -3309,6 +3315,5 @@ pfoDebug = fopen("./debug.txt", "wt");
 
    iExitCondition = EC_FRAME_COMPLETE;
    bolDone = false;
-
 }
 
