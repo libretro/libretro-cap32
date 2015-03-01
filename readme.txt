@@ -22,7 +22,7 @@ You can download the caprice32 original source code here :
 It's a quick hack.
 At this time , works the basis but buggy on linux / android / PS3.
 
-Remember ,Everything not working well, It's a debug release , so expect to more bug.
+Remember ,Everything not working well, It's a debug release , so expect bugs.
 
 
 
