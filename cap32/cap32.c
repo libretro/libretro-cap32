@@ -3072,12 +3072,13 @@ void mixsnd(void)
 int InitOSGLU(void)
 {
    capmain(1,NULL);
+   return 0;
 }
 
 int  UnInitOSGLU(void)
 {
-    doCleanUp();
-    return 0;
+   doCleanUp();
+   return 0;
 }
 
 void shortcut_check(void)
@@ -3353,5 +3354,6 @@ int capmain (int argc, char **argv)
 
    iExitCondition = EC_FRAME_COMPLETE;
    bolDone = false;
+   return 0;
 }
 

@@ -35,8 +35,9 @@
 #define MXZO 384
 #define MYZO 272
 
-typedef struct mres{
-	int x,y;
+typedef struct mres
+{
+   int x,y;
 }MRES;
 
 
