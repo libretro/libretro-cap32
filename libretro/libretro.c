@@ -47,52 +47,53 @@ void retro_deinit(void)
 
 unsigned retro_api_version(void)
 {
-   	return RETRO_API_VERSION;
+   return RETRO_API_VERSION;
 }
 
 void retro_set_controller_port_device(unsigned port, unsigned device)
 {
-   	(void)port;
-   	(void)device;
+   (void)port;
+   (void)device;
 }
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   	memset(info, 0, sizeof(*info));
-   	info->library_name     = "CAPRICE32 4.2";
-   	info->library_version  = "v1";
-   	info->valid_extensions = "dsk|sna";
-   	info->need_fullpath    = true;
+   memset(info, 0, sizeof(*info));
+   info->library_name     = "CAPRICE32 4.2";
+   info->library_version  = "v1";
+   info->valid_extensions = "dsk|sna";
+   info->need_fullpath    = true;
 }
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   	struct retro_game_geometry geom = { 200, 150, TEX_WIDTH, TEX_HEIGHT,4.0 / 3.0 };
-   	struct retro_system_timing timing = { 50.0, 44100.0 };
-   
-   	info->geometry = geom;
-   	info->timing   = timing;
+   struct retro_game_geometry geom = { 200, 150, TEX_WIDTH, TEX_HEIGHT,4.0 / 3.0 };
+   struct retro_system_timing timing = { 50.0, 44100.0 };
+
+   info->geometry = geom;
+   info->timing   = timing;
 }
  
 void retro_set_environment(retro_environment_t cb)
 {
-   	environ_cb = cb;
+   environ_cb = cb;
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
-   	audio_cb = cb;
+   audio_cb = cb;
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-   	audio_batch_cb = cb;
+   audio_batch_cb = cb;
 }
 
 void retro_set_video_refresh(retro_video_refresh_t cb)
 {
-   	video_cb = cb;
+   video_cb = cb;
 }
+
 /*
 void retro_set_input_poll(retro_input_poll_t cb)
 {
@@ -120,11 +121,12 @@ void display_zoom(void)
 	unsigned short *ptr=&bmp[ (384-XZO)/2 +400*(272-YZO)/2];
 	unsigned short *out=&zoom[0];
 
-	for(i=0;i<YZO;i++){
-		memcpy(out,ptr,XZO*2);
-		ptr+=TEX_WIDTH;
-		out+=XZO;
-	}
+	for(i = 0;i < YZO; i++)
+   {
+      memcpy(out,ptr,XZO*2);
+      ptr += TEX_WIDTH;
+      out += XZO;
+   }
 	video_cb(zoom,XZO, YZO, XZO << 1);
 }
 
@@ -149,45 +151,43 @@ void retro_run(void)
  
 static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
 {
-	 int retrok=keyboard_translation[keycode];
+   int retrok=keyboard_translation[keycode];
 
-  	// printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
-  	//       down ? "yes" : "no", keycode, character, mod,retrok);
+   // printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
+   //       down ? "yes" : "no", keycode, character, mod,retrok);
 
-	if (keycode>=321);
-	else
+   if (keycode >= 321)
+      return;
+
+   if(SHOWKEY == 1)
+      return;
+
+   if(down && retrok == 0x25)
    {
-      if(SHOWKEY==1)
-         return;
 
-      if(down && retrok==0x25)
-      {
-
-         if (SHIFTON == 1)
-            retro_key_up(retrok);
-         else
-            retro_key_down(retrok);
-         SHIFTON = -SHIFTON;							
-
-      }
-      else if(down && retrok==0x27)
-      {
-         if (CTRLON == 1)
-            retro_key_up(retrok);
-         else
-            retro_key_down(retrok);
-         CTRLON = -CTRLON;							
-
-      }
+      if (SHIFTON == 1)
+         retro_key_up(retrok);
       else
-      {
-         if(down && retrok!=-1)		
-            retro_key_down(retrok);	
-         else if(!down && retrok!=-1)
-            retro_key_up(retrok);
-      }
-   }
+         retro_key_down(retrok);
+      SHIFTON = -SHIFTON;							
 
+   }
+   else if(down && retrok==0x27)
+   {
+      if (CTRLON == 1)
+         retro_key_up(retrok);
+      else
+         retro_key_down(retrok);
+      CTRLON = -CTRLON;							
+
+   }
+   else
+   {
+      if(down && retrok!=-1)		
+         retro_key_down(retrok);	
+      else if(!down && retrok!=-1)
+         retro_key_up(retrok);
+   }
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -211,7 +211,6 @@ bool retro_load_game(const struct retro_game_info *info)
    strcpy(RPATH,full_path);
    loadadsk((char *)full_path,0);
 
-
    return true;
 }
 
@@ -219,51 +218,50 @@ void retro_unload_game(void){}
 
 unsigned retro_get_region(void)
 {
-   	return RETRO_REGION_NTSC;
+   return RETRO_REGION_NTSC;
 }
 
 bool retro_load_game_special(unsigned type,
       const struct retro_game_info *info, size_t num)
 {
-   	(void)type;
-   	(void)info;
-   	(void)num;
-   	return false;
+   (void)type;
+   (void)info;
+   (void)num;
+   return false;
 }
 
 size_t retro_serialize_size(void)
 {
-   	return 0;
+   return 0;
 }
 
 bool retro_serialize(void *data_, size_t size)
 {
-   	return false;
+   return false;
 }
 
 bool retro_unserialize(const void *data_, size_t size)
 {
-	return false;
+   return false;
 }
 
 void *retro_get_memory_data(unsigned id)
 {
-   	(void)id;
-   	return NULL;
+   (void)id;
+   return NULL;
 }
 
 size_t retro_get_memory_size(unsigned id)
 {
-   	(void)id;
-   	return 0;
+   (void)id;
+   return 0;
 }
 
 void retro_cheat_reset(void) {}
 
 void retro_cheat_set(unsigned index, bool enabled, const char *code)
 {
-   	(void)index;
-   	(void)enabled;
-   	(void)code;
+   (void)index;
+   (void)enabled;
+   (void)code;
 }
-
