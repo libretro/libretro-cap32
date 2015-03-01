@@ -23,18 +23,23 @@ void printch(unsigned short *buffer,int x, int y,
          if ((*font &(128>>j)))
          {
             rectx = x+(j<<0);
-            if(taille==1)recty = y+(i<<1);
-            else recty = y+(i<<0);
+
+            if(taille==1)
+               recty = y+(i<<1);
+            else
+               recty = y+(i<<0);
 
             buffer[recty* VIRTUAL_WIDTH  + rectx] = couleur; 
-            if(pl==1) buffer[(recty+1)* VIRTUAL_WIDTH  + rectx] = couleur; 				
+            if(pl==1)
+               buffer[(recty+1)* VIRTUAL_WIDTH  + rectx] = couleur; 				
 
          }
       }
    }
 }
 
-void textpixel(unsigned  short *buffer,int x,int y,unsigned  short  color,int tail,int plein,int zdep, char *string,...)
+void textpixel(unsigned  short *buffer,int x,int y,
+      unsigned  short  color,int tail,int plein,int zdep, char *string,...)
 {
    int boucle=0;  
    char	text[256];	   	
@@ -55,13 +60,14 @@ void textpixel(unsigned  short *buffer,int x,int y,unsigned  short  color,int ta
 
 }
 
-void textCLpixel(unsigned  short  *buffer,int lim,int x,int x2,int y,unsigned  short color,int tail,int plein,int zdep,char *string,...)
+void textCLpixel(unsigned  short  *buffer,int lim,int x,int x2,int y,
+      unsigned  short color,int tail,int plein,int zdep,char *string,...)
 {
-   int boucle=0;  
-   char	text[256];	   	
-   va_list	ap;			
+   char	text[256];
+   va_list	ap;
+   int boucle=0;
 
-   if (string == NULL)
+   if (!string)
       return;
 
    va_start(ap, string);
@@ -90,7 +96,7 @@ void textCpixel(unsigned  short *buffer,int x,int x2,int y,
    char	text[256];	   	
    va_list	ap;			
 
-   if (string == NULL)
+   if (!string)
       return;
 
    va_start(ap, string);
@@ -113,7 +119,8 @@ void textCpixel(unsigned  short *buffer,int x,int x2,int y,
 
 }
 
-void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short color)
+void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,
+      int dx,int dy,unsigned  short color)
 {
    int i,j,idx;
 
@@ -127,7 +134,8 @@ void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  sh
    }
 }
 
-void DrawBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short  color)
+void DrawBoxBmp(unsigned  short  *buffer,int x,int y,
+      int dx,int dy,unsigned  short  color)
 {
    int i,j,idx;
 
@@ -150,7 +158,8 @@ void DrawBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  sho
 }
 
 
-void DrawHlineBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short  color)
+void DrawHlineBmp(unsigned  short  *buffer,int x,int y,
+      int dx,int dy,unsigned  short  color)
 {
    int i,j,idx;
 
@@ -161,7 +170,8 @@ void DrawHlineBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  s
    }
 }
 
-void DrawVlineBmp(unsigned  short *buffer,int x,int y,int dx,int dy,unsigned  short  color){
+void DrawVlineBmp(unsigned  short *buffer,int x,int y,
+      int dx,int dy,unsigned  short  color){
 
    int i,j,idx;
 
@@ -171,7 +181,8 @@ void DrawVlineBmp(unsigned  short *buffer,int x,int y,int dx,int dy,unsigned  sh
    }	
 }
 
-void DrawlineBmp(unsigned  short  *buffer,int x1,int y1,int x2,int y2,unsigned  short  color){
+void DrawlineBmp(unsigned  short  *buffer,
+      int x1,int y1,int x2,int y2,unsigned  short  color){
 
    int pixx, pixy;
    int x, y;
@@ -258,14 +269,15 @@ void DrawlineBmp(unsigned  short  *buffer,int x1,int y1,int x2,int y2,unsigned  
 
 }
 
-void DrawBox(unsigned  short  *buf,box b,char t[],unsigned  short  color){
-
+void DrawBox(unsigned  short  *buf,box b,
+      char t[],unsigned  short  color)
+{
    DrawBoxBmp(buf,b.x,b.y,b.dx,b.dy,color); 	
    textCpixel(buf,b.x, 3*b.x + b.dx ,b.y+2,color,1,1,4,"%s",t);
-
 }
 
-void DrawBoxF(unsigned  short  *buf,box b,char t[],unsigned short  color,unsigned  short  border){
+void DrawBoxF(unsigned  short  *buf,box b,
+      char t[],unsigned short  color,unsigned  short  border){
 
    int ydec=b.y+(b.dy/2)-4;
 
@@ -281,7 +293,8 @@ void DrawBoxF(unsigned  short  *buf,box b,char t[],unsigned short  color,unsigne
 
 const float DEG2RAD = 3.14159/180;
 
-void DrawCircle(unsigned short *buf,int x, int y, int radius,unsigned short rgba,int full)
+void DrawCircle(unsigned short *buf,int x, int y,
+      int radius,unsigned short rgba,int full)
 { 
    int i;
    float degInRad; 

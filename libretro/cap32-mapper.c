@@ -83,7 +83,7 @@ void texture_init(void)
 
 void Emu_init(void) { }
 
-void Emu_uninit() { }
+void Emu_uninit(void) { }
 
 #ifdef AND
 #define DEFAULT_PATH "/mnt/sdcard/amstrad/"
@@ -108,16 +108,15 @@ long GetTicks(void)
 {
 #ifndef _ANDROID_
 
-   	struct timeval tv;
-   	gettimeofday (&tv, NULL);
-   	return tv.tv_sec*1000000 + tv.tv_usec;
+   struct timeval tv;
+   gettimeofday (&tv, NULL);
+   return tv.tv_sec*1000000 + tv.tv_usec;
 #else
 
-    	struct timespec now;
-    	clock_gettime(CLOCK_MONOTONIC, &now);
-    	return now.tv_sec*1000000 + now.tv_nsec/1000;
+   struct timespec now;
+   clock_gettime(CLOCK_MONOTONIC, &now);
+   return now.tv_sec*1000000 + now.tv_nsec/1000;
 #endif
-                                                                              
 } 
 
 //DBG LOAD DSK
@@ -476,32 +475,29 @@ int update_input_gui(void)
 
    input_poll_cb();	
 
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) && dskflag[0]==0 ){
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) && dskflag[0]==0 )
+   {
       dskflag[0]=1;
       ret= -1; 
    }
-   else /*if (dskflag[0]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP) ){
-          dskflag[0]=0;
-          ret= -1; 
-          }*/dskflag[0]=0;
+   else
+      dskflag[0]=0;
 
-      if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN) && dskflag[1]==0 )
-      {
-         dskflag[1]=1;
-         ret= 1;
-      } 
-      else/* if (dskflag[1]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN) ){
-             dskflag[1]=0;
-             ret= 1; 
-             }*/dskflag[1]=0;
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN) && dskflag[1]==0 )
+   {
+      dskflag[1]=1;
+      ret= 1;
+   } 
+   else
+      dskflag[1]=0;
 
-         if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) && dskflag[4]==0 )
-            dskflag[4]=1;
-         else if (dskflag[4]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) )
-         {
-            dskflag[4]=0;
-            ret= -10; 
-         }
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) && dskflag[4]==0 )
+      dskflag[4]=1;
+   else if (dskflag[4]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) )
+   {
+      dskflag[4]=0;
+      ret= -10; 
+   }
 
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) && dskflag[5]==0 )
       dskflag[5]=1;
