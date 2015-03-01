@@ -258,7 +258,7 @@ extern t_z80regs z80;
 
 extern uint32_t *ScanPos;
 extern uint32_t *ScanStart;
-extern word MaxVSync;
+extern uint16_t MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
@@ -1106,7 +1106,7 @@ int zip_dir (t_zip_info *zi)
    int n, iFileCount;
    long lFilePosition;
    uint32_t dwCentralDirPosition, dwNextEntry;
-   word wCentralDirEntries, wCentralDirSize, wFilenameLength;
+   uint16_t wCentralDirEntries, wCentralDirSize, wFilenameLength;
    uint8_t *pbPtr;
    char *pchStrPtr;
    uint32_t dwOffset;
@@ -1129,8 +1129,8 @@ int zip_dir (t_zip_info *zi)
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
       while (pbPtr != (uint8_t *)pbGPBuffer) {
          if (*(uint32_t *)pbPtr == 0x06054b50) { // check for end of central directory signature
-            wCentralDirEntries = *(word *)(pbPtr + 10);
-            wCentralDirSize = *(word *)(pbPtr + 12);
+            wCentralDirEntries = *(uint16_t *)(pbPtr + 10);
+            wCentralDirSize = *(uint16_t *)(pbPtr + 12);
             dwCentralDirPosition = *(uint32_t *)(pbPtr + 16);
             break;
          }
@@ -1156,9 +1156,9 @@ int zip_dir (t_zip_info *zi)
    pchStrPtr = zi->pchFileNames;
 
    for (n = wCentralDirEntries; n; n--) {
-      wFilenameLength = *(word *)(pbPtr + 28);
+      wFilenameLength = *(uint16_t *)(pbPtr + 28);
       dwOffset = *(uint32_t *)(pbPtr + 42);
-      dwNextEntry = wFilenameLength + *(word *)(pbPtr + 30) + *(word *)(pbPtr + 32);
+      dwNextEntry = wFilenameLength + *(uint16_t *)(pbPtr + 30) + *(uint16_t *)(pbPtr + 32);
       pbPtr += 46;
       char *pchThisExtension = zi->pchExtension;
       while (*pchThisExtension != '\0') { // loop for all extensions to be checked
@@ -1201,7 +1201,7 @@ int zip_extract (char *pchZipFile, char *pchFileName, uint32_t dwOffset)
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
    fread(pbGPBuffer, 30, 1, pfileIn); // read local header
    dwSize = *(uint32_t *)(pbGPBuffer + 18); // length of compressed data
-   dwOffset += 30 + *(word *)(pbGPBuffer + 26) + *(word *)(pbGPBuffer + 28);
+   dwOffset += 30 + *(uint16_t *)(pbGPBuffer + 26) + *(uint16_t *)(pbGPBuffer + 28);
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
 
    pbInputBuffer = pbGPBuffer; // space for compressed data chunck
@@ -1878,9 +1878,9 @@ int dsk_format (t_drive *drive, int iFormat)
          uint8_t *pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
          uint8_t *pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
          uint8_t CHRN[4];
-         CHRN[0] = (byte)track;
-         CHRN[1] = (byte)side;
-         CHRN[3] = (byte)disk_format[iFormat].sector_size;
+         CHRN[0] = (uint8_t)track;
+         CHRN[1] = (uint8_t)side;
+         CHRN[3] = (uint8_t)disk_format[iFormat].sector_size;
 
          for (sector = 0; sector < dwSectors; sector++)
          {
@@ -1937,11 +1937,11 @@ int tape_insert (char *pchFileName)
    }
    pbTapeImage = (uint8_t *)malloc(lFileSize+6);
    *pbTapeImage = 0x20; // start off with a pause block
-   *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
+   *(uint16_t *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
    fread(pbTapeImage+3, lFileSize, 1, pfileObject); // append the entire CDT file
    fclose(pfileObject);
    *(pbTapeImage+lFileSize+3) = 0x20; // end with a pause block
-   *(word *)(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
+   *(uint16_t *)(pbTapeImage+lFileSize+3+1) = 2000; // set the length to 2 seconds
 
    #ifdef DEBUG_TAPE
    fputs("--- New Tape\r\n", pfoDebug);
@@ -1953,7 +1953,7 @@ int tape_insert (char *pchFileName)
       bID = *pbBlock++;
       switch(bID) {
          case 0x10: // standard speed data block
-            iBlockLength = *(word *)(pbBlock+2) + 4;
+            iBlockLength = *(uint16_t *)(pbBlock+2) + 4;
             bolGotDataBlock = true;
             break;
          case 0x11: // turbo loading data block
@@ -1978,7 +1978,7 @@ int tape_insert (char *pchFileName)
             break;
          case 0x20: // pause
             if ((!bolGotDataBlock) && (pbBlock != pbTapeImage+1)) {
-               *(word *)pbBlock = 0; // remove any pauses (execept ours) before the data starts
+               *(uint16_t *)pbBlock = 0; // remove any pauses (execept ours) before the data starts
             }
             iBlockLength = 2;
             break;
@@ -2002,7 +2002,7 @@ int tape_insert (char *pchFileName)
             break;
          case 0x26: // call sequence
    return ERR_TAP_UNSUPPORTED;
-            iBlockLength = (*(word *)pbBlock * 2) + 2;
+            iBlockLength = (*(uint16_t *)pbBlock * 2) + 2;
             break;
          case 0x27: // return from sequence
    return ERR_TAP_UNSUPPORTED;
@@ -2010,7 +2010,7 @@ int tape_insert (char *pchFileName)
             break;
          case 0x28: // select block
    return ERR_TAP_UNSUPPORTED;
-            iBlockLength = *(word *)pbBlock + 2;
+            iBlockLength = *(uint16_t *)pbBlock + 2;
             break;
          case 0x30: // text description
             iBlockLength = *pbBlock + 1;
@@ -2019,7 +2019,7 @@ int tape_insert (char *pchFileName)
             iBlockLength = *(pbBlock+1) + 2;
             break;
          case 0x32: // archive info
-            iBlockLength = *(word *)pbBlock + 2;
+            iBlockLength = *(uint16_t *)pbBlock + 2;
             break;
          case 0x33: // hardware type
             iBlockLength = (*pbBlock * 3) + 1;
@@ -2078,7 +2078,7 @@ int tape_insert_voc (char *pchFileName)
       return ERR_TAP_BAD_VOC;
    }
    lOffset =
-   lInitialOffset = *(word *)(pbPtr + 0x14);
+   lInitialOffset = *(uint16_t *)(pbPtr + 0x14);
    lFileSize = file_size(fileno(pfileObject));
    if ((lFileSize-26) <= 0) { // should have at least one block...
       fclose(pfileObject);
@@ -2122,7 +2122,7 @@ int tape_insert_voc (char *pchFileName)
             break;
          case 0x3: // silence
             iBlockLength = 4;
-            lSampleLength += *(word *)(pbPtr+0x01) + 1;
+            lSampleLength += *(uint16_t *)(pbPtr+0x01) + 1;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x03))) { // no change in sample rate allowed
                fclose(pfileObject);
                return ERR_TAP_BAD_VOC;
@@ -2157,11 +2157,11 @@ int tape_insert_voc (char *pchFileName)
       return ERR_OUT_OF_MEMORY;
    }
    *pbTapeImage = 0x20; // start off with a pause block
-   *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
+   *(uint16_t *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
 
    *(pbTapeImage+3) = 0x15; // direct recording block
-   *(word *)(pbTapeImage+4) = (word)dwTapePulseCycles; // number of T states per sample
-   *(word *)(pbTapeImage+6) = 0; // pause after block
+   *(uint16_t *)(pbTapeImage+4) = (uint16_t)dwTapePulseCycles; // number of T states per sample
+   *(uint16_t *)(pbTapeImage+6) = 0; // pause after block
    *(pbTapeImage+8) = lSampleLength & 7 ? lSampleLength & 7 : 8; // bits used in last byte
    *(uint32_t *)(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
    pbTapeImagePtr = pbTapeImage + 12;
@@ -2238,7 +2238,7 @@ int tape_insert_voc (char *pchFileName)
             break;
          case 0x3: // silence
             iBlockLength = 4;
-            lSampleLength = *(word *)(pbPtr) + 1;
+            lSampleLength = *(uint16_t *)(pbPtr) + 1;
             for (iBytePos = 0; iBytePos < lSampleLength; iBytePos++)
             {
                dwBit--;
@@ -2262,7 +2262,7 @@ int tape_insert_voc (char *pchFileName)
    fclose(pfileObject);
 
    *pbTapeImagePtr = 0x20; // end with a pause block
-   *(word *)(pbTapeImagePtr+1) = 2000; // set the length to 2 seconds
+   *(uint16_t *)(pbTapeImagePtr+1) = 2000; // set the length to 2 seconds
 
    pbTapeImageEnd = pbTapeImagePtr + 3;
 
@@ -2404,7 +2404,7 @@ int emulator_init (void)
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
 
-   memmap_ROM[7] = (byte*)&AMSDOS[0];
+   memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
 
    CPC.mf2 = 0;
    crtc_init();
@@ -2871,7 +2871,7 @@ void loadConfiguration (void)
                   dwVal = iSector+1;
                else
                   dwVal = strtoul(pchToken, &pchTail, 0);
-               disk_format[iFmt].sector_ids[iSide][iSector] = (byte)dwVal;
+               disk_format[iFmt].sector_ids[iSide][iSector] = (uint8_t)dwVal;
             }
          }
          iFmt++; // entry is valid

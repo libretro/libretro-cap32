@@ -28,18 +28,15 @@ extern "C" {
 // The next 4 bytes must remain together
 typedef union
 {
-   dword combined;
+   uint32_t combined;
    struct {
-      byte monVSYNC;
-      byte inHSYNC;
-      //      byte inHSYNC;byte monVSYNC;
+      uint8_t monVSYNC;
+      uint8_t inHSYNC;
       union {
-         word combined;
+         uint16_t combined;
          struct {
-            byte DISPTIMG;
-            byte HDSPTIMG;
-
-            //       byte HDSPTIMG;byte DISPTIMG;
+            uint8_t DISPTIMG;
+            uint8_t HDSPTIMG;
          };
       } dt;
    };
@@ -48,12 +45,10 @@ typedef union
 // The next two bytes must remain together
 typedef union
 {
-   word combined;
+   uint16_t combined;
    struct {
-      byte NewDISPTIMG;
-      byte NewHDSPTIMG;
-
-      //byte NewHDSPTIMG; byte NewDISPTIMG;
+      uint8_t NewDISPTIMG;
+      uint8_t NewHDSPTIMG;
    };
 } t_new_dt;
 

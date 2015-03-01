@@ -57,11 +57,11 @@ extern t_CPC CPC;
 extern t_FDC FDC;
 extern t_z80regs z80;
 
-extern byte *pbGPBuffer;
+extern uint8_t *pbGPBuffer;
 
 #ifdef DEBUG_FDC
 extern FILE *pfoDebug;
-dword dwBytesTransferred = 0;
+uint32_t dwBytesTransferred = 0;
 #endif
 
 #define CMD_CODE  0
@@ -137,7 +137,7 @@ extern t_drive driveA;
 extern t_drive driveB;
 t_drive *active_drive; // reference to the currently selected drive
 t_track *active_track; // reference to the currently selected track, of the active_drive
-dword read_status_delay = 0;
+uint32_t read_status_delay = 0;
 
 
 
@@ -184,7 +184,7 @@ void check_unit(void)
 
 int init_status_regs(void)
 {
-   byte val;
+   uint8_t val;
 
    memset(&FDC.result, 0, sizeof(FDC.result)); // clear result codes buffer
    val = FDC.command[CMD_UNIT] & 7; // keep head and unit of command
@@ -197,10 +197,10 @@ int init_status_regs(void)
 
 
 
-t_sector *find_sector(byte *requested_CHRN)
+t_sector *find_sector(uint8_t *requested_CHRN)
 {
    int loop_count;
-   dword idx;
+   uint32_t idx;
    t_sector *sector;
 
    sector = NULL; // return value indicates 'sector not found' by default
@@ -217,7 +217,7 @@ t_sector *find_sector(byte *requested_CHRN)
          FDC.result[RES_ST2] &= ~(0x02 | 0x10); // remove possible Bad Cylinder + No Cylinder flags
          break;
       }
-      byte cylinder = active_track->sector[idx].CHRN[0]; // extract C
+      uint8_t cylinder = active_track->sector[idx].CHRN[0]; // extract C
       if (cylinder == 0xff) {
          FDC.result[RES_ST2] |= 0x02; // Bad Cylinder
       }
@@ -421,7 +421,7 @@ loop:
 
 
 
-void fdc_write_data(byte val)
+void fdc_write_data(uint8_t val)
 {
    int idx;
 
@@ -536,8 +536,8 @@ void fdc_write_data(byte val)
                   }
                }
                else if (FDC.command[CMD_CODE] == 0x4d) { // write ID command?
-                  dword sector_size, track_size;
-                  byte *pbPtr, *pbDataPtr;
+                  uint32_t sector_size, track_size;
+                  uint8_t *pbPtr, *pbDataPtr;
 
                   if (active_track->sectors != 0) { // track is formatted?
                      free(active_track->data); // dealloc memory for old track data
@@ -551,7 +551,7 @@ void fdc_write_data(byte val)
 
                      track_size = sector_size * FDC.command[CMD_H];
                      active_track->sectors = FDC.command[CMD_H];
-                     active_track->data = (byte *)malloc(track_size); // attempt to allocate the required memory
+                     active_track->data = (uint8_t *)malloc(track_size); // attempt to allocate the required memory
                      pbDataPtr = active_track->data;
                      pbPtr = pbGPBuffer;
                      for (sector = 0; sector < FDC.command[CMD_H]; sector++) {
@@ -592,9 +592,9 @@ void fdc_write_data(byte val)
 
 
 
-byte fdc_read_status(void)
+uint8_t fdc_read_status(void)
 {
-   byte val;
+   uint8_t val;
 
    val = 0x80; // data register ready
    if (FDC.phase == EXEC_PHASE) { // in execution phase?
@@ -622,7 +622,7 @@ byte fdc_read_status(void)
 
 uint8_t fdc_read_data(void)
 {
-   byte val;
+   uint8_t val;
 
    val = 0xff; // default value
    switch (FDC.phase)
@@ -729,7 +729,7 @@ void fdc_specify(void)
 
 void fdc_drvstat(void)
 {
-   byte val;
+   uint8_t val;
 
    check_unit(); // switch to target drive
    val = FDC.command[CMD_UNIT] & 7; // keep head and unit of command
@@ -758,7 +758,7 @@ void fdc_recalib(void)
 
 void fdc_intstat(void)
 {
-   byte val;
+   uint8_t val;
 
    val = FDC.result[RES_ST0] & 0xf8; // clear Head Address and Unit bits
    if (FDC.flags & SEEKDRVA_flag) { // seek completed on drive A?
@@ -822,7 +822,7 @@ void fdc_readtrk(void)
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
       if ((active_drive->flipped)) { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
@@ -857,7 +857,7 @@ void fdc_write(void)
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
       if ((active_drive->flipped)) { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
@@ -897,7 +897,7 @@ void fdc_read(void)
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
       if ((active_drive->flipped)) { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
@@ -929,13 +929,13 @@ void fdc_readID(void)
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
       if ((active_drive->flipped)) { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
       }
       active_track = &active_drive->track[active_drive->current_track][side];
       if (active_track->sectors != 0) { // track is formatted?
-         dword idx;
+         uint32_t idx;
 
          idx = active_drive->current_sector; // get the active sector index
          if (idx >= active_track->sectors) { // index beyond number of sectors for this track?
@@ -963,7 +963,7 @@ void fdc_writeID(void)
    if (init_status_regs() == 0)
    { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
       if ((active_drive->flipped))
       { // did the user request to access the "other" side?
          side = side ? 0 : 1; // reverse the side to access
@@ -1003,7 +1003,7 @@ void fdc_scan(void)
    {
       // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
-      dword side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
+      uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
 
       if ((active_drive->flipped))
       { // did the user request to access the "other" side?

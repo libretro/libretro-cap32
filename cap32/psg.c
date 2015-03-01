@@ -49,18 +49,18 @@
 
 extern t_CPC CPC;
 extern t_PSG PSG;
-extern dword freq_table[];
+extern uint32_t freq_table[];
 
-extern byte *pbSndBuffer;
-extern byte *pbSndBufferEnd;
-extern byte bTapeLevel;
+extern uint8_t *pbSndBuffer;
+extern uint8_t *pbSndBufferEnd;
+extern uint8_t bTapeLevel;
 
 #define TAPE_VOLUME 32
 
 
 
 // Amplitude table (c)Hacker KAY
-word Amplitudes_AY[16] = {
+uint16_t Amplitudes_AY[16] = {
    0, 836, 1212, 1773, 2619, 3875, 5397, 8823,
    10392, 16706, 23339, 29292, 36969, 46421, 55195, 65535
 };
@@ -71,14 +71,14 @@ union {
 #ifdef MSB_FIRST
    struct
    {
-      dword Hi;
-      dword Lo;
+      uint32_t Hi;
+      uint32_t Lo;
    };
 #else
    struct
    {
-      dword Lo;
-      dword Hi;
+      uint32_t Lo;
+      uint32_t Hi;
    };
 #endif
 
@@ -95,17 +95,17 @@ union TCounter
 #ifdef MSB_FIRST
    struct
    {
-      dword Hi;
-      dword Lo;
+      uint32_t Hi;
+      uint32_t Lo;
    };
 #else
    struct
    {
-      dword Lo;
-      dword Hi;
+      uint32_t Lo;
+      uint32_t Hi;
    };
 #endif
-   dword Re;
+   uint32_t Re;
 };
 
 union TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
@@ -115,17 +115,17 @@ union
 #ifdef MSB_FIRST
    struct
    {
-      dword Val;
-      dword Low;
+      uint32_t Val;
+      uint32_t Low;
    };
 #else
    struct
    {
-      dword Low;
-      dword Val;
+      uint32_t Low;
+      uint32_t Val;
    };
 #endif
-   dword Seed;
+   uint32_t Seed;
 } Noise;
 
 union
@@ -133,29 +133,29 @@ union
 #ifdef MSB_FIRST
    struct
    {
-      dword Hi;
-      dword Lo;
+      uint32_t Hi;
+      uint32_t Lo;
    };
 #else
    struct
    {
-      dword Lo;
-      dword Hi;
+      uint32_t Lo;
+      uint32_t Hi;
    };
 #endif
    int64_t Re;
 } Envelope_Counter;
-byte Ton_A, Ton_B, Ton_C;
+uint8_t Ton_A, Ton_B, Ton_C;
 
 int Level_AR[32], Level_AL[32], Level_BR[32], Level_BL[32], Level_CR[32], Level_CL[32];
 int LevelTape;
-byte Index_AL, Index_AR, Index_BL, Index_BR, Index_CL, Index_CR;
+uint8_t Index_AL, Index_AR, Index_BL, Index_BR, Index_CL, Index_CR;
 int PreAmp, PreAmpMax;
 int Left_Chan, Right_Chan;
 
 
 
-inline void SetMixerRegister(byte Value)
+inline void SetMixerRegister(uint8_t Value)
 {
    PSG.RegisterAY.Mixer = Value;
    Ton_EnA = Value & 1 ? false : true;
@@ -168,7 +168,7 @@ inline void SetMixerRegister(byte Value)
 
 
 
-inline void SetAmplA(byte Value)
+inline void SetAmplA(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeA = Value;
    Envelope_EnA = Value & 16 ? false : true;
@@ -176,7 +176,7 @@ inline void SetAmplA(byte Value)
 
 
 
-inline void SetAmplB(byte Value)
+inline void SetAmplB(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeB = Value;
    Envelope_EnB = Value & 16 ? false : true;
@@ -184,7 +184,7 @@ inline void SetAmplB(byte Value)
 
 
 
-inline void SetAmplC(byte Value)
+inline void SetAmplC(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeC = Value;
    Envelope_EnC = Value & 16 ? false : true;
@@ -297,7 +297,7 @@ void Case_EnvType_14(void)
 
 
 
-inline void SetEnvelopeRegister(byte Value)
+inline void SetEnvelopeRegister(uint8_t Value)
 {
    Envelope_Counter.Hi = 0;
    PSG.FirstPeriod = true;
@@ -347,7 +347,7 @@ inline void SetEnvelopeRegister(byte Value)
 
 
 
-void SetAYRegister(int Num, byte Value)
+void SetAYRegister(int Num, uint8_t Value)
 {
    switch(Num)
    {
@@ -389,17 +389,17 @@ void SetAYRegister(int Num, byte Value)
 inline void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
-   if (Ton_Counter_A.Hi >= *(word *)&PSG.RegisterAY.TonALo) {
+   if (Ton_Counter_A.Hi >= *(uint16_t *)&PSG.RegisterAY.TonALo) {
       Ton_Counter_A.Hi = 0;
       Ton_A ^= 1;
    }
    Ton_Counter_B.Hi++;
-   if (Ton_Counter_B.Hi >= *(word *)&PSG.RegisterAY.TonBLo) {
+   if (Ton_Counter_B.Hi >= *(uint16_t *)&PSG.RegisterAY.TonBLo) {
       Ton_Counter_B.Hi = 0;
       Ton_B ^= 1;
    }
    Ton_Counter_C.Hi++;
-   if (Ton_Counter_C.Hi >= *(word *)&PSG.RegisterAY.TonCLo) {
+   if (Ton_Counter_C.Hi >= *(uint16_t *)&PSG.RegisterAY.TonCLo) {
       Ton_Counter_C.Hi = 0;
       Ton_C ^= 1;
    }
@@ -412,7 +412,7 @@ inline void Synthesizer_Logic_Q(void)
       Case_EnvType();
    }
    Envelope_Counter.Hi++;
-   if (Envelope_Counter.Hi >= *(word *)&PSG.RegisterAY.EnvelopeLo) {
+   if (Envelope_Counter.Hi >= *(uint16_t *)&PSG.RegisterAY.EnvelopeLo) {
       Envelope_Counter.Hi = 0;
    }
 }
@@ -430,7 +430,7 @@ inline void Synthesizer_Mixer_Q(void)
 
    LevR = LevL;
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(word *)&PSG.RegisterAY.TonALo > 4)) {
+      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4)) {
          k = Ton_A;
       }
       else {
@@ -455,7 +455,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(word *)&PSG.RegisterAY.TonBLo > 4)) {
+      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4)) {
          k = Ton_B;
       }
       else {
@@ -480,7 +480,7 @@ inline void Synthesizer_Mixer_Q(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(word *)&PSG.RegisterAY.TonCLo > 4)) {
+      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4)) {
          k = Ton_C;
       }
       else {
@@ -525,10 +525,10 @@ void Synthesizer_Stereo16(void)
 
 #ifdef MSB_FIRST
    /* FIXME - sound issues */
-   *(word *)CPC.snd_bufferptr     = Right_Chan / Tick_Counter;
-   *(word *)(CPC.snd_bufferptr+2) = Left_Chan / Tick_Counter;
+   *(uint16_t *)CPC.snd_bufferptr     = Right_Chan / Tick_Counter;
+   *(uint16_t *)(CPC.snd_bufferptr+2) = Left_Chan / Tick_Counter;
 #else
-   *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+   *(uint32_t *)CPC.snd_bufferptr = val.d; // write to mixing buffer
 #endif
 
    CPC.snd_bufferptr += 4;
@@ -555,7 +555,7 @@ void Synthesizer_Stereo8(void)
    reg_pair val;
    val.b.l = 128 + Left_Chan / Tick_Counter;
    val.b.h = 128 + Right_Chan / Tick_Counter;
-   *(word *)CPC.snd_bufferptr = val.w.l; // write to mixing buffer
+   *(uint16_t *)CPC.snd_bufferptr = val.w.l; // write to mixing buffer
    CPC.snd_bufferptr += 2;
    Left_Chan = 0;
    Right_Chan = Left_Chan;
@@ -577,7 +577,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(word *)&PSG.RegisterAY.TonALo > 4)) {
+      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4)) {
          k = Ton_A;
       }
       else {
@@ -600,7 +600,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(word *)&PSG.RegisterAY.TonBLo > 4)) {
+      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4)) {
          k = Ton_B;
       }
       else {
@@ -623,7 +623,7 @@ inline void Synthesizer_Mixer_Q_Mono(void)
    }
 
    if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(word *)&PSG.RegisterAY.TonCLo > 4)) {
+      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4)) {
          k = Ton_C;
       }
       else {
@@ -660,7 +660,7 @@ void Synthesizer_Mono16(void)
       LoopCount.Hi--;
    }
    LoopCount.Re += LoopCountInit;
-   *(word *)CPC.snd_bufferptr = Left_Chan / Tick_Counter; // write to mixing buffer
+   *(uint16_t *)CPC.snd_bufferptr = Left_Chan / Tick_Counter; // write to mixing buffer
    CPC.snd_bufferptr += 2;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {
@@ -681,7 +681,7 @@ void Synthesizer_Mono8(void)
       LoopCount.Hi--;
    }
    LoopCount.Re += LoopCountInit;
-   *(byte *)CPC.snd_bufferptr = 128 + Left_Chan / Tick_Counter; // write to mixing buffer
+   *(uint8_t *)CPC.snd_bufferptr = 128 + Left_Chan / Tick_Counter; // write to mixing buffer
    CPC.snd_bufferptr++;
    Left_Chan = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd) {

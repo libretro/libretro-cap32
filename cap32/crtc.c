@@ -48,11 +48,11 @@ extern t_GateArray GateArray;
 extern t_VDU VDU;
 extern t_z80regs z80;
 
-extern dword dwXScale;
-extern byte *pbRAM;
+extern uint32_t dwXScale;
+extern uint8_t *pbRAM;
 
 #ifdef DEBUG_CRTC
-extern dword dwDebugFlag;
+extern uint32_t dwDebugFlag;
 extern FILE *pfoDebug;
 #endif
 
@@ -70,27 +70,27 @@ extern FILE *pfoDebug;
 t_flags1 flags1;
 t_new_dt new_dt;
 
-dword LastPreRend;
-word MinVSync, MaxVSync;
+uint32_t LastPreRend;
+uint16_t MinVSync, MaxVSync;
 int iMonHSPeakPos, iMonHSStartPos, iMonHSEndPos, iMonHSPeakToStart, iMonHSStartToPeak, iMonHSEndToPeak, iMonHSPeakToEnd;
 int HorzPos, MonHSYNC, MonFreeSync;
 int HSyncDuration, MinHSync, MaxHSync;
 int HadP;
-byte PosShift, HorzChar, HorzMax;
+uint8_t PosShift, HorzChar, HorzMax;
 
-dword *ModeMaps[4];
-dword *ModeMap;
-byte HorzPix[49];
-byte RendBuff[800];
-byte *RendWid, *RendOut;
-dword *RendStart, *RendPos;
+uint32_t *ModeMaps[4];
+uint32_t *ModeMap;
+uint8_t HorzPix[49];
+uint8_t RendBuff[800];
+uint8_t *RendWid, *RendOut;
+uint32_t *RendStart, *RendPos;
 
-word MAXlate[0x7400];
+uint16_t MAXlate[0x7400];
 
 void (*PreRender)(void);
 
 // Version 2 translation tables - static
-dword M0Map[0x200] = {
+uint32_t M0Map[0x200] = {
    0x00000000,0x00000000,0x00000000,0x08080808,0x08080808,0x00000000,0x08080808,0x08080808,
    0x00000000,0x02020202,0x00000000,0x0A0A0A0A,0x08080808,0x02020202,0x08080808,0x0A0A0A0A,
    0x02020202,0x00000000,0x02020202,0x08080808,0x0A0A0A0A,0x00000000,0x0A0A0A0A,0x08080808,
@@ -157,7 +157,7 @@ dword M0Map[0x200] = {
    0x07070707,0x07070707,0x07070707,0x0F0F0F0F,0x0F0F0F0F,0x07070707,0x0F0F0F0F,0x0F0F0F0F
 };
 
-dword M1Map[0x200] = {
+uint32_t M1Map[0x200] = {
    0x00000000,0x00000000,0x00000000,0x02020000,0x00000000,0x00000202,0x00000000,0x02020202,
    0x02020000,0x00000000,0x02020000,0x02020000,0x02020000,0x00000202,0x02020000,0x02020202,
    0x00000202,0x00000000,0x00000202,0x02020000,0x00000202,0x00000202,0x00000202,0x02020202,
@@ -224,7 +224,7 @@ dword M1Map[0x200] = {
    0x03030303,0x01010101,0x03030303,0x03030101,0x03030303,0x01010303,0x03030303,0x03030303
 };
 
-dword M2Map[0x200] = {
+uint32_t M2Map[0x200] = {
    0x00000000,0x00000000,0x00000000,0x01000000,0x00000000,0x00010000,0x00000000,0x01010000,
    0x00000000,0x00000100,0x00000000,0x01000100,0x00000000,0x00010100,0x00000000,0x01010100,
    0x00000000,0x00000001,0x00000000,0x01000001,0x00000000,0x00010001,0x00000000,0x01010001,
@@ -291,7 +291,7 @@ dword M2Map[0x200] = {
    0x01010101,0x00000101,0x01010101,0x01000101,0x01010101,0x00010101,0x01010101,0x01010101
 };
 
-dword M3Map[0x200] = {
+uint32_t M3Map[0x200] = {
    0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
    0x00000000,0x02020202,0x00000000,0x02020202,0x00000000,0x02020202,0x00000000,0x02020202,
    0x02020202,0x00000000,0x02020202,0x00000000,0x02020202,0x00000000,0x02020202,0x00000000,
@@ -358,7 +358,7 @@ dword M3Map[0x200] = {
    0x03030303,0x03030303,0x03030303,0x03030303,0x03030303,0x03030303,0x03030303,0x03030303
 };
 
-dword M0hMap[0x100] = {
+uint32_t M0hMap[0x100] = {
    0x00000000,0x08080000,0x00000808,0x08080808,0x02020000,0x0A0A0000,0x02020808,0x0A0A0808,
    0x00000202,0x08080202,0x00000A0A,0x08080A0A,0x02020202,0x0A0A0202,0x02020A0A,0x0A0A0A0A,
    0x04040000,0x0C0C0000,0x04040808,0x0C0C0808,0x06060000,0x0E0E0000,0x06060808,0x0E0E0808,
@@ -393,7 +393,7 @@ dword M0hMap[0x100] = {
    0x05050707,0x0D0D0707,0x05050F0F,0x0D0D0F0F,0x07070707,0x0F0F0707,0x07070F0F,0x0F0F0F0F
 };
 
-dword M1hMap[0x100] = {
+uint32_t M1hMap[0x100] = {
    0x00000000,0x02000000,0x00020000,0x02020000,0x00000200,0x02000200,0x00020200,0x02020200,
    0x00000002,0x02000002,0x00020002,0x02020002,0x00000202,0x02000202,0x00020202,0x02020202,
    0x01000000,0x03000000,0x01020000,0x03020000,0x01000200,0x03000200,0x01020200,0x03020200,
@@ -428,7 +428,7 @@ dword M1hMap[0x100] = {
    0x01010103,0x03010103,0x01030103,0x03030103,0x01010303,0x03010303,0x01030303,0x03030303
 };
 
-dword M2hMap[0x100] = {
+uint32_t M2hMap[0x100] = {
    0x00000000,0x12000000,0x12000000,0x01000000,0x00120000,0x12120000,0x12120000,0x01120000,
    0x00120000,0x12120000,0x12120000,0x01120000,0x00010000,0x12010000,0x12010000,0x01010000,
    0x00001200,0x12001200,0x12001200,0x01001200,0x00121200,0x12121200,0x12121200,0x01121200,
@@ -463,7 +463,7 @@ dword M2hMap[0x100] = {
    0x00120101,0x12120101,0x12120101,0x01120101,0x00010101,0x12010101,0x12010101,0x01010101
 };
 
-dword M3hMap[0x100] = {
+uint32_t M3hMap[0x100] = {
    0x00000000,0x00000000,0x00000000,0x00000000,0x02020000,0x02020000,0x02020000,0x02020000,
    0x00000202,0x00000202,0x00000202,0x00000202,0x02020202,0x02020202,0x02020202,0x02020202,
    0x00000000,0x00000000,0x00000000,0x00000000,0x02020000,0x02020000,0x02020000,0x02020000,
@@ -502,7 +502,7 @@ dword M3hMap[0x100] = {
 void update_skew(void)
 {
    new_dt.NewHDSPTIMG |= 0x02; // enable horizontal DISPTMG by default
-   dword skew = (CRTC.registers[8] >> 4) & 3; // isolate the display skew
+   uint32_t skew = (CRTC.registers[8] >> 4) & 3; // isolate the display skew
    if (skew == 3) { // disable output?
       new_dt.NewHDSPTIMG &= 0xfd; // disable horizontal DISPTMG
    } else {
@@ -777,9 +777,9 @@ void frame_finished(void)
 {
 /*   if (VDU.scrln < MAX_DRAWN) { // monitor line below maximum visible?
       int cnt = (MAX_DRAWN - VDU.scrln) << 1; // number of lines remaining to be drawn
-      dword *addr = CPC.scr_base;
+      uint32_t *addr = CPC.scr_base;
       while (cnt--) {
-         dword *tmp_addr = addr;
+         uint32_t *tmp_addr = addr;
          for (int n = CPC.scr_bpp * 24; n; n--) {
             *tmp_addr++ = 0; // clear old surface contents
          }
@@ -796,7 +796,7 @@ void frame_finished(void)
 
 void prerender_border(void)
 {
-   register dword dwVal = 0x10101010;
+   register uint32_t dwVal = 0x10101010;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
   *(RendPos + 2) = dwVal;
@@ -808,7 +808,7 @@ void prerender_border(void)
 
 void prerender_border_half(void)
 {
-   register dword dwVal = 0x10101010;
+   register uint32_t dwVal = 0x10101010;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    RendPos += 2;
@@ -818,7 +818,7 @@ void prerender_border_half(void)
 
 void prerender_sync(void)
 {
-   register dword dwVal = 0x11111111;
+   register uint32_t dwVal = 0x11111111;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    *(RendPos + 2) = dwVal;
@@ -830,7 +830,7 @@ void prerender_sync(void)
 
 void prerender_sync_half(void)
 {
-   register dword dwVal = 0x11111111;
+   register uint32_t dwVal = 0x11111111;
    *RendPos = dwVal;
    *(RendPos + 1) = dwVal;
    RendPos += 2;
@@ -840,7 +840,7 @@ void prerender_sync_half(void)
 
 void prerender_normal(void)
 {
-   register byte bVidMem = *(pbRAM + CRTC.next_address);
+   uint8_t bVidMem = *(pbRAM + CRTC.next_address);
    *RendPos = *(ModeMap + (bVidMem * 2));
    *(RendPos + 1) = *(ModeMap + (bVidMem * 2) + 1);
    bVidMem = *(pbRAM + CRTC.next_address + 1);
@@ -853,7 +853,7 @@ void prerender_normal(void)
 
 void prerender_normal_half(void)
 {
-   register byte bVidMem = *(pbRAM + CRTC.next_address);
+   uint8_t bVidMem = *(pbRAM + CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
    *RendPos = Swap32(*RendPos);
    bVidMem = *(pbRAM + CRTC.next_address+1);
@@ -876,7 +876,7 @@ void set_prerender(void)
    }
    else
    {
-      if (!(word)LastPreRend)
+      if (!(uint16_t)LastPreRend)
          PreRender = CPC.scr_prerenderbord;
       else
          PreRender = CPC.scr_prerendersync;
@@ -887,95 +887,95 @@ void set_prerender(void)
 
 void render8bpp(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
-   register byte bCount = *RendWid++;
-   while (bCount--) {
+   uint8_t *pbPos = (uint8_t*)CPC.scr_pos;
+   uint8_t bCount = *RendWid++;
+   while (bCount--)
       *pbPos++ = GateArray.palette[*RendOut++];
-   }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = (uint32_t *)pbPos;
 }
 
 
 
 void render8bpp_doubleY(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
-   register dword dwLineOffs = CPC.scr_bps << 2;
-   register byte bCount = *RendWid++;
-   while (bCount--) {
-      register byte val = GateArray.palette[*RendOut++];
+   uint8_t *pbPos = (uint8_t*)CPC.scr_pos;
+   uint32_t dwLineOffs = CPC.scr_bps << 2;
+   uint8_t bCount = *RendWid++;
+   while (bCount--)
+   {
+      register uint8_t val = GateArray.palette[*RendOut++];
       *(pbPos + dwLineOffs) = val;
       *pbPos++ = val;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = (uint32_t *)pbPos;
 }
 
 
 
 void render16bpp(void)
 {
-   register word *pwPos = (word *)CPC.scr_pos;
-   register byte bCount = *RendWid++;
+   register uint16_t *pwPos = (uint16_t *)CPC.scr_pos;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
       *pwPos++ = GateArray.palette[*RendOut++];
    }
-   CPC.scr_pos = (dword *)pwPos;
+   CPC.scr_pos = (uint32_t *)pwPos;
 }
 
 
 
 void render16bpp_doubleY(void)
 {
-   register word *pwPos = (word *)CPC.scr_pos;
-   register dword dwLineOffs = CPC.scr_bps << 1;
-   register byte bCount = *RendWid++;
+   register uint16_t *pwPos = (uint16_t *)CPC.scr_pos;
+   register uint32_t dwLineOffs = CPC.scr_bps << 1;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
-      register word val = GateArray.palette[*RendOut++];
+      register uint16_t val = GateArray.palette[*RendOut++];
       *(pwPos + dwLineOffs) = val;
       *pwPos++ = val;
    }
-   CPC.scr_pos = (dword *)pwPos;
+   CPC.scr_pos = (uint32_t *)pwPos;
 }
 
 
 
 void render24bpp(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
-   register byte bCount = *RendWid++;
+   register uint8_t *pbPos = (uint8_t*)CPC.scr_pos;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
-      *(word *)pbPos = (word)val;
-      *(pbPos + 2) = (byte)(val >> 16);
+      register uint32_t val = GateArray.palette[*RendOut++];
+      *(uint16_t *)pbPos = (uint16_t)val;
+      *(pbPos + 2) = (uint8_t)(val >> 16);
       pbPos += 3;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = (uint32_t *)pbPos;
 }
 
 
 
 void render24bpp_doubleY(void)
 {
-   register byte *pbPos = (byte *)CPC.scr_pos;
-   register dword dwLineOffs = CPC.scr_bps << 2;
-   register byte bCount = *RendWid++;
+   register uint8_t *pbPos = (uint8_t*)CPC.scr_pos;
+   register uint32_t dwLineOffs = CPC.scr_bps << 2;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
-      *(word *)(pbPos + dwLineOffs) = (word)val;
-      *(word *)pbPos = (word)val;
+      register uint32_t val = GateArray.palette[*RendOut++];
+      *(uint16_t *)(pbPos + dwLineOffs) = (uint16_t)val;
+      *(uint16_t *)pbPos = (uint16_t)val;
       val >>= 16;
-      *(pbPos + dwLineOffs + 2) = (byte)val;
-      *(pbPos + 2) = (byte)val;
+      *(pbPos + dwLineOffs + 2) = (uint8_t)val;
+      *(pbPos + 2) = (uint8_t)val;
       pbPos += 3;
    }
-   CPC.scr_pos = (dword *)pbPos;
+   CPC.scr_pos = (uint32_t *)pbPos;
 }
 
 
 
 void render32bpp(void)
 {
-   register byte bCount = *RendWid++;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
       *CPC.scr_pos++ = GateArray.palette[*RendOut++];
    }
@@ -985,9 +985,9 @@ void render32bpp(void)
 
 void render32bpp_doubleY(void)
 {
-   register byte bCount = *RendWid++;
+   register uint8_t bCount = *RendWid++;
    while (bCount--) {
-      register dword val = GateArray.palette[*RendOut++];
+      register uint32_t val = GateArray.palette[*RendOut++];
       *(CPC.scr_pos + CPC.scr_bps) = val;
       *CPC.scr_pos++ = val;
    }
@@ -1097,25 +1097,25 @@ void crtc_cycle(int repeat_count)
          HorzPos = iMonHSPeakPos - HSyncDuration;
 
          HorzChar = HorzPos >> 8;
-         dword val = (HorzPos & 0xf0) >> PosShift;
+         uint32_t val = (HorzPos & 0xf0) >> PosShift;
          if (!val) {
             HorzMax = 48;
             HorzPix[0] = HorzPix[1];
             RendPos = RendStart;
             HorzChar--;
          } else {
-            RendPos = (dword *)&RendBuff[val];
-            int tmp = (byte *)RendStart - (byte *)RendPos;
-            HorzPix[48] = (byte)tmp;
-            HorzPix[0] = HorzPix[1] - (byte)tmp;
+            RendPos = (uint32_t *)&RendBuff[val];
+            int tmp = (uint8_t*)RendStart - (uint8_t*)RendPos;
+            HorzPix[48] = (uint8_t)tmp;
+            HorzPix[0] = HorzPix[1] - (uint8_t)tmp;
             HorzMax = 49;
          }
-         RendOut = (byte *)RendStart;
+         RendOut = (uint8_t*)RendStart;
          RendWid = &HorzPix[0];
          CPC.scr_pos = CPC.scr_base;
          VDU.scrln++;
          VDU.scanline++;
-         if ((dword)VDU.scrln >= MAX_DRAWN) {
+         if ((uint32_t)VDU.scrln >= MAX_DRAWN) {
             VDU.flag_drawing = 0;
          } else {
             VDU.flag_drawing = 1;
@@ -1208,7 +1208,7 @@ void crtc_cycle(int repeat_count)
 
          CRTC.CharInstSL = (void(*)(void))CharSL1;
 
-         register dword temp = 0;
+         register uint32_t temp = 0;
          if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
             temp = 1;
             CRTC.flag_resscan = 1; // request a raster counter reset
@@ -1321,9 +1321,9 @@ void crtc_reset(void)
       HorzPix[i] = Wid;
 
    HorzPix[48] = 0;
-   RendStart = (dword *)&RendBuff[Wid];
-   RendPos = (dword *)&RendBuff[0];
-   RendOut = (byte *)RendStart;
+   RendStart = (uint32_t *)&RendBuff[Wid];
+   RendPos = (uint32_t *)&RendBuff[0];
+   RendOut = (uint8_t*)RendStart;
    RendWid = &HorzPix[0];
  
    HorzPos = 0x500;

@@ -19,27 +19,24 @@
 #ifndef Z80_H
 #define Z80_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus 
 extern "C" {
 #endif
 
 // todo endianness
 
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned int dword;
-
-
 typedef union
 {
 #ifdef MSB_FIRST
-   struct { byte h3, h2, h, l; } b;
-   struct { word h, l; } w;
+   struct { uint8_t h3, h2, h, l; } b;
+   struct { uint16_t h, l; } w;
 #else
-   struct { byte l, h, h2, h3; } b;
-   struct { word l, h; } w;
+   struct { uint8_t l, h, h2, h3; } b;
+   struct { uint16_t l, h; } w;
 #endif
-   dword d;
+   uint32_t d;
 }  reg_pair;
 
 #define Sflag  0x80 // sign flag
@@ -53,8 +50,8 @@ typedef union
 
 typedef struct {
    reg_pair AF, BC, DE, HL, PC, SP, AFx, BCx, DEx, HLx, IX, IY;
-   byte I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
-   dword break_point, trace;
+   uint8_t I, R, Rb7, IFF1, IFF2, IM, HALT, EI_issued, int_pending;
+   uint32_t break_point, trace;
 } t_z80regs;
 
 #define _A        z80.AF.b.h
@@ -102,11 +99,11 @@ typedef struct {
 
 
 
-byte read_mem(word addr);
-void write_mem(word addr, byte val);
+uint8_t read_mem(uint16_t addr);
+void write_mem(uint16_t addr, uint8_t val);
 void crtc_cycle(int repeat_count); // not provided by Z80.c
-byte z80_IN_handler(reg_pair port); // not provided by Z80.c
-void z80_OUT_handler(reg_pair port, byte val); // not provided by Z80.c
+uint8_t z80_IN_handler(reg_pair port); // not provided by Z80.c
+void z80_OUT_handler(reg_pair port, uint8_t val); // not provided by Z80.c
 
 void z80_init_tables(void);
 void z80_mf2stop(void);
