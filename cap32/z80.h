@@ -30,14 +30,14 @@ typedef unsigned short word;
 typedef unsigned int dword;
 
 
-typedef union {
-#ifndef PS3PORT// SDL_BYTEORDER == SDL_LIL_ENDIAN
-   struct { byte l, h, h2, h3; } b;
-   struct { word l, h; } w;
-#else
-#warning "PS3 BIG ENDIAN"
+typedef union
+{
+#ifdef MSB_FIRST
    struct { byte h3, h2, h, l; } b;
    struct { word h, l; } w;
+#else
+   struct { byte l, h, h2, h3; } b;
+   struct { word l, h; } w;
 #endif
    dword d;
 }  reg_pair;

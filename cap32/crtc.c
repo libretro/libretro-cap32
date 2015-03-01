@@ -511,10 +511,16 @@ void update_skew(void)
    }
 }
 
-#ifdef PS3PORT
-static __inline__ unsigned Swap32(unsigned x){
-unsigned result= ((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24));
- return result;
+#ifdef MSB_FIRST
+static __inline__ unsigned Swap32(unsigned x)
+{
+   unsigned result = ((x << 24)|((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00)| (x >> 24));
+   return result;
+}
+#else
+static __inline__ unsigned Swap32(unsigned x)
+{
+   return x;
 }
 #endif
 
@@ -847,44 +853,33 @@ void prerender_normal(void)
 
 void prerender_normal_half(void)
 {
-#ifdef PS3PORT
    register byte bVidMem = *(pbRAM + CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
-	
-   *RendPos =Swap32(*RendPos);
-
+   *RendPos = Swap32(*RendPos);
    bVidMem = *(pbRAM + CRTC.next_address+1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
-
-   *(RendPos + 1)=Swap32(*(RendPos + 1));
-
+   *(RendPos + 1) = Swap32(*(RendPos + 1));
    RendPos += 2;
-#else
-   register byte bVidMem = *(pbRAM + CRTC.next_address);
-   *RendPos = *(ModeMap + bVidMem);
-   bVidMem = *(pbRAM + CRTC.next_address + 1);
-   *(RendPos + 1) = *(ModeMap + bVidMem);
-   RendPos += 2;
-#endif
 }
  
 void set_prerender(void)
 {
-
-#ifndef PS3PORT
-   LastPreRend = flags1.combined;
-   if (LastPreRend == 0x03ff0000) {
-#else
    LastPreRend =flags1.combined;
-   if (LastPreRend == 0x0000ff03) {
+
+#ifdef MSB_FIRST
+   if (LastPreRend == 0x0000ff03)
+#else
+   if (LastPreRend == 0x03ff0000)
 #endif
+   {
       PreRender = CPC.scr_prerendernorm;
-   } else {
-      if (!(word)LastPreRend) {
+   }
+   else
+   {
+      if (!(word)LastPreRend)
          PreRender = CPC.scr_prerenderbord;
-      } else {
+      else
          PreRender = CPC.scr_prerendersync;
-      }
    }
 }
 

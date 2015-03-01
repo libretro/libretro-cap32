@@ -68,15 +68,17 @@ word Amplitudes_AY[16] = {
 int Level_PP[256];
 
 union {
-#ifndef PS3PORT
-   struct {
-      dword Lo;
+#ifdef MSB_FIRST
+   struct
+   {
       dword Hi;
+      dword Lo;
    };
 #else
-   struct {
-      dword Hi;
+   struct
+   {
       dword Lo;
+      dword Hi;
    };
 #endif
 
@@ -88,16 +90,19 @@ bool Ton_EnA, Ton_EnB, Ton_EnC, Noise_EnA, Noise_EnB, Noise_EnC;
 bool Envelope_EnA, Envelope_EnB, Envelope_EnC;
 void (*Case_EnvType)(void);
 
-union TCounter {
-  #ifndef PS3PORT
-   struct {
-      dword Lo;
+union TCounter
+{
+#ifdef MSB_FIRST
+   struct
+   {
       dword Hi;
+      dword Lo;
    };
 #else
-   struct {
-      dword Hi;
+   struct
+   {
       dword Lo;
+      dword Hi;
    };
 #endif
    dword Re;
@@ -107,15 +112,17 @@ union TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
 
 union
 {
-#ifndef PS3PORT
-   struct {
-      dword Low;
+#ifdef MSB_FIRST
+   struct
+   {
       dword Val;
+      dword Low;
    };
 #else
-   struct {
-      dword Val;
+   struct
+   {
       dword Low;
+      dword Val;
    };
 #endif
    dword Seed;
@@ -123,15 +130,17 @@ union
 
 union
 {
-#ifndef PS3PORT
-   struct {
-      dword Lo;
+#ifdef MSB_FIRST
+   struct
+   {
       dword Hi;
+      dword Lo;
    };
 #else
-   struct {
-      dword Hi;
+   struct
+   {
       dword Lo;
+      dword Hi;
    };
 #endif
    int64_t Re;
@@ -514,11 +523,10 @@ void Synthesizer_Stereo16(void)
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
 
-#ifdef PS3PORT
-//FIXME SOUND PS3
-*(word *)CPC.snd_bufferptr =Right_Chan / Tick_Counter;
-*(word *)(CPC.snd_bufferptr+2) =Left_Chan / Tick_Counter;
-//   *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+#ifdef MSB_FIRST
+   /* FIXME - sound issues */
+   *(word *)CPC.snd_bufferptr     = Right_Chan / Tick_Counter;
+   *(word *)(CPC.snd_bufferptr+2) = Left_Chan / Tick_Counter;
 #else
    *(dword *)CPC.snd_bufferptr = val.d; // write to mixing buffer
 #endif

@@ -242,16 +242,19 @@ typedef struct {
    unsigned char *snd_bufferptr;
 
 
-   union {
-#ifndef PS3PORT
-      struct {
-         unsigned int low;
+   union
+   {
+#ifdef MSB_FIRST
+      struct
+      {
          unsigned int high;
+         unsigned int low;
       };
 #else     
-	struct {
-         unsigned int high;
+      struct
+      {
          unsigned int low;
+         unsigned int high;
       };
 #endif
       int64_t both;
@@ -358,24 +361,27 @@ typedef struct {
    unsigned char portC;
 } t_PPI;
 
-typedef struct {
-
-   union {
-#ifndef PS3PORT
-      struct {
-         unsigned int low;
+typedef struct
+{
+   union
+   {
+#ifdef MSB_FIRST
+      struct
+      {
          unsigned int high;
+         unsigned int low;
       };
 #else     
-	struct {
-         unsigned int high;
+      struct
+      {
          unsigned int low;
+         unsigned int high;
       };
 #endif
       int64_t both;
    } cycle_count;
 
-	unsigned int buffer_full;
+   unsigned int buffer_full;
    unsigned char control;
    unsigned char reg_select;
    union {
