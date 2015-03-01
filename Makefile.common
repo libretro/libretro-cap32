@@ -11,7 +11,7 @@ SOURCES_C += $(CORE_DIR)/libretro/vkbd.c
 
 SOURCES_CXX += $(CORE_DIR)/cap32/cap32.cpp
 SOURCES_CXX += $(CORE_DIR)/cap32/crtc.cpp
-SOURCES_CXX += $(CORE_DIR)/cap32/fdc.cpp 
+SOURCES_C += $(CORE_DIR)/cap32/fdc.c
 SOURCES_CXX += $(CORE_DIR)/cap32/psg.cpp
 SOURCES_CXX += $(CORE_DIR)/cap32/tape.cpp
-SOURCES_CXX += $(CORE_DIR)/cap32/z80.cpp
+SOURCES_C += $(CORE_DIR)/cap32/z80.c

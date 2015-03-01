@@ -620,9 +620,7 @@ byte fdc_read_status(void)
    return val;
 }
 
-
-
-byte fdc_read_data(void)
+uint8_t fdc_read_data(void)
 {
    byte val;
 

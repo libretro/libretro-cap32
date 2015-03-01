@@ -457,9 +457,17 @@ typedef struct {
 void emulator_reset(bool bolMF2Reset);
 
 // fdc.c
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void fdc_write_data(unsigned char val);
 unsigned char fdc_read_status(void);
-unsigned char fdc_read_data(void);
+uint8_t fdc_read_data(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 // psg.c
 void SetAYRegister(int Num, unsigned char Value);

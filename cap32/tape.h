@@ -22,7 +22,15 @@
 #define TAPE_LEVEL_LOW 0
 #define TAPE_LEVEL_HIGH 0x80
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void Tape_UpdateLevel(void);
 void Tape_Rewind(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

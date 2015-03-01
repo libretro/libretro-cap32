@@ -19,12 +19,16 @@
 #ifndef Z80_H
 #define Z80_H
 
-//retro hack
+#ifdef __cplusplus 
+extern "C" {
+#endif
+
 // todo endianness
 
 typedef unsigned char byte;
 typedef unsigned short word;
 typedef unsigned int dword;
+
 
 typedef union {
 #ifndef PS3PORT// SDL_BYTEORDER == SDL_LIL_ENDIAN
@@ -113,5 +117,9 @@ void z80_pfx_ddcb(void);
 void z80_pfx_ed(void);
 void z80_pfx_fd(void);
 void z80_pfx_fdcb(void);
+
+#ifdef __cplusplus 
+}
+#endif
 
 #endif
