@@ -300,14 +300,8 @@ $(TARGET): $(HEADERS) $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
-	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
-
-fuse/config.h:
-	cp src/config_fuse.h fuse/config.h
-
-libspectrum/config.h:
-	cp src/config_libspectrum.h libspectrum/config.h
 
 clean-objs:
 	rm -f $(OBJS)

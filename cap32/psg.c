@@ -102,9 +102,12 @@ union TCounter {
 #endif
    dword Re;
 };
-TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
-union {
- #ifndef PS3PORT
+
+union TCounter Ton_Counter_A, Ton_Counter_B, Ton_Counter_C, Noise_Counter;
+
+union
+{
+#ifndef PS3PORT
    struct {
       dword Low;
       dword Val;
@@ -117,8 +120,10 @@ union {
 #endif
    dword Seed;
 } Noise;
-union {
-  #ifndef PS3PORT
+
+union
+{
+#ifndef PS3PORT
    struct {
       dword Lo;
       dword Hi;

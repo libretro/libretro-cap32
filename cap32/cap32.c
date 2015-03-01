@@ -22,7 +22,7 @@
    Oct 15, 2000 - 15:33 added CRTC IN/OUT handlers
    Oct 20, 2000 - 23:23 fixed some IN/OUT handler bugs
    Oct 27, 2000 - 17:39 added reset_CPC
-   Oct 30, 2000 - 21:05 found the problem with the streched display: scr_bps needs to be in dwords, not bytes!
+   Oct 30, 2000 - 21:05 found the problem with the streched display: scr_bps needs to be in uint32_ts, not bytes!
    Nov 01, 2000 - 23:43 aargh! found the BASIC 'reset' bug: the pbROMhi variable was pointing to the wrong location!
    Nov 03, 2000 - 18:03 added keyboard_interrupt handler
    Nov 03, 2000 - 19:10 added preliminary PSG register write handlers
@@ -169,23 +169,23 @@
 #endif
 
 //RETRO HACK C/C++ MIXING
-extern "C" void retro_key_down(int key);
-extern "C" void retro_key_up(int key);
-extern "C" int InitOSGLU(void);
-extern "C" int  UnInitOSGLU(void);
-extern "C" void retro_loop();
-extern "C" void retro_joy0(unsigned char joy0);
-extern "C" void doCleanUp (void);
-extern "C" void theloop();
-extern "C" int capmain (int argc, char **argv);
-extern "C" void retro_audio_cb( short l, short r);
-extern "C" void mixsnd ();
-extern "C" void shortcut_check();
-extern "C" void theloop();
-extern "C" long GetTicks(void);
-extern "C" void emu_reset ();
-extern "C" int loadadsk (char *arv,int drive);
-extern "C" int HandleExtension(char *path,char *ext);
+extern void retro_key_down(int key);
+extern void retro_key_up(int key);
+extern int InitOSGLU(void);
+extern int  UnInitOSGLU(void);
+extern void retro_loop();
+extern void retro_joy0(unsigned char joy0);
+extern void doCleanUp (void);
+extern void theloop();
+extern int capmain (int argc, char **argv);
+extern void retro_audio_cb( short l, short r);
+extern void mixsnd ();
+extern void shortcut_check();
+extern void theloop();
+extern long GetTicks(void);
+extern void emu_reset ();
+extern int loadadsk (char *arv,int drive);
+extern int HandleExtension(char *path,char *ext);
 
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
@@ -253,54 +253,54 @@ int cmd_cpt=-1;
 #define MAX_SPEED_SETTING 32
 #define DEF_SPEED_SETTING 4
 
-extern byte bTapeLevel;
+extern uint8_t bTapeLevel;
 extern t_z80regs z80;
 
-extern dword *ScanPos;
-extern dword *ScanStart;
+extern uint32_t *ScanPos;
+extern uint32_t *ScanStart;
 extern word MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
 
 //video_plugin* vid_plugin;
-dword dwSndMinSafeDist=0, dwSndMaxSafeDist=2*2*882;
+uint32_t dwSndMinSafeDist=0, dwSndMaxSafeDist=2*2*882;
 
-dword dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
-dword dwFPS, dwFrameCount;
-dword dwXScale, dwYScale;
-dword dwSndBufferCopied;
+uint32_t dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
+uint32_t dwFPS, dwFrameCount;
+uint32_t dwXScale, dwYScale;
+uint32_t dwSndBufferCopied;
 
-dword dwBreakPoint, dwTrace, dwMF2ExitAddr;
-dword dwMF2Flags = 0;
-byte *pbGPBuffer = NULL;
-byte *pbSndBuffer = NULL;
-byte *pbSndBufferEnd = NULL;
-byte *pbSndStream = NULL;
-byte *membank_read[4], *membank_write[4], *memmap_ROM[256];
-byte *pbRAM = NULL;
-byte *pbROMlo = NULL;
-byte *pbROMhi = NULL;
-byte *pbExpansionROM = NULL;
-byte *pbMF2ROMbackup = NULL;
-byte *pbMF2ROM = NULL;
-byte *pbTapeImage = NULL;
-byte *pbTapeImageEnd = NULL;
-byte keyboard_matrix[16];
+uint32_t dwBreakPoint, dwTrace, dwMF2ExitAddr;
+uint32_t dwMF2Flags = 0;
+uint8_t *pbGPBuffer = NULL;
+uint8_t *pbSndBuffer = NULL;
+uint8_t *pbSndBufferEnd = NULL;
+uint8_t *pbSndStream = NULL;
+uint8_t *membank_read[4], *membank_write[4], *memmap_ROM[256];
+uint8_t *pbRAM = NULL;
+uint8_t *pbROMlo = NULL;
+uint8_t *pbROMhi = NULL;
+uint8_t *pbExpansionROM = NULL;
+uint8_t *pbMF2ROMbackup = NULL;
+uint8_t *pbMF2ROM = NULL;
+uint8_t *pbTapeImage = NULL;
+uint8_t *pbTapeImageEnd = NULL;
+uint8_t keyboard_matrix[16];
 
-static byte *membank_config[8][4];
+static uint8_t *membank_config[8][4];
 
 FILE *pfileObject;
 FILE *pfoPrinter;
 
 #ifdef DEBUG
 //#define DEBUG_KEY SDLK_F9
-dword dwDebugFlag = 1;
+uint32_t dwDebugFlag = 1;
 FILE *pfoDebug;
 #endif
 
 #define MAX_FREQ_ENTRIES 5
-dword freq_table[MAX_FREQ_ENTRIES] = {
+uint32_t freq_table[MAX_FREQ_ENTRIES] = {
    11025,
    22050,
    44100,
@@ -330,9 +330,9 @@ static double colours_green[32] = {
    0.2510, 0.3137, 0.5333, 0.5961
 };
 
-dword colours[32];
+uint32_t colours[32];
 
-static byte bit_values[8] = {
+static uint8_t bit_values[8] = {
    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
 
@@ -520,7 +520,7 @@ typedef enum {
 
 
 #define MAX_ROM_MODS 2
-extern "C"  /*static*/ char cpc_keytrans[MAX_ROM_MODS][240];
+extern /*static*/ char cpc_keytrans[MAX_ROM_MODS][240];
 #include "rom_mods.c"
 
 char chAppPath[_MAX_PATH + 1];
@@ -555,7 +555,7 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
 
 #define psg_write \
 { \
-   byte control = PSG.control & 0xc0; /* isolate PSG control bits */ \
+   uint8_t control = PSG.control & 0xc0; /* isolate PSG control bits */ \
    if (control == 0xc0) { /* latch address? */ \
       PSG.reg_select = psg_data; /* select new PSG register */ \
    } else if (control == 0x80) { /* write? */ \
@@ -569,8 +569,8 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
 
 void ga_init_banking (void)
 {
-   byte *romb0, *romb1, *romb2, *romb3, *romb4, *romb5, *romb6, *romb7;
-   byte *pbRAMbank;
+   uint8_t *romb0, *romb1, *romb2, *romb3, *romb4, *romb5, *romb6, *romb7;
+   uint8_t *pbRAMbank;
 
    romb0 = pbRAM;
    romb1 = pbRAM + 1*16384;
@@ -628,7 +628,8 @@ void ga_init_banking (void)
 
 void ga_memory_manager (void)
 {
-   dword mem_bank;
+   unsigned n;
+   uint32_t mem_bank;
    if (CPC.ram_size == 64) { // 64KB of RAM?
       mem_bank = 0; // no expansion memory
       GateArray.RAM_config = 0; // the only valid configuration is 0
@@ -642,7 +643,7 @@ void ga_memory_manager (void)
       GateArray.RAM_bank = mem_bank;
       ga_init_banking();
    }
-   for (int n = 0; n < 4; n++) { // remap active memory banks
+   for (n = 0; n < 4; n++) { // remap active memory banks
       membank_read[n] = membank_config[GateArray.RAM_config & 7][n];
       membank_write[n] = membank_config[GateArray.RAM_config & 7][n];
    }
@@ -661,9 +662,9 @@ void ga_memory_manager (void)
 
 
 
-byte z80_IN_handler (reg_pair port)
+uint8_t z80_IN_handler (reg_pair port)
 {
-   byte ret_val;
+   uint8_t ret_val;
 
    ret_val = 0xff; // default return value
 // CRTC -----------------------------------------------------------------------
@@ -679,7 +680,7 @@ byte z80_IN_handler (reg_pair port)
    }
 // PPI ------------------------------------------------------------------------
    else if (!(port.b.h & 0x08)) { // PPI chip select?
-      byte ppi_port = port.b.h & 3;
+      uint8_t ppi_port = port.b.h & 3;
       switch (ppi_port) {
          case 0: // read from port A?
             if (PPI.control & 0x10) { // port A set to input?
@@ -717,22 +718,24 @@ byte z80_IN_handler (reg_pair port)
             break;
 
          case 2: // read from port C?
-            byte direction = PPI.control & 9; // isolate port C directions
-            ret_val = PPI.portC; // default to last programmed value
-            if (direction) { // either half set to input?
-               if (direction & 8) { // upper half set to input?
-                  ret_val &= 0x0f; // blank out upper half
-                  byte val = PPI.portC & 0xc0; // isolate PSG control bits
-                  if (val == 0xc0) { // PSG specify register?
-                     val = 0x80; // change to PSG write register
+            {
+               uint8_t direction = PPI.control & 9; // isolate port C directions
+               ret_val = PPI.portC; // default to last programmed value
+               if (direction) { // either half set to input?
+                  if (direction & 8) { // upper half set to input?
+                     ret_val &= 0x0f; // blank out upper half
+                     uint8_t val = PPI.portC & 0xc0; // isolate PSG control bits
+                     if (val == 0xc0) { // PSG specify register?
+                        val = 0x80; // change to PSG write register
+                     }
+                     ret_val |= val | 0x20; // casette write data is always set
+                     if (CPC.tape_motor) {
+                        ret_val |= 0x10; // set the bit if the tape motor is running
+                     }
                   }
-                  ret_val |= val | 0x20; // casette write data is always set
-                  if (CPC.tape_motor) {
-                     ret_val |= 0x10; // set the bit if the tape motor is running
+                  if (!(direction & 1)) { // lower half set to output?
+                     ret_val |= 0x0f; // invalid - set all bits
                   }
-               }
-               if (!(direction & 1)) { // lower half set to output?
-                  ret_val |= 0x0f; // invalid - set all bits
                }
             }
             break;
@@ -753,7 +756,7 @@ byte z80_IN_handler (reg_pair port)
 
 
 
-void z80_OUT_handler (reg_pair port, byte val)
+void z80_OUT_handler (reg_pair port, uint8_t val)
 {
 // Gate Array -----------------------------------------------------------------
    if ((port.b.h & 0xc0) == 0x40) { // GA chip select?
@@ -776,7 +779,7 @@ void z80_OUT_handler (reg_pair port, byte val)
             }
             #endif
             {
-               byte colour = val & 0x1f; // isolate colour value
+               uint8_t colour = val & 0x1f; // isolate colour value
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] =colours[colour];//SDL_MapRGB(back_surface->format,
                 //colours[colour].r, colours[colour].g, colours[colour].b);
@@ -793,10 +796,10 @@ r2=colours[GateArray.ink_values[1]]>>11;
 g2=(colours[GateArray.ink_values[1]]>>5)&0x2F;
 b2=colours[GateArray.ink_values[1]]&0x1F;
 
-r=((dword)r + (dword)r2)>>1;
-g=((dword)g + (dword)g2)>>1;
-b=((dword)b + (dword)b2)>>1;
-dword colur = b | (g << 5) | (r << 11);
+r=((uint32_t)r + (uint32_t)r2)>>1;
+g=((uint32_t)g + (uint32_t)g2)>>1;
+b=((uint32_t)b + (uint32_t)b2)>>1;
+uint32_t colur = b | (g << 5) | (r << 11);
 colur = colur | (colur << 16);
 GateArray.palette[18] = colur;
 
@@ -840,7 +843,7 @@ GateArray.palette[18] = colur;
    }
 // CRTC -----------------------------------------------------------------------
    if (!(port.b.h & 0x40)) { // CRTC chip select?
-      byte crtc_port = port.b.h & 3;
+      uint8_t crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
@@ -887,7 +890,7 @@ GateArray.palette[18] = colur;
                case 7: // vertical sync position
                   CRTC.registers[7] = val & 0x7f;
                   {
-                     register dword temp = 0;
+                     register uint32_t temp = 0;
                      if (CRTC.line_count == CRTC.registers[7]) { // matches vertical sync position?
                         temp++;
                         if (CRTC.r7match != temp) {
@@ -915,7 +918,7 @@ GateArray.palette[18] = colur;
                case 9: // maximum raster count
                   CRTC.registers[9] = val & 0x1f;
                   {
-                     register dword temp = 0;
+                     register uint32_t temp = 0;
                      if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
                         temp = 1;
                         CRTC.flag_resscan = 1; // request a raster counter reset
@@ -1006,7 +1009,7 @@ GateArray.palette[18] = colur;
          case 0: // write to port A?
             PPI.portA = val;
             if (!(PPI.control & 0x10)) { // port A set to output?
-               byte psg_data = val;
+               uint8_t psg_data = val;
                psg_write
             }
             break;
@@ -1021,7 +1024,7 @@ GateArray.palette[18] = colur;
             if (!(PPI.control & 8)) { // output upper half?
                CPC.tape_motor = val & 0x10; // update tape motor control
                PSG.control = val; // change PSG control
-               byte psg_data = PPI.portA;
+               uint8_t psg_data = PPI.portA;
                psg_write
             }
             break;
@@ -1033,7 +1036,7 @@ GateArray.palette[18] = colur;
                PPI.portC = 0;
             } else { // bit manipulation of port C data
                if (val & 1) { // set bit?
-                  byte bit = (val >> 1) & 7; // isolate bit to set
+                  uint8_t bit = (val >> 1) & 7; // isolate bit to set
                   PPI.portC |= bit_values[bit]; // set requested bit
                   if (!(PPI.control & 1)) { // output lower half?
                      CPC.keyboard_line = PPI.portC;
@@ -1041,11 +1044,11 @@ GateArray.palette[18] = colur;
                   if (!(PPI.control & 8)) { // output upper half?
                      CPC.tape_motor = PPI.portC & 0x10;
                      PSG.control = PPI.portC; // change PSG control
-                     byte psg_data = PPI.portA;
+                     uint8_t psg_data = PPI.portA;
                      psg_write
                   }
                } else {
-                  byte bit = (val >> 1) & 7; // isolate bit to reset
+                  uint8_t bit = (val >> 1) & 7; // isolate bit to reset
                   PPI.portC &= ~(bit_values[bit]); // reset requested bit
                   if (!(PPI.control & 1)) { // output lower half?
                      CPC.keyboard_line = PPI.portC;
@@ -1053,7 +1056,7 @@ GateArray.palette[18] = colur;
                   if (!(PPI.control & 8)) { // output upper half?
                      CPC.tape_motor = PPI.portC & 0x10;
                      PSG.control = PPI.portC; // change PSG control
-                     byte psg_data = PPI.portA;
+                     uint8_t psg_data = PPI.portA;
                      psg_write
                   }
                }
@@ -1102,11 +1105,11 @@ int zip_dir (t_zip_info *zi)
 {
    int n, iFileCount;
    long lFilePosition;
-   dword dwCentralDirPosition, dwNextEntry;
+   uint32_t dwCentralDirPosition, dwNextEntry;
    word wCentralDirEntries, wCentralDirSize, wFilenameLength;
-   byte *pbPtr;
+   uint8_t *pbPtr;
    char *pchStrPtr;
-   dword dwOffset;
+   uint32_t dwOffset;
 
    iFileCount = 0;
    if ((pfileObject = fopen(zi->pchZipFile, "rb")) == NULL) {
@@ -1124,11 +1127,11 @@ int zip_dir (t_zip_info *zi)
          return ERR_FILE_BAD_ZIP; // exit if loading of data chunck failed
       }
       pbPtr = pbGPBuffer + (256 - 22); // pointer to end of central directory (under ideal conditions)
-      while (pbPtr != (byte *)pbGPBuffer) {
-         if (*(dword *)pbPtr == 0x06054b50) { // check for end of central directory signature
+      while (pbPtr != (uint8_t *)pbGPBuffer) {
+         if (*(uint32_t *)pbPtr == 0x06054b50) { // check for end of central directory signature
             wCentralDirEntries = *(word *)(pbPtr + 10);
             wCentralDirSize = *(word *)(pbPtr + 12);
-            dwCentralDirPosition = *(dword *)(pbPtr + 16);
+            dwCentralDirPosition = *(uint32_t *)(pbPtr + 16);
             break;
          }
          pbPtr--; // move backwards through buffer
@@ -1154,7 +1157,7 @@ int zip_dir (t_zip_info *zi)
 
    for (n = wCentralDirEntries; n; n--) {
       wFilenameLength = *(word *)(pbPtr + 28);
-      dwOffset = *(dword *)(pbPtr + 42);
+      dwOffset = *(uint32_t *)(pbPtr + 42);
       dwNextEntry = wFilenameLength + *(word *)(pbPtr + 30) + *(word *)(pbPtr + 32);
       pbPtr += 46;
       char *pchThisExtension = zi->pchExtension;
@@ -1163,7 +1166,7 @@ int zip_dir (t_zip_info *zi)
             strncpy(pchStrPtr, (char *)pbPtr, wFilenameLength); // copy filename from zip directory
             pchStrPtr[wFilenameLength] = 0; // zero terminate string
             pchStrPtr += wFilenameLength+1;
-            *(dword *)pchStrPtr = dwOffset; // associate offset with string
+            *(uint32_t *)pchStrPtr = dwOffset; // associate offset with string
             pchStrPtr += 4;
             iFileCount++;
             break;
@@ -1182,11 +1185,11 @@ int zip_dir (t_zip_info *zi)
    return 0; // operation completed successfully
 }
 
-int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
+int zip_extract (char *pchZipFile, char *pchFileName, uint32_t dwOffset)
 {
    int iStatus, iCount;
-   dword dwSize;
-   byte *pbInputBuffer, *pbOutputBuffer;
+   uint32_t dwSize;
+   uint8_t *pbInputBuffer, *pbOutputBuffer;
    FILE *pfileOut, *pfileIn;
    z_stream z;
 
@@ -1197,7 +1200,7 @@ int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
    pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
    fread(pbGPBuffer, 30, 1, pfileIn); // read local header
-   dwSize = *(dword *)(pbGPBuffer + 18); // length of compressed data
+   dwSize = *(uint32_t *)(pbGPBuffer + 18); // length of compressed data
    dwOffset += 30 + *(word *)(pbGPBuffer + 26) + *(word *)(pbGPBuffer + 28);
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
 
@@ -1236,14 +1239,14 @@ int zip_extract (char *pchZipFile, char *pchFileName, dword dwOffset)
    return 0; // data was successfully decompressed
 }
 
-extern "C" int snapshot_load (char *pchFileName);
+extern int snapshot_load (char *pchFileName);
 
 int snapshot_load (char *pchFileName)
 {
    int n;
-   dword dwSnapSize, dwModel, dwFlags;
+   uint32_t dwSnapSize, dwModel, dwFlags;
    char chPath[_MAX_PATH + 1];
-   byte val;
+   uint8_t val;
    reg_pair port;
    t_SNA_header sh;
 
@@ -1261,11 +1264,11 @@ int snapshot_load (char *pchFileName)
          return ERR_SNA_SIZE;
       }
       if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
-         byte *pbTemp;
+         uint8_t *pbTemp;
 
-         pbTemp = new byte [dwSnapSize*1024];
+         pbTemp = malloc(dwSnapSize*1024 * sizeof(uint8_t));
          if (pbTemp) {
-            delete [] pbRAM;
+            free(pbRAM);
             CPC.ram_size = dwSnapSize;
             pbRAM = pbTemp;
          } else {
@@ -1446,13 +1449,13 @@ int snapshot_load (char *pchFileName)
 
    return 0;
 }
-extern "C" int snapshot_save (char *pchFileName);
+extern int snapshot_save (char *pchFileName);
 
 int snapshot_save (char *pchFileName)
 {
    t_SNA_header sh;
    int n;
-   dword dwFlags;
+   uint32_t dwFlags;
 
    memset(&sh, 0, sizeof(sh));
 
@@ -1623,7 +1626,7 @@ int snapshot_save (char *pchFileName)
 
 void dsk_eject (t_drive *drive)
 {
-   dword track, side;
+   uint32_t track, side;
 
    for (track = 0; track < DSK_TRACKMAX; track++) { // loop for all tracks
       for (side = 0; side < DSK_SIDEMAX; side++) { // loop for all sides
@@ -1632,7 +1635,7 @@ void dsk_eject (t_drive *drive)
          }
       }
    }
-   dword dwTemp = drive->current_track; // save the drive head position
+   uint32_t dwTemp = drive->current_track; // save the drive head position
    memset(drive, 0, sizeof(t_drive)); // clear drive info structure
    drive->current_track = dwTemp;
 }
@@ -1640,8 +1643,8 @@ void dsk_eject (t_drive *drive)
 int dsk_load (char *pchFileName, t_drive *drive, char chID)
 {
    int iRetCode;
-   dword dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
-   byte *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
+   uint32_t dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
+   uint8_t *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
 
    iRetCode = 0;
    dsk_eject(drive);
@@ -1677,7 +1680,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                }
                drive->track[track][side].sectors = dwSectors; // store sector count
                drive->track[track][side].size = dwTrackSize; // store track size
-               drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+               drive->track[track][side].data = (uint8_t *)malloc(dwTrackSize); // attempt to allocate the required memory
                if (drive->track[track][side].data == NULL) { // abort if not enough
                   iRetCode = ERR_OUT_OF_MEMORY;
                   goto exit;
@@ -1731,7 +1734,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                      }
                      drive->track[track][side].sectors = dwSectors; // store sector count
                      drive->track[track][side].size = dwTrackSize; // store track size
-                     drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+                     drive->track[track][side].data = (uint8_t *)malloc(dwTrackSize); // attempt to allocate the required memory
                      if (drive->track[track][side].data == NULL) { // abort if not enough
                         iRetCode = ERR_OUT_OF_MEMORY;
                         goto exit;
@@ -1778,7 +1781,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
 {
    t_DSK_header dh;
    t_track_header th;
-   dword track, side, pos, sector;
+   uint32_t track, side, pos, sector;
 
    if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
       memset(&dh, 0, sizeof(dh));
@@ -1839,7 +1842,9 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
 
 int dsk_format (t_drive *drive, int iFormat)
 {
+   uint32_t track, side;
    int iRetCode = 0;
+
    drive->tracks = disk_format[iFormat].tracks;
    if (drive->tracks > DSK_TRACKMAX) { // compare against upper limit
       drive->tracks = DSK_TRACKMAX; // limit to maximum
@@ -1850,29 +1855,36 @@ int dsk_format (t_drive *drive, int iFormat)
       goto exit;
    }
    drive->sides--; // zero base number of sides
-   for (dword track = 0; track < drive->tracks; track++) { // loop for all tracks
-      for (dword side = 0; side <= drive->sides; side++) { // loop for all sides
-         dword dwSectorSize = 0x80 << disk_format[iFormat].sector_size; // determine sector size in bytes
-         dword dwSectors = disk_format[iFormat].sectors;
-         if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
+   for (track = 0; track < drive->tracks; track++)
+   { // loop for all tracks
+      for (side = 0; side <= drive->sides; side++)
+      { // loop for all sides
+         uint32_t sector;
+         uint32_t dwSectorSize = 0x80 << disk_format[iFormat].sector_size; // determine sector size in bytes
+         uint32_t dwSectors = disk_format[iFormat].sectors;
+         if (dwSectors > DSK_SECTORMAX)
+         { // abort if sector count greater than maximum
             iRetCode = ERR_DSK_SECTORS;
             goto exit;
          }
-         dword dwTrackSize = dwSectorSize * dwSectors; // determine track size in bytes, minus track header
+         uint32_t dwTrackSize = dwSectorSize * dwSectors; // determine track size in bytes, minus track header
          drive->track[track][side].sectors = dwSectors; // store sector count
          drive->track[track][side].size = dwTrackSize; // store track size
-         drive->track[track][side].data = (byte *)malloc(dwTrackSize); // attempt to allocate the required memory
+         drive->track[track][side].data = (uint8_t *)malloc(dwTrackSize); // attempt to allocate the required memory
          if (drive->track[track][side].data == NULL) { // abort if not enough
             iRetCode = ERR_OUT_OF_MEMORY;
             goto exit;
          }
-         byte *pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
-         byte *pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
-         byte CHRN[4];
+         uint8_t *pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
+         uint8_t *pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
+         uint8_t CHRN[4];
          CHRN[0] = (byte)track;
          CHRN[1] = (byte)side;
          CHRN[3] = (byte)disk_format[iFormat].sector_size;
-         for (dword sector = 0; sector < dwSectors; sector++) { // loop for all sectors
+
+         for (sector = 0; sector < dwSectors; sector++)
+         {
+            // loop for all sectors
             CHRN[2] = disk_format[iFormat].sector_ids[side][sector];
             memcpy(drive->track[track][side].sector[sector].CHRN, CHRN, 4); // copy CHRN
             drive->track[track][side].sector[sector].size = dwSectorSize;
@@ -1901,8 +1913,8 @@ int tape_insert (char *pchFileName)
 {
    long lFileSize;
    int iBlockLength;
-   byte bID;
-   byte *pbPtr, *pbBlock;
+   uint8_t bID;
+   uint8_t *pbPtr, *pbBlock;
 
    tape_eject();
    if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
@@ -1923,7 +1935,7 @@ int tape_insert (char *pchFileName)
       fclose(pfileObject);
       return ERR_TAP_INVALID;
    }
-   pbTapeImage = (byte *)malloc(lFileSize+6);
+   pbTapeImage = (uint8_t *)malloc(lFileSize+6);
    *pbTapeImage = 0x20; // start off with a pause block
    *(word *)(pbTapeImage+1) = 2000; // set the length to 2 seconds
    fread(pbTapeImage+3, lFileSize, 1, pfileObject); // append the entire CDT file
@@ -1945,7 +1957,7 @@ int tape_insert (char *pchFileName)
             bolGotDataBlock = true;
             break;
          case 0x11: // turbo loading data block
-            iBlockLength = (*(dword *)(pbBlock+0x0f) & 0x00ffffff) + 0x12;
+            iBlockLength = (*(uint32_t *)(pbBlock+0x0f) & 0x00ffffff) + 0x12;
             bolGotDataBlock = true;
             break;
          case 0x12: // pure tone
@@ -1957,11 +1969,11 @@ int tape_insert (char *pchFileName)
             bolGotDataBlock = true;
             break;
          case 0x14: // pure data block
-            iBlockLength = (*(dword *)(pbBlock+0x07) & 0x00ffffff) + 0x0a;
+            iBlockLength = (*(uint32_t *)(pbBlock+0x07) & 0x00ffffff) + 0x0a;
             bolGotDataBlock = true;
             break;
          case 0x15: // direct recording
-            iBlockLength = (*(dword *)(pbBlock+0x05) & 0x00ffffff) + 0x08;
+            iBlockLength = (*(uint32_t *)(pbBlock+0x05) & 0x00ffffff) + 0x08;
             bolGotDataBlock = true;
             break;
          case 0x20: // pause
@@ -2016,17 +2028,17 @@ int tape_insert (char *pchFileName)
             iBlockLength = 8;
             break;
          case 0x35: // custom info block
-            iBlockLength = *(dword *)(pbBlock+0x10) + 0x14;
+            iBlockLength = *(uint32_t *)(pbBlock+0x10) + 0x14;
             break;
          case 0x40: // snapshot block
-            iBlockLength = (*(dword *)(pbBlock+0x01) & 0x00ffffff) + 0x04;
+            iBlockLength = (*(uint32_t *)(pbBlock+0x01) & 0x00ffffff) + 0x04;
             break;
          case 0x5A: // another tzx/cdt file
             iBlockLength = 9;
             break;
 
          default: // "extension rule"
-            iBlockLength = *(dword *)pbBlock + 4;
+            iBlockLength = *(uint32_t *)pbBlock + 4;
       }
 
       #ifdef DEBUG_TAPE
@@ -2052,7 +2064,7 @@ int tape_insert_voc (char *pchFileName)
 {
    long lFileSize, lOffset, lInitialOffset, lSampleLength;
    int iBlockLength;
-   byte *pbPtr, *pbTapeImagePtr, *pbVocDataBlock, *pbVocDataBlockPtr;
+   uint8_t *pbPtr, *pbTapeImagePtr, *pbVocDataBlock, *pbVocDataBlockPtr;
    bool bolDone;
 
    tape_eject();
@@ -2078,13 +2090,13 @@ int tape_insert_voc (char *pchFileName)
    #endif
    iBlockLength = 0;
    lSampleLength = 0;
-   byte bSampleRate = 0;
+   uint8_t bSampleRate = 0;
    bolDone = false;
    while ((!bolDone) && (lOffset < lFileSize)) {
       fseek(pfileObject, lOffset, SEEK_SET);
       fread(pbPtr, 16, 1, pfileObject); // read block ID + size
       #ifdef DEBUG_TAPE
-      fprintf(pfoDebug, "%02x %d\r\n", *pbPtr, *(dword *)(pbPtr+0x01) & 0x00ffffff);
+      fprintf(pfoDebug, "%02x %d\r\n", *pbPtr, *(uint32_t *)(pbPtr+0x01) & 0x00ffffff);
       #endif
       switch(*pbPtr)
       {
@@ -2092,7 +2104,7 @@ int tape_insert_voc (char *pchFileName)
             bolDone = true;
             break;
          case 0x1: // sound data
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 6;
             if ((bSampleRate) && (bSampleRate != *(pbPtr+0x04))) { // no change in sample rate allowed
                fclose(pfileObject);
@@ -2105,7 +2117,7 @@ int tape_insert_voc (char *pchFileName)
             }
             break;
          case 0x2: // sound continue
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr+0x01) & 0x00ffffff) + 4;
             lSampleLength += iBlockLength - 4;
             break;
          case 0x3: // silence
@@ -2121,7 +2133,7 @@ int tape_insert_voc (char *pchFileName)
             iBlockLength = 3;
             break;
          case 0x5: // ascii
-            iBlockLength = (*(dword *)(pbPtr+0x01) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr+0x01) & 0x00ffffff) + 4;
             break;
          default:
             fclose(pfileObject);
@@ -2133,13 +2145,13 @@ int tape_insert_voc (char *pchFileName)
    fprintf(pfoDebug, "--- %ld bytes\r\n", lSampleLength);
    #endif
 
-   dword dwTapePulseCycles = 3500000L / (1000000L / (256 - bSampleRate)); // length of one pulse in ZX Spectrum T states
-   dword dwCompressedSize = lSampleLength >> 3; // 8x data reduction
+   uint32_t dwTapePulseCycles = 3500000L / (1000000L / (256 - bSampleRate)); // length of one pulse in ZX Spectrum T states
+   uint32_t dwCompressedSize = lSampleLength >> 3; // 8x data reduction
    if (dwCompressedSize > 0x00ffffff) { // we only support one direct recording block right now
       fclose(pfileObject);
       return ERR_TAP_BAD_VOC;
    }
-   pbTapeImage = (byte *)malloc(dwCompressedSize+1+8+6);
+   pbTapeImage = (uint8_t *)malloc(dwCompressedSize+1+8+6);
    if (pbTapeImage == NULL) { // check if the memory allocation has failed
       fclose(pfileObject);
       return ERR_OUT_OF_MEMORY;
@@ -2151,34 +2163,40 @@ int tape_insert_voc (char *pchFileName)
    *(word *)(pbTapeImage+4) = (word)dwTapePulseCycles; // number of T states per sample
    *(word *)(pbTapeImage+6) = 0; // pause after block
    *(pbTapeImage+8) = lSampleLength & 7 ? lSampleLength & 7 : 8; // bits used in last byte
-   *(dword *)(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
+   *(uint32_t *)(pbTapeImage+9) = dwCompressedSize & 0x00ffffff; // data length
    pbTapeImagePtr = pbTapeImage + 12;
 
    lOffset = lInitialOffset;
    bolDone = false;
-   dword dwBit = 8;
-   byte bByte = 0;
-   while ((!bolDone) && (lOffset < lFileSize)) {
+   uint32_t dwBit = 8;
+   uint8_t bByte = 0;
+   unsigned iBytePos;
+   while ((!bolDone) && (lOffset < lFileSize))
+   {
       fseek(pfileObject, lOffset, SEEK_SET);
       fread(pbPtr, 1, 1, pfileObject); // read block ID
-      switch(*pbPtr) {
+      switch(*pbPtr)
+      {
          case 0x0: // terminator
             bolDone = true;
             break;
          case 0x1: // sound data
             fread(pbPtr, 3+2, 1, pfileObject); // get block size and sound info
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 6;
-            pbVocDataBlock = (byte *)malloc(lSampleLength);
-            if (pbVocDataBlock == NULL) {
+            pbVocDataBlock = (uint8_t *)malloc(lSampleLength);
+
+            if (pbVocDataBlock == NULL)
+            {
                fclose(pfileObject);
                tape_eject();
                return ERR_OUT_OF_MEMORY;
             }
             fread(pbVocDataBlock, lSampleLength, 1, pfileObject);
             pbVocDataBlockPtr = pbVocDataBlock;
-            for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
-               byte bVocSample = *pbVocDataBlockPtr++;
+            for (iBytePos = 0; iBytePos < lSampleLength; iBytePos++)
+            {
+               uint8_t bVocSample = *pbVocDataBlockPtr++;
                dwBit--;
                if (bVocSample > VOC_THRESHOLD) {
                   bByte |= bit_values[dwBit];
@@ -2193,9 +2211,9 @@ int tape_insert_voc (char *pchFileName)
             break;
          case 0x2: // sound continue
             fread(pbPtr, 3, 1, pfileObject); // get block size
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr) & 0x00ffffff) + 4;
             lSampleLength = iBlockLength - 4;
-            pbVocDataBlock = (byte *)malloc(lSampleLength);
+            pbVocDataBlock = (uint8_t *)malloc(lSampleLength);
             if (pbVocDataBlock == NULL) {
                fclose(pfileObject);
                tape_eject();
@@ -2203,13 +2221,14 @@ int tape_insert_voc (char *pchFileName)
             }
             fread(pbVocDataBlock, lSampleLength, 1, pfileObject);
             pbVocDataBlockPtr = pbVocDataBlock;
-            for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
-               byte bVocSample = *pbVocDataBlockPtr++;
+            for (iBytePos = 0; iBytePos < lSampleLength; iBytePos++)
+            {
+               uint8_t bVocSample = *pbVocDataBlockPtr++;
                dwBit--;
-               if (bVocSample > VOC_THRESHOLD) {
+               if (bVocSample > VOC_THRESHOLD)
                   bByte |= bit_values[dwBit];
-               }
-               if (!dwBit) { // got all 8 bits?
+               if (!dwBit)
+               { // got all 8 bits?
                   *pbTapeImagePtr++ = bByte;
                   dwBit = 8;
                   bByte = 0;
@@ -2220,9 +2239,11 @@ int tape_insert_voc (char *pchFileName)
          case 0x3: // silence
             iBlockLength = 4;
             lSampleLength = *(word *)(pbPtr) + 1;
-            for (int iBytePos = 0; iBytePos < lSampleLength; iBytePos++) {
+            for (iBytePos = 0; iBytePos < lSampleLength; iBytePos++)
+            {
                dwBit--;
-               if (!dwBit) { // got all 8 bits?
+               if (!dwBit)
+               { // got all 8 bits?
                   *pbTapeImagePtr++ = bByte;
                   dwBit = 8;
                   bByte = 0;
@@ -2233,7 +2254,7 @@ int tape_insert_voc (char *pchFileName)
             iBlockLength = 3;
             break;
          case 0x5: // ascii
-            iBlockLength = (*(dword *)(pbPtr) & 0x00ffffff) + 4;
+            iBlockLength = (*(uint32_t *)(pbPtr) & 0x00ffffff) + 4;
             break;
       }
       lOffset += iBlockLength;
@@ -2253,7 +2274,7 @@ int tape_insert_voc (char *pchFileName)
 int emulator_patch_ROM (void)
 {
    char chPath[_MAX_PATH + 1];
-   byte *pbPtr;
+   uint8_t *pbPtr;
 
    strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
    strcat(chPath, "/");
@@ -2364,17 +2385,22 @@ int emulator_init (void)
 {
    int iErr, iRomNum;
    char chPath[_MAX_PATH + 1];
-   char *pchRomData;
+   char *pchRomData = NULL;
 
-   pbGPBuffer = new byte [128*1024]; // attempt to allocate the general purpose buffer
-   pbRAM = new byte [CPC.ram_size*1024]; // allocate memory for desired amount of RAM
+   (void)pchRomData;
+   (void)chPath;
+   (void)iRomNum;
+   (void)iErr;
 
-   pbROMlo=(byte *)&OS[0]; // CPC 6128
+   pbGPBuffer = malloc(128*1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   pbRAM = malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+
+   pbROMlo=(uint8_t *)&OS[0]; // CPC 6128
 
    if ((!pbGPBuffer) || (!pbRAM) )
       return ERR_OUT_OF_MEMORY;
 
-   pbROMhi = pbExpansionROM = (byte *)pbROMlo + 16384;
+   pbROMhi = pbExpansionROM = (uint8_t *)pbROMlo + 16384;
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
 
@@ -2393,19 +2419,22 @@ void emulator_shutdown (void)
 {
    int iRomNum;
 
-   delete [] pbMF2ROMbackup;
-   delete [] pbMF2ROM;
+   if (pbMF2ROMbackup)
+      free(pbMF2ROMbackup);
+   if (pbMF2ROM)
+      free(pbMF2ROM);
    pbMF2ROM = NULL;
 
    for (iRomNum = 2; iRomNum < 16; iRomNum++) // loop for ROMs 2-15
    {
       if (memmap_ROM[iRomNum] != NULL && iRomNum!=7) // was a ROM assigned to this slot?
-         delete [] memmap_ROM[iRomNum]; // if so, release the associated memory
+         free(memmap_ROM[iRomNum]); // if so, release the associated memory
    }
 
-   // delete [] pbROMlo;
-   delete [] pbRAM;
-   delete [] pbGPBuffer;
+   if (pbRAM)
+      free(pbRAM);
+   if (pbGPBuffer)
+      free(pbGPBuffer);
 }
 
 int printer_start (void)
@@ -2425,7 +2454,7 @@ void printer_stop (void)
    pfoPrinter = NULL;
 }
 
-void audio_update (void *userdata, byte *stream, int len) { }
+void audio_update (void *userdata, uint8_t *stream, int len) { }
 
 int audio_align_samples (int given)
 {
@@ -2437,19 +2466,20 @@ int audio_align_samples (int given)
 
 int audio_init (void)
 {
+   unsigned n;
 
    if (!CPC.snd_enabled)
       return 0;
 
    CPC.snd_buffersize = 2*2*882;//audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer = (byte *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
+   pbSndBuffer = (uint8_t *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
    pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
    memset(pbSndBuffer, 0, CPC.snd_buffersize);
    CPC.snd_bufferptr = pbSndBuffer; // init write cursor
 
    InitAY();
 
-   for (int n = 0; n < 16; n++)
+   for (n = 0; n < 16; n++)
       SetAYRegister(n, PSG.RegisterAY.Index[n]); // init sound emulation with valid values
 
    return 0;
@@ -2461,43 +2491,46 @@ void audio_resume (void) {}
 
 int video_set_palette (void)
 {
-            int n;
+   int n;
 
-         if (!CPC.scr_tube) {
-            int n;
-            for (n = 0; n < 32; n++) {
-               dword red = (dword)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 31);
-               if (red > 31) { // limit to the maximum
-                  red = 31;
-               }
-               dword green = (dword)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 63);
-               if (green > 63) {
-                  green = 63;
-               }
-               dword blue = (dword)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 31);
-               if (blue > 31) {
-                  blue = 31;
-               } 
-		dword colr = blue | (green << 5) | (red << 11);
-               colours[n] = colr | (colr << 16);
-
-            }
-         } else {
-            int n;
-            for (n = 0; n < 32; n++) {
-               dword green = (dword)(colours_green[n] * (CPC.scr_intensity / 10.0) * 63);
-               if (green > 63) {
-                  green = 63;
-               }
-    		dword colr = green << 5;
-               colours[n] = colr | (colr << 16);
-
-            }
+   if (!CPC.scr_tube)
+   {
+      int n;
+      for (n = 0; n < 32; n++)
+      {
+         uint32_t red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 31);
+         if (red > 31) { // limit to the maximum
+            red = 31;
          }
-	
-   for (n = 0; n < 17; n++) { // loop for all colours + border
-		int i=GateArray.ink_values[n];
-		GateArray.palette[n] = colours[GateArray.ink_values[n]];
+         uint32_t green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 63);
+         if (green > 63) {
+            green = 63;
+         }
+         uint32_t blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 31);
+         if (blue > 31) {
+            blue = 31;
+         } 
+         uint32_t colr = blue | (green << 5) | (red << 11);
+         colours[n] = colr | (colr << 16);
+
+      }
+   } else {
+      int n;
+      for (n = 0; n < 32; n++) {
+         uint32_t green = (uint32_t)(colours_green[n] * (CPC.scr_intensity / 10.0) * 63);
+         if (green > 63) {
+            green = 63;
+         }
+         uint32_t colr = green << 5;
+         colours[n] = colr | (colr << 16);
+
+      }
+   }
+
+   for (n = 0; n < 17; n++)
+   { // loop for all colours + border
+      int i=GateArray.ink_values[n];
+      GateArray.palette[n] = colours[GateArray.ink_values[n]];
    }
 
    return 0;
@@ -2563,7 +2596,7 @@ int video_init (void)
    }
 
   CPC.scr_bps = 400*2/4;
-  CPC.scr_pos=CPC.scr_base = (dword *)&bmp[0];
+  CPC.scr_pos=CPC.scr_base = (uint32_t *)&bmp[0];
   CPC.scr_line_offs = CPC.scr_bps * 1;
 
   video_set_style(); 
@@ -2652,6 +2685,7 @@ void getConfigValueString (char* pchFileName, char* pchSection, char* pchKey, ch
 
 void loadConfiguration (void)
 {
+   unsigned i, n, iSide, iSector, iRomNum;
    char chFileName[_MAX_PATH + 1];
    char chPath[_MAX_PATH + 1];
 
@@ -2763,8 +2797,9 @@ void loadConfiguration (void)
    CPC.tape_zip = getConfigValueInt(chFileName, "file", "tape_zip", 0) & 1;
 
    int iFmt = FIRST_CUSTOM_DISK_FORMAT;
-   for (int i = iFmt; i < MAX_DISK_FORMAT; i++) { // loop through all user definable disk formats
-      dword dwVal;
+   for (i = iFmt; i < MAX_DISK_FORMAT; i++)
+   { // loop through all user definable disk formats
+      uint32_t dwVal;
       char *pchTail;
       char chFmtId[14];
       disk_format[iFmt].label[0] = 0; // clear slot
@@ -2826,15 +2861,16 @@ void loadConfiguration (void)
             continue;
          }
          dwVal = strtoul(pchToken, &pchTail, 0);
-         disk_format[iFmt].filler_byte = (byte)dwVal;
-         for (int iSide = 0; iSide < (int)disk_format[iFmt].sides; iSide++) {
-            for (int iSector = 0; iSector < (int)disk_format[iFmt].sectors; iSector++) {
+         disk_format[iFmt].filler_byte = (uint8_t)dwVal;
+         for (iSide = 0; iSide < (int)disk_format[iFmt].sides; iSide++)
+         {
+            for (iSector = 0; iSector < (int)disk_format[iFmt].sectors; iSector++)
+            {
                pchToken = strtok(NULL, chDelimiters); // sector ID
-               if (pchToken == NULL) { // value missing?
+               if (pchToken == NULL) // value missing?
                   dwVal = iSector+1;
-               } else {
+               else
                   dwVal = strtoul(pchToken, &pchTail, 0);
-               }
                disk_format[iFmt].sector_ids[iSide][iSector] = (byte)dwVal;
             }
          }
@@ -2857,7 +2893,8 @@ void loadConfiguration (void)
    strncpy(chPath, chAppPath, sizeof(chPath)-5);
    strcat(chPath, "/rom");
    getConfigValueString(chFileName, "rom", "rom_path", CPC.rom_path, sizeof(CPC.rom_path)-1, chPath);
-   for (int iRomNum = 0; iRomNum < 16; iRomNum++) { // loop for ROMs 0-15
+   for (iRomNum = 0; iRomNum < 16; iRomNum++)
+   { // loop for ROMs 0-15
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
       getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, "");
@@ -3034,12 +3071,13 @@ void mixsnd(void)
 
 int InitOSGLU(void)
 {
- capmain(1,NULL);
+   capmain(1,NULL);
 }
 
 int  UnInitOSGLU(void)
 {
     doCleanUp();
+    return 0;
 }
 
 void shortcut_check(void)
@@ -3172,7 +3210,7 @@ void shortcut_check(void)
 
 }
 
-dword dwSndDist;
+uint32_t dwSndDist;
 int iExitCondition;
 bool bolDone;
 
@@ -3184,19 +3222,19 @@ bool have_TAP = false;
 
 int loadadsk (char *arv,int drive)
 {
-	if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") ){
-
-		if(drive==0)dsk_load( arv, &driveA, 'A'); 
-		else dsk_load( arv, &driveB, 'B');   
-	    	have_DSK = true;
-		sprintf(RPATH,"%s%d.SNA\0",arv,drive);		
-	}
-	else {
-		snapshot_load (arv);
-		have_SNA = true;
-	        sprintf(RPATH,"%s\0",arv);
-	}
-
+   if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
+   {
+      if(drive==0)dsk_load( arv, &driveA, 'A'); 
+      else dsk_load( arv, &driveB, 'B');   
+      have_DSK = true;
+      sprintf(RPATH,"%s%d.SNA\0",arv,drive);		
+   }
+   else {
+      snapshot_load (arv);
+      have_SNA = true;
+      sprintf(RPATH,"%s\0",arv);
+   }
+   return 0;
 }
 
 int RLOOP=1;
@@ -3247,11 +3285,11 @@ void theloop()
          dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
       }
 
-      dword dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+      uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
       if (VDU.scrln > 0)
-         CPC.scr_base = (dword *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
+         CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
       else
-         CPC.scr_base = (dword *)&bmp[0]; // reset to surface start
+         CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
 
       CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
