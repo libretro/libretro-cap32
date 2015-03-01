@@ -10,7 +10,7 @@ SOURCES_C += $(CORE_DIR)/libretro/graph.c
 SOURCES_C += $(CORE_DIR)/libretro/vkbd.c
 
 SOURCES_CXX += $(CORE_DIR)/cap32/cap32.cpp
-SOURCES_CXX += $(CORE_DIR)/cap32/crtc.cpp
+SOURCES_C += $(CORE_DIR)/cap32/crtc.c
 SOURCES_C += $(CORE_DIR)/cap32/fdc.c
 SOURCES_CXX += $(CORE_DIR)/cap32/psg.cpp
 SOURCES_CXX += $(CORE_DIR)/cap32/tape.cpp

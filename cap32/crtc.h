@@ -19,8 +19,11 @@
 #ifndef CRTC_H
 #define CRTC_H
 
-#include "z80.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+#include "z80.h"
 
 // The next 4 bytes must remain together
 typedef union
@@ -75,5 +78,9 @@ void render24bpp(void);
 void render24bpp_doubleY(void);
 void render32bpp(void);
 void render32bpp_doubleY(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

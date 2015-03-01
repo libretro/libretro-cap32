@@ -1274,19 +1274,26 @@ void crtc_cycle(int repeat_count)
 
 void crtc_init(void)
 {
-   if (dwXScale == 1) {
+   unsigned l;
+
+   if (dwXScale == 1)
+   {
       ModeMaps[0] = M0hMap;
       ModeMaps[1] = M1hMap;
       ModeMaps[2] = M2hMap;
       ModeMaps[3] = M3hMap;
-   } else {
+   }
+   else
+   {
       ModeMaps[0] = M0Map;
       ModeMaps[1] = M1Map;
       ModeMaps[2] = M2Map;
       ModeMaps[3] = M3Map;
    }
    ModeMap = ModeMaps[0];
-   for (int l = 0; l < 0x7400; l++) {
+
+   for (l = 0; l < 0x7400; l++)
+   {
       int j = l << 1; // actual address
       MAXlate[l] = (j & 0x7FE) | ((j & 0x6000) << 1);
    }
@@ -1296,6 +1303,7 @@ void crtc_init(void)
 
 void crtc_reset(void)
 {
+   unsigned i;
    int Wid;
 
    memset(&CRTC, 0, sizeof(CRTC)); // clear CRTC data structure
@@ -1303,16 +1311,20 @@ void crtc_reset(void)
    CRTC.registers[2] = 0x2e;
    CRTC.registers[3] = 0x8e;
 
-   if (dwXScale == 1) {
+   if (dwXScale == 1)
+   {
       Wid = 8;
       PosShift = 5;
-   } else {
+   }
+   else
+   {
       Wid = 16;
       PosShift = 4;
    }
-   for (int i = 0; i < 48; i++) {
+
+   for (i = 0; i < 48; i++)
       HorzPix[i] = Wid;
-   }
+
    HorzPix[48] = 0;
    RendStart = (dword *)&RendBuff[Wid];
    RendPos = (dword *)&RendBuff[0];
