@@ -6,11 +6,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-#define Uint8 unsigned char
-#define Uint16 unsigned short int
-#define Uint32 unsigned int
-
+#include <stdint.h>
 #include <stdbool.h>
 
 #define TEX_WIDTH 400
