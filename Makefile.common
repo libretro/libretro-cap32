@@ -1,0 +1,17 @@
+INCFLAGS := -I$(CORE_DIR) \
+            -I$(CORE_DIR)/cap32 \
+            -I$(CORE_DIR)/libretro
+
+SOURCES_C += $(CORE_DIR)/libretro/libretro.c
+SOURCES_C += $(CORE_DIR)/libretro/cap32-mapper.c
+SOURCES_C += $(CORE_DIR)/libretro/diskutils.c
+SOURCES_C += $(CORE_DIR)/libretro/fontmsx.c
+SOURCES_C += $(CORE_DIR)/libretro/graph.c
+SOURCES_C += $(CORE_DIR)/libretro/vkbd.c
+
+SOURCES_CXX += $(CORE_DIR)/cap32/cap32.cpp
+SOURCES_CXX += $(CORE_DIR)/cap32/crtc.cpp
+SOURCES_CXX += $(CORE_DIR)/cap32/fdc.cpp 
+SOURCES_CXX += $(CORE_DIR)/cap32/psg.cpp
+SOURCES_CXX += $(CORE_DIR)/cap32/tape.cpp
+SOURCES_CXX += $(CORE_DIR)/cap32/z80.cpp
