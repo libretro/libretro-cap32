@@ -61,9 +61,8 @@ void retro_get_system_info(struct retro_system_info *info)
    	memset(info, 0, sizeof(*info));
    	info->library_name     = "CAPRICE32 4.2";
    	info->library_version  = "v1";
-   	info->valid_extensions = "dsk|DSK|SNA|sna";
-   	info->need_fullpath    = true;//false;
-   	//info->valid_extensions = NULL; // Anything is fine, we don't care.
+   	info->valid_extensions = "dsk|sna";
+   	info->need_fullpath    = true;
 }
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
@@ -108,12 +107,13 @@ void retro_set_input_state(retro_input_state_t cb)
 
 void retro_reset(void){}
 
-void retro_audio_cb( short l, short r){
+void retro_audio_cb( short l, short r)
+{
 	audio_cb(l,r);
 }
 
-void display_zoom(){
-
+void display_zoom(void)
+{
 	int i;
 	int XZO=Mres[ZOOM].x,YZO=Mres[ZOOM].y;
 
@@ -130,18 +130,20 @@ void display_zoom(){
 
 void retro_run(void)
 {
-   	int x;
+   int x;
 
-	if(pauseg==0){
-		
-		retro_loop();		
-		update_input();
-		//if(SND==1)mixsnd(); moved to cap32.cpp;
-	}
-	else enter_gui();
+   if(pauseg==0)
+   {
+      retro_loop();		
+      update_input();
+      //if(SND==1)mixsnd(); moved to cap32.cpp;
+   }
+   else
+      enter_gui();
 
-   	if(ZOOM==-1)video_cb(bmp,TEX_WIDTH-16, TEX_HEIGHT, TEX_WIDTH << 1);
-	else display_zoom();
+   if(ZOOM==-1)
+      video_cb(bmp,TEX_WIDTH-16, TEX_HEIGHT, TEX_WIDTH << 1);
+   else display_zoom();
 
 }
  
@@ -153,56 +155,64 @@ static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_
   	//       down ? "yes" : "no", keycode, character, mod,retrok);
 
 	if (keycode>=321);
-	else{
-		if(SHOWKEY==1)return;
+	else
+   {
+      if(SHOWKEY==1)
+         return;
 
-		if(down && retrok==0x25){
-										
-			if(SHIFTON == 1)retro_key_up(retrok);
-			else retro_key_down(retrok);
-			SHIFTON=-SHIFTON;							
-			
-		}
-		else if(down && retrok==0x27){
-										
-			if(CTRLON == 1)retro_key_up(retrok);
-			else retro_key_down(retrok);
-			CTRLON=-CTRLON;							
-			
-		}
-		else {
-			if(down && retrok!=-1)		
-				retro_key_down(retrok);	
-			else if(!down && retrok!=-1)
-				retro_key_up(retrok);
-		}
-	}
+      if(down && retrok==0x25)
+      {
+
+         if (SHIFTON == 1)
+            retro_key_up(retrok);
+         else
+            retro_key_down(retrok);
+         SHIFTON = -SHIFTON;							
+
+      }
+      else if(down && retrok==0x27)
+      {
+         if (CTRLON == 1)
+            retro_key_up(retrok);
+         else
+            retro_key_down(retrok);
+         CTRLON = -CTRLON;							
+
+      }
+      else
+      {
+         if(down && retrok!=-1)		
+            retro_key_down(retrok);	
+         else if(!down && retrok!=-1)
+            retro_key_up(retrok);
+      }
+   }
 
 }
 
 bool retro_load_game(const struct retro_game_info *info)
 {
-    	const char *full_path;
+   const char *full_path;
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 
-    	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-    	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-    	{
-    		fprintf(stderr, "RGB565 is not supported.\n");
-    		return false;
-    	}
+   if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
+   {
+      fprintf(stderr, "RGB565 is not supported.\n");
+      return false;
+   }
 
-    	struct retro_keyboard_callback cb = { keyboard_cb };
-    	environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
+   struct retro_keyboard_callback cb = { keyboard_cb };
+   environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
 
-    	(void)info;
+   (void)info;
 
-    	full_path = info->path;
+   full_path = info->path;
 
-    	strcpy(RPATH,full_path);
-        loadadsk((char *)full_path,0);
+   strcpy(RPATH,full_path);
+   loadadsk((char *)full_path,0);
 
 
-    	return true;
+   return true;
 }
 
 void retro_unload_game(void){}
@@ -212,7 +222,8 @@ unsigned retro_get_region(void)
    	return RETRO_REGION_NTSC;
 }
 
-bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num)
+bool retro_load_game_special(unsigned type,
+      const struct retro_game_info *info, size_t num)
 {
    	(void)type;
    	(void)info;
