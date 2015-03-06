@@ -119,6 +119,11 @@ long GetTicks(void)
 #endif
 } 
 
+void Screen_SetFullUpdate(void)
+{
+   memset(bmp, 0, sizeof(bmp));
+}
+
 //DBG LOAD DSK
 void enter_gui(void)
 {
@@ -133,9 +138,6 @@ void enter_gui(void)
       mprintf("Cancel Fileselect(%s)\n",dskimg);
       inbrowser=0;	
       pauseg=0;
-      Screen_SetFullUpdate();
-
-      return;		
    }
    else if(!strcmp(dskimg,"NO CHOICE\0"))
    {
@@ -146,10 +148,8 @@ void enter_gui(void)
       loadadsk((char *)dskimg,NUMjoy>0?0:1);
       inbrowser=0;
       pauseg=0;
-      Screen_SetFullUpdate();
-
-      return;
    }		
+   Screen_SetFullUpdate();
 
 }
 void Print_Statut(void)
@@ -176,10 +176,6 @@ X   CAT
 Y   LOAD DSK
 */
 
-void Screen_SetFullUpdate(void)
-{	
-   memset(bmp, 0, sizeof(bmp));
-}
 
 void retro_mouse(int a,int b) {}
 void retro_mouse_but0(int a) {}
