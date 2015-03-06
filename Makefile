@@ -37,13 +37,20 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 endif
 
 CC_AS ?= $(CC)
-
+LIBM  := -lm
+LIBZ  := -lz
 # Unix
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
 
+else ifneq (,$(findstring linux-portable,$(platform)))
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC -nostdlib
+	LIBM :=
+	LIBZ :=
+	SHARED := -shared -Wl,-version-script=link.T
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
@@ -259,7 +266,7 @@ CFLAGS   += -Wall
 CXXFLAGS += $(fpic) $(DEFINES)
 CXXFLAGS += -Wall
 
-LDFLAGS += -lm -lz
+LDFLAGS += $(LIBM) $(LIBZ)
 
 ROMS =
 SNAPS =
