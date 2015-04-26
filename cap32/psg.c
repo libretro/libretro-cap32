@@ -95,14 +95,14 @@ union TCounter
 #ifdef MSB_FIRST
    struct
    {
-      uint32_t Hi;
-      uint32_t Lo;
+      uint16_t Hi;
+      uint16_t Lo;
    };
 #else
    struct
    {
-      uint32_t Lo;
-      uint32_t Hi;
+      uint16_t Lo;
+      uint16_t Hi;
    };
 #endif
    uint32_t Re;
@@ -115,14 +115,14 @@ union
 #ifdef MSB_FIRST
    struct
    {
-      uint32_t Val;
-      uint32_t Low;
+      uint16_t Val;
+      uint16_t Low;
    };
 #else
    struct
    {
-      uint32_t Low;
-      uint32_t Val;
+      uint16_t Low;
+      uint16_t Val;
    };
 #endif
    uint32_t Seed;

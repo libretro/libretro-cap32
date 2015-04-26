@@ -3300,8 +3300,10 @@ void theloop()
       { // emulation finished rendering a complete frame?
          dwFrameCount++;
          RLOOP=0; //exit retro_loop for retro_run
+      }
+      else if (iExitCondition == EC_SOUND_BUFFER) {
          mixsnd();
-      } 
+      }
    }
 }
 
