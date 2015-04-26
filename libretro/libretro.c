@@ -23,9 +23,9 @@ extern int sndbufsize;
 signed short rsnd=0;
 
 unsigned short zoom[MXZO*MYZO*2];
-int ZOOM=-1;
+int ZOOM=3;
 
-MRES Mres[5]={ {256,192},{256,232},{272,232},{320,232}, {320,256}};
+MRES Mres[5]={ {256,192},{256,232},{272,232},{320,200}, {320,256}};
 
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
@@ -118,7 +118,7 @@ void display_zoom(void)
 	int i;
 	int XZO=Mres[ZOOM].x,YZO=Mres[ZOOM].y;
 
-	unsigned short *ptr=&bmp[ (384-XZO)/2 +400*(272-YZO)/2];
+	unsigned short *ptr=&bmp[ (384-XZO)/2 +400*(282-YZO)/2];
 	unsigned short *out=&zoom[0];
 
 	for(i = 0;i < YZO; i++)
