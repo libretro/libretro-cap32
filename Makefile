@@ -37,7 +37,7 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 endif
 
 CC_AS ?= $(CC)
-LIBM  := 
+LIBM  :=  -lm
 LIBZ  := -lz
 # Unix
 ifneq (,$(findstring unix,$(platform)))
