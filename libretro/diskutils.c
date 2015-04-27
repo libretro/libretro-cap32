@@ -20,48 +20,6 @@ extern unsigned short int bmp[TEX_WIDTH * TEX_HEIGHT];
 
 #define PATHSEP '/'
 
-#if 0
-//unused 
-int diskmgr(){
-
-	int i;
-	static char* msg[] = {"Slot 0: Empty","Slot 1: Empty","Slot 2: Empty","Slot 3: Empty",\
-			      "Slot 4: Empty","Slot 5: Empty","Return to Game" };
-	static int ypos=0; //your position in menu
-
-	i=update_input_gui();
-
-	switch(i){
-
-		case -1 : ypos--;
-			break;
-		case  1 : ypos++;
-			break;
-		case  2 : return ypos+1; //valid
-			break;
-		case  3 : return -1; //cancel
-			break;
-		default : 
-			break;
- 	}
-
-	if(ypos>6)ypos=0;
-	if(ypos<0)ypos=6;
-
-	DrawFBoxBmp(bmp,CROP_WIDTH/4,CROP_HEIGHT/10,CROP_WIDTH/2,CROP_HEIGHT-20,RGB565(3,3,3));
-	DrawFBoxBmp(bmp,2+CROP_WIDTH/4,1+CROP_HEIGHT/10,-4+CROP_WIDTH/2,-2+CROP_HEIGHT-20,RGB565(22,23,26));
-
-
-	for(i=0;i<7;i++){		
-		Draw_text(bmp,20+CROP_WIDTH/4,50+i*30,RGB565(5, 5, 5),0x0,1,2,40,"%s",msg[i]);
-	}
-	DrawBoxBmp(bmp,1+CROP_WIDTH/4,45+ypos*30,-2+CROP_WIDTH/2,26,RGB565(31,0,0));
-
-	return 0;
-
-}
-#endif 
-
 int alphasort2(const struct dirent **d1, const struct dirent **d2)
 {
    const struct dirent *c1;
@@ -220,16 +178,17 @@ char * filebrowser(const char *path_and_name)
    static int pad_held_down = 0;
    static char seldsk[512];	 
 
+   (void)firstin;
+
    if(first==0)
    {
 
       entries = 0;		
 
       if (path_and_name && path_and_name[0])
-         sprintf(path,"%s\0",path_and_name);			
+         sprintf(path,"%s",path_and_name);			
 
       first++;
-
    }
 
    if (reloaddir)
@@ -262,7 +221,7 @@ char * filebrowser(const char *path_and_name)
    if(padcountdown)
       padcountdown--;
 
-   i=update_input_gui();
+   i = update_input_gui();
 
    switch(i)
    {
@@ -312,8 +271,7 @@ char * filebrowser(const char *path_and_name)
          {
 
             char *tempstr = malloc(FILENAME_MAX);
-            sprintf(tempstr,"%s%s\0",path,files[select]->d_name);
-
+            sprintf(tempstr,"%s%s",path,files[select]->d_name);
 
             if ( File_DirExists(tempstr) == 1 || \
                   strcmp(files[select]->d_name,".")==0 || \
@@ -324,19 +282,19 @@ char * filebrowser(const char *path_and_name)
                   File_HandleDotDirs(tempstr);
                else strcat(tempstr, "/"/*PATHSEP*/);
 
-               sprintf(path, "%s\0",tempstr);				
+               sprintf(path, "%s",tempstr);				
                reloaddir = true;
 
                free(tempstr);
 
-               select=fselect=pselect=0;
+               select= fselect = pselect = 0;
 
                return "NO CHOICE";
             }
 
             free(tempstr);
 
-            sprintf(seldsk,"%s%s\0",path,files[select]->d_name);
+            sprintf(seldsk,"%s%s",path,files[select]->d_name);
             //FIXME
 
             if( HandleExtension(files[select]->d_name,"DSK") ||\

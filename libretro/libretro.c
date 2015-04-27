@@ -154,6 +154,8 @@ void retro_run(void)
 {
    int x;
 
+   (void)x;
+
    if(pauseg==0)
    {
       retro_loop();		

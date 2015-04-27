@@ -2531,7 +2531,8 @@ int video_set_palette (void)
 
    for (n = 0; n < 17; n++)
    { // loop for all colours + border
-      int i=GateArray.ink_values[n];
+      int i = GateArray.ink_values[n];
+      (void)i;
       GateArray.palette[n] = colours[GateArray.ink_values[n]];
    }
 
@@ -2690,6 +2691,8 @@ void loadConfiguration (void)
    unsigned i, n, iSide, iSector, iRomNum;
    char chFileName[_MAX_PATH + 1];
    char chPath[_MAX_PATH + 1];
+
+   (void)n;
 
    strncpy(chFileName, chAppPath, sizeof(chFileName)-10);
    strcat(chFileName, "/cap32.cfg");
@@ -3289,12 +3292,12 @@ int loadadsk (char *arv,int drive)
       if(drive==0)dsk_load( arv, &driveA, 'A'); 
       else dsk_load( arv, &driveB, 'B');   
       have_DSK = true;
-      sprintf(RPATH,"%s%d.SNA\0",arv,drive);		
+      sprintf(RPATH,"%s%d.SNA",arv,drive);		
    }
    else {
       snapshot_load (arv);
       have_SNA = true;
-      sprintf(RPATH,"%s\0",arv);
+      sprintf(RPATH,"%s",arv);
    }
    return 0;
 }
