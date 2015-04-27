@@ -39,14 +39,15 @@ int scandir(const char *dirp, struct dirent ***namelist,
    size_t names_size = 0, pos;
    int save;
 
+   (void)save;
+
    if (dp == NULL)
       return -1;
 
-   save = errno;
-
+   save  = errno;
    errno = 0;
+   pos   = 0;
 
-   pos = 0;
    while ((current = readdir (dp)) != NULL)
       if (filter == NULL || (*filter) (current))
       {
@@ -165,10 +166,11 @@ int HandleExtension(char *path,char *ext)
 //basic filebrowser
 #define MAXSEL 10
 
-char * filebrowser(const char *path_and_name)
+char *filebrowser(const char *path_and_name)
 {
-   static struct dirent **files = NULL;
+   static char seldsk[512];	 
    static char path[FILENAME_MAX];                 /* The actual path names */
+   static struct dirent **files = NULL;
    static bool reloaddir = true;
    static int first=0;
 
@@ -176,13 +178,11 @@ char * filebrowser(const char *path_and_name)
    static int firstin=0,fselect=0,select=0,pselect=0;
    static int padcountdown = 0;
    static int pad_held_down = 0;
-   static char seldsk[512];	 
 
    (void)firstin;
 
    if(first==0)
    {
-
       entries = 0;		
 
       if (path_and_name && path_and_name[0])
@@ -243,7 +243,7 @@ char * filebrowser(const char *path_and_name)
             if(select<pselect)pselect--;
          }
          break;
-      case  1 : //DOWN
+      case  1 : /* DOWN */
          if(padcountdown==0)
          {
             select++;
@@ -295,16 +295,15 @@ char * filebrowser(const char *path_and_name)
             free(tempstr);
 
             sprintf(seldsk,"%s%s",path,files[select]->d_name);
+
             //FIXME
 
             if( HandleExtension(files[select]->d_name,"DSK") ||\
                   HandleExtension(files[select]->d_name,"dsk") ||\
                   HandleExtension(files[select]->d_name,"SNA") ||\
                   HandleExtension(files[select]->d_name,"sna") )
-
                return (char*)seldsk;
-            else 	return "NO CHOICE";
-
+            return "NO CHOICE";
          }
          break;
       case  3 : //CANCEL
@@ -322,14 +321,16 @@ char * filebrowser(const char *path_and_name)
 
    for(i = pselect; i < (pselect + LIMSEL); i++)
    {
-      if( fselect == (i-pselect) )	
-         Draw_text(bmp,20+CROP_WIDTH/4,30+(i-pselect)*16,RGB565(5, 5, 5),0x0,1,1,40,"%s",files[i]->d_name);
-      else
-         Draw_text(bmp,20+CROP_WIDTH/4,30+(i-pselect)*16,RGB565(25, 5, 5),0x0,1,1,40,"%s",files[i]->d_name);
+      Draw_text(bmp,
+            20 + CROP_WIDTH / 4,
+            30 + (i-pselect) * 16,
+            RGB565((fselect == (i-pselect)) ? 25 : 5, 5, 5),
+            0x0, 1, 1, 40,
+            "%s",
+            files[i]->d_name);
    }
 
    return "NO CHOICE";
-
 }
 
 

@@ -121,7 +121,6 @@ void Screen_SetFullUpdate(void)
 void enter_gui(void)
 {
    char dskimg[512]="\0";
-   static int inbrowser=1;
    int ret=0;	
 
    (void)ret;
@@ -130,7 +129,6 @@ void enter_gui(void)
 
    if(!strcmp(dskimg,"EMPTY"))
    {
-      inbrowser=0;	
       pauseg=0;
    }
    else if(!strcmp(dskimg,"NO CHOICE"))
@@ -139,7 +137,6 @@ void enter_gui(void)
    else
    {
       loadadsk((char *)dskimg,NUMjoy>0?0:1);
-      inbrowser=0;
       pauseg=0;
    }		
    Screen_SetFullUpdate();
