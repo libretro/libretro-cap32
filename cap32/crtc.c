@@ -512,19 +512,19 @@ void update_skew(void)
 }
 
 #ifdef MSB_FIRST
-static __inline__ unsigned Swap32(unsigned x)
+static INLINE unsigned Swap32(unsigned x)
 {
    unsigned result = ((x << 24)|((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00)| (x >> 24));
    return result;
 }
 #else
-static __inline__ unsigned Swap32(unsigned x)
+static INLINE unsigned Swap32(unsigned x)
 {
    return x;
 }
 #endif
 
-inline void change_mode(void)
+static INLINE void change_mode(void)
 {
    if (CRTC.flag_hadhsync) { // have we had an HSYNC on this scan line?
       CRTC.flag_hadhsync = 0;
@@ -535,9 +535,7 @@ inline void change_mode(void)
    }
 }
 
-
-
-inline void end_vdu_hsync(void)
+static INLINE void end_vdu_hsync(void)
 {
    int temp;
 
@@ -630,9 +628,7 @@ inline void end_vdu_hsync(void)
    iMonHSEndPos = 0;
 }
 
-
-
-inline void match_line_count(void)
+static INLINE void match_line_count(void)
 {
    if (CRTC.line_count == CRTC.registers[6]) { // matches vertical displayed?
       new_dt.NewDISPTIMG = 0; // disable vertical DISPTMG
@@ -655,9 +651,7 @@ inline void match_line_count(void)
    }
 }
 
-
-
-inline void reload_addr(void)
+static INLINE void reload_addr(void)
 {
    if (CRTC.line_count == 0) { // has line count been reset?
       new_dt.NewDISPTIMG = 0xff; // enable vertical DISPTMG
@@ -667,9 +661,7 @@ inline void reload_addr(void)
    match_line_count();
 }
 
-
-
-inline void restart_frame(void)
+static INLINE void restart_frame(void)
 {
    CRTC.flag_invta = 0;
    CRTC.flag_resframe = 0;
@@ -681,9 +673,7 @@ inline void restart_frame(void)
    reload_addr();
 }
 
-
-
-inline void match_hsw(void)
+static INLINE void match_hsw(void)
 {
    if (CRTC.hsw_count == CRTC.hsw) { // matches horizontal sync width?
       GateArray.sl_count++; // update GA scan line counter

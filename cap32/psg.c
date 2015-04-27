@@ -153,9 +153,7 @@ uint8_t Index_AL, Index_AR, Index_BL, Index_BR, Index_CL, Index_CR;
 int PreAmp, PreAmpMax;
 int Left_Chan, Right_Chan;
 
-
-
-inline void SetMixerRegister(uint8_t Value)
+static INLINE void SetMixerRegister(uint8_t Value)
 {
    PSG.RegisterAY.Mixer = Value;
    Ton_EnA = Value & 1 ? false : true;
@@ -166,25 +164,19 @@ inline void SetMixerRegister(uint8_t Value)
    Noise_EnC = Value & 32 ? false : true;
 }
 
-
-
-inline void SetAmplA(uint8_t Value)
+static INLINE void SetAmplA(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeA = Value;
    Envelope_EnA = Value & 16 ? false : true;
 }
 
-
-
-inline void SetAmplB(uint8_t Value)
+static INLINE void SetAmplB(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeB = Value;
    Envelope_EnB = Value & 16 ? false : true;
 }
 
-
-
-inline void SetAmplC(uint8_t Value)
+static INLINE void SetAmplC(uint8_t Value)
 {
    PSG.RegisterAY.AmplitudeC = Value;
    Envelope_EnC = Value & 16 ? false : true;
@@ -295,9 +287,7 @@ void Case_EnvType_14(void)
    }
 }
 
-
-
-inline void SetEnvelopeRegister(uint8_t Value)
+static INLINE void SetEnvelopeRegister(uint8_t Value)
 {
    Envelope_Counter.Hi = 0;
    PSG.FirstPeriod = true;
@@ -384,9 +374,7 @@ void SetAYRegister(int Num, uint8_t Value)
    }
 }
 
-
-
-inline void Synthesizer_Logic_Q(void)
+static INLINE void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
    if (Ton_Counter_A.Hi >= *(uint16_t *)&PSG.RegisterAY.TonALo) {
@@ -417,9 +405,7 @@ inline void Synthesizer_Logic_Q(void)
    }
 }
 
-
-
-inline void Synthesizer_Mixer_Q(void)
+static INLINE void Synthesizer_Mixer_Q(void)
 {
    int LevL, LevR, k;
 
@@ -565,9 +551,7 @@ void Synthesizer_Stereo8(void)
    }
 }
 
-
-
-inline void Synthesizer_Mixer_Q_Mono(void)
+static INLINE void Synthesizer_Mixer_Q_Mono(void)
 {
    int Lev, k;
 

@@ -237,9 +237,7 @@ t_sector *find_sector(uint8_t *requested_CHRN)
    return sector;
 }
 
-
-
-inline void cmd_write(void)
+static INLINE void cmd_write(void)
 {
    t_sector *sector;
 
@@ -280,9 +278,7 @@ inline void cmd_write(void)
    }
 }
 
-
-
-inline void cmd_read(void)
+static INLINE void cmd_read(void)
 {
    t_sector *sector;
 
@@ -339,9 +335,7 @@ loop:
    }
 }
 
-
-
-inline void cmd_readtrk(void)
+static INLINE void cmd_readtrk(void)
 {
    int sector_size;
    t_sector *sector;
@@ -369,9 +363,7 @@ inline void cmd_readtrk(void)
    read_status_delay = 1;
 }
 
-
-
-inline void cmd_scan(void)
+static INLINE void cmd_scan(void)
 {
    t_sector *sector;
 
