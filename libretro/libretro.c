@@ -18,7 +18,7 @@ extern char RPATH[512];
 extern void update_input(void);
 extern void texture_init(void);
 
-extern unsigned short * sndbuffer;
+extern uint16_t *sndbuffer;
 extern int sndbufsize;
 signed short rsnd=0;
 
@@ -38,13 +38,13 @@ static retro_environment_t environ_cb;
 
 void retro_init(void)
 {
-	texture_init();
-	InitOSGLU();
+   texture_init();
+   InitOSGLU();
 }
 
 void retro_deinit(void)
 {	 
-	UnInitOSGLU();	
+   UnInitOSGLU();	
 }
 
 unsigned retro_api_version(void)
@@ -160,7 +160,6 @@ void retro_run(void)
    {
       retro_loop();		
       update_input();
-      //if(SND==1)mixsnd(); moved to cap32.cpp;
    }
    else
       enter_gui();
@@ -171,12 +170,15 @@ void retro_run(void)
 
 }
  
-static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
+static void keyboard_cb(bool down, unsigned keycode,
+    uint32_t character, uint16_t mod)
 {
    int retrok=keyboard_translation[keycode];
 
-   // printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
-   //       down ? "yes" : "no", keycode, character, mod,retrok);
+#if 0
+   printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
+   down ? "yes" : "no", keycode, character, mod,retrok);
+#endif
 
    if (keycode >= 321)
       return;

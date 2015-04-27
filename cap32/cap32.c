@@ -168,24 +168,24 @@
 #define tmpnam(a)
 #endif
 
-//RETRO HACK C/C++ MIXING
-extern void retro_key_down(int key);
-extern void retro_key_up(int key);
-extern int InitOSGLU(void);
-extern int  UnInitOSGLU(void);
-extern void retro_loop();
-extern void retro_joy0(unsigned char joy0);
-extern void doCleanUp (void);
-extern void theloop();
-extern int capmain (int argc, char **argv);
-extern void retro_audio_cb( short l, short r);
-extern void mixsnd ();
-extern void shortcut_check();
-extern void theloop();
-extern long GetTicks(void);
-extern void emu_reset ();
-extern int loadadsk (char *arv,int drive);
-extern int HandleExtension(char *path,char *ext);
+/* forward declarations - some libretro port callbacks */
+void retro_key_down(int key);
+void retro_key_up(int key);
+int InitOSGLU(void);
+int  UnInitOSGLU(void);
+void retro_loop(void);
+void retro_joy0(unsigned char joy0);
+void doCleanUp (void);
+void theloop(void);
+int capmain (int argc, char **argv);
+void retro_audio_cb( short l, short r);
+void mixsnd (void);
+void shortcut_check(void);
+void theloop(void);
+long GetTicks(void);
+void emu_reset (void);
+int loadadsk (char *arv,int drive);
+int HandleExtension(char *path,char *ext);
 
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
