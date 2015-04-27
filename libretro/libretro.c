@@ -22,6 +22,8 @@ extern unsigned short * sndbuffer;
 extern int sndbufsize;
 signed short rsnd=0;
 
+int autorun=0;
+
 unsigned short zoom[MXZO*MYZO*2];
 int ZOOM=3;
 
@@ -76,7 +78,12 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
  
 void retro_set_environment(retro_environment_t cb)
 {
-   environ_cb = cb;
+	static const struct retro_variable vars[] = {
+		{ "cap32_autorun", "Autorun; disabled|enabled" },
+		{ NULL, NULL },
+	};
+	environ_cb = cb;
+	cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -128,6 +135,19 @@ void display_zoom(void)
       out += XZO;
    }
 	video_cb(zoom,XZO, YZO, XZO << 1);
+}
+
+static void check_variables(void)
+{
+   struct retro_variable var = {0};
+
+   var.key = "cap32_autorun";
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+     if (strcmp(var.value, "enabled") == 0)
+			 autorun = 1;
+   }
 }
 
 void retro_run(void)
@@ -210,6 +230,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    strcpy(RPATH,full_path);
    loadadsk((char *)full_path,0);
+	 check_variables();
 
    return true;
 }

@@ -190,8 +190,10 @@ extern int HandleExtension(char *path,char *ext);
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
 extern int SND;
-int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0;
+extern int autorun;
+int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0;
 int cmd_cpt=-1;
+int rundisk_wait=0;
 
 #include "cap32.h"
 #include "crtc.h"
@@ -3168,6 +3170,65 @@ void shortcut_check(void)
       cmd_cpt++;	
 
    }
+   else if(TYPE_RUNDISK){
+
+   	switch(cmd_cpt){
+   		// R
+   		case 0:keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
+   		break;
+   		case 1:keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
+   		break;
+   		// U
+   		case 2:keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
+   		break;
+   		case 3:keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
+   		break;
+   		// N
+   		case 4:keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
+   		break;
+   		case 5:keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
+   		break;
+   		// shft+2 => "
+      case 6:keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
+   		       keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
+   		break;
+   		case 7:keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
+   		       keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
+   		break;
+   		// D
+   		case 8:keyboard_matrix[0x75 >> 4] &= ~bit_values[0x75 & 7];// key is being held down
+   		break;
+   		case 9:keyboard_matrix[0x75 >> 4] |= bit_values[0x75 & 7]; // key has been released
+   		break;
+   		// I
+   		case 10:keyboard_matrix[0x43 >> 4] &= ~bit_values[0x43 & 7];// key is being held down
+   		break;
+   		case 11:keyboard_matrix[0x43 >> 4] |= bit_values[0x43 & 7]; // key has been released
+   		break;
+   		// S
+   		case 12:keyboard_matrix[0x74 >> 4] &= ~bit_values[0x74 & 7];// key is being held down
+   		break;
+   		case 13:keyboard_matrix[0x74 >> 4] |= bit_values[0x74 & 7]; // key has been released
+   		break;
+   		// K
+   		case 14:keyboard_matrix[0x45 >> 4] &= ~bit_values[0x45 & 7];// key is being held down
+   		break;
+   		case 15:keyboard_matrix[0x45 >> 4] |= bit_values[0x45 & 7]; // key has been released
+   		break;
+   		// Enter
+   	        case 16:keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
+   		break;
+   		case 17:keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
+   		break;
+   		case 18:TYPE_RUNDISK=!TYPE_RUNDISK;cmd_cpt=-1;
+   		break;
+
+   		default: break;
+
+   	}
+   	cmd_cpt++;
+
+   }
    else  if(TYPE_ENTER)
    {
       switch(cmd_cpt)
@@ -3244,6 +3305,18 @@ void retro_loop(void)
 {
    while(RLOOP==1)
       theloop();
+
+   // wait a while for BASIC prompt to be ready before autorunning
+   if (rundisk_wait<50) rundisk_wait++;
+   else if (rundisk_wait==50)
+   {
+     if (autorun)
+     {
+       TYPE_RUNDISK=1;
+       cmd_cpt=0;
+     }
+     rundisk_wait++;
+   }
 
    RLOOP=1;
 
