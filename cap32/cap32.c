@@ -3071,7 +3071,7 @@ void mixsnd(void)
    p = (int16_t*)pbSndBuffer;
 
    for(x = 0; x < 882 * 2; x += 2)
-      retro_audio_cb(*p++,*p++);
+      retro_audio_cb(p[x],p[x+1]);
 }
 
 int InitOSGLU(void)
