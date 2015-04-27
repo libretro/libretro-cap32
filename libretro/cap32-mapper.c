@@ -97,13 +97,6 @@ void Emu_uninit(void) { }
 
 #endif
 
-#define MDEBUG
-#ifdef MDEBUG
-#define mprintf printf
-#else
-#define mprintf(...) 
-#endif
-
 long GetTicks(void)
 {
 #ifndef _ANDROID_
@@ -128,25 +121,22 @@ void Screen_SetFullUpdate(void)
 void enter_gui(void)
 {
    char dskimg[512]="\0";
-   static int inbrowser=1;
    int ret=0;	
 
-   sprintf(dskimg,"%s\0",filebrowser(DEFAULT_PATH));
+   (void)ret;
 
-   if(!strcmp(dskimg,"EMPTY\0"))
+   sprintf(dskimg, "%s",filebrowser(DEFAULT_PATH));
+
+   if(!strcmp(dskimg,"EMPTY"))
    {
-      mprintf("Cancel Fileselect(%s)\n",dskimg);
-      inbrowser=0;	
       pauseg=0;
    }
-   else if(!strcmp(dskimg,"NO CHOICE\0"))
+   else if(!strcmp(dskimg,"NO CHOICE"))
    {
    }
    else
    {
-      mprintf("Ok Fileselect(%s)\n",dskimg);	
       loadadsk((char *)dskimg,NUMjoy>0?0:1);
-      inbrowser=0;
       pauseg=0;
    }		
    Screen_SetFullUpdate();
@@ -192,14 +182,19 @@ void update_input(void)
    static int vkx=0,vky=0;
 
    MXjoy0=0;
-   if(oldi!=-1){retro_key_up(oldi);oldi=-1;}
+
+   if(oldi!=-1)
+   {
+      retro_key_up(oldi);
+      oldi=-1;
+   }
 
    input_poll_cb();
 
    if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F11) || input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y) )
       pauseg=1;
 
-   i=10;//show vkey toggle
+   i=3;//show vkey toggle
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
@@ -219,7 +214,7 @@ void update_input(void)
       if(TYPE_ENTER)cmd_cpt=0;
    }
 
-   i=3;//type DEL / ZOOM
+   i=10;//type DEL / ZOOM
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
@@ -326,9 +321,10 @@ void update_input(void)
             //Screen_SetFullUpdate();
 
          }
-         else if(i==-1)oldi=-1;
-         else if(i==-3){//KDB bgcolor
-            //Screen_SetFullUpdate();
+         else if(i==-1)
+            oldi=-1;
+         else if(i==-3)
+         {
             KCOL=-KCOL;
             oldi=-1;
          }

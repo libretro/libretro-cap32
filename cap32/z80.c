@@ -356,12 +356,12 @@ static uint8_t cc_ex[256] = {
 
 extern uint8_t *membank_read[4], *membank_write[4];
 
-inline uint8_t read_mem(uint16_t addr)
+static INLINE uint8_t read_mem(uint16_t addr)
 {
    return (*(membank_read[addr >> 14] + (addr & 0x3fff))); // returns a byte from a 16KB memory bank
 }
 
-inline void write_mem(uint16_t addr, uint8_t val)
+static INLINE void write_mem(uint16_t addr, uint8_t val)
 {
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
@@ -629,12 +629,12 @@ inline void write_mem(uint16_t addr, uint8_t val)
 
 #define BIT_XY BIT
 
-inline uint8_t RES(uint8_t bit, uint8_t val)
+static INLINE uint8_t RES(uint8_t bit, uint8_t val)
 {
    return val & ~(1 << bit);
 }
 
-inline uint8_t RLC(uint8_t val)
+static INLINE uint8_t RLC(uint8_t val)
 {
    unsigned res = val;
    unsigned carry = (res & 0x80) ? Cflag : 0;
@@ -643,7 +643,7 @@ inline uint8_t RLC(uint8_t val)
    return res;
 }
 
-inline uint8_t RL(uint8_t val)
+static INLINE uint8_t RL(uint8_t val)
 {
    unsigned res = val;
    unsigned carry = (res & 0x80) ? Cflag : 0;
@@ -652,7 +652,7 @@ inline uint8_t RL(uint8_t val)
    return res;
 }
 
-inline uint8_t RRC(uint8_t val) {
+static INLINE uint8_t RRC(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x01) ? Cflag : 0;
    res = ((res >> 1) | (res << 7)) & 0xff;
@@ -660,7 +660,7 @@ inline uint8_t RRC(uint8_t val) {
    return res;
 }
 
-inline uint8_t RR(uint8_t val) {
+static INLINE uint8_t RR(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x01) ? Cflag : 0;
    res = ((res >> 1) | (_F << 7)) & 0xff;
@@ -668,11 +668,11 @@ inline uint8_t RR(uint8_t val) {
    return res;
 }
 
-inline uint8_t SET(uint8_t bit, uint8_t val) {
+static INLINE uint8_t SET(uint8_t bit, uint8_t val) {
    return val | (1 << bit);
 }
 
-inline uint8_t SLA(uint8_t val) {
+static INLINE uint8_t SLA(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x80) ? Cflag : 0;
    res = (res << 1) & 0xff;
@@ -680,7 +680,7 @@ inline uint8_t SLA(uint8_t val) {
    return res;
 }
 
-inline uint8_t SLL(uint8_t val) {
+static INLINE uint8_t SLL(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x80) ? Cflag : 0;
    res = ((res << 1) | 0x01) & 0xff;
@@ -688,7 +688,7 @@ inline uint8_t SLL(uint8_t val) {
    return res;
 }
 
-inline uint8_t SRA(uint8_t val) {
+static INLINE uint8_t SRA(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x01) ? Cflag : 0;
    res = ((res >> 1) | (res & 0x80)) & 0xff;
@@ -696,7 +696,7 @@ inline uint8_t SRA(uint8_t val) {
    return res;
 }
 
-inline uint8_t SRL(uint8_t val) {
+static INLINE uint8_t SRL(uint8_t val) {
    unsigned res = val;
    unsigned carry = (res & 0x01) ? Cflag : 0;
    res = (res >> 1) & 0xff;

@@ -43,10 +43,10 @@ Control:
 
 	L2  STATUS ON/OFF
 	R2  SND ON/OFF
-	L   VKBD ON/OFF
+	L   ZOOM/DEL
 	R   RESET
 	SEL ENTER
-	STR ZOOM/DEL
+	STR VKBD ON/OFF
 	A   FIRE/VKBD KEY
 	B   RUN
 	X   CAT
@@ -59,6 +59,27 @@ Control:
 	"DSK" SWITCH DSK DRIVE A/B
 	"Col" SWTICH FGCOL ON/OFF
 
+Core options:
+  Autorun - 	disable/enable
+	
+							If enabled a RUN"DISK command will be done at startup. To make it
+							work with your games, you need to create a DISK.BAS file on the
+							game disk that. Currently this needs to be done using a different
+							Amstrad emulator as libretro-cap32 currently does not save changes
+							to disk files.
+							
+							Follow these steps using a different Amstrad emulator:
+							1. Load the emulator and mount your game disk file
+							2. Type "CAT" at the BASIC prompt and find the name of the game
+							   file on the disk. Usually it's an abbreviation of the game. For
+								 this example I will use Boulderdash which has a game file on
+								 the disk called BOULDER.BAS								
+							3. At the BASIC prompt type:
+						  	   10 RUN"BOULDER.BAS
+							  	 SAVE "DISK.BAS"
+							
+							When Autorun is enabled DISK.BAS will be launched at startup which
+							will then run the real game file.
 	
 Knows Bugs: 
  

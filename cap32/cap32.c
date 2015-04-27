@@ -168,30 +168,32 @@
 #define tmpnam(a)
 #endif
 
-//RETRO HACK C/C++ MIXING
-extern void retro_key_down(int key);
-extern void retro_key_up(int key);
-extern int InitOSGLU(void);
-extern int  UnInitOSGLU(void);
-extern void retro_loop();
-extern void retro_joy0(unsigned char joy0);
-extern void doCleanUp (void);
-extern void theloop();
-extern int capmain (int argc, char **argv);
-extern void retro_audio_cb( short l, short r);
-extern void mixsnd ();
-extern void shortcut_check();
-extern void theloop();
-extern long GetTicks(void);
-extern void emu_reset ();
-extern int loadadsk (char *arv,int drive);
-extern int HandleExtension(char *path,char *ext);
+/* forward declarations - some libretro port callbacks */
+void retro_key_down(int key);
+void retro_key_up(int key);
+int InitOSGLU(void);
+int  UnInitOSGLU(void);
+void retro_loop(void);
+void retro_joy0(unsigned char joy0);
+void doCleanUp (void);
+void theloop(void);
+int capmain (int argc, char **argv);
+void retro_audio_cb( short l, short r);
+void mixsnd (void);
+void shortcut_check(void);
+void theloop(void);
+long GetTicks(void);
+void emu_reset (void);
+int loadadsk (char *arv,int drive);
+int HandleExtension(char *path,char *ext);
 
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
 extern int SND;
-int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0;
+extern int autorun;
+int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0;
 int cmd_cpt=-1;
+int rundisk_wait=0;
 
 #include "cap32.h"
 #include "crtc.h"
@@ -2529,7 +2531,8 @@ int video_set_palette (void)
 
    for (n = 0; n < 17; n++)
    { // loop for all colours + border
-      int i=GateArray.ink_values[n];
+      int i = GateArray.ink_values[n];
+      (void)i;
       GateArray.palette[n] = colours[GateArray.ink_values[n]];
    }
 
@@ -2688,6 +2691,8 @@ void loadConfiguration (void)
    unsigned i, n, iSide, iSector, iRomNum;
    char chFileName[_MAX_PATH + 1];
    char chPath[_MAX_PATH + 1];
+
+   (void)n;
 
    strncpy(chFileName, chAppPath, sizeof(chFileName)-10);
    strcat(chFileName, "/cap32.cfg");
@@ -3066,7 +3071,7 @@ void mixsnd(void)
    p = (int16_t*)pbSndBuffer;
 
    for(x = 0; x < 882 * 2; x += 2)
-      retro_audio_cb(*p++,*p++);
+      retro_audio_cb(p[x],p[x+1]);
 }
 
 int InitOSGLU(void)
@@ -3168,6 +3173,65 @@ void shortcut_check(void)
       cmd_cpt++;	
 
    }
+   else if(TYPE_RUNDISK){
+
+   	switch(cmd_cpt){
+   		// R
+   		case 0:keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
+   		break;
+   		case 1:keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
+   		break;
+   		// U
+   		case 2:keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
+   		break;
+   		case 3:keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
+   		break;
+   		// N
+   		case 4:keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
+   		break;
+   		case 5:keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
+   		break;
+   		// shft+2 => "
+      case 6:keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
+   		       keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
+   		break;
+   		case 7:keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
+   		       keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
+   		break;
+   		// D
+   		case 8:keyboard_matrix[0x75 >> 4] &= ~bit_values[0x75 & 7];// key is being held down
+   		break;
+   		case 9:keyboard_matrix[0x75 >> 4] |= bit_values[0x75 & 7]; // key has been released
+   		break;
+   		// I
+   		case 10:keyboard_matrix[0x43 >> 4] &= ~bit_values[0x43 & 7];// key is being held down
+   		break;
+   		case 11:keyboard_matrix[0x43 >> 4] |= bit_values[0x43 & 7]; // key has been released
+   		break;
+   		// S
+   		case 12:keyboard_matrix[0x74 >> 4] &= ~bit_values[0x74 & 7];// key is being held down
+   		break;
+   		case 13:keyboard_matrix[0x74 >> 4] |= bit_values[0x74 & 7]; // key has been released
+   		break;
+   		// K
+   		case 14:keyboard_matrix[0x45 >> 4] &= ~bit_values[0x45 & 7];// key is being held down
+   		break;
+   		case 15:keyboard_matrix[0x45 >> 4] |= bit_values[0x45 & 7]; // key has been released
+   		break;
+   		// Enter
+   	        case 16:keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
+   		break;
+   		case 17:keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
+   		break;
+   		case 18:TYPE_RUNDISK=!TYPE_RUNDISK;cmd_cpt=-1;
+   		break;
+
+   		default: break;
+
+   	}
+   	cmd_cpt++;
+
+   }
    else  if(TYPE_ENTER)
    {
       switch(cmd_cpt)
@@ -3228,12 +3292,12 @@ int loadadsk (char *arv,int drive)
       if(drive==0)dsk_load( arv, &driveA, 'A'); 
       else dsk_load( arv, &driveB, 'B');   
       have_DSK = true;
-      sprintf(RPATH,"%s%d.SNA\0",arv,drive);		
+      sprintf(RPATH,"%s%d.SNA",arv,drive);		
    }
    else {
       snapshot_load (arv);
       have_SNA = true;
-      sprintf(RPATH,"%s\0",arv);
+      sprintf(RPATH,"%s",arv);
    }
    return 0;
 }
@@ -3244,6 +3308,18 @@ void retro_loop(void)
 {
    while(RLOOP==1)
       theloop();
+
+   // wait a while for BASIC prompt to be ready before autorunning
+   if (rundisk_wait<50) rundisk_wait++;
+   else if (rundisk_wait==50)
+   {
+     if (autorun)
+     {
+       TYPE_RUNDISK=1;
+       cmd_cpt=0;
+     }
+     rundisk_wait++;
+   }
 
    RLOOP=1;
 

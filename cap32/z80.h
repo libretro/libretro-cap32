@@ -98,9 +98,6 @@ typedef struct {
 #define EC_SOUND_BUFFER    50
 
 
-
-uint8_t read_mem(uint16_t addr);
-void write_mem(uint16_t addr, uint8_t val);
 void crtc_cycle(int repeat_count); // not provided by Z80.c
 uint8_t z80_IN_handler(reg_pair port); // not provided by Z80.c
 void z80_OUT_handler(reg_pair port, uint8_t val); // not provided by Z80.c

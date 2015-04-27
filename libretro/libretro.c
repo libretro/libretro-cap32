@@ -18,9 +18,11 @@ extern char RPATH[512];
 extern void update_input(void);
 extern void texture_init(void);
 
-extern unsigned short * sndbuffer;
+extern uint16_t *sndbuffer;
 extern int sndbufsize;
 signed short rsnd=0;
+
+int autorun=0;
 
 unsigned short zoom[MXZO*MYZO*2];
 int ZOOM=3;
@@ -36,13 +38,13 @@ static retro_environment_t environ_cb;
 
 void retro_init(void)
 {
-	texture_init();
-	InitOSGLU();
+   texture_init();
+   InitOSGLU();
 }
 
 void retro_deinit(void)
 {	 
-	UnInitOSGLU();	
+   UnInitOSGLU();	
 }
 
 unsigned retro_api_version(void)
@@ -76,7 +78,12 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
  
 void retro_set_environment(retro_environment_t cb)
 {
-   environ_cb = cb;
+	static const struct retro_variable vars[] = {
+		{ "cap32_autorun", "Autorun; disabled|enabled" },
+		{ NULL, NULL },
+	};
+	environ_cb = cb;
+	cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -130,15 +137,29 @@ void display_zoom(void)
 	video_cb(zoom,XZO, YZO, XZO << 1);
 }
 
+static void check_variables(void)
+{
+   struct retro_variable var = {0};
+
+   var.key = "cap32_autorun";
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+     if (strcmp(var.value, "enabled") == 0)
+			 autorun = 1;
+   }
+}
+
 void retro_run(void)
 {
    int x;
+
+   (void)x;
 
    if(pauseg==0)
    {
       retro_loop();		
       update_input();
-      //if(SND==1)mixsnd(); moved to cap32.cpp;
    }
    else
       enter_gui();
@@ -149,12 +170,15 @@ void retro_run(void)
 
 }
  
-static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
+static void keyboard_cb(bool down, unsigned keycode,
+    uint32_t character, uint16_t mod)
 {
    int retrok=keyboard_translation[keycode];
 
-   // printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
-   //       down ? "yes" : "no", keycode, character, mod,retrok);
+#if 0
+   printf( "Down: %s, Code: %d, Char: %u, Mod: %u. ,(%d)\n",
+   down ? "yes" : "no", keycode, character, mod,retrok);
+#endif
 
    if (keycode >= 321)
       return;
@@ -210,6 +234,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    strcpy(RPATH,full_path);
    loadadsk((char *)full_path,0);
+	 check_variables();
 
    return true;
 }

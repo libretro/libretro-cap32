@@ -163,10 +163,12 @@ void DrawHlineBmp(unsigned  short  *buffer,int x,int y,
 {
    int i,j,idx;
 
-   for(i=x;i<x+dx;i++)
+   (void)j;
+
+   for(i = x; i < x + dx; i++)
    {
-      idx=i+y*VIRTUAL_WIDTH;
-      buffer[idx]=color;		
+      idx = i + y * VIRTUAL_WIDTH;
+      buffer[idx] = color;		
    }
 }
 
@@ -174,10 +176,13 @@ void DrawVlineBmp(unsigned  short *buffer,int x,int y,
       int dx,int dy,unsigned  short  color){
 
    int i,j,idx;
+  
+   (void)i;
 
-   for(j=y;j<y+dy;j++){			
-      idx=x+j*VIRTUAL_WIDTH;
-      buffer[idx]=color;		
+   for(j = y; j < y + dy; j++)
+   {
+      idx= x + j * VIRTUAL_WIDTH;
+      buffer[idx] = color;		
    }	
 }
 
@@ -355,23 +360,25 @@ void Draw_string(unsigned short *surf, signed short int x,
       unsigned short yscale, unsigned short fg, unsigned short bg)
 {
    int k,strlen;
+   int xrepeat, yrepeat;
    unsigned char *linesurf;
    signed short int ypixel;
    unsigned short *yptr; 
    int col, bit;
+   int surfw, surfh;
    unsigned char b;
 
-   int xrepeat, yrepeat;
+   (void)k;
 
-   if(string==NULL)return;
+   if(string==NULL)
+      return;
+
    for(strlen = 0; strlen<maxstrlen && string[strlen]; strlen++) {}
 
-   int surfw=strlen * 7 * xscale;
-   int surfh=8 * yscale;
-
-   linesurf =malloc(sizeof(unsigned short)*surfw*surfh );
-
-   yptr = (unsigned short *)&linesurf[0];
+   surfw    = strlen * 7 * xscale;
+   surfh    = 8 * yscale;
+   linesurf = (unsigned char*)malloc(sizeof(unsigned short)*surfw*surfh );
+   yptr     = (unsigned short *)&linesurf[0];
 
    for(ypixel = 0; ypixel<8; ypixel++)
    {
@@ -408,16 +415,18 @@ void Draw_text(unsigned  short *buffer,int x,int y,
       unsigned  short  fgcol,unsigned  short int bgcol ,int scalex,
       int scaley , int max,char *string,...)
 {
-   int boucle=0;  
-   char text[256];	   	
-   va_list	ap;			
+   char text[256];
+   va_list	ap;
+   int boucle=0;
 
-   if (string == NULL)return;		
+   (void)boucle;
 
-   va_start(ap, string);		
-   vsprintf(text, string, ap);	
-   va_end(ap);	
+   if (string == NULL)
+      return;
 
-   Draw_string(buffer, x,y, text,max, scalex, scaley,fgcol,bgcol);	
+   va_start(ap, string);
+   vsprintf(text, string, ap);
+   va_end(ap);
+
+   Draw_string(buffer, x,y, text,max, scalex, scaley,fgcol,bgcol);
 }
-
