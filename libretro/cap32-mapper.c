@@ -199,7 +199,7 @@ void update_input(void)
    if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F11) || input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y) )
       pauseg=1;
 
-   i=10;//show vkey toggle
+   i=3;//show vkey toggle
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
@@ -219,7 +219,7 @@ void update_input(void)
       if(TYPE_ENTER)cmd_cpt=0;
    }
 
-   i=3;//type DEL / ZOOM
+   i=10;//type DEL / ZOOM
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
