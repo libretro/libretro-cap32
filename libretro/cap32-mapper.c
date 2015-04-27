@@ -97,13 +97,6 @@ void Emu_uninit(void) { }
 
 #endif
 
-#define MDEBUG
-#ifdef MDEBUG
-#define mprintf printf
-#else
-#define mprintf(...) 
-#endif
-
 long GetTicks(void)
 {
 #ifndef _ANDROID_
@@ -131,20 +124,20 @@ void enter_gui(void)
    static int inbrowser=1;
    int ret=0;	
 
+   (void)ret;
+
    sprintf(dskimg, "%s",filebrowser(DEFAULT_PATH));
 
-   if(!strcmp(dskimg,"EMPTY\0"))
+   if(!strcmp(dskimg,"EMPTY"))
    {
-      mprintf("Cancel Fileselect(%s)\n",dskimg);
       inbrowser=0;	
       pauseg=0;
    }
-   else if(!strcmp(dskimg,"NO CHOICE\0"))
+   else if(!strcmp(dskimg,"NO CHOICE"))
    {
    }
    else
    {
-      mprintf("Ok Fileselect(%s)\n",dskimg);	
       loadadsk((char *)dskimg,NUMjoy>0?0:1);
       inbrowser=0;
       pauseg=0;
@@ -192,7 +185,12 @@ void update_input(void)
    static int vkx=0,vky=0;
 
    MXjoy0=0;
-   if(oldi!=-1){retro_key_up(oldi);oldi=-1;}
+
+   if(oldi!=-1)
+   {
+      retro_key_up(oldi);
+      oldi=-1;
+   }
 
    input_poll_cb();
 
@@ -326,9 +324,10 @@ void update_input(void)
             //Screen_SetFullUpdate();
 
          }
-         else if(i==-1)oldi=-1;
-         else if(i==-3){//KDB bgcolor
-            //Screen_SetFullUpdate();
+         else if(i==-1)
+            oldi=-1;
+         else if(i==-3)
+         {
             KCOL=-KCOL;
             oldi=-1;
          }
