@@ -37,7 +37,7 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 endif
 
 CC_AS ?= $(CC)
-LIBM  := -lm
+LIBM  := 
 LIBZ  := -lz
 # Unix
 ifneq (,$(findstring unix,$(platform)))
@@ -106,7 +106,7 @@ else ifeq ($(platform), theos_ios)
 else ifeq ($(platform), qnx)
 	TARGET := $(TARGET_NAME)_libretro_qnx.so
 	fpic := -fPIC
-	SHARED := -lcpp -lm -shared -Wl,-version-script=link.T
+	SHARED := -lcpp -shared -Wl,-version-script=link.T
 	CC = qcc -Vgcc_ntoarmv7le
 	CC_AS = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp

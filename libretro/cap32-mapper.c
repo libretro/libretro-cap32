@@ -131,7 +131,7 @@ void enter_gui(void)
    static int inbrowser=1;
    int ret=0;	
 
-   sprintf(dskimg,"%s\0",filebrowser(DEFAULT_PATH));
+   sprintf(dskimg, "%s",filebrowser(DEFAULT_PATH));
 
    if(!strcmp(dskimg,"EMPTY\0"))
    {
