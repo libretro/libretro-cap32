@@ -1,6 +1,5 @@
 #include "libretro.h"
-
-#include "libretro-cap32.h"
+#include "libretro-glue.h"
 
 #include "graph.h"
 #include "vkbd.h"
