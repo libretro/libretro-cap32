@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "vkbd.h"
 
-#ifdef PS3PORT
+#ifdef __CELLOS_LV2__
 #include "sys/sys_time.h"
 #include "sys/timer.h"
 #include <sys/time.h>
@@ -26,7 +26,6 @@ void gettimeofday (struct timeval *tv, void *blah)
 #endif
 
 extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL;
-//extern unsigned char keyboard_translation[320];
 extern const int keyboard_translation[512];
 extern char * filebrowser(const char *path_and_name);
 
@@ -98,16 +97,14 @@ void Emu_uninit(void) { }
 
 long GetTicks(void)
 {
-#ifndef _ANDROID_
-
-   struct timeval tv;
-   gettimeofday (&tv, NULL);
-   return tv.tv_sec*1000000 + tv.tv_usec;
-#else
-
+#ifdef _ANDROID_
    struct timespec now;
    clock_gettime(CLOCK_MONOTONIC, &now);
    return now.tv_sec*1000000 + now.tv_nsec/1000;
+#else
+   struct timeval tv;
+   gettimeofday (&tv, NULL);
+   return tv.tv_sec*1000000 + tv.tv_usec;
 #endif
 } 
 
