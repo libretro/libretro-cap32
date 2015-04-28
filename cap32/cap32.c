@@ -164,7 +164,7 @@
 
 #include <zlib.h>
 
-#ifdef PS3PORT
+#ifdef __CELLOS_LV2__
 #define tmpnam(a)
 #endif
 
@@ -1214,9 +1214,10 @@ int zip_extract (char *pchZipFile, char *pchFileName, uint32_t dwOffset)
    z_stream z;
 
    tmpnam(pchFileName); // generate a unique (temporary) file name for the decompression process
-   if (!(pfileOut = fopen(pchFileName, "wb"))) {
+
+   if (!(pfileOut = fopen(pchFileName, "wb")))
       return ERR_FILE_UNZIP_FAILED; // couldn't create output file
-   }
+
    pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
    fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
    fread(pbGPBuffer, 30, 1, pfileIn); // read local header
@@ -3535,14 +3536,6 @@ int capmain (int argc, char **argv)
       fprintf(stderr, "emulator_init() failed. Aborting.\n");
       exit(-1);
    }
-
-#ifdef DEBUG
-#ifdef PS3PORT
-   pfoDebug = fopen("/dev_hdd0/HOMEBREW/amstrad/debug.txt", "wt");
-#else
-   pfoDebug = fopen("./debug.txt", "wt");
-#endif
-#endif
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure

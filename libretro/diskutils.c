@@ -14,7 +14,7 @@ static int entries;
 
 extern unsigned short int bmp[TEX_WIDTH * TEX_HEIGHT];
 
-#ifdef PS3PORT
+#ifdef __CELLOS_LV2__
 #define S_ISDIR(x) (x & CELL_FS_S_IFDIR)
 #endif
 
