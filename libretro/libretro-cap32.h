@@ -31,7 +31,7 @@
 
 #define RGB565(r, g, b)  (((r) << (5+6)) | ((g) << 6) | (b))
 
-//ZOOM GAME RES
+/* Zoom game resolution */
 #define MXZO 384
 #define MYZO 272
 
@@ -40,5 +40,12 @@ typedef struct mres
    int x,y;
 }MRES;
 
+/* Forward declarations */
+int loadadsk (char *arv,int drive);
+void emu_reset(void);
+void retro_joy0(unsigned char joy0);
+void retro_key_down(int key);
+void retro_key_up(int key);
+int snapshot_save (char *pchFileName);
 
 #endif

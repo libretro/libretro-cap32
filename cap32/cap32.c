@@ -169,12 +169,7 @@
 #endif
 
 /* forward declarations - some libretro port callbacks */
-void retro_key_down(int key);
-void retro_key_up(int key);
-int InitOSGLU(void);
-int  UnInitOSGLU(void);
 void retro_loop(void);
-void retro_joy0(unsigned char joy0);
 void doCleanUp (void);
 void theloop(void);
 int capmain (int argc, char **argv);
@@ -183,8 +178,6 @@ void mixsnd (void);
 void shortcut_check(void);
 void theloop(void);
 long GetTicks(void);
-void emu_reset (void);
-int loadadsk (char *arv,int drive);
 int HandleExtension(char *path,char *ext);
 
 extern unsigned short int bmp[400 * 300];
@@ -1451,7 +1444,6 @@ int snapshot_load (char *pchFileName)
 
    return 0;
 }
-extern int snapshot_save (char *pchFileName);
 
 int snapshot_save (char *pchFileName)
 {
@@ -1650,7 +1642,8 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
 
    iRetCode = 0;
    dsk_eject(drive);
-   if ((pfileObject = fopen(pchFileName, "rb")) != NULL) {
+   if ((pfileObject = fopen(pchFileName, "rb")) != NULL)
+   {
       fread(pbGPBuffer, 0x100, 1, pfileObject); // read DSK header
       pbPtr = pbGPBuffer;
 
@@ -1769,13 +1762,12 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
 
 exit:
       fclose(pfileObject);
-   } else {
+   }
+   else
       iRetCode = ERR_FILE_NOT_FOUND;
-   }
 
-   if (iRetCode != 0) { // on error, 'eject' disk from drive
+   if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
-   }
    return iRetCode;
 }
 
@@ -1792,15 +1784,19 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
       dh.tracks = drive->tracks;
       dh.sides = (drive->sides+1) | (drive->random_DEs); // correct side count and indicate random DEs, if necessary
       pos = 0;
-      for (track = 0; track < drive->tracks; track++) { // loop for all tracks
-         for (side = 0; side <= drive->sides; side++) { // loop for all sides
-            if (drive->track[track][side].size) { // track is formatted?
+
+      for (track = 0; track < drive->tracks; track++)
+      { // loop for all tracks
+         for (side = 0; side <= drive->sides; side++)
+         { // loop for all sides
+            if (drive->track[track][side].size) // track is formatted?
                dh.track_size[pos] = (drive->track[track][side].size + 0x100) >> 8; // track size + header in bytes
-            }
             pos++;
          }
       }
-      if (!fwrite(&dh, sizeof(dh), 1, pfileObject)) { // write header to file
+
+      if (!fwrite(&dh, sizeof(dh), 1, pfileObject))
+      { // write header to file
          fclose(pfileObject);
          return ERR_DSK_WRITE;
       }
@@ -1835,9 +1831,9 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
          }
       }
       fclose(pfileObject);
-   } else {
-      return ERR_DSK_WRITE; // write attempt failed
    }
+   else
+      return ERR_DSK_WRITE; // write attempt failed
 
    return 0;
 }
@@ -1899,9 +1895,8 @@ int dsk_format (t_drive *drive, int iFormat)
    drive->altered = 1; // flag disk as having been modified
 
 exit:
-   if (iRetCode != 0) { // on error, 'eject' disk from drive
+   if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
-   }
    return iRetCode;
 }
 
@@ -1919,21 +1914,29 @@ int tape_insert (char *pchFileName)
    uint8_t *pbPtr, *pbBlock;
 
    tape_eject();
-   if ((pfileObject = fopen(pchFileName, "rb")) == NULL) {
+
+   if ((pfileObject = fopen(pchFileName, "rb")) == NULL)
       return ERR_FILE_NOT_FOUND;
-   }
+
    fread(pbGPBuffer, 10, 1, pfileObject); // read CDT header
    pbPtr = pbGPBuffer;
-   if (memcmp(pbPtr, "ZXTape!\032", 8) != 0) { // valid CDT file?
+
+   if (memcmp(pbPtr, "ZXTape!\032", 8) != 0)
+   { // valid CDT file?
       fclose(pfileObject);
       return ERR_TAP_INVALID;
    }
-   if (*(pbPtr + 0x08) != 1) { // major version must be 1
+
+   if (*(pbPtr + 0x08) != 1)
+   { // major version must be 1
       fclose(pfileObject);
       return ERR_TAP_INVALID;
    }
+
    lFileSize = file_size(fileno(pfileObject)) - 0x0a;
-   if (lFileSize <= 0) { // the tape image should have at least one block...
+
+   if (lFileSize <= 0)
+   { // the tape image should have at least one block...
       fclose(pfileObject);
       return ERR_TAP_INVALID;
    }
@@ -1951,9 +1954,11 @@ int tape_insert (char *pchFileName)
    pbTapeImageEnd = pbTapeImage + lFileSize+6;
    pbBlock = pbTapeImage;
    bool bolGotDataBlock = false;
-   while (pbBlock < pbTapeImageEnd) {
+   while (pbBlock < pbTapeImageEnd)
+   {
       bID = *pbBlock++;
-      switch(bID) {
+      switch(bID)
+      {
          case 0x10: // standard speed data block
             iBlockLength = *(uint16_t *)(pbBlock+2) + 4;
             bolGotDataBlock = true;
@@ -1991,27 +1996,27 @@ int tape_insert (char *pchFileName)
             iBlockLength = 0;
             break;
          case 0x23: // jump to block
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x24: // loop start
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 2;
             break;
          case 0x25: // loop end
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x26: // call sequence
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = (*(uint16_t *)pbBlock * 2) + 2;
             break;
          case 0x27: // return from sequence
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = 0;
             break;
          case 0x28: // select block
-   return ERR_TAP_UNSUPPORTED;
+            return ERR_TAP_UNSUPPORTED;
             iBlockLength = *(uint16_t *)pbBlock + 2;
             break;
          case 0x30: // text description
@@ -2043,19 +2048,18 @@ int tape_insert (char *pchFileName)
             iBlockLength = *(uint32_t *)pbBlock + 4;
       }
 
-      #ifdef DEBUG_TAPE
+#ifdef DEBUG_TAPE
       fprintf(pfoDebug, "%02x %d\r\n", bID, iBlockLength);
-      #endif
+#endif
 
       pbBlock += iBlockLength;
    }
-   if (pbBlock != pbTapeImageEnd) {
+
+   if (pbBlock != pbTapeImageEnd)
+   {
       tape_eject();
       return ERR_TAP_INVALID;
    }
-
-
-
 
    Tape_Rewind();
 
@@ -2399,7 +2403,7 @@ int emulator_init (void)
 
    pbROMlo=(uint8_t *)&OS[0]; // CPC 6128
 
-   if ((!pbGPBuffer) || (!pbRAM) )
+   if (!pbGPBuffer || !pbRAM)
       return ERR_OUT_OF_MEMORY;
 
    pbROMhi = pbExpansionROM = (uint8_t *)pbROMlo + 16384;
@@ -2474,10 +2478,10 @@ int audio_init (void)
       return 0;
 
    CPC.snd_buffersize = 2*2*882;//audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer = (uint8_t *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
-   pbSndBufferEnd = pbSndBuffer + CPC.snd_buffersize;
+   pbSndBuffer        = (uint8_t *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
+   pbSndBufferEnd     = pbSndBuffer + CPC.snd_buffersize;
    memset(pbSndBuffer, 0, CPC.snd_buffersize);
-   CPC.snd_bufferptr = pbSndBuffer; // init write cursor
+   CPC.snd_bufferptr  = pbSndBuffer; // init write cursor
 
    InitAY();
 
@@ -2540,6 +2544,7 @@ int video_set_palette (void)
 }
 
 #define STYLE 3
+
 void video_set_style (void)
 {
    if (STYLE == 3/*vid_plugin->half_pixels*/)
@@ -2553,7 +2558,8 @@ void video_set_style (void)
       dwXScale = 2;
       dwYScale = 1;
    }
-   switch (dwXScale) {
+   switch (dwXScale)
+   {
       case 1:
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half;
          CPC.scr_prerenderbord = (void(*)(void))prerender_border_half;
@@ -2568,52 +2574,41 @@ void video_set_style (void)
 
    switch(CPC.scr_bpp)
    {
-/*
-      case 32:
-               CPC.scr_render = (void(*)(void))render32bpp;
-               break;
-
-      case 24:
-               CPC.scr_render = (void(*)(void))render24bpp;
-               break;
-*/
       case 16:
       case 15:
-
-               CPC.scr_render = (void(*)(void))render16bpp;
-               break;
-
+         CPC.scr_render = (void(*)(void))render16bpp;
+         break;
       case 8:
-               CPC.scr_render = (void(*)(void))render8bpp;
-               break;
+         CPC.scr_render = (void(*)(void))render8bpp;
+         break;
    }
 }
 
 int video_init (void)
 { 
+   int error_code;
    CPC.scr_bpp = 16;
 
-   int iErrCode = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
-   if (iErrCode) {
-      return iErrCode; 
-   }
+   error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
+   if (error_code)
+      return error_code; 
 
-  CPC.scr_bps = 400*2/4;
-  CPC.scr_pos=CPC.scr_base = (uint32_t *)&bmp[0];
-  CPC.scr_line_offs = CPC.scr_bps * 1;
+   CPC.scr_bps       = 400 * 2 / 4;
+   CPC.scr_pos       = CPC.scr_base = (uint32_t *)&bmp[0];
+   CPC.scr_line_offs = CPC.scr_bps * 1;
 
-  video_set_style(); 
-  memset(bmp, 0, sizeof(bmp));
+   video_set_style(); 
+   memset(bmp, 0, sizeof(bmp));
 
-  return 0;
+   return 0;
 }
 
 void video_shutdown (void)
 {
 }
 
-void video_display (void){
- 
+void video_display (void)
+{
 }
 
 void input_swap_joy (void)
@@ -2624,8 +2619,6 @@ void input_swap_joy (void)
 int input_init (void)
 {
    return 0;
-
-
 }
 
 int getConfigValueInt (char* pchFileName, char* pchSection, char* pchKey, int iDefaultValue)
@@ -2656,27 +2649,38 @@ int getConfigValueInt (char* pchFileName, char* pchSection, char* pchKey, int iD
    return iDefaultValue; // no value found
 }
 
-void getConfigValueString (char* pchFileName, char* pchSection, char* pchKey, char* pchValue, int iSize, char* pchDefaultValue)
+void getConfigValueString (char* pchFileName, char* pchSection,
+      char *pchKey, char *pchValue, int iSize, char *pchDefaultValue)
 {
    FILE* pfoConfigFile;
    char chLine[MAX_LINE_LEN + 1];
    char* pchToken;
 
-   if ((pfoConfigFile = fopen(pchFileName, "r")) != NULL) { // open the config file
-      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // grab one line
-         pchToken = strtok(chLine, "[]"); // check if there's a section key
-         if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchSection) == 0)) {
-            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL) { // get the next line
+   if ((pfoConfigFile = fopen(pchFileName, "r")) != NULL)
+   {
+      /* open the config file */
+      
+      while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL)
+      {
+         /* grab one line */
+         pchToken = strtok(chLine, "[]"); /* check if there's a section key */
+         if((pchToken != NULL) && (pchToken[0] != '#')
+               && (strcmp(pchToken, pchSection) == 0))
+         {
+            while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL)
+            {
+               /* get the next line */
                pchToken = strtok(chLine, "\t =\n\r"); // check if it has a key=value pair
-               if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0)) {
+
+               if((pchToken != NULL) && (pchToken[0] != '#') && (strcmp(pchToken, pchKey) == 0))
+               {
                   char* pchPtr = strtok(NULL, "\t=#\n\r"); // get the value if it matches our key
-                  if (pchPtr != NULL) {
+
+                  if (pchPtr != NULL)
                      strncpy(pchValue, pchPtr, iSize); // copy to destination
-                     return;
-                  } else {
+                  else
                      strncpy(pchValue, pchDefaultValue, iSize); // no value found, return the default
-                     return;
-                  }
+                  return;
                }
             }
          }
@@ -2699,54 +2703,47 @@ void loadConfiguration (void)
 
    memset(&CPC, 0, sizeof(CPC));
    CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
-   if (CPC.model > 2) {
-      CPC.model = 2;
-   }
-   CPC.jumpers = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
-   CPC.ram_size = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM
-   if (CPC.ram_size > 576) {
-      CPC.ram_size = 576;
-   } else if ((CPC.model == 2) && (CPC.ram_size < 128)) {
-      CPC.ram_size = 128; // minimum RAM size for CPC 6128 is 128KB
-   }
-   CPC.speed = getConfigValueInt(chFileName, "system", "speed", DEF_SPEED_SETTING); // original CPC speed
-   if ((CPC.speed < MIN_SPEED_SETTING) || (CPC.speed > MAX_SPEED_SETTING)) {
-      CPC.speed = DEF_SPEED_SETTING;
-   }
-   CPC.limit_speed = 1;
-   CPC.auto_pause = getConfigValueInt(chFileName, "system", "auto_pause", 1) & 1;
-   CPC.printer = getConfigValueInt(chFileName, "system", "printer", 0) & 1;
-   CPC.mf2 = getConfigValueInt(chFileName, "system", "mf2", 0) & 1;
-   CPC.keyboard = getConfigValueInt(chFileName, "system", "keyboard", 0);
-   if (CPC.keyboard > MAX_ROM_MODS) {
-      CPC.keyboard = 0;
-   }
-   CPC.joysticks = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
 
-   CPC.scr_fs_width = getConfigValueInt(chFileName, "video", "scr_width", 400);
+   if (CPC.model > 2)
+      CPC.model = 2;
+
+   CPC.jumpers       = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
+   CPC.ram_size      = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM
+
+   if (CPC.ram_size > 576)
+      CPC.ram_size   = 576;
+   else if ((CPC.model == 2) && (CPC.ram_size < 128))
+      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+
+   CPC.speed = getConfigValueInt(chFileName, "system", "speed", DEF_SPEED_SETTING); // original CPC speed
+
+   if ((CPC.speed < MIN_SPEED_SETTING) || (CPC.speed > MAX_SPEED_SETTING))
+      CPC.speed = DEF_SPEED_SETTING;
+   CPC.limit_speed   = 1;
+   CPC.auto_pause    = getConfigValueInt(chFileName, "system", "auto_pause", 1) & 1;
+   CPC.printer       = getConfigValueInt(chFileName, "system", "printer", 0) & 1;
+   CPC.mf2           = getConfigValueInt(chFileName, "system", "mf2", 0) & 1;
+   CPC.keyboard      = getConfigValueInt(chFileName, "system", "keyboard", 0);
+
+   if (CPC.keyboard > MAX_ROM_MODS)
+      CPC.keyboard = 0;
+   CPC.joysticks     = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
+
+   CPC.scr_fs_width  = getConfigValueInt(chFileName, "video", "scr_width", 400);
    CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 300);
-   CPC.scr_fs_bpp = getConfigValueInt(chFileName, "video", "scr_bpp", 16);
-   CPC.scr_style = getConfigValueInt(chFileName, "video", "scr_style", 3);
-/*
-   unsigned i=0;
-   while((video_plugin_list[i+1].name!=NULL)&&(i<CPC.scr_style))
-   {
-      i++;
-   }
-   if (i!=CPC.scr_style) {
-      CPC.scr_style = 0;
-   }
-*/
+   CPC.scr_fs_bpp    = getConfigValueInt(chFileName, "video", "scr_bpp", 16);
+   CPC.scr_style     = getConfigValueInt(chFileName, "video", "scr_style", 3);
    CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 0) & 1;
-   CPC.scr_vsync = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
-   CPC.scr_led = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
-   CPC.scr_fps = getConfigValueInt(chFileName, "video", "scr_fps", 0) & 1;
-   CPC.scr_tube = getConfigValueInt(chFileName, "video", "scr_tube", 0) & 1;
+   CPC.scr_vsync     = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
+   CPC.scr_led       = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
+   CPC.scr_fps       = getConfigValueInt(chFileName, "video", "scr_fps", 0) & 1;
+   CPC.scr_tube      = getConfigValueInt(chFileName, "video", "scr_tube", 0) & 1;
    CPC.scr_intensity = getConfigValueInt(chFileName, "video", "scr_intensity", 10);
    CPC.scr_remanency = getConfigValueInt(chFileName, "video", "scr_remanency", 0) & 1;
-   if ((CPC.scr_intensity < 5) || (CPC.scr_intensity > 15)) {
+
+   if ((CPC.scr_intensity < 5) || (CPC.scr_intensity > 15))
       CPC.scr_intensity = 10;
-   }
+
    CPC.scr_window = getConfigValueInt(chFileName, "video", "scr_window", 0) & 1;
 
    CPC.snd_enabled = getConfigValueInt(chFileName, "sound", "enabled", 1) & 1;
@@ -2898,20 +2895,20 @@ void loadConfiguration (void)
    strncpy(chPath, chAppPath, sizeof(chPath)-5);
    strcat(chPath, "/rom");
    getConfigValueString(chFileName, "rom", "rom_path", CPC.rom_path, sizeof(CPC.rom_path)-1, chPath);
+
    for (iRomNum = 0; iRomNum < 16; iRomNum++)
    { // loop for ROMs 0-15
       char chRomId[14];
       sprintf(chRomId, "slot%02d", iRomNum); // build ROM ID
       getConfigValueString(chFileName, "rom", chRomId, CPC.rom_file[iRomNum], sizeof(CPC.rom_file[iRomNum])-1, "");
    }
-   if (CPC.rom_path[0] == '\0') { // if the path is empty, set it to the default
+
+   if (CPC.rom_path[0] == '\0') // if the path is empty, set it to the default
       strcpy(CPC.rom_path, chPath);
-   }
-   if ((pfileObject = fopen(chFileName, "rt")) == NULL) {
+   if ((pfileObject = fopen(chFileName, "rt")) == NULL)
       strcpy(CPC.rom_file[7], "amsdos.rom"); // insert AMSDOS in slot 7 if the config file does not exist yet
-   } else {
+   else
       fclose(pfileObject);
-   }
    getConfigValueString(chFileName, "rom", "rom_mf2", CPC.rom_mf2, sizeof(CPC.rom_mf2)-1, "");
 }
 
@@ -2923,27 +2920,32 @@ void splitPathFileName(char *pchCombined, char *pchPath, char *pchFile)
    if (!pchPtr) {
       pchPtr = strrchr(pchCombined, '\\'); // try again with the alternate form
    }
-   if (pchPtr) {
-      pchPtr++; // advance the pointer to the next character
-      if (pchFile) {
-         strcpy(pchFile, pchPtr); // copy the filename
-      }
-      char chOld = *pchPtr;
-      *pchPtr = 0; // cut off the filename part
-      if (pchPath != pchCombined) {
-         if (pchPath) {
+   if (pchPtr)
+   {
+      char chOld;
+
+      pchPtr++; /* advance the pointer to the next character */
+      if (pchFile)
+         strcpy(pchFile, pchPtr); /* copy the filename */
+
+      chOld   = *pchPtr;
+      *pchPtr = 0; /* cut off the filename part */
+
+      if (pchPath != pchCombined)
+      {
+         if (pchPath)
             strcpy(pchPath, pchCombined); // copy the path
-         }
          *pchPtr = chOld; // restore original string
       }
-   } else {
-      if (pchFile) {
+   }
+   else
+   {
+      if (pchFile)
          *pchFile = 0; // no filename found
-      }
-      if (pchPath != pchCombined) {
-         if (pchPath) {
+      if (pchPath != pchCombined)
+      {
+         if (pchPath)
             strcpy(pchPath, pchCombined); // copy the path
-         }
       }
    }
 }
@@ -2987,76 +2989,81 @@ void retro_key_up(int key)
 
 static int jflag[5]={0,0,0,0,0};
 
-void retro_joy0(unsigned char joy0){
-	//0x01,0x02,0x04,0x08,0x80
-	// UP  DWN  LEFT RGT  BTN0
-	// 0    1     2   3    4
+void retro_joy0(unsigned char joy0)
+{
+   //0x01,0x02,0x04,0x08,0x80
+   // UP  DWN  LEFT RGT  BTN0
+   // 0    1     2   3    4
 
-	//UP
-	if(joy0&0x01){
+   //UP
+   if(joy0&0x01)
+   {
+      if(jflag[0]==0)
+      {
+         retro_key_down(0x90);
+         jflag[0]=1;
+      }
+   }
+   else
+   {
+      if(jflag[0]==1)
+      {
+         retro_key_up(0x90);
+         jflag[0]=0;
+      }
+   }
 
-		if(jflag[0]==0){
-			retro_key_down(0x90);
-			jflag[0]=1;
-		}
-	}else {
-		if(jflag[0]==1){
-			retro_key_up(0x90);
-			jflag[0]=0;
-		}
-	}
+   //Down
+   if(joy0&0x02){
+      if(jflag[1]==0){
+         retro_key_down(0x91);
+         jflag[1]=1;
+      }
+   }else {
+      if(jflag[1]==1){
+         retro_key_up(0x91);
+         jflag[1]=0;
+      }
+   }
 
-	//Down
-	if(joy0&0x02){
-		if(jflag[1]==0){
-			retro_key_down(0x91);
-			jflag[1]=1;
-		}
-	}else {
-		if(jflag[1]==1){
-			retro_key_up(0x91);
-			jflag[1]=0;
-		}
-	}
+   //Left
+   if(joy0&0x04){
+      if(jflag[2]==0){
+         retro_key_down(0x92);
+         jflag[2]=1;
+      }
+   }else {
+      if(jflag[2]==1){
+         retro_key_up(0x92);
+         jflag[2]=0;
+      }
+   }
 
-	//Left
-	if(joy0&0x04){
-		if(jflag[2]==0){
-			retro_key_down(0x92);
-			jflag[2]=1;
-		}
-	}else {
-		if(jflag[2]==1){
-			retro_key_up(0x92);
-			jflag[2]=0;
-		}
-	}
+   //Right
+   if(joy0&0x08){
+      if(jflag[3]==0){
+         retro_key_down(0x93);
+         jflag[3]=1;
+      }
+   }else {
+      if(jflag[3]==1){
+         retro_key_up(0x93);
+         jflag[3]=0;
+      }
+   }
 
-	//Right
-	if(joy0&0x08){
-		if(jflag[3]==0){
-			retro_key_down(0x93);
-			jflag[3]=1;
-		}
-	}else {
-		if(jflag[3]==1){
-			retro_key_up(0x93);
-			jflag[3]=0;
-		}
-	}
-
-	//btn0
-	if(joy0&0x80){
-		if(jflag[4]==0){
-			retro_key_down(0x94); 
-			jflag[4]=1;
-		}
-	}else {
-		if(jflag[4]==1){
-			retro_key_up(0x94); 
-			jflag[4]=0;
-		}
-	}
+   //btn0
+   if(joy0&0x80){
+      if(jflag[4]==0){
+         retro_key_down(0x94); 
+         jflag[4]=1;
+      }
+   }else {
+      if(jflag[4]==1){
+         retro_key_up(0x94); 
+         jflag[4]=0;
+      }
+   }
 
 }
 
@@ -3173,63 +3180,84 @@ void shortcut_check(void)
       cmd_cpt++;	
 
    }
-   else if(TYPE_RUNDISK){
+   else if(TYPE_RUNDISK)
+   {
 
-   	switch(cmd_cpt){
-   		// R
-   		case 0:keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
-   		break;
-   		case 1:keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
-   		break;
-   		// U
-   		case 2:keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
-   		break;
-   		case 3:keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
-   		break;
-   		// N
-   		case 4:keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
-   		break;
-   		case 5:keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
-   		break;
-   		// shft+2 => "
-      case 6:keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
-   		       keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
-   		break;
-   		case 7:keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
-   		       keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
-   		break;
-   		// D
-   		case 8:keyboard_matrix[0x75 >> 4] &= ~bit_values[0x75 & 7];// key is being held down
-   		break;
-   		case 9:keyboard_matrix[0x75 >> 4] |= bit_values[0x75 & 7]; // key has been released
-   		break;
-   		// I
-   		case 10:keyboard_matrix[0x43 >> 4] &= ~bit_values[0x43 & 7];// key is being held down
-   		break;
-   		case 11:keyboard_matrix[0x43 >> 4] |= bit_values[0x43 & 7]; // key has been released
-   		break;
-   		// S
-   		case 12:keyboard_matrix[0x74 >> 4] &= ~bit_values[0x74 & 7];// key is being held down
-   		break;
-   		case 13:keyboard_matrix[0x74 >> 4] |= bit_values[0x74 & 7]; // key has been released
-   		break;
-   		// K
-   		case 14:keyboard_matrix[0x45 >> 4] &= ~bit_values[0x45 & 7];// key is being held down
-   		break;
-   		case 15:keyboard_matrix[0x45 >> 4] |= bit_values[0x45 & 7]; // key has been released
-   		break;
-   		// Enter
-   	        case 16:keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
-   		break;
-   		case 17:keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
-   		break;
-   		case 18:TYPE_RUNDISK=!TYPE_RUNDISK;cmd_cpt=-1;
-   		break;
-
-   		default: break;
-
-   	}
-   	cmd_cpt++;
+      switch(cmd_cpt)
+      {
+         // R
+         case 0:
+            keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
+            break;
+         case 1:
+            keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
+            break;
+            // U
+         case 2:
+            keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
+            break;
+         case 3:
+            keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
+            break;
+            // N
+         case 4:
+            keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
+            break;
+         case 5:
+            keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
+            break;
+            /* shft+2 => " */
+         case 6:
+            keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
+            keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
+            break;
+         case 7:
+            keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
+            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
+            break;
+            // D
+         case 8:
+            keyboard_matrix[0x75 >> 4] &= ~bit_values[0x75 & 7];// key is being held down
+            break;
+         case 9:
+            keyboard_matrix[0x75 >> 4] |= bit_values[0x75 & 7]; // key has been released
+            break;
+            // I
+         case 10:
+            keyboard_matrix[0x43 >> 4] &= ~bit_values[0x43 & 7];// key is being held down
+            break;
+         case 11:
+            keyboard_matrix[0x43 >> 4] |= bit_values[0x43 & 7]; // key has been released
+            break;
+            // S
+         case 12:
+            keyboard_matrix[0x74 >> 4] &= ~bit_values[0x74 & 7];// key is being held down
+            break;
+         case 13:
+            keyboard_matrix[0x74 >> 4] |= bit_values[0x74 & 7]; // key has been released
+            break;
+            // K
+         case 14:
+            keyboard_matrix[0x45 >> 4] &= ~bit_values[0x45 & 7];// key is being held down
+            break;
+         case 15:
+            keyboard_matrix[0x45 >> 4] |= bit_values[0x45 & 7]; // key has been released
+            break;
+            // Enter
+         case 16:
+            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7]; /* key is being held down */
+            break;
+         case 17:
+            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; /* key has been released */
+            break;
+         case 18:
+            TYPE_RUNDISK=!TYPE_RUNDISK;
+            cmd_cpt=-1;
+            break;
+         default:
+            break;
+      }
+      cmd_cpt++;
 
    }
    else  if(TYPE_ENTER)
@@ -3264,7 +3292,8 @@ void shortcut_check(void)
             keyboard_matrix[0x97 >> 4] |= bit_values[0x97 & 7]; // key has been released
             break;		
          case 2:
-            TYPE_DEL=!TYPE_DEL;cmd_cpt=-1;
+            TYPE_DEL=!TYPE_DEL;
+            cmd_cpt=-1;
             break;
          default:
             break;
@@ -3289,12 +3318,16 @@ int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
-      if(drive==0)dsk_load( arv, &driveA, 'A'); 
-      else dsk_load( arv, &driveB, 'B');   
+      if(drive==0)
+         dsk_load( arv, &driveA, 'A'); 
+      else
+         dsk_load( arv, &driveB, 'B');   
+
       have_DSK = true;
       sprintf(RPATH,"%s%d.SNA",arv,drive);		
    }
-   else {
+   else
+   {
       snapshot_load (arv);
       have_SNA = true;
       sprintf(RPATH,"%s",arv);
@@ -3326,75 +3359,80 @@ void retro_loop(void)
    shortcut_check();
 }
 
-void theloop()
+void theloop(void)
 {
-   if (1/*!CPC.paused*/)
-   { // run the emulation, as long as the user doesn't pause it
+   /* run the emulation */
+   dwTicks = /*SDL_*/GetTicks();
+
+   if (dwTicks >= dwTicksTargetFPS)
+   {
+      /* update FPS counter? */
+      dwFPS = dwFrameCount;
+      dwFrameCount = 0;
+      dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
+   }
+
+   if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
+   {
+      int iTicksAdj = 0; // no adjustment necessary by default
+
+      if (CPC.snd_enabled)
+      {
+
+         if (pbSndStream < CPC.snd_bufferptr)
+            dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
+         else
+            dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
+
+         if (dwSndDist < dwSndMinSafeDist)
+            iTicksAdj = -5; // speed emulation up to compensate
+         else if (dwSndDist > dwSndMaxSafeDist)
+            iTicksAdj = 5; // slow emulation down to compensate
+      }
       dwTicks = /*SDL_*/GetTicks();
 
-      if (dwTicks >= dwTicksTargetFPS)
-      { // update FPS counter?
-         dwFPS = dwFrameCount;
-         dwFrameCount = 0;
-         dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
-      }
+      if (dwTicks < (dwTicksTarget+iTicksAdj)) /* limit speed? */
+         return; /* delay emulation */
 
-      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
-      {
-         int iTicksAdj = 0; // no adjustment necessary by default
-
-         if (CPC.snd_enabled)
-         {
-
-            if (pbSndStream < CPC.snd_bufferptr)
-               dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-            else
-               dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-
-            if (dwSndDist < dwSndMinSafeDist)
-               iTicksAdj = -5; // speed emulation up to compensate
-            else if (dwSndDist > dwSndMaxSafeDist)
-               iTicksAdj = 5; // slow emulation down to compensate
-         }
-         dwTicks = /*SDL_*/GetTicks();
-         if (dwTicks < (dwTicksTarget+iTicksAdj)) // limit speed?
-            return;// continue; // delay emulation
-         dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
-      }
-
-      uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
-      if (VDU.scrln > 0)
-         CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
-      else
-         CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
-
-      CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
-
-      iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-
-      if (iExitCondition == EC_FRAME_COMPLETE)
-      { // emulation finished rendering a complete frame?
-         dwFrameCount++;
-         RLOOP=0; //exit retro_loop for retro_run
-      }
-      else if (iExitCondition == EC_SOUND_BUFFER) {
-         mixsnd();
-      }
+      dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
    }
+
+   uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+   if (VDU.scrln > 0)
+      CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
+   else
+      CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
+
+   CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
+
+   iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+
+   if (iExitCondition == EC_FRAME_COMPLETE)
+   {
+      /* emulation finished rendering a complete frame? */
+      dwFrameCount++;
+      RLOOP=0; /* exit retro_loop for retro_run */
+   }
+   else if (iExitCondition == EC_SOUND_BUFFER)
+      mixsnd();
 }
 
 int capmain (int argc, char **argv)
 {
    strcpy (chAppPath, "./");
 
-   loadConfiguration(); // retrieve the emulator configuration
+   /* retrieve the emulator configuration */
+   loadConfiguration();
+
    if (CPC.printer)
    {
-      if (!printer_start()) // start capturing printer output, if enabled
+      /* start capturing printer output, if enabled */
+      if (!printer_start())
          CPC.printer = 0;
    }
 
-   z80_init_tables(); // init Z80 emulation
+   /* init Z80 emulation */
+   z80_init_tables(); 
 
    if (video_init())
    {
@@ -3425,13 +3463,14 @@ int capmain (int argc, char **argv)
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
 
-   dwTicksOffset = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
-   dwTicksTarget = GetTicks();//SDL_GetTicks();
-   dwTicksTargetFPS = dwTicksTarget;
-   dwTicksTarget += dwTicksOffset;
+   dwTicksOffset     = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
+   dwTicksTarget     = GetTicks();
+   dwTicksTargetFPS  = dwTicksTarget;
+   dwTicksTarget    += dwTicksOffset;
 
-   iExitCondition = EC_FRAME_COMPLETE;
-   bolDone = false;
+   iExitCondition    = EC_FRAME_COMPLETE;
+   bolDone           = false;
+
    return 0;
 }
 
