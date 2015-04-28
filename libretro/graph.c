@@ -7,8 +7,7 @@
 
 extern unsigned char  msx[];
 
-void printch(unsigned short *buffer,int x, int y,
-      unsigned  short  couleur,unsigned char ch,int taille,int pl,int zde)
+void printch(unsigned short *buffer,int x, int y, unsigned  short color,unsigned char ch,int taille,int pl,int zde)
 {
    int i,j;
    unsigned char *font;
@@ -16,37 +15,38 @@ void printch(unsigned short *buffer,int x, int y,
 
    font=&msx[(int)ch * 8];
 
-   for(i=0;i<8;i++,font++)
+   for(i = 0;i < 8; i++, font++)
    {
-      for(j=0;j<8;j++)
+      for(j = 0;j < 8; j++)
       {
          if ((*font &(128>>j)))
          {
             rectx = x+(j<<0);
-
             if(taille==1)
                recty = y+(i<<1);
             else
                recty = y+(i<<0);
 
-            buffer[recty* VIRTUAL_WIDTH  + rectx] = couleur; 
+            buffer[recty* VIRTUAL_WIDTH  + rectx] = color; 
+
             if(pl==1)
-               buffer[(recty+1)* VIRTUAL_WIDTH  + rectx] = couleur; 				
+               buffer[(recty+1)* VIRTUAL_WIDTH  + rectx] = color; 				
 
          }
       }
    }
 }
 
-void textpixel(unsigned  short *buffer,int x,int y,
-      unsigned  short  color,int tail,int plein,int zdep, char *string,...)
+void textpixel(unsigned  short *buffer,int x,int y,unsigned  short  color,int tail,int plein,int zdep, char *string,...)
 {
-   int boucle=0;  
-   char	text[256];	   	
-   va_list	ap;			
+   int boucle;
+   char	text[256];
+   va_list	ap;
+
+   boucle = 0;
 
    if (string == NULL)
-      return;
+      return;		
 
    va_start(ap, string);		
    vsprintf(text, string, ap);	
@@ -60,23 +60,22 @@ void textpixel(unsigned  short *buffer,int x,int y,
 
 }
 
-void textCLpixel(unsigned  short  *buffer,int lim,int x,int x2,int y,
-      unsigned  short color,int tail,int plein,int zdep,char *string,...)
+void textCLpixel(unsigned  short  *buffer,int lim,int x,int x2,int y,unsigned  short color,int tail,int plein,int zdep,char *string,...)
 {
-   char	text[256];
-   va_list	ap;
-   int boucle=0;
+   int boucle;
+   char	text[256];	   	
+   va_list	ap;			
 
-   if (!string)
+   boucle = 0;
+
+   if (string == NULL)
       return;
 
-   va_start(ap, string);
-   vsprintf(text, string, ap);
+   va_start(ap, string);		
+   vsprintf(text, string, ap);	
    va_end(ap);
 
-   while(text[boucle]!=0 && boucle<lim)
-      boucle++;
-
+   while(text[boucle]!=0 && boucle<lim)boucle++;   
    boucle=(x2-x)/2 -(boucle*3);
    x=boucle;
 
@@ -89,23 +88,23 @@ void textCLpixel(unsigned  short  *buffer,int lim,int x,int x2,int y,
 
 }
 
-void textCpixel(unsigned  short *buffer,int x,int x2,int y,
-      unsigned  short  color,int tail,int plein,int zdep,char *string,...)
+void textCpixel(unsigned  short *buffer,int x,int x2,int y,unsigned  short  color,int tail,int plein,int zdep,char *string,...)
 {
-   int boucle=0;  
+   int boucle;
    char	text[256];	   	
    va_list	ap;			
 
-   if (!string)
-      return;
+   boucle = 0;
 
-   va_start(ap, string);
-   vsprintf(text, string, ap);
+   if (string == NULL)
+      return;		
+
+   va_start(ap, string);		
+   vsprintf(text, string, ap);	
    va_end(ap);
 
-   while(text[boucle]!=0)
-      boucle++;
-
+   while(text[boucle] != 0)
+      boucle++;   
    boucle=(x2-x)/2 -(boucle*3);
    x=boucle;
 
@@ -113,14 +112,20 @@ void textCpixel(unsigned  short *buffer,int x,int x2,int y,
    while(text[boucle]!=0)
    {
       printch(buffer,x,y,color,text[boucle],tail,plein,zdep);
-      boucle++;
-      x+=8;
+      boucle++;x+=8;//6;
    }
 
 }
 
-void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,
-      int dx,int dy,unsigned  short color)
+void DrawPointBmp(unsigned  short  *buffer,int x,int y,unsigned  short color)
+{
+   int idx;
+
+   idx = x + y * VIRTUAL_WIDTH;
+   buffer[idx]=color;	
+}
+
+void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short color)
 {
    int i,j,idx;
 
@@ -128,14 +133,14 @@ void DrawFBoxBmp(unsigned  short  *buffer,int x,int y,
    {
       for(j=y;j<y+dy;j++)
       {
-         idx=i+j*VIRTUAL_WIDTH;
-         buffer[idx]=color;
+         idx= i + j * VIRTUAL_WIDTH;
+         buffer[idx]=color;	
       }
    }
+
 }
 
-void DrawBoxBmp(unsigned  short  *buffer,int x,int y,
-      int dx,int dy,unsigned  short  color)
+void DrawBoxBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short  color)
 {
    int i,j,idx;
 
@@ -158,58 +163,49 @@ void DrawBoxBmp(unsigned  short  *buffer,int x,int y,
 }
 
 
-void DrawHlineBmp(unsigned  short  *buffer,int x,int y,
-      int dx,int dy,unsigned  short  color)
+void DrawHlineBmp(unsigned  short  *buffer,int x,int y,int dx,int dy,unsigned  short  color)
 {
    int i,j,idx;
 
    (void)j;
 
-   for(i = x; i < x + dx; i++)
+   for(i=x;i<x+dx;i++)
    {
-      idx = i + y * VIRTUAL_WIDTH;
-      buffer[idx] = color;		
+      idx=i+y*VIRTUAL_WIDTH;
+      buffer[idx]=color;		
    }
 }
 
-void DrawVlineBmp(unsigned  short *buffer,int x,int y,
-      int dx,int dy,unsigned  short  color){
-
+void DrawVlineBmp(unsigned  short *buffer,int x,int y,int dx,int dy,unsigned  short  color)
+{
    int i,j,idx;
-  
+
    (void)i;
 
-   for(j = y; j < y + dy; j++)
+   for(j=y;j<y+dy;j++)
    {
-      idx= x + j * VIRTUAL_WIDTH;
-      buffer[idx] = color;		
+      idx=x+j*VIRTUAL_WIDTH;
+      buffer[idx]=color;		
    }	
 }
 
-void DrawlineBmp(unsigned  short  *buffer,
-      int x1,int y1,int x2,int y2,unsigned  short  color){
-
-   int pixx, pixy;
-   int x, y;
-   int dx, dy; 	
-   int sx, sy;
-   int swaptmp;
-   int idx;
+void DrawlineBmp(unsigned  short  *buffer,int x1,int y1,int x2,int y2,unsigned  short  color)
+{
+   int pixx, pixy, x, y, dx, dy, sx, sy, swaptmp, idx;
 
    dx = x2 - x1;
    dy = y2 - y1;
    sx = (dx >= 0) ? 1 : -1;
    sy = (dy >= 0) ? 1 : -1;
 
-   if (dx==0)
+   if (dx == 0)
    {
-      if (dy>0)
+      if (dy > 0)
       {
          DrawVlineBmp(buffer, x1, y1,0, dy, color);
          return;
-
       }
-      else if (dy<0)
+      else if (dy < 0)
       {
          DrawVlineBmp(buffer, x1, y2,0, -dy, color);
          return;
@@ -228,7 +224,6 @@ void DrawlineBmp(unsigned  short  *buffer,
       {
          DrawHlineBmp(buffer, x1, y1, dx, 0, color);
          return;
-
       }
       else if (dx<0)
       {
@@ -274,15 +269,14 @@ void DrawlineBmp(unsigned  short  *buffer,
 
 }
 
-void DrawBox(unsigned  short  *buf,box b,
-      char t[],unsigned  short  color)
-{
+void DrawBox(unsigned  short  *buf,box b,char t[],unsigned  short  color){
+
    DrawBoxBmp(buf,b.x,b.y,b.dx,b.dy,color); 	
    textCpixel(buf,b.x, 3*b.x + b.dx ,b.y+2,color,1,1,4,"%s",t);
+
 }
 
-void DrawBoxF(unsigned  short  *buf,box b,
-      char t[],unsigned short  color,unsigned  short  border){
+void DrawBoxF(unsigned  short  *buf,box b,char t[],unsigned short  color,unsigned  short  border){
 
    int ydec=b.y+(b.dy/2)-4;
 
@@ -298,8 +292,7 @@ void DrawBoxF(unsigned  short  *buf,box b,
 
 const float DEG2RAD = 3.14159/180;
 
-void DrawCircle(unsigned short *buf,int x, int y,
-      int radius,unsigned short rgba,int full)
+void DrawCircle(unsigned short *buf,int x, int y, int radius,unsigned short rgba,int full)
 { 
    int i;
    float degInRad; 
@@ -311,11 +304,10 @@ void DrawCircle(unsigned short *buf,int x, int y,
       x1=x+cos(degInRad)*radius;
       y1=y+sin(degInRad)*radius;
 
-      if(full)
+      if (full)
          DrawlineBmp(buf,x,y, x1,y1,rgba); 
       else
          buf[x1+y1*VIRTUAL_WIDTH]=rgba;
-
    }
 
 }
@@ -354,10 +346,7 @@ void filter_scale2x(unsigned char *srcPtr, unsigned srcPitch,
 
 #include "font2.c"
 
-void Draw_string(unsigned short *surf, signed short int x,
-      signed short int y, const unsigned char *string,
-      unsigned short maxstrlen,unsigned short xscale,
-      unsigned short yscale, unsigned short fg, unsigned short bg)
+void Draw_string(unsigned short *surf, signed short int x, signed short int y, const unsigned char *string,unsigned short maxstrlen,unsigned short xscale, unsigned short yscale, unsigned short fg, unsigned short bg)
 {
    int k,strlen;
    int xrepeat, yrepeat;
@@ -365,20 +354,21 @@ void Draw_string(unsigned short *surf, signed short int x,
    signed short int ypixel;
    unsigned short *yptr; 
    int col, bit;
-   int surfw, surfh;
    unsigned char b;
 
    (void)k;
 
-   if(string==NULL)
+   if(!string)
       return;
 
    for(strlen = 0; strlen<maxstrlen && string[strlen]; strlen++) {}
 
-   surfw    = strlen * 7 * xscale;
-   surfh    = 8 * yscale;
-   linesurf = (unsigned char*)malloc(sizeof(unsigned short)*surfw*surfh );
-   yptr     = (unsigned short *)&linesurf[0];
+   int surfw=strlen * 7 * xscale;
+   int surfh=8 * yscale;
+
+   linesurf =(unsigned char*)malloc(sizeof(unsigned short)*surfw*surfh );
+
+   yptr = (unsigned short *)&linesurf[0];
 
    for(ypixel = 0; ypixel<8; ypixel++)
    {
@@ -407,17 +397,14 @@ void Draw_string(unsigned short *surf, signed short int x,
          if(*yptr!=0)surf[xrepeat+yrepeat*VIRTUAL_WIDTH] = *yptr;
 
    free(linesurf);
-
 }
 
 
-void Draw_text(unsigned  short *buffer,int x,int y,
-      unsigned  short  fgcol,unsigned  short int bgcol ,int scalex,
-      int scaley , int max,char *string,...)
+void Draw_text(unsigned  short *buffer,int x,int y,unsigned  short  fgcol,unsigned  short int bgcol ,int scalex,int scaley , int max,char *string,...)
 {
-   char text[256];
-   va_list	ap;
-   int boucle=0;
+   int boucle=0;  
+   char text[256];	   	
+   va_list	ap;			
 
    (void)boucle;
 
@@ -428,5 +415,6 @@ void Draw_text(unsigned  short *buffer,int x,int y,
    vsprintf(text, string, ap);
    va_end(ap);
 
-   Draw_string(buffer, x,y, text,max, scalex, scaley,fgcol,bgcol);
+   Draw_string(buffer, x,y, text,max, scalex, scaley,fgcol,bgcol);	
 }
+
