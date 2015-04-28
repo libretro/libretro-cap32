@@ -186,101 +186,100 @@ static INLINE void SetAmplC(uint8_t Value)
 
 void Case_EnvType_0_3__9(void)
 {
-   if (PSG.FirstPeriod) {
+   if (PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv--;
-      if (!PSG.AmplitudeEnv) {
+      if (!PSG.AmplitudeEnv)
          PSG.FirstPeriod = false;
-      }
    }
 }
 
-
-
 void Case_EnvType_4_7__15(void)
 {
-   if (PSG.FirstPeriod) {
+   if (PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv++;
-      if (PSG.AmplitudeEnv == 32) {
+      if (PSG.AmplitudeEnv == 32)
+      {
          PSG.FirstPeriod = false;
          PSG.AmplitudeEnv = 0;
       }
    }
 }
-
-
 
 void Case_EnvType_8(void)
 {
    PSG.AmplitudeEnv = (PSG.AmplitudeEnv - 1) & 31;
 }
 
-
-
 void Case_EnvType_10(void)
 {
-   if (PSG.FirstPeriod) {
+   if (PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv--;
-      if (PSG.AmplitudeEnv == -1) {
+      if (PSG.AmplitudeEnv == -1)
+      {
          PSG.FirstPeriod = false;
          PSG.AmplitudeEnv = 0;
       }
    }
    else {
       PSG.AmplitudeEnv++;
-      if (PSG.AmplitudeEnv == 32) {
+      if (PSG.AmplitudeEnv == 32)
+      {
          PSG.FirstPeriod = true;
          PSG.AmplitudeEnv = 31;
       }
    }
 }
 
-
-
 void Case_EnvType_11(void)
 {
-   if (PSG.FirstPeriod) {
+   if (PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv--;
-      if (PSG.AmplitudeEnv == -1) {
+      if (PSG.AmplitudeEnv == -1)
+      {
          PSG.FirstPeriod = false;
          PSG.AmplitudeEnv = 31;
       }
    }
 }
-
-
 
 void Case_EnvType_12(void)
 {
    PSG.AmplitudeEnv = (PSG.AmplitudeEnv + 1) & 31;
 }
 
-
-
 void Case_EnvType_13(void)
 {
-   if (PSG.FirstPeriod) {
+   if (PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv++;
-      if (PSG.AmplitudeEnv == 32) {
+      if (PSG.AmplitudeEnv == 32)
+      {
          PSG.FirstPeriod = false;
          PSG.AmplitudeEnv = 31;
       }
    }
 }
 
-
-
 void Case_EnvType_14(void)
 {
-   if (!PSG.FirstPeriod) {
+   if (!PSG.FirstPeriod)
+   {
       PSG.AmplitudeEnv--;
-      if (PSG.AmplitudeEnv == -1) {
+      if (PSG.AmplitudeEnv == -1)
+      {
          PSG.FirstPeriod = true;
          PSG.AmplitudeEnv = 0;
       }
    }
-   else {
+   else
+   {
       PSG.AmplitudeEnv++;
-      if (PSG.AmplitudeEnv == 32) {
+      if (PSG.AmplitudeEnv == 32)
+      {
          PSG.FirstPeriod = false;
          PSG.AmplitudeEnv = 31;
       }
@@ -291,13 +290,13 @@ static INLINE void SetEnvelopeRegister(uint8_t Value)
 {
    Envelope_Counter.Hi = 0;
    PSG.FirstPeriod = true;
-   if (!(Value & 4)) {
+   if (!(Value & 4))
       PSG.AmplitudeEnv = 32;
-   }
-   else {
+   else
       PSG.AmplitudeEnv = -1;
-   }
+
    PSG.RegisterAY.EnvType = Value;
+
    switch (Value)
    {
       case 0:
@@ -377,32 +376,39 @@ void SetAYRegister(int Num, uint8_t Value)
 static INLINE void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
-   if (Ton_Counter_A.Hi >= *(uint16_t *)&PSG.RegisterAY.TonALo) {
+   if (Ton_Counter_A.Hi >= *(uint16_t *)&PSG.RegisterAY.TonALo)
+   {
       Ton_Counter_A.Hi = 0;
       Ton_A ^= 1;
    }
+
    Ton_Counter_B.Hi++;
-   if (Ton_Counter_B.Hi >= *(uint16_t *)&PSG.RegisterAY.TonBLo) {
+
+   if (Ton_Counter_B.Hi >= *(uint16_t *)&PSG.RegisterAY.TonBLo)
+   {
       Ton_Counter_B.Hi = 0;
       Ton_B ^= 1;
    }
+
    Ton_Counter_C.Hi++;
-   if (Ton_Counter_C.Hi >= *(uint16_t *)&PSG.RegisterAY.TonCLo) {
+
+   if (Ton_Counter_C.Hi >= *(uint16_t *)&PSG.RegisterAY.TonCLo)
+   {
       Ton_Counter_C.Hi = 0;
       Ton_C ^= 1;
    }
    Noise_Counter.Hi++;
-   if ((!(Noise_Counter.Hi & 1)) && (Noise_Counter.Hi >= (PSG.RegisterAY.Noise << 1))) {
+   if ((!(Noise_Counter.Hi & 1)) && (Noise_Counter.Hi >= (PSG.RegisterAY.Noise << 1)))
+   {
       Noise_Counter.Hi = 0;
       Noise.Seed = (((((Noise.Seed >> 13) ^ (Noise.Seed >> 16)) & 1) ^ 1) | Noise.Seed << 1) & 0x1ffff;
    }
-   if (!Envelope_Counter.Hi) {
+
+   if (!Envelope_Counter.Hi)
       Case_EnvType();
-   }
    Envelope_Counter.Hi++;
-   if (Envelope_Counter.Hi >= *(uint16_t *)&PSG.RegisterAY.EnvelopeLo) {
+   if (Envelope_Counter.Hi >= *(uint16_t *)&PSG.RegisterAY.EnvelopeLo)
       Envelope_Counter.Hi = 0;
-   }
 }
 
 static INLINE void Synthesizer_Mixer_Q(void)
@@ -410,81 +416,86 @@ static INLINE void Synthesizer_Mixer_Q(void)
    int LevL, LevR, k;
 
    LevL = bTapeLevel ? LevelTape : 0; // start with the tape signal
-   if (CPC.snd_pp_device) {
+   if (CPC.snd_pp_device)
       LevL += Level_PP[CPC.printer_port];
-   }
 
    LevR = LevL;
-   if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4)) {
+   if (Ton_EnA)
+   {
+      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4))
          k = Ton_A;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnA) {
+
+   if (Noise_EnA)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnA) {
+
+   if (k)
+   {
+      if (Envelope_EnA)
+      {
          LevL += Level_AL[PSG.RegisterAY.AmplitudeA * 2 + 1];
          LevR += Level_AR[PSG.RegisterAY.AmplitudeA * 2 + 1];
       }
-      else {
+      else
+      {
          LevL += Level_AL[PSG.AmplitudeEnv];
          LevR += Level_AR[PSG.AmplitudeEnv];
       }
    }
 
-   if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4)) {
+   if (Ton_EnB)
+   {
+      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4))
          k = Ton_B;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnB) {
+
+   if (Noise_EnB)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnB) {
+
+   if (k)
+   {
+      if (Envelope_EnB)
+      {
          LevL += Level_BL[PSG.RegisterAY.AmplitudeB * 2 + 1];
          LevR += Level_BR[PSG.RegisterAY.AmplitudeB * 2 + 1];
       }
-      else {
+      else
+      {
          LevL += Level_BL[PSG.AmplitudeEnv];
          LevR += Level_BR[PSG.AmplitudeEnv];
       }
    }
 
-   if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4)) {
+   if (Ton_EnC)
+   {
+      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4))
          k = Ton_C;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnC) {
+
+   if (Noise_EnC)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnC) {
+
+   if (k)
+   {
+      if (Envelope_EnC)
+      {
          LevL += Level_CL[PSG.RegisterAY.AmplitudeC * 2 + 1];
          LevR += Level_CR[PSG.RegisterAY.AmplitudeC * 2 + 1];
       }
-      else {
+      else
+      {
          LevL += Level_CL[PSG.AmplitudeEnv];
          LevR += Level_CR[PSG.AmplitudeEnv];
       }
@@ -497,7 +508,9 @@ static INLINE void Synthesizer_Mixer_Q(void)
 void Synthesizer_Stereo16(void)
 {
    int Tick_Counter = 0;
-   while (LoopCount.Hi) {
+
+   while (LoopCount.Hi)
+   {
       Synthesizer_Logic_Q();
       Synthesizer_Mixer_Q();
       Tick_Counter++;
@@ -518,11 +531,13 @@ void Synthesizer_Stereo16(void)
 #endif
 
    CPC.snd_bufferptr += 4;
-   Left_Chan = 0;
-   Right_Chan = Left_Chan;
-   if (CPC.snd_bufferptr >= pbSndBufferEnd) {
+   Left_Chan          = 0;
+   Right_Chan         = Left_Chan;
+
+   if (CPC.snd_bufferptr >= pbSndBufferEnd)
+   {
       CPC.snd_bufferptr = pbSndBuffer;
-      PSG.buffer_full = 1;
+      PSG.buffer_full   = 1;
    }
 }
 
@@ -531,21 +546,26 @@ void Synthesizer_Stereo16(void)
 void Synthesizer_Stereo8(void)
 {
    int Tick_Counter = 0;
-   while (LoopCount.Hi) {
+   while (LoopCount.Hi)
+   {
       Synthesizer_Logic_Q();
       Synthesizer_Mixer_Q();
       Tick_Counter++;
       LoopCount.Hi--;
    }
+
    LoopCount.Re += LoopCountInit;
    reg_pair val;
    val.b.l = 128 + Left_Chan / Tick_Counter;
    val.b.h = 128 + Right_Chan / Tick_Counter;
    *(uint16_t *)CPC.snd_bufferptr = val.w.l; // write to mixing buffer
    CPC.snd_bufferptr += 2;
-   Left_Chan = 0;
+
+   Left_Chan  = 0;
    Right_Chan = Left_Chan;
-   if (CPC.snd_bufferptr >= pbSndBufferEnd) {
+
+   if (CPC.snd_bufferptr >= pbSndBufferEnd)
+   {
       CPC.snd_bufferptr = pbSndBuffer;
       PSG.buffer_full = 1;
    }
@@ -555,78 +575,71 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 {
    int Lev, k;
 
-   Lev = bTapeLevel ? LevelTape : 0; // start with the tape signal
-   if (CPC.snd_pp_device) {
+   Lev = bTapeLevel ? LevelTape : 0; /* start with the tape signal */
+   if (CPC.snd_pp_device)
       Lev += Level_PP[CPC.printer_port];
-   }
 
-   if (Ton_EnA) {
-      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4)) {
+   if (Ton_EnA)
+   {
+      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4))
          k = Ton_A;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnA) {
+
+   if (Noise_EnA)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnA) {
+
+   if (k)
+   {
+      if (Envelope_EnA)
          Lev += Level_AL[PSG.RegisterAY.AmplitudeA * 2 + 1];
-      }
-      else {
+      else
          Lev += Level_AL[PSG.AmplitudeEnv];
-      }
    }
 
-   if (Ton_EnB) {
-      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4)) {
+   if (Ton_EnB)
+   {
+      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4))
          k = Ton_B;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnB) {
+
+   if (Noise_EnB)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnB) {
+
+   if (k)
+   {
+      if (Envelope_EnB)
          Lev += Level_BL[PSG.RegisterAY.AmplitudeB * 2 + 1];
-      }
-      else {
+      else
          Lev += Level_BL[PSG.AmplitudeEnv];
-      }
    }
 
-   if (Ton_EnC) {
-      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4)) {
+   if (Ton_EnC)
+   {
+      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4))
          k = Ton_C;
-      }
-      else {
+      else
          k = 1;
-      }
    }
-   else {
+   else
       k = 1;
-   }
-   if (Noise_EnC) {
+
+   if (Noise_EnC)
       k &= Noise.Val;
-   }
-   if (k) {
-      if (Envelope_EnC) {
+
+   if (k)
+   {
+      if (Envelope_EnC)
          Lev += Level_CL[PSG.RegisterAY.AmplitudeC * 2 + 1];
-      }
-      else {
+      else
          Lev += Level_CL[PSG.AmplitudeEnv];
-      }
    }
 
    Left_Chan += Lev;
@@ -658,17 +671,20 @@ void Synthesizer_Mono16(void)
 void Synthesizer_Mono8(void)
 {
    int Tick_Counter = 0;
-   while (LoopCount.Hi) {
+   while (LoopCount.Hi)
+   {
       Synthesizer_Logic_Q();
       Synthesizer_Mixer_Q_Mono();
       Tick_Counter++;
       LoopCount.Hi--;
    }
+
    LoopCount.Re += LoopCountInit;
    *(uint8_t *)CPC.snd_bufferptr = 128 + Left_Chan / Tick_Counter; // write to mixing buffer
    CPC.snd_bufferptr++;
    Left_Chan = 0;
-   if (CPC.snd_bufferptr >= pbSndBufferEnd) {
+   if (CPC.snd_bufferptr >= pbSndBufferEnd)
+   {
       CPC.snd_bufferptr = pbSndBuffer;
       PSG.buffer_full = 1;
    }
@@ -687,28 +703,28 @@ void Calculate_Level_Tables(void)
    Index_C = Index_CL;
    l = Index_A + Index_B + Index_C;
    r = Index_AR + Index_BR + Index_CR;
-   if (CPC.snd_stereo) {
-      if (l < r) {
+   if (CPC.snd_stereo)
+   {
+      if (l < r)
          l = r;
-      }
    }
-   else {
+   else
+   {
       l += r;
       Index_A += Index_AR;
       Index_B += Index_BR;
       Index_C += Index_CR;
    }
-   if (l == 0) {
+   if (l == 0)
       l++;
-   }
-   if (!CPC.snd_bits) { // 8 bits per sample?
+   if (!CPC.snd_bits) // 8 bits per sample?
       r = 127;
-   }
-   else {
+   else
       r = 32767;
-   }
    l = 255 * r / l;
-   for (i = 0; i < 16; i++) {
+
+   for (i = 0; i < 16; i++)
+   {
       b = (int)rint(Index_A / 255.0 * Amplitudes_AY[i]);
       b = (int)rint(b / 65535.0 * l);
       Level_AL[i * 2] = b;
@@ -735,7 +751,9 @@ void Calculate_Level_Tables(void)
       Level_CR[i * 2 + 1] = b;
    }
    k = exp(CPC.snd_volume * log(2.0) / PreAmpMax) - 1;
-   for (i = 0; i < 32; i++) {
+
+   for (i = 0; i < 32; i++)
+   {
       Level_AL[i] = (int)rint(Level_AL[i] * k);
       Level_AR[i] = (int)rint(Level_AR[i] * k);
       Level_BL[i] = (int)rint(Level_BL[i] * k);
@@ -743,47 +761,44 @@ void Calculate_Level_Tables(void)
       Level_CL[i] = (int)rint(Level_CL[i] * k);
       Level_CR[i] = (int)rint(Level_CR[i] * k);
    }
-   if (!CPC.snd_bits) { // 8 bits per sample?
+
+   if (!CPC.snd_bits) // 8 bits per sample?
       LevelTape = -(int)rint((TAPE_VOLUME / 2) * k);
-   }
-   else {
+   else
       LevelTape = -(int)rint((TAPE_VOLUME * 128) * k);
-   }
-   for (i = 0, b = 255; i < 256; i++) { // calculate the 256 levels of the Digiblaster/Soundplayer
+
+   for (i = 0, b = 255; i < 256; i++)
+   {
+      /* calculate the 256 levels of the Digiblaster/Soundplayer */
       Level_PP[i] = -(int)rint(((b << 8) / 65535.0 * l) * k);
       b--;
    }
 }
 
-
-
 void ResetAYChipEmulation(void)
 {
-   Ton_Counter_A.Re = 0;
-   Ton_Counter_B.Re = 0;
-   Ton_Counter_C.Re = 0;
-   Noise_Counter.Re = 0;
+   Ton_Counter_A.Re    = 0;
+   Ton_Counter_B.Re    = 0;
+   Ton_Counter_C.Re    = 0;
+   Noise_Counter.Re    = 0;
    Envelope_Counter.Re = 0;
-   Ton_A = 0;
-   Ton_B = 0;
-   Ton_C = 0;
-   Left_Chan = 0;
-   Right_Chan = 0;
-   Noise.Seed = 0xffff;
+   Ton_A               = 0;
+   Ton_B               = 0;
+   Ton_C               = 0;
+   Left_Chan           = 0;
+   Right_Chan          = 0;
+   Noise.Seed          = 0xffff;
 }
-
-
 
 void InitAYCounterVars(void)
 {
    CPC.snd_cycle_count_init.both = (int64_t)rint((4000000 * ((CPC.speed * 25) / 100.0)) /
-      freq_table[CPC.snd_playback_rate] * 4294967296.0); // number of Z80 cycles per sample
+         freq_table[CPC.snd_playback_rate] * 4294967296.0); // number of Z80 cycles per sample
+
    LoopCountInit = (int64_t)rint(1000000.0 / (4000000.0 * ((CPC.speed * 25) / 100.0)) / 8.0 *
-      CPC.snd_cycle_count_init.both); // number of AY counter increments per sample
-   LoopCount.Re = LoopCountInit;
+         CPC.snd_cycle_count_init.both); // number of AY counter increments per sample
+   LoopCount.Re  = LoopCountInit;
 }
-
-
 
 void InitAY(void)
 {
@@ -798,20 +813,20 @@ void InitAY(void)
    InitAYCounterVars();
    ResetAYChipEmulation();
 
-   if (CPC.snd_stereo) { // stereo mode?
-      if (CPC.snd_bits) { // 16 bits per sample?
+   // stereo mode?
+   if (CPC.snd_stereo)
+   {
+      if (CPC.snd_bits) // 16 bits per sample?
          PSG.Synthesizer = Synthesizer_Stereo16;
-      }
-      else { // 8 bits
+      else // 8 bits
          PSG.Synthesizer = Synthesizer_Stereo8;
-      }
    }
-   else { // mono
-      if (CPC.snd_bits) { // 16 bits per sample?
+   else // mono
+   {
+      // 16 bits per sample?
+      if (CPC.snd_bits)
          PSG.Synthesizer = Synthesizer_Mono16;
-      }
-      else { // 8 bits
+      else // 8 bits
          PSG.Synthesizer = Synthesizer_Mono8;
-      }
    }
 }
