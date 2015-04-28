@@ -2587,40 +2587,46 @@ int video_set_palette (void)
 
    if (!CPC.scr_tube)
    {
-      int n;
       for (n = 0; n < 32; n++)
       {
-         uint32_t red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 31);
-         if (red > 31) { // limit to the maximum
+         uint32_t red, green, blue, colr;
+
+         red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 31);
+         if (red > 31) /* limit to the maximum */
             red = 31;
-         }
-         uint32_t green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 63);
-         if (green > 63) {
+
+         green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 63);
+         if (green > 63)
             green = 63;
-         }
-         uint32_t blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 31);
-         if (blue > 31) {
+
+         blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 31);
+         if (blue > 31)
             blue = 31;
-         } 
-         uint32_t colr = blue | (green << 5) | (red << 11);
+
+         colr       = blue | (green << 5) | (red << 11);
          colours[n] = colr | (colr << 16);
 
       }
-   } else {
-      int n;
-      for (n = 0; n < 32; n++) {
+   }
+   else
+   {
+      for (n = 0; n < 32; n++)
+      {
+         uint32_t colr;
          uint32_t green = (uint32_t)(colours_green[n] * (CPC.scr_intensity / 10.0) * 63);
-         if (green > 63) {
+
+         if (green > 63)
             green = 63;
-         }
-         uint32_t colr = green << 5;
+
+         colr       = green << 5;
          colours[n] = colr | (colr << 16);
 
       }
    }
 
    for (n = 0; n < 17; n++)
-   { // loop for all colours + border
+   {
+      /* loop for all colours + border */
       int i = GateArray.ink_values[n];
       (void)i;
       GateArray.palette[n] = colours[GateArray.ink_values[n]];
@@ -3427,8 +3433,10 @@ void retro_loop(void)
    while(RLOOP==1)
       theloop();
 
-   // wait a while for BASIC prompt to be ready before autorunning
-   if (rundisk_wait<50) rundisk_wait++;
+   /* wait a while for BASIC prompt 
+    * to be ready before autorunning */
+   if (rundisk_wait<50)
+      rundisk_wait++;
    else if (rundisk_wait==50)
    {
      if (autorun)
