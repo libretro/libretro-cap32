@@ -117,7 +117,6 @@ void Screen_SetFullUpdate(void)
    memset(bmp, 0, sizeof(bmp));
 }
 
-//DBG LOAD DSK
 void enter_gui(void)
 {
    char dskimg[512]="\0";

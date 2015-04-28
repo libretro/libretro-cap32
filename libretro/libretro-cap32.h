@@ -1,5 +1,5 @@
 #ifndef LIBRETRO_CAP32_H
-#define LIBRETRO_CAP32_H 1
+#define LIBRETRO_CAP32_H
 
 #include <stdint.h>
 #include <string.h>
@@ -47,5 +47,7 @@ void retro_joy0(unsigned char joy0);
 void retro_key_down(int key);
 void retro_key_up(int key);
 int snapshot_save (char *pchFileName);
+void enter_gui(void);
+int update_input_gui(void);
 
 #endif
