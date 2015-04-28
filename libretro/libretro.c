@@ -1,7 +1,6 @@
 #include "libretro.h"
 #include "libretro-glue.h"
-
-#include "CPCkeymap.h"
+#include "libretro-keymap.h"
 
 extern void retro_key_down(int key);
 extern void retro_key_up(int key);
