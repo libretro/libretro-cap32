@@ -2754,15 +2754,14 @@ void loadConfiguration (void)
    CPC.snd_bits = getConfigValueInt(chFileName, "sound", "bits", 1) & 1;
    CPC.snd_stereo = getConfigValueInt(chFileName, "sound", "stereo", 1) & 1;
    CPC.snd_volume = getConfigValueInt(chFileName, "sound", "volume", 80);
-   if ((CPC.snd_volume < 0) || (CPC.snd_volume > 100)) {
+
+   if ((CPC.snd_volume < 0) || (CPC.snd_volume > 100))
       CPC.snd_volume = 80;
-   }
    CPC.snd_pp_device = getConfigValueInt(chFileName, "sound", "pp_device", 0) & 1;
 
    CPC.kbd_layout = getConfigValueInt(chFileName, "control", "kbd_layout", 0);
-   if (CPC.kbd_layout > 3) {
+   if (CPC.kbd_layout > 3)
       CPC.kbd_layout = 0;
-   }
 
    CPC.max_tracksize = getConfigValueInt(chFileName, "file", "max_track_size", 6144-154);
    strncpy(chPath, chAppPath, sizeof(chPath)-7);
