@@ -1,4 +1,5 @@
-#include "libretro-glue.h"
+#include "retroscreen.h"
+#include "libretro-core.h"
 #include "graph.h"
 
 #include <unistd.h>
@@ -166,9 +167,8 @@ int HandleExtension(char *path,char *ext)
 //basic filebrowser
 #define MAXSEL 10
 
-char *filebrowser(const char *path_and_name)
+char *filebrowser(char *buff,const char *path_and_name)
 {
-   static char seldsk[512];	 
    static char path[FILENAME_MAX];                 /* The actual path names */
    static struct dirent **files = NULL;
    static bool reloaddir = true;
@@ -181,13 +181,20 @@ char *filebrowser(const char *path_and_name)
 
    (void)firstin;
 
+   char *ret=malloc(512);
+
+#if defined PITCH && PITCH == 4
+unsigned *pix=(unsigned*)buff;
+#else
+unsigned short *pix=(unsigned short *)buff;
+#endif
+
    if(first==0)
    {
       entries = 0;		
 
       if (path_and_name && path_and_name[0])
          sprintf(path,"%s",path_and_name);			
-
       first++;
    }
 
@@ -199,17 +206,20 @@ char *filebrowser(const char *path_and_name)
       if (entries < 0)
       {
          fprintf(stderr, "Path not found. :(\n");
-         first=0;			
-
-         return "EMPTY";
+         first=0;	
+		
+			sprintf(ret,"EMPTY\0");
+ 			return ret;
       }
 
       reloaddir = false;
 
    }
 
-   if(entries==0)
-      return "EMPTY";
+   if(entries==0){
+		sprintf(ret,"NO CHOICE\0");
+		return ret;
+	}    
 
    ndsknum=entries;
 
@@ -289,25 +299,30 @@ char *filebrowser(const char *path_and_name)
 
                select= fselect = pselect = 0;
 
-               return "NO CHOICE";
+            	sprintf(ret,"NO CHOICE\0");
+ 				return ret;
             }
 
             free(tempstr);
 
-            sprintf(seldsk,"%s%s",path,files[select]->d_name);
-
-            //FIXME
+           //FIXME
 
             if( HandleExtension(files[select]->d_name,"DSK") ||\
                   HandleExtension(files[select]->d_name,"dsk") ||\
                   HandleExtension(files[select]->d_name,"SNA") ||\
-                  HandleExtension(files[select]->d_name,"sna") )
-               return (char*)seldsk;
-            return "NO CHOICE";
+                  HandleExtension(files[select]->d_name,"sna") ){
+
+				 sprintf(ret,"%s%s",path,files[select]->d_name);
+	             return ret;
+			}
+
+            sprintf(ret,"NO CHOICE\0");
+ 			return ret;
          }
          break;
       case  3 : //CANCEL
-         return "EMPTY";
+			sprintf(ret,"EMPTY\0");
+ 			return ret;
          break;
       default : 
          break;
@@ -316,12 +331,12 @@ char *filebrowser(const char *path_and_name)
    if(i!=-1 && i!=1)
       pad_held_down = 0;
 
-   DrawFBoxBmp(bmp,CROP_WIDTH/4,CROP_HEIGHT/10,CROP_WIDTH/2,CROP_HEIGHT-20,RGB565(3,3,3));
-   DrawFBoxBmp(bmp,2+CROP_WIDTH/4,1+CROP_HEIGHT/10,-4+CROP_WIDTH/2,-2+CROP_HEIGHT-20,RGB565(22,23,26));
+   DrawFBoxBmp((char*)pix/*bmp*/,CROP_WIDTH/4,CROP_HEIGHT/10,CROP_WIDTH/2,CROP_HEIGHT-20,RGB565(3,3,3));
+   DrawFBoxBmp((char*)pix/*bmp*/,2+CROP_WIDTH/4,1+CROP_HEIGHT/10,-4+CROP_WIDTH/2,-2+CROP_HEIGHT-20,RGB565(22,23,26));
 
    for(i = pselect; i < (pselect + LIMSEL); i++)
    {
-      Draw_text(bmp,
+      Draw_text((char*)pix/*bmp*/,
             20 + CROP_WIDTH / 4,
             30 + (i-pselect) * 16,
             RGB565((fselect == (i-pselect)) ? 25 : 5, 5, 5),
@@ -330,7 +345,9 @@ char *filebrowser(const char *path_and_name)
             files[i]->d_name);
    }
 
-   return "NO CHOICE";
+	sprintf(ret,"NO CHOICE\0");
+	return ret;
+
 }
 
 

@@ -289,7 +289,7 @@ FILE *pfileObject;
 FILE *pfoPrinter;
 
 #ifdef DEBUG
-//#define DEBUG_KEY SDLK_F9
+//#define DEBUG_KEY RETROK_F9
 uint32_t dwDebugFlag = 1;
 FILE *pfoDebug;
 #endif
@@ -355,163 +355,240 @@ typedef enum {
    CAP32_TAPEPLAY
 } CAP32_KEYS;
 
-typedef enum {
-   CPC_0,
-   CPC_1,
-   CPC_2,
-   CPC_3,
-   CPC_4,
-   CPC_5,
-   CPC_6,
-   CPC_7,
-   CPC_8,
-   CPC_9,
-   CPC_A,
-   CPC_B,
-   CPC_C,
-   CPC_D,
-   CPC_E,
-   CPC_F,
-   CPC_G,
-   CPC_H,
-   CPC_I,
-   CPC_J,
-   CPC_K,
-   CPC_L,
-   CPC_M,
-   CPC_N,
-   CPC_O,
-   CPC_P,
-   CPC_Q,
-   CPC_R,
-   CPC_S,
-   CPC_T,
-   CPC_U,
-   CPC_V,
-   CPC_W,
-   CPC_X,
-   CPC_Y,
-   CPC_Z,
-   CPC_a,
-   CPC_b,
-   CPC_c,
-   CPC_d,
-   CPC_e,
-   CPC_f,
-   CPC_g,
-   CPC_h,
-   CPC_i,
-   CPC_j,
-   CPC_k,
-   CPC_l,
-   CPC_m,
-   CPC_n,
-   CPC_o,
-   CPC_p,
-   CPC_q,
-   CPC_r,
-   CPC_s,
-   CPC_t,
-   CPC_u,
-   CPC_v,
-   CPC_w,
-   CPC_x,
-   CPC_y,
-   CPC_z,
-   CPC_AMPERSAND,
-   CPC_ASTERISK,
-   CPC_AT,
-   CPC_BACKQUOTE,
-   CPC_BACKSLASH,
-   CPC_CAPSLOCK,
-   CPC_CLR,
-   CPC_COLON,
-   CPC_COMMA,
-   CPC_CONTROL,
-   CPC_COPY,
-   CPC_CPY_DOWN,
-   CPC_CPY_LEFT,
-   CPC_CPY_RIGHT,
-   CPC_CPY_UP,
-   CPC_CUR_DOWN,
-   CPC_CUR_LEFT,
-   CPC_CUR_RIGHT,
-   CPC_CUR_UP,
-   CPC_CUR_ENDBL,
-   CPC_CUR_HOMELN,
-   CPC_CUR_ENDLN,
-   CPC_CUR_HOMEBL,
-   CPC_DBLQUOTE,
-   CPC_DEL,
-   CPC_DOLLAR,
-   CPC_ENTER,
-   CPC_EQUAL,
-   CPC_ESC,
-   CPC_EXCLAMATN,
-   CPC_F0,
-   CPC_F1,
-   CPC_F2,
-   CPC_F3,
-   CPC_F4,
-   CPC_F5,
-   CPC_F6,
-   CPC_F7,
-   CPC_F8,
-   CPC_F9,
-   CPC_FPERIOD,
-   CPC_GREATER,
-   CPC_HASH,
-   CPC_LBRACKET,
-   CPC_LCBRACE,
-   CPC_LEFTPAREN,
-   CPC_LESS,
-   CPC_LSHIFT,
-   CPC_MINUS,
-   CPC_PERCENT,
-   CPC_PERIOD,
-   CPC_PIPE,
-   CPC_PLUS,
-   CPC_POUND,
-   CPC_POWER,
-   CPC_QUESTION,
-   CPC_QUOTE,
-   CPC_RBRACKET,
-   CPC_RCBRACE,
-   CPC_RETURN,
-   CPC_RIGHTPAREN,
-   CPC_RSHIFT,
-   CPC_SEMICOLON,
-   CPC_SLASH,
-   CPC_SPACE,
-   CPC_TAB,
-   CPC_UNDERSCORE,
-   CPC_J0_UP,
-   CPC_J0_DOWN,
-   CPC_J0_LEFT,
-   CPC_J0_RIGHT,
-   CPC_J0_FIRE1,
-   CPC_J0_FIRE2,
-   CPC_J1_UP,
-   CPC_J1_DOWN,
-   CPC_J1_LEFT,
-   CPC_J1_RIGHT,
-   CPC_J1_FIRE1,
-   CPC_J1_FIRE2,
-   CPC_ES_NTILDE,
-   CPC_ES_nTILDE,
-   CPC_ES_PESETA,
-   CPC_FR_eACUTE,
-   CPC_FR_eGRAVE,
-   CPC_FR_cCEDIL,
-   CPC_FR_aGRAVE,
-   CPC_FR_uGRAVE
-} CPC_KEYS;
+
+#define KMOD_CTRL (KMOD_LCTRL|KMOD_RCTRL)
+#define KMOD_SHIFT  (KMOD_LSHIFT|KMOD_RSHIFT)
+#define KMOD_ALT  (KMOD_LALT|KMOD_RALT)
+#define KMOD_META (KMOD_LMETA|KMOD_RMETA)
 
 #define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
 #define MOD_PC_CTRL     (KMOD_CTRL << 16)
 #define MOD_PC_MODE     (KMOD_MODE << 16)
 
 #define KBD_MAX_ENTRIES 160
+
+#include "libretro.h"
+
+//TAKEN FORM ARNOLD
+typedef enum
+{
+	/* line 0, bit 0..bit 7 */
+	CPC_KEY_CURSOR_UP = 0,
+	CPC_KEY_CURSOR_RIGHT,
+	CPC_KEY_CURSOR_DOWN,
+	CPC_KEY_F9,
+	CPC_KEY_F6,
+	CPC_KEY_F3,
+	CPC_KEY_SMALL_ENTER,
+	CPC_KEY_FDOT,
+	/* line 1, bit 0..bit 7 */
+	CPC_KEY_CURSOR_LEFT,
+	CPC_KEY_COPY,
+	CPC_KEY_F7,
+	CPC_KEY_F8,
+	CPC_KEY_F5,
+	CPC_KEY_F1,
+	CPC_KEY_F2,
+	CPC_KEY_F0,
+	/* line 2, bit 0..bit 7 */
+	CPC_KEY_CLR,
+	CPC_KEY_OPEN_SQUARE_BRACKET,
+	CPC_KEY_RETURN,
+	CPC_KEY_CLOSE_SQUARE_BRACKET,
+	CPC_KEY_F4,
+	CPC_KEY_SHIFT,
+	CPC_KEY_FORWARD_SLASH,
+	CPC_KEY_CONTROL,
+	/* line 3, bit 0.. bit 7 */
+	CPC_KEY_HAT,
+	CPC_KEY_MINUS,
+	CPC_KEY_AT,
+	CPC_KEY_P,
+	CPC_KEY_SEMICOLON,
+	CPC_KEY_COLON,
+	CPC_KEY_BACKSLASH,
+	CPC_KEY_DOT,
+	/* line 4, bit 0..bit 7 */
+	CPC_KEY_ZERO,
+	CPC_KEY_9,
+	CPC_KEY_O,
+	CPC_KEY_I,
+	CPC_KEY_L,
+	CPC_KEY_K,
+	CPC_KEY_M,
+	CPC_KEY_COMMA,
+	/* line 5, bit 0..bit 7 */
+	CPC_KEY_8,
+	CPC_KEY_7,
+	CPC_KEY_U,
+	CPC_KEY_Y,
+	CPC_KEY_H,
+	CPC_KEY_J,
+	CPC_KEY_N,
+	CPC_KEY_SPACE,
+	/* line 6, bit 0..bit 7 */
+	CPC_KEY_6,
+	CPC_KEY_5,
+	CPC_KEY_R,
+	CPC_KEY_T,
+	CPC_KEY_G,
+	CPC_KEY_F,
+	CPC_KEY_B,
+	CPC_KEY_V,
+	/* line 7, bit 0.. bit 7 */
+	CPC_KEY_4,
+	CPC_KEY_3,
+	CPC_KEY_E,
+	CPC_KEY_W,
+	CPC_KEY_S,
+	CPC_KEY_D,
+	CPC_KEY_C,
+	CPC_KEY_X,
+	/* line 8, bit 0.. bit 7 */
+	CPC_KEY_1,
+	CPC_KEY_2,
+	CPC_KEY_ESC,
+	CPC_KEY_Q,
+	CPC_KEY_TAB,
+	CPC_KEY_A,
+	CPC_KEY_CAPS_LOCK,
+	CPC_KEY_Z,
+	/* line 9, bit 7..bit 0 */
+	CPC_KEY_JOY_UP,
+	CPC_KEY_JOY_DOWN,
+	CPC_KEY_JOY_LEFT,
+	CPC_KEY_JOY_RIGHT,
+	CPC_KEY_JOY_FIRE1,
+	CPC_KEY_JOY_FIRE2,
+	CPC_KEY_SPARE,
+	CPC_KEY_DEL,
+
+
+	/* no key press */
+	CPC_KEY_NULL
+} CPC_KEY_ID;
+
+void CPC_SetKey(int KeyID)
+{
+	if (KeyID!=CPC_KEY_NULL)
+	{
+		int Line = KeyID>>3;
+		int Bit = KeyID & 0x07;
+		keyboard_matrix/*KeyboardData*/[Line] &= ~(1<<Bit);
+	}
+}
+
+void CPC_ClearKey(int KeyID)
+{
+	if (KeyID!=CPC_KEY_NULL)
+	{
+		int Line = KeyID>>3;
+		int Bit = KeyID & 0x07;
+		keyboard_matrix/*KeyboardData*/[Line] |= (1<<Bit);
+	}
+}
+
+static int KeySymToCPCKey[512];
+
+void	retro_InitialiseKeyboardMapping()
+{
+	int	 i;
+
+	for (i=0; i<512; i++)
+	{
+		KeySymToCPCKey[i] = CPC_KEY_NULL;
+	}
+
+	/* International key mappings */
+	KeySymToCPCKey[RETROK_0] = CPC_KEY_ZERO;
+	KeySymToCPCKey[RETROK_1] = CPC_KEY_1;
+	KeySymToCPCKey[RETROK_2] = CPC_KEY_2;
+	KeySymToCPCKey[RETROK_3] = CPC_KEY_3;
+	KeySymToCPCKey[RETROK_4] = CPC_KEY_4;
+	KeySymToCPCKey[RETROK_5] = CPC_KEY_5;
+	KeySymToCPCKey[RETROK_6] = CPC_KEY_6;
+	KeySymToCPCKey[RETROK_7] = CPC_KEY_7;
+	KeySymToCPCKey[RETROK_8] = CPC_KEY_8;
+	KeySymToCPCKey[RETROK_9] = CPC_KEY_9;
+	KeySymToCPCKey[RETROK_a] = CPC_KEY_A;
+	KeySymToCPCKey[RETROK_b] = CPC_KEY_B;
+	KeySymToCPCKey[RETROK_c] = CPC_KEY_C;
+	KeySymToCPCKey[RETROK_d] = CPC_KEY_D;
+	KeySymToCPCKey[RETROK_e] = CPC_KEY_E;
+	KeySymToCPCKey[RETROK_f] = CPC_KEY_F;
+	KeySymToCPCKey[RETROK_g] = CPC_KEY_G;
+	KeySymToCPCKey[RETROK_h] = CPC_KEY_H;
+	KeySymToCPCKey[RETROK_i] = CPC_KEY_I;
+	KeySymToCPCKey[RETROK_j] = CPC_KEY_J;
+	KeySymToCPCKey[RETROK_k] = CPC_KEY_K;
+	KeySymToCPCKey[RETROK_l] = CPC_KEY_L;
+	KeySymToCPCKey[RETROK_m] = CPC_KEY_M;
+	KeySymToCPCKey[RETROK_n] = CPC_KEY_N;
+	KeySymToCPCKey[RETROK_o] = CPC_KEY_O;
+	KeySymToCPCKey[RETROK_p] = CPC_KEY_P;
+	KeySymToCPCKey[RETROK_q] = CPC_KEY_Q;
+	KeySymToCPCKey[RETROK_r] = CPC_KEY_R;
+	KeySymToCPCKey[RETROK_s] = CPC_KEY_S;
+	KeySymToCPCKey[RETROK_t] = CPC_KEY_T;
+	KeySymToCPCKey[RETROK_u] = CPC_KEY_U;
+	KeySymToCPCKey[RETROK_v] = CPC_KEY_V;
+	KeySymToCPCKey[RETROK_w] = CPC_KEY_W;
+	KeySymToCPCKey[RETROK_x] = CPC_KEY_X;
+	KeySymToCPCKey[RETROK_y] = CPC_KEY_Y;
+	KeySymToCPCKey[RETROK_z] = CPC_KEY_Z;
+	KeySymToCPCKey[RETROK_SPACE] = CPC_KEY_SPACE;
+	KeySymToCPCKey[RETROK_COMMA] = CPC_KEY_COMMA;
+	KeySymToCPCKey[RETROK_PERIOD] = CPC_KEY_DOT;
+	KeySymToCPCKey[RETROK_SEMICOLON] = CPC_KEY_COLON;
+	KeySymToCPCKey[RETROK_MINUS] = CPC_KEY_MINUS;
+	KeySymToCPCKey[RETROK_EQUALS] = CPC_KEY_HAT;
+	KeySymToCPCKey[RETROK_LEFTBRACKET] = CPC_KEY_AT;
+	KeySymToCPCKey[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;
+
+	KeySymToCPCKey[RETROK_TAB] = CPC_KEY_TAB;
+	KeySymToCPCKey[RETROK_RETURN] = CPC_KEY_RETURN;
+	KeySymToCPCKey[RETROK_BACKSPACE] = CPC_KEY_DEL;
+	KeySymToCPCKey[RETROK_ESCAPE] = CPC_KEY_ESC;
+
+	//KeySymToCPCKey[RETROK_Equals & 0x0ff)] = CPC_KEY_CLR;
+
+	KeySymToCPCKey[RETROK_UP] = CPC_KEY_CURSOR_UP;
+	KeySymToCPCKey[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
+	KeySymToCPCKey[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
+	KeySymToCPCKey[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
+
+	KeySymToCPCKey[RETROK_KP0] = CPC_KEY_F0;
+	KeySymToCPCKey[RETROK_KP1] = CPC_KEY_F1;
+	KeySymToCPCKey[RETROK_KP2] = CPC_KEY_F2;
+	KeySymToCPCKey[RETROK_KP3] = CPC_KEY_F3;
+	KeySymToCPCKey[RETROK_KP4] = CPC_KEY_F4;
+	KeySymToCPCKey[RETROK_KP5] = CPC_KEY_F5;
+	KeySymToCPCKey[RETROK_KP6] = CPC_KEY_F6;
+	KeySymToCPCKey[RETROK_KP7] = CPC_KEY_F7;
+	KeySymToCPCKey[RETROK_KP8] = CPC_KEY_F8;
+	KeySymToCPCKey[RETROK_KP9] = CPC_KEY_F9;
+
+	KeySymToCPCKey[RETROK_KP_PERIOD] = CPC_KEY_FDOT;
+
+	KeySymToCPCKey[RETROK_LSHIFT] = CPC_KEY_SHIFT;
+	KeySymToCPCKey[RETROK_RSHIFT] = CPC_KEY_SHIFT;
+	KeySymToCPCKey[RETROK_LCTRL] = CPC_KEY_CONTROL;
+	KeySymToCPCKey[RETROK_RCTRL] = CPC_KEY_CONTROL;
+	KeySymToCPCKey[RETROK_CAPSLOCK] = CPC_KEY_CAPS_LOCK;
+
+	KeySymToCPCKey[RETROK_KP_ENTER] = CPC_KEY_SMALL_ENTER;
+
+	KeySymToCPCKey[RETROK_DELETE] = CPC_KEY_JOY_LEFT;
+	KeySymToCPCKey[RETROK_END] = CPC_KEY_JOY_DOWN;
+	KeySymToCPCKey[RETROK_PAGEDOWN] = CPC_KEY_JOY_RIGHT;
+	KeySymToCPCKey[RETROK_INSERT] = CPC_KEY_JOY_FIRE1;
+	KeySymToCPCKey[RETROK_HOME] = CPC_KEY_JOY_UP;
+	KeySymToCPCKey[RETROK_PAGEUP] = CPC_KEY_JOY_FIRE2;
+
+	KeySymToCPCKey[0x0134] = CPC_KEY_COPY;			/* Alt */
+	KeySymToCPCKey[0x0137] = CPC_KEY_COPY;			/* Compose */
+
+}
 
 
 #define MAX_ROM_MODS 2
@@ -2710,6 +2787,7 @@ void input_swap_joy (void)
 
 int input_init (void)
 {
+
    return 0;
 }
 
@@ -3070,15 +3148,25 @@ void emu_reset(void)
 
 void retro_key_down(int key)
 {
-	keyboard_matrix[key >> 4] &= ~bit_values[key & 7];	
+	int code;
+
+	if(key<512)
+ 		code=KeySymToCPCKey[key];	
+	else code = CPC_KEY_NULL;
+	CPC_SetKey(code);
 }
 
 void retro_key_up(int key)
 {
-	keyboard_matrix[key >> 4] |= bit_values[key & 7];	
+	int code;
+
+	if(key<512)
+ 		code=KeySymToCPCKey[key];
+	else code = CPC_KEY_NULL;
+	CPC_ClearKey(code);
 }
 
-static int jflag[5]={0,0,0,0,0};
+static int jflag[6]={0,0,0,0,0,0};
 
 void retro_joy0(unsigned char joy0)
 {
@@ -3091,7 +3179,7 @@ void retro_joy0(unsigned char joy0)
    {
       if(jflag[0]==0)
       {
-         retro_key_down(0x90);
+         retro_key_down(RETROK_HOME);
          jflag[0]=1;
       }
    }
@@ -3099,7 +3187,7 @@ void retro_joy0(unsigned char joy0)
    {
       if(jflag[0]==1)
       {
-         retro_key_up(0x90);
+         retro_key_up(RETROK_HOME);
          jflag[0]=0;
       }
    }
@@ -3107,12 +3195,12 @@ void retro_joy0(unsigned char joy0)
    //Down
    if(joy0&0x02){
       if(jflag[1]==0){
-         retro_key_down(0x91);
+         retro_key_down(RETROK_END);
          jflag[1]=1;
       }
    }else {
       if(jflag[1]==1){
-         retro_key_up(0x91);
+         retro_key_up(RETROK_END);
          jflag[1]=0;
       }
    }
@@ -3120,12 +3208,12 @@ void retro_joy0(unsigned char joy0)
    //Left
    if(joy0&0x04){
       if(jflag[2]==0){
-         retro_key_down(0x92);
+         retro_key_down(RETROK_DELETE);
          jflag[2]=1;
       }
    }else {
       if(jflag[2]==1){
-         retro_key_up(0x92);
+         retro_key_up(RETROK_DELETE);
          jflag[2]=0;
       }
    }
@@ -3133,12 +3221,12 @@ void retro_joy0(unsigned char joy0)
    //Right
    if(joy0&0x08){
       if(jflag[3]==0){
-         retro_key_down(0x93);
+         retro_key_down(RETROK_PAGEDOWN);
          jflag[3]=1;
       }
    }else {
       if(jflag[3]==1){
-         retro_key_up(0x93);
+         retro_key_up(RETROK_PAGEDOWN);
          jflag[3]=0;
       }
    }
@@ -3146,16 +3234,28 @@ void retro_joy0(unsigned char joy0)
    //btn0
    if(joy0&0x80){
       if(jflag[4]==0){
-         retro_key_down(0x94); 
+         retro_key_down(RETROK_INSERT); 
          jflag[4]=1;
       }
    }else {
       if(jflag[4]==1){
-         retro_key_up(0x94); 
+         retro_key_up(RETROK_INSERT); 
          jflag[4]=0;
       }
    }
 
+   //btn1
+   if(joy0&0x40){
+      if(jflag[5]==0){
+         retro_key_down(RETROK_PAGEUP); 
+         jflag[5]=1;
+      }
+   }else {
+      if(jflag[5]==1){
+         retro_key_up(RETROK_PAGEUP); 
+         jflag[5]=0;
+      }
+   }
 }
 
 void mixsnd(void)
@@ -3172,9 +3272,17 @@ void mixsnd(void)
       retro_audio_cb(p[x],p[x+1]);
 }
 
+
+int skel_main(int argc, char *argv[])
+{
+   retro_InitialiseKeyboardMapping();
+   capmain(argc,argv);
+   return 0;
+}
+
 int InitOSGLU(void)
 {
-   capmain(1,NULL);
+
    return 0;
 }
 
@@ -3426,10 +3534,24 @@ int loadadsk (char *arv,int drive)
    return 0;
 }
 
+void play_tape(){
+
+	if (pbTapeImage) {
+
+		if (CPC.tape_play_button) {
+			CPC.tape_play_button = 0;
+		} else {
+			CPC.tape_play_button = 0x10;
+		}
+
+	}
+}
+
 int RLOOP=1;
 
 void retro_loop(void)
 {
+
    while(RLOOP==1)
       theloop();
 
