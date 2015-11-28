@@ -540,7 +540,7 @@ void Print_Statut(void)
 /*
 In joy mode
 L2  STATUS ON/OFF
-R2  SND ON/OFF
+R2  AUTOLOAD TAPE
 L   CAT
 R   RESET
 SEL MOUSE/JOY IN GUI
@@ -560,7 +560,7 @@ int Retro_PollEvent()
 {
 	//   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
     //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
-    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT SND  ?    ? 
+    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT TAPE ?    ? 
 
    int SAVPAS=PAS;	
    int i;
@@ -663,15 +663,17 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       STATUTON=-STATUTON;
      // Screen_SetFullUpdate();
    }
-/*
-   i=13;//snd on/off
+
+   i=13;//auto load tape
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       mbt[i]=0;
-      SND=-SND;		
+     	
+	  TYPE_RUNTAPE=!TYPE_RUNTAPE;
+      if(TYPE_RUNTAPE)cmd_cpt=0;
    }
-*/
+
    i=11;//reset
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
