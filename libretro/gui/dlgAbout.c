@@ -16,7 +16,7 @@ const char DlgAbout_fileid[] = "Hatari dlgAbout.c : " __DATE__ " " __TIME__;
 #include "sdlgui.h"
 #include <string.h>
 
-#define PROG_NAME "VICE 2.4.20"
+#define PROG_NAME "Caprice32 4.2"
 
 #define DLGABOUT_EXIT       17
 
@@ -26,9 +26,9 @@ static SGOBJ aboutdlg[] =
 	{ SGBOX, 0, 0, 0,0, 48,25, NULL },
 	{ SGTEXT, 0, 0, 13,1, 12,1, PROG_NAME },
 	{ SGTEXT, 0, 0, 17,2, 12,1, "=============" },
-	{ SGTEXT, 0, 0, 1,4, 46,1, "VICE the Versatile Commodore Emulator" },
-	{ SGTEXT, 0, 0, 1,5, 46,1, "http://vice-emu.sourceforge.net/" },
-	{ SGTEXT, 0, 0, 2,7, 46,1, "" },
+	{ SGTEXT, 0, 0, 1,4, 46,1, "Caprice32 - Amstrad CPC Emulator" },
+	{ SGTEXT, 0, 0, 1,5, 46,1, "http://sourceforge.net/projects/caprice32/" },
+	{ SGTEXT, 0, 0, 2,7, 46,1, "(c) Copyright 1997-2004 Ulrich Doewich" },
 	{ SGTEXT, 0, 0, 1,9, 46,1, "" },
 	{ SGTEXT, 0, 0, 1,10, 46,1,"----------------------------------" },
 	{ SGTEXT, 0, 0, 1,11, 46,1, "" },
@@ -37,7 +37,7 @@ static SGOBJ aboutdlg[] =
 	{ SGTEXT, 0, 0, 1,14, 46,1, "" },
 	{ SGTEXT, 0, 0, 1,15, 46,1, "" },
 	{ SGTEXT, 0, 0, 1,17, 46,1, "" },
-	{ SGTEXT, 0, 0, 1,18, 46,1, "Port of VICE 2.4.20 to LIBRETRO" },
+	{ SGTEXT, 0, 0, 1,18, 46,1, "Port of Caprice32 4.2 to LIBRETRO" },
 	{ SGTEXT, 0, 0, 1,19, 46,1, "Gui taken from HATARI emulator" },
 	{ SGTEXT, 0, 0, 1,20, 46,1, "http://hatari.tuxfamily.org/"},
 	{ SGBUTTON, SG_EXIT/*SG_DEFAULT*/, 0, 16,23, 8,1, "OK" },

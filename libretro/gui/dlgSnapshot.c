@@ -49,7 +49,7 @@ void Dialog_SnapshotDlg(void)
 				if (snapfile)
 				{	
 
-					if(machine_read_snapshot(snapfile,0)){
+					if( snapshot_load (snapfile)){
 							printf("loading snapfile (%s)\n",snapfile);
 					}
 					else 	printf("error loading snapfile (%s)\n",snapfile);
@@ -63,7 +63,10 @@ void Dialog_SnapshotDlg(void)
 			
 				snapfile=malloc(512*sizeof(char));
 				
-				name = file_system_get_disk_name(8); /* Filename */
+				if(NUMDRV==1)
+					name = DISKA_NAME; /* Filename */
+				else 
+					name = DISKB_NAME; /* Filename */
 
  				if (name){
 
@@ -79,7 +82,7 @@ void Dialog_SnapshotDlg(void)
 				}
 				else sprintf(snapfile,"%s.sna\0","dump");
 
-				machine_write_snapshot(snapfile, save_roms, save_disks, 0); 
+				snapshot_save(snapfile); 
 				printf("saving snapfile (%s)\n",snapfile);
 
 				free(snapfile);

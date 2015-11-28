@@ -21,6 +21,7 @@ extern unsigned short int bmp[TEX_WIDTH * TEX_HEIGHT];
 
 #define PATHSEP '/'
 
+#if DEF_ALPHASORT2
 int alphasort2(const struct dirent **d1, const struct dirent **d2)
 {
    const struct dirent *c1;
@@ -29,6 +30,9 @@ int alphasort2(const struct dirent **d1, const struct dirent **d2)
    c2 = *d2;
    return strcmp(c1->d_name, c2->d_name);
 }
+#else
+extern int alphasort2(const struct dirent **d1, const struct dirent **d2);
+#endif
 
 int scandir(const char *dirp, struct dirent ***namelist,
       int (*filter)(const struct dirent *),
@@ -113,7 +117,7 @@ static struct dirent **files_free(struct dirent **files)
    }
    return NULL;
 }
-
+#ifdef FILE_HANDLEDOTDIRS
 void File_HandleDotDirs(char *path)
 {
    int len = strlen(path);
@@ -141,13 +145,14 @@ void File_HandleDotDirs(char *path)
       }
    }
 }
-
+#endif
+#ifdef FILE_DIREXISTS
 bool File_DirExists(const char *pathdir)
 {
 	struct stat buf;
 	return (stat(pathdir, &buf) == 0 && S_ISDIR(buf.st_mode));
 }
-
+#endif
 int HandleExtension(char *path,char *ext)
 {
    int len = strlen(path);

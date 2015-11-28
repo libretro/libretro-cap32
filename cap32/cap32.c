@@ -188,6 +188,10 @@ int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0;
 int cmd_cpt=-1;
 int rundisk_wait=0;
 
+extern char DISKA_NAME[512];
+extern char DISKB_NAME[512];
+extern char TAPE_NAME[512];
+
 #include "cap32.h"
 #include "crtc.h"
 #include "tape.h"
@@ -1887,6 +1891,7 @@ exit:
 
    if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
+		
    return iRetCode;
 }
 
@@ -2193,6 +2198,8 @@ int tape_insert (char *pchFileName)
 
    Tape_Rewind();
 
+   sprintf(TAPE_NAME,"%s",pchFileName);
+
    return 0;
 }
 
@@ -2430,6 +2437,8 @@ int tape_insert_voc (char *pchFileName)
    pbTapeImageEnd = pbTapeImagePtr + 3;
 
    Tape_Rewind();
+
+   sprintf(TAPE_NAME,"%s",pchFileName);
 
    return 0;
 }
@@ -3540,15 +3549,29 @@ bool have_SNA = false;
 bool have_TAP = false;
 
 //FIXME RETRO
+int detach_disk(int drive)
+{
+	if(drive==0){
+	   dsk_eject(&driveA);
+		sprintf(DISKA_NAME,"\0"); 
+	}
+	else {
+   		dsk_eject(&driveB);
+		sprintf(DISKB_NAME,"\0"); 
+	}
+}
 
 int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
       if(drive==0)
-         dsk_load( arv, &driveA, 'A'); 
+	     if(dsk_load( arv, &driveA, 'A') == 0)
+			sprintf(DISKA_NAME,"%s",arv); 
+
       else
-         dsk_load( arv, &driveB, 'B');   
+         if(dsk_load( arv, &driveB, 'B') == 0)   
+			sprintf(DISKB_NAME,"%s",arv); 
 
       have_DSK = true;
       sprintf(RPATH,"%s%d.SNA",arv,drive);		

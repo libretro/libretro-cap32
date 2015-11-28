@@ -13,8 +13,29 @@ SOURCES_C += \
 	$(CORE_DIR)/libretro/core/graph.c 
 
 SOURCES_C += $(CORE_DIR)/libretro/core/diskutils.c
-
 SOURCES_C += $(CORE_DIR)/libretro/core/vkbd.c
+
+GUI = $(CORE_DIR)/libretro/gui
+
+SOURCES_C += $(GUI)/dialog.c\
+				 $(GUI)/paths.c \
+				 $(GUI)/file.c \
+				 $(GUI)/unzip.c \
+				 $(GUI)/thumb.c \
+				 $(GUI)/zip.c \
+				 $(GUI)/str.c \
+				 $(GUI)/dlgFloppy.c \
+				 $(GUI)/dlgFileSelect.c \
+				 $(GUI)/dlgJoystick.c \
+				 $(GUI)/dlgAbout.c \
+				 $(GUI)/dlgSound.c \
+				 $(GUI)/dlgAlert.c \
+				 $(GUI)/dlgMisc.c \
+				 $(GUI)/dlgVideo.c \
+				 $(GUI)/dlgMain.c \
+				 $(GUI)/dlgSnapshot.c \
+				 $(GUI)/dlgOption.c \
+				 $(GUI)/sdlgui.c
 
 SOURCES_C += $(CORE_DIR)/cap32/cap32.c
 SOURCES_C += $(CORE_DIR)/cap32/crtc.c

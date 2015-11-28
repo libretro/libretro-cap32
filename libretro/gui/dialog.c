@@ -61,7 +61,7 @@ bool Dialog_DoProperty(void)
 
    if(bForceReset)
    {
-	  machine_trigger_reset(MACHINE_RESET_MODE_HARD);
+	//  machine_trigger_reset(MACHINE_RESET_MODE_HARD);
 
       return bOKDialog;
    }

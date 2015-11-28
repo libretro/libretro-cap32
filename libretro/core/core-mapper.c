@@ -12,6 +12,10 @@ extern const char *retro_system_directory;
 extern const char *retro_content_directory;
 char RETRO_DIR[512];
 
+char DISKA_NAME[512]="\0";
+char DISKB_NAME[512]="\0";
+char TAPE_NAME[512]="\0";
+
 //TIME
 #ifdef __CELLOS_LV2__
 #include "sys/sys_time.h"
@@ -57,6 +61,7 @@ int al[2][2];//left analog1
 int ar[2][2];//right analog1
 unsigned char MXjoy[2]; // joy
 int NUMjoy=1;
+int NUMDRV=1;
 
 //MOUSE
 extern int pushi;  // gui mouse btn
@@ -162,6 +167,8 @@ void enter_options(void) {}
 
 void enter_gui(void)
 {
+
+#if 0
   //save_bkg();
   //  Dialog_DoProperty();
    char dskimg[512]="\0";
@@ -190,10 +197,15 @@ void enter_gui(void)
 			return ;
 		}
 
-      loadadsk((char *)dskimg,NUMjoy>0?0:1);
+      loadadsk((char *)dskimg,NUMDRV>0?0:1);
       pauseg=0;
    }		
-
+#else
+	
+	DlgFloppy_Main();
+	//Dialog_DoProperty();
+pauseg=0;
+#endif
 
 }
 
@@ -321,7 +333,7 @@ void retro_virtualkb(void)
          else if(i==-5)
          {
 			//FLIP DSK PORT 1-2
-			NUMjoy=-NUMjoy;
+			NUMDRV=-NUMDRV;
             oldi=-1;
          }
          else if(i==-6)
@@ -479,7 +491,7 @@ void Print_Statut(void)
 
    Draw_text(bmp,STAT_DECX+40 ,STAT_BASEY,0xffff,0x8080,1,2,40,(SND>0?"SND":""));
    Draw_text(bmp,STAT_DECX+80 ,STAT_BASEY,0xffff,0x8080,1,2,40,"F:%d",dwFPS);
-   Draw_text(bmp,STAT_DECX+120,STAT_BASEY,0xffff,0x8080,1,2,40,"DSK%c",NUMjoy>0?'A':'B');
+   Draw_text(bmp,STAT_DECX+120,STAT_BASEY,0xffff,0x8080,1,2,40,"DSK%c",NUMDRV>0?'A':'B');
    if(ZOOM>-1)
       Draw_text(bmp,(384-Mres[ZOOM].x)/2,(272-Mres[ZOOM].y)/2,0xffff,0x8080,1,2,40,"x:%3d y:%3d",Mres[ZOOM].x,Mres[ZOOM].y);
 }

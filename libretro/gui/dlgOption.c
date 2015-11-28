@@ -51,13 +51,15 @@ void Dialog_OptionDlg(void)
 	optiondlg[DLGOPTION_STATUS].state&= ~SG_SELECTED;
 	optiondlg[DLGOPTION_MousePort].state&= ~SG_SELECTED;
 
-	resources_get_int( "Mouse",&c64mouse_enable);
+	//resources_get_int( "Mouse",&c64mouse_enable);
+	c64mouse_enable=0;
 
 	if (c64mouse_enable) { // Mouse on
 		optiondlg[DLGOPTION_Mouse].state |= SG_SELECTED;
 	}
 
-	resources_get_int( "Mouseport",&mouseport);
+	//resources_get_int( "Mouseport",&mouseport);
+	mouseport=0;
 	if(mouseport==2)optiondlg[DLGOPTION_MousePort].state |= SG_SELECTED;
  
 /*
@@ -82,7 +84,7 @@ void Dialog_OptionDlg(void)
 	}
 	while (but != DLGOPTION_EXIT && but != SDLGUI_QUIT
 	        && but != SDLGUI_ERROR && !bQuitProgram );
-
+/*
 	if(optiondlg[DLGOPTION_Mouse].state & SG_SELECTED){
 
 		if(!c64mouse_enable){
@@ -112,6 +114,7 @@ void Dialog_OptionDlg(void)
 		}
 
 	}
+*/
 /*
 	if(optiondlg[DLGOPTION_STATUS].state & SG_SELECTED){
 

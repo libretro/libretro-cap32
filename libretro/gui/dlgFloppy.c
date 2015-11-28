@@ -24,18 +24,10 @@ const char DlgFloppy_fileid[] = "Hatari dlgFloppy.c : " __DATE__ " " __TIME__;
 
 static const char * const pszDiskImageNameExts[] =
 {
-	".d64",
-	".d71",
-	".d80",
-	".d82",
-	".g64",
-	".g41",
-	".t64",
-	".x64",
-	".tap",
-	".prg",
-	".p00",
-	".crt",
+	".dsk",
+	".cdt",
+	".voc",
+	".sna",
 	".zip",
 	NULL
 };
@@ -69,23 +61,28 @@ static SGOBJ floppydlg[] =
 {
 	{ SGBOX, 0, 0, 0,0, 64,20, NULL },
 	{ SGTEXT, 0, 0, 25,1, 12,1, "Floppy disks" },
-	{ SGTEXT, 0, 0, 2,3, 8,1, "DF8:" },
+	{ SGTEXT, 0, 0, 2,3, 8,1, "DISKA:" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 46,3, 7,1, "Eject" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 54,3, 8,1, "Browse" },
 	{ SGTEXT, 0, 0, 3,4, 58,1, NULL },
-	{ SGTEXT, 0, 0, 2,6, 8,1, "DF9:" },
+	{ SGTEXT, 0, 0, 2,6, 8,1, "DISKB:" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 46,6, 7,1, "Eject" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 54,6, 8,1, "Browse" }
 ,
 	{ SGTEXT, 0, 0, 3,7, 58,1, NULL },
-	{ SGTEXT, 0, 0, 2,9, 8,1, "DF10:" },
+	{ SGTEXT, 0, 0, 2,9, 8,1, "TAPE:" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 46,9, 7,1, "Eject" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 54,9, 8,1, "Browse" },
 	{ SGTEXT, 0, 0, 3,10, 58,1, NULL },
+
+	{ SGTEXT, 0, 0, 3,12, 58,1, NULL },
+	{ SGTEXT, 0, 0, 3,12, 58,1, NULL },
+	{ SGTEXT, 0, 0, 3,12, 58,1, NULL },
+#if 0
 	{ SGTEXT, 0, 0, 2,12, 8,1, "DF11:" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 46,12, 7,1, "Eject" },
 	{ SGBUTTON,  SG_EXIT/*0*/, 0, 54,12, 8,1, "Browse" },
-
+#endif
 	{ SGTEXT, 0, 0, 3,13, 58,1, NULL },
 	{ SGTEXT, 0, 0, 2,14, 32,1, "Default floppy images directory:" },
 	{ SGTEXT, 0, 0, 3,15, 58,1, NULL },
@@ -304,25 +301,21 @@ void DlgFloppy_Main(void)
 
  floppydlg[FLOPPYDLG_ATTACH2FLIPLIST].state &= ~SG_SELECTED;
 
- name = file_system_get_disk_name(8); /* Filename */
+ name = DISKA_NAME; /* Filename */
  if (!name)dlgname[0][0] = '\0';
  else File_ShrinkName(dlgname[0], name,floppydlg[FLOPPYDLG_DISKA].w);
  floppydlg[FLOPPYDLG_DISKA].txt = dlgname[0];
 
- name = file_system_get_disk_name(9); /* Filename */
+ name = DISKB_NAME; /* Filename */
  if (!name)dlgname[1][0] = '\0';
  else File_ShrinkName(dlgname[1], name,floppydlg[FLOPPYDLG_DISKB].w);
  floppydlg[FLOPPYDLG_DISKB].txt = dlgname[1];
 
- name = file_system_get_disk_name(10); /* Filename */
+ name = TAPE_NAME; /* Filename */
  if (!name)dlgname[2][0] = '\0';
  else File_ShrinkName(dlgname[2], name,floppydlg[FLOPPYDLG_DISK2].w);
  floppydlg[FLOPPYDLG_DISK2].txt = dlgname[2];
 
- name = file_system_get_disk_name(11); /* Filename */
- if (!name)dlgname[3][0] = '\0';
- else File_ShrinkName(dlgname[3], name,floppydlg[FLOPPYDLG_DISK3].w);
- floppydlg[FLOPPYDLG_DISK3].txt = dlgname[3];
 
 	/* Default image directory: */
 	File_ShrinkName(dlgdiskdir,szDiskImageDirectory,
@@ -339,80 +332,48 @@ void DlgFloppy_Main(void)
 		 case FLOPPYDLG_EJECTA:                         /* Eject disk in drive A: */
 			Floppy_SetDiskFileNameNone(0);
 			dlgname[0][0] = '\0';
-			file_system_detach_disk(GET_DRIVE(8));
+			detach_disk(0);
 
 			break;
 		 case FLOPPYDLG_BROWSEA:                        /* Choose a new disk A: */
 			DlgDisk_BrowseDisk(dlgname[0], 0, FLOPPYDLG_DISKA);
 
 			if (strlen(szDiskFileName[0]) > 0){
-
-			int drivetype;
-
-			printf("load (%s)-",szDiskFileName[0]);
-			resources_get_int_sprintf("Drive%iType", &drivetype, GET_DRIVE(8));
-			printf("(Drive%iType)\n",drivetype);
-
-			cartridge_detach_image(-1);
-			tape_image_detach(1);
-//			file_system_detach_disk(GET_DRIVE(8));
-
-			if(File_DoesFileExtensionMatch(szDiskFileName[0],"CRT"))
-				cartridge_attach_image(CARTRIDGE_CRT, szDiskFileName[0]);
-			else {
-//FIXME
-/*
-				if(File_DoesFileExtensionMatch(szDiskFileName[0],"D81") && drivetype!=1581)
-						resources_set_int_sprintf("Drive%iType", 1581,  GET_DRIVE(8));
-				else if (drivetype!=1542 && !File_DoesFileExtensionMatch(szDiskFileName[0],"D81"))
-						resources_set_int_sprintf("Drive%iType", 1542,  GET_DRIVE(8));
-*/			
-
-				if (floppydlg[FLOPPYDLG_ATTACH2FLIPLIST].state & SG_SELECTED){
-					file_system_detach_disk(GET_DRIVE(8));
-					printf("Attach to flip list\n");
-					file_system_attach_disk(8, szDiskFileName[0]);
-					fliplist_add_image(8)	;
-				}
-				else {
-					printf("autostart\n");
-					autostart_autodetect(szDiskFileName[0], NULL, 0, AUTOSTART_MODE_RUN);
-				}
-
-			}
-
+				loadadsk (szDiskFileName[0],0);
 			}
 
 			break;
 		 case FLOPPYDLG_EJECTB:                         /* Eject disk in drive B: */
 			Floppy_SetDiskFileNameNone(1);
 			dlgname[1][0] = '\0';
-			file_system_detach_disk(GET_DRIVE(9));
+			detach_disk(1);
 
 			break;
 		case FLOPPYDLG_BROWSEB:                         /* Choose a new disk B: */
 			DlgDisk_BrowseDisk(dlgname[1], 1, FLOPPYDLG_DISKB);
 
 			if (strlen(szDiskFileName[1]) > 0){
-				
-			file_system_detach_disk(GET_DRIVE(9));
-     		file_system_attach_disk(9, szDiskFileName[1]);
-	
+				loadadsk (szDiskFileName[1],1);
 			}
 
 		 case FLOPPYDLG_EJECT2:                         /* Eject disk in drive A: */
 			Floppy_SetDiskFileNameNone(2);
 			dlgname[2][0] = '\0';
-			file_system_detach_disk(GET_DRIVE(10));
+			tape_eject ();
+ 			sprintf(TAPE_NAME,"\0");
+
 			break;
 		 case FLOPPYDLG_BROWSE2:                        /* Choose a new disk A: */
 			DlgDisk_BrowseDisk(dlgname[2], 0, FLOPPYDLG_DISK2);
 
 			if (strlen(szDiskFileName[2]) > 0){
-					//strcpy(prefs->DrivePath[2], szDiskFileName[2]);
+
+				if(File_DoesFileExtensionMatch(szDiskFileName[2],"VOC"))tape_insert_voc (szDiskFileName[2]);
+				else tape_insert (szDiskFileName[2]);
 			}
 
 			break;
+#if 0
 		 case FLOPPYDLG_EJECT3:                         /* Eject disk in drive B: */
 			Floppy_SetDiskFileNameNone(3);
 			dlgname[3][0] = '\0';
@@ -427,6 +388,7 @@ void DlgFloppy_Main(void)
 			}
 
 			break;
+#endif
 		 case FLOPPYDLG_BROWSEIMG:
 			DlgDisk_BrowseDir(dlgdiskdir,szDiskImageDirectory,floppydlg[FLOPPYDLG_IMGDIR].w);
 			break;
@@ -448,19 +410,5 @@ void DlgFloppy_Main(void)
 	while (but != FLOPPYDLG_EXIT && but != SDLGUI_QUIT
 	        && but != SDLGUI_ERROR && !bQuitProgram);
 
-/*
-	if (floppydlg[FLOPPYDLG_AUTOSTART].state & SG_SELECTED){
-
-			if(!ThePrefs.Emul1541Proc){
-					prefs->Emul1541Proc = !prefs->Emul1541Proc;
-			}
-	}
-	else {
-			if(ThePrefs.Emul1541Proc){
-					prefs->Emul1541Proc = !prefs->Emul1541Proc;
-			}	
-
-	}
-*/
 
 }
