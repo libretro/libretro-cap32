@@ -27,6 +27,19 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
+
+typedef enum
+{
+	/* line 0, bit 0..bit 7 */
+	GUI_NONE = 0,
+	GUI_LOAD ,
+	GUI_SNAP ,
+	GUI_MAIN ,
+
+} GUI_ACTION;
+
+int GUISTATE=GUI_NONE;
+
 extern void Screen_SetFullUpdate(int scr);
 extern bool Dialog_DoProperty(void);
 
@@ -165,6 +178,13 @@ void enter_options(void) {}
 
 #endif
 
+extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL,TYPE_RUNTAPE;
+int STATUTON=-1;
+#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
+#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
+
+
+
 void enter_gui(void)
 {
 
@@ -202,9 +222,25 @@ void enter_gui(void)
    }		
 #else
 	
-	DlgFloppy_Main();
-	//Dialog_DoProperty();
-pauseg=0;
+	switch (GUISTATE){
+	
+		case GUI_LOAD:
+			DlgFloppy_Main();
+			break;
+	
+		case GUI_SNAP:
+			Dialog_SnapshotDlg();
+			break;
+
+		case GUI_MAIN:
+			Dialog_DoProperty();
+			break;
+
+		default:
+			break;
+	}
+
+	pauseg=0;
 #endif
 
 }
@@ -428,7 +464,7 @@ void Process_key()
 	 	for(i=0;i<320;i++)
 			if(Key_Sate[i] && Key_Sate[i]!=old_Key_Sate[i]  )
         	{	
-				if(i==RETROK_F10){
+				if(i==RETROK_F12){
 					//play_tape();
 					continue;
 				}
@@ -455,8 +491,11 @@ printf("press: %d \n",i);
         	}	
         	else if ( !Key_Sate[i] && Key_Sate[i]!=old_Key_Sate[i]  )
         	{
-				if(i==RETROK_F10){
-					play_tape();
+				if(i==RETROK_F12){
+
+      			TYPE_RUNTAPE=!TYPE_RUNTAPE;
+      			if(TYPE_RUNTAPE)cmd_cpt=0;
+					//play_tape();
 					continue;
 				}
 /*
@@ -497,23 +536,25 @@ void Print_Statut(void)
 }
 */
 
+
 /*
+In joy mode
 L2  STATUS ON/OFF
 R2  SND ON/OFF
-L   VKBD ON/OFF
+L   CAT
 R   RESET
-SEL ENTER
-STR ZOOM/DEL
-A   FIRE/VKBD KEY
+SEL MOUSE/JOY IN GUI
+STR ENTER/RETURN
+A   FIRE1/VKBD KEY
 B   RUN
-X   CAT
-Y   LOAD DSK
+X   FIRE2
+Y   VKBD ON/OFF
+In Keayboard mode
+F8 LOAD DSK/TAPE
+F9 MEM SNAPSHOT LOAD/SAVE
+F10 MAIN GUI
+F12 PLAY TAPE
 */
-
-extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL;
-int STATUTON=-1;
-#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
-#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
 int Retro_PollEvent()
 {
@@ -535,8 +576,19 @@ int Retro_PollEvent()
 
    if(SHOWKEY==-1 && pauseg==0)Process_key();
 
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F12)) //gui /*|| input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y))*/
-      pauseg=1;
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F8)){ 
+		GUISTATE=GUI_LOAD;
+		pauseg=1;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9)){ 
+		GUISTATE=GUI_SNAP;
+		pauseg=1;
+   }
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10)){ 
+		GUISTATE=GUI_MAIN;
+		pauseg=1;
+   }
+
  
 if(pauseg==0){ // if emulation running
 

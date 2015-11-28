@@ -184,7 +184,7 @@ extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
 extern int SND;
 extern int autorun;
-int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0;
+int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0,TYPE_RUNTAPE=0;
 int cmd_cpt=-1;
 int rundisk_wait=0;
 
@@ -3534,6 +3534,71 @@ void shortcut_check(void)
          default:
             break;
       }
+      cmd_cpt++;	
+
+   }
+   else if (TYPE_RUNTAPE)
+   {
+
+      switch(cmd_cpt)
+      {
+	    case 0:
+		retro_key_down(RETROK_RSHIFT);
+		retro_key_down(RETROK_LEFTBRACKET); break;
+	    case 1:
+		retro_key_up(RETROK_RSHIFT);
+		retro_key_up(RETROK_LEFTBRACKET); break;
+	    case 2:
+		retro_key_down(RETROK_t); break;
+	    case 3:
+		retro_key_up(RETROK_t); break;
+	    case 4:
+		retro_key_down(RETROK_a); break;
+	    case 5:
+		retro_key_up(RETROK_a); break;
+	    case 6:
+		retro_key_down(RETROK_p); break;
+	    case 7:
+		retro_key_up(RETROK_p); break;
+	    case 8:
+		retro_key_down(RETROK_e); break;
+	    case 9:
+		retro_key_up(RETROK_e); break;
+	    case 10:
+		retro_key_down(RETROK_RETURN); break;
+	    case 11:
+		retro_key_up(RETROK_RETURN); break;
+	    case 12:
+		retro_key_down(RETROK_r); break;
+	    case 13:
+		retro_key_up(RETROK_r); break;
+	    case 14:
+		retro_key_down(RETROK_u); break;
+	    case 15:
+		retro_key_up(RETROK_u); break;
+	    case 16:
+		retro_key_down(RETROK_n); break;
+	    case 17:
+		retro_key_up(RETROK_n); break;
+	    case 18:
+		retro_key_down(RETROK_RSHIFT);
+		retro_key_down(RETROK_2); break;
+	    case 19:
+		retro_key_up(RETROK_RSHIFT);
+		retro_key_up(RETROK_2); break;
+	    case 20:
+		retro_key_down(RETROK_RETURN); break;
+	    case 21:
+		retro_key_up(RETROK_RETURN); break;
+	    case 22:
+		play_tape(); break;
+        case 23:
+            TYPE_RUNTAPE=!TYPE_RUNTAPE;
+            cmd_cpt=-1;
+            break;
+         default:
+            break;
+	  }
       cmd_cpt++;	
 
    }
