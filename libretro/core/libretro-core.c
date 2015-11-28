@@ -16,18 +16,27 @@ int retrow=1024;
 int retroh=1024;
 unsigned short int bmp[400*300];
 
+#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
+#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
+
+unsigned amstrad_devices[ 2 ];
+
 int autorun=0;
 
-extern int RETROJOY,RETROTDE,RETROSTATUS,RETRODRVTYPE;
-extern int retrojoy_init,retro_ui_finalized;
+int RETROJOY=0,RETROPT0=0,RETROSTATUS=0,RETRODRVTYPE=0;
+int retrojoy_init=0,retro_ui_finalized=0;
 
 extern int SHIFTON,pauseg,SND ,snd_sampler;
 extern short signed int SNDBUF[1024*2];
 extern char RPATH[512];
 extern char RETRO_DIR[512];
-extern int vice_statusbar;
-extern void set_drive_type(int drive,int val);
-extern void set_truedrive_emultion(int val);
+int cap32_statusbar=0;
+
+//CAP32 DEF BEGIN
+#include "cap32.h"
+#include "z80.h"
+extern t_CPC CPC;
+//CAP32 DEF END
 
 #include "cmdline.c"
 
@@ -52,6 +61,24 @@ void retro_set_environment(retro_environment_t cb)
 {
    environ_cb = cb;
 
+  static const struct retro_controller_description p1_controllers[] = {
+    { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+    { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+  };
+  static const struct retro_controller_description p2_controllers[] = {
+    { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+    { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+  };
+
+
+  static const struct retro_controller_info ports[] = {
+    { p1_controllers, 2  }, // port 1
+    { p2_controllers, 2  }, // port 2
+    { NULL, 0 }
+  };
+
+  cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
+
    struct retro_variable variables[] = {
 
 	  { 
@@ -61,21 +88,37 @@ void retro_set_environment(retro_environment_t cb)
       {
          "cap32_resolution",
          "Internal resolution; 320x240|384x272|384x288|400x300|640x480|832x576|800x600|960x720|1024x768|1024x1024",
-
+      },
+      {
+         "cap32_Model",
+         "Model:; 464|664|6128",
+      },
+      {
+         "cap32_Ram",
+         "Ram size:; 64|128|192|512|576",
       },
       {
          "cap32_Statusbar",
          "Status Bar; disabled|enabled",
       },
       {
-         "cap32_Drive8Type",
-         "Drive8Type; 1540|1541|1542|1551|1570|1571|1573|1581|2000|4000|2031|2040|3040|4040|1001|8050|8250",
+         "cap32_Drive",
+         "Drive:; 0|1",
       },
       {
-         "cap32_DriveTrueEmulation",
-         "DriveTrueEmulation; disabled|enabled",
+         "cap32_scr_tube",
+         "scr_tube; disabled|enabled",
       },
-
+      {
+         "cap32_scr_intensity",
+         "scr_intensity; 5|6|7|8|9|10|11|12|13|14|15",
+      },
+/*
+      {
+         "cap32_scr_remanency",
+         "scr_remanency; disabled|enabled",
+      },
+*/
       {
          "cap32_RetroJoy",
          "Retro joy0; disabled|enabled",
@@ -89,11 +132,6 @@ void retro_set_environment(retro_environment_t cb)
 
 static void update_variables(void)
 {
-/*
-   struct retro_variable var = {
-      .key = "Skel_resolution",
-   };
-*/
 
    struct retro_variable var;
 
@@ -125,17 +163,6 @@ static void update_variables(void)
 	//FIXME remove force res
 	retrow=WINDOW_WIDTH;
 	retroh=WINDOW_HEIGHT;
-
-#if defined(__CBM2__)
-	retrow=704;
-	retroh=266;
-#elif defined(__CBM5X__)
-	retrow=448;
-	retroh=284;
-#else
-	retrow=384;
-	retroh=272;
-#endif
 	retrow=400;
 	retroh=300;
 
@@ -147,17 +174,49 @@ static void update_variables(void)
       texture_init();
       //reset_screen();
    }
-#if 0
-   var.key = "Statusbar";
+
+   var.key = "cap32_Model";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      char str[100];
+	  int val;
+      snprintf(str, sizeof(str), var.value);
+      val = strtoul(str, NULL, 0);
+      if(val==464)val=0;
+      else if(val==664)val=1;
+      else if(val==6128)val=2;
+	  if(retro_ui_finalized)
+		  change_model(val);
+
+   }
+
+   var.key = "cap32_Ram";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      char str[100];
+	  int val;
+      snprintf(str, sizeof(str), var.value);
+      val = strtoul(str, NULL, 0);
+      
+	  if(retro_ui_finalized)
+		  change_ram(val);
+
+   }
+
+   var.key = "cap32_Statusbar";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
 		if(retro_ui_finalized){
     		  if (strcmp(var.value, "enabled") == 0)
-    		     vice_statusbar=1;
+    		     cap32_statusbar=1;
     		  if (strcmp(var.value, "disabled") == 0)
-    		     vice_statusbar=0;
+    		     cap32_statusbar=0;
 		}
 		else {
 				if (strcmp(var.value, "enabled") == 0)RETROSTATUS=1;
@@ -166,7 +225,7 @@ static void update_variables(void)
    }
 
 
-   var.key = "vice_Drive8Type";
+   var.key = "cap32_Drive";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -177,37 +236,62 @@ static void update_variables(void)
       val = strtoul(str, NULL, 0);
 
 	  if(retro_ui_finalized)
-		  set_drive_type(8, val);
+		  ;//set_drive_type(8, val);
 	  else RETRODRVTYPE=val;
    }
 
-   var.key = "vice_DriveTrueEmulation";
+   var.key = "cap32_scr_tube";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
 		if(retro_ui_finalized){
-      		if (strcmp(var.value, "enabled") == 0)
-         		set_truedrive_emultion(1);
-      		if (strcmp(var.value, "disabled") == 0)
-         		set_truedrive_emultion(0);
-		}
-		else  {
-			if (strcmp(var.value, "enabled") == 0)RETROTDE=1;
-			if (strcmp(var.value, "disabled") == 0)RETROTDE=0;
+      		if (strcmp(var.value, "enabled") == 0){
+         		  CPC.scr_tube=1;video_set_palette();}
+      		if (strcmp(var.value, "disabled") == 0){
+         		 CPC.scr_tube=0;video_set_palette();}
 		}
    }
 
-   var.key = "vice_RetroJoy";
+   var.key = "cap32_scr_intensity";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      char str[100];
+	  int val;
+      snprintf(str, sizeof(str), var.value);
+      val = strtoul(str, NULL, 0);
+
+	  if(retro_ui_finalized){
+		  CPC.scr_intensity = val;
+		  video_set_palette();
+	  }	
+   }
+/*
+   var.key = "cap32_scr_remanency";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+		if(retro_ui_finalized){
+      		if (strcmp(var.value, "enabled") == 0){
+         		  CPC.scr_remanency=1;video_set_palette();}//set_truedrive_emultion(1);
+      		if (strcmp(var.value, "disabled") == 0){
+         		 CPC.scr_remanency=0;video_set_palette();}//set_truedrive_emultion(0);
+		}
+   }
+*/
+   var.key = "cap32_RetroJoy";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
 		if(retrojoy_init){
 		      if (strcmp(var.value, "enabled") == 0)
-		         resources_set_int( "RetroJoy", 1);
+		         ;//resources_set_int( "RetroJoy", 1);
 		      if (strcmp(var.value, "disabled") == 0)
-		         resources_set_int( "RetroJoy", 0);
+		         ;//resources_set_int( "RetroJoy", 0);
 		}
 		else {
 			if (strcmp(var.value, "enabled") == 0)RETROJOY=1;
@@ -215,7 +299,7 @@ static void update_variables(void)
 		}
 
    }
-#endif
+
 }
 
 static void retro_wrap_emulator()
@@ -247,7 +331,7 @@ void Emu_init(){
    MOUSEMODE=1;
 #endif
 
-   update_variables();
+ //  update_variables();
 
    memset(Key_Sate,0,512);
    memset(Key_Sate2,0,512);
@@ -261,7 +345,7 @@ void Emu_init(){
 #else
 	retro_wrap_emulator();
 #endif
-
+   update_variables();
 }
 
 void Emu_uninit(){
@@ -394,10 +478,15 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-void retro_set_controller_port_device(unsigned port, unsigned device)
+
+void retro_set_controller_port_device( unsigned port, unsigned device )
 {
-   (void)port;
-   (void)device;
+  if ( port < 2 )
+  {
+    amstrad_devices[ port ] = device;
+
+printf(" (%d)=%d \n",port,device);
+  }
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -405,7 +494,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
    info->library_version  = "4.2";
-   info->valid_extensions = "dsk|sna|zip|tap|cdt";
+   info->valid_extensions = "dsk|sna|zip|tap|cdt|voc";
    info->need_fullpath    = true;
    info->block_extract = false;
 
@@ -462,9 +551,10 @@ void retro_run_gui(void)
 
 void retro_blit(){
   	// Update display
-int i;
-for(i=0;i<TEX_HEIGHT;i++)
-	memcpy((unsigned char *)Retro_Screen+i*TEX_WIDTH*PITCH,(unsigned char *)bmp+i*TEX_WIDTH*PITCH,TEX_WIDTH*PITCH);
+	#define DEC (16+16*TEX_WIDTH*PITCH)
+	int i;
+	for(i=0;i<TEX_HEIGHT;i++)
+		memcpy((unsigned char *)Retro_Screen+i*TEX_WIDTH*PITCH+DEC,(unsigned char *)bmp+i*TEX_WIDTH*PITCH,TEX_WIDTH*PITCH);
 }
 
 void retro_run(void)
@@ -492,18 +582,22 @@ void retro_run(void)
 #endif
 
 }
-/*
+
 unsigned int lastdown,lastup,lastchar;
 static void keyboard_cb(bool down, unsigned keycode,
       uint32_t character, uint16_t mod)
 {
-   //logging.log(RETRO_LOG_INFO, "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
-     //    down ? "yes" : "no", keycode, character, mod);
+/*
+  printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
+         down ? "yes" : "no", keycode, character, mod);
+*/
+/*
 if(down)lastdown=keycode;
 else lastup=keycode;
 lastchar=character;
-}
 */
+}
+
 
 bool retro_load_game(const struct retro_game_info *info)
 {
@@ -511,10 +605,10 @@ bool retro_load_game(const struct retro_game_info *info)
 
    (void)info;
 
-/*
+
    struct retro_keyboard_callback cb = { keyboard_cb };
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
-*/
+
    full_path = info->path;
 
    strcpy(RPATH,full_path);
@@ -534,9 +628,10 @@ bool retro_load_game(const struct retro_game_info *info)
 	Emu_init();
 
 	if (strlen(RPATH) >= strlen("cdt"))
-		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt"))
+		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
 			tape_insert ((char *)full_path);
-
+   			return true;
+		}
 	loadadsk((char *)full_path,0);
 #endif
    return true;

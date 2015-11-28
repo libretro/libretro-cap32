@@ -3146,6 +3146,34 @@ void emu_reset(void)
 	emulator_reset(false);
 }
 
+extern int retro_ui_finalized;
+
+void change_model(int val){
+
+	CPC.model=val;
+
+   if ((CPC.model == 2) && (CPC.ram_size < 128))
+      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+printf("change model %d ---------------\n",val);
+}
+
+void change_ram(int val){
+
+	CPC.ram_size=val;
+
+   if ((CPC.model == 2) && (CPC.ram_size < 128))
+      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+printf("change ram %d ---------------\n",val);
+}
+
 void retro_key_down(int key)
 {
 	int code;
@@ -3677,6 +3705,8 @@ int capmain (int argc, char **argv)
 
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
+
+   retro_ui_finalized=1;
 
    return 0;
 }

@@ -310,7 +310,9 @@ unsigned short *pix=(unsigned short *)buff;
             if( HandleExtension(files[select]->d_name,"DSK") ||\
                   HandleExtension(files[select]->d_name,"dsk") ||\
                   HandleExtension(files[select]->d_name,"SNA") ||\
-                  HandleExtension(files[select]->d_name,"sna") ){
+                  HandleExtension(files[select]->d_name,"sna") ||\
+                  HandleExtension(files[select]->d_name,"cdt") ||\
+                  HandleExtension(files[select]->d_name,"CDT") ){
 
 				 sprintf(ret,"%s%s",path,files[select]->d_name);
 	             return ret;

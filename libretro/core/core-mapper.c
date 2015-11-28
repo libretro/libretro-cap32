@@ -25,7 +25,6 @@ char RETRO_DIR[512];
 
 extern void Screen_SetFullUpdate(int scr);
 extern bool Dialog_DoProperty(void);
-extern void validkey(int c64_key,int key_up,uint8 *key_matrix, uint8 *rev_matrix, uint8 *joystick);
 
 long frame=0;
 unsigned long  Ktime=0 , LastFPSTime=0;
@@ -156,7 +155,7 @@ void enter_options(void) {}
 #ifdef PS3PORT
 #define DEFAULT_PATH "/dev_hdd0/HOMEBREW/amstrad/"
 #else
-#define DEFAULT_PATH "/home/tech/and/ume/software/cpc6128/"
+#define DEFAULT_PATH "/"
 #endif
 
 #endif
@@ -183,6 +182,14 @@ void enter_gui(void)
    else
    {
 	  printf("choice:(%s) \n",dskimg);
+
+	  if (strlen(RPATH) >= strlen("cdt"))
+		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
+			tape_insert ((char *)dskimg);
+		    pauseg=0;
+			return ;
+		}
+
       loadadsk((char *)dskimg,NUMjoy>0?0:1);
       pauseg=0;
    }		
@@ -222,6 +229,7 @@ int RSTOPON=-1;
 int CTRLON=-1;
 
 extern unsigned short int bmp[400*300];
+extern unsigned amstrad_devices[ 2 ];
 
 
 void retro_virtualkb(void)
@@ -313,19 +321,20 @@ void retro_virtualkb(void)
          else if(i==-5)
          {
 			//FLIP DSK PORT 1-2
-
+			NUMjoy=-NUMjoy;
             oldi=-1;
          }
          else if(i==-6)
          {
 			//Exit
-			
-            oldi=-1;
+			retro_deinit();
+			oldi=-1;
+            exit(0);
          }
          else if(i==-7)
          {
 			//SNA SAVE
-			
+			snapshot_save (RPATH);
             oldi=-1;
          }
          else if(i==-8)
@@ -396,8 +405,6 @@ void Screen_SetFullUpdate(int scr)
    if(scr>0)memset(bmp,0,sizeof(bmp));
 }
 
-#define MATRIX(a,b) (((a) << 3) | (b))
-
 void Process_key()
 {
 	int i;
@@ -413,11 +420,24 @@ void Process_key()
 					//play_tape();
 					continue;
 				}
-				if(i==RETROK_RALT){
-					//KBMOD=-KBMOD;
-					//printf("Modifier pressed %d \n",KBMOD); 
+/*
+				if(i==RETROK_RCTRL){
+					//CTRLON=-CTRLON;
+					printf("Modifier crtl pressed %d \n",CTRLON); 
 					continue;
 				}
+				if(i==RETROK_RSHIFT){
+					//SHITFON=-SHITFON;
+					printf("Modifier shift pressed %d \n",SHIFTON); 
+					continue;
+				}
+*/
+				if(i==RETROK_LALT){
+					//KBMOD=-KBMOD;
+					printf("Modifier alt pressed %d \n",KBMOD); 
+					continue;
+				}
+printf("press: %d \n",i);
 				retro_key_down(i);
 	
         	}	
@@ -427,11 +447,24 @@ void Process_key()
 					play_tape();
 					continue;
 				}
-				if(i==RETROK_RALT){
-					//KBMOD=-KBMOD;
-					//printf("Modifier pressed %d \n",KBMOD); 
+/*
+				if(i==RETROK_RCTRL){
+					CTRLON=-CTRLON;
+					printf("Modifier crtl released %d \n",CTRLON); 
 					continue;
 				}
+				if(i==RETROK_RSHIFT){
+					SHIFTON=-SHIFTON;
+					printf("Modifier shift released %d \n",SHIFTON); 
+					continue;
+				}
+*/
+				if(i==RETROK_LALT){
+					KBMOD=-KBMOD;
+					printf("Modifier alt released %d \n",KBMOD); 
+					continue;
+				}
+printf("release: %d \n",i);
 				retro_key_up(i);
 	
         	}	
@@ -439,12 +472,42 @@ void Process_key()
 	memcpy(old_Key_Sate,Key_Sate , sizeof(Key_Sate) );
 
 }
+/*
+void Print_Statut(void)
+{
+   DrawFBoxBmp(bmp,0,CROP_HEIGHT,CROP_WIDTH,STAT_YSZ,RGB565(0,0,0));
+
+   Draw_text(bmp,STAT_DECX+40 ,STAT_BASEY,0xffff,0x8080,1,2,40,(SND>0?"SND":""));
+   Draw_text(bmp,STAT_DECX+80 ,STAT_BASEY,0xffff,0x8080,1,2,40,"F:%d",dwFPS);
+   Draw_text(bmp,STAT_DECX+120,STAT_BASEY,0xffff,0x8080,1,2,40,"DSK%c",NUMjoy>0?'A':'B');
+   if(ZOOM>-1)
+      Draw_text(bmp,(384-Mres[ZOOM].x)/2,(272-Mres[ZOOM].y)/2,0xffff,0x8080,1,2,40,"x:%3d y:%3d",Mres[ZOOM].x,Mres[ZOOM].y);
+}
+*/
+
+/*
+L2  STATUS ON/OFF
+R2  SND ON/OFF
+L   VKBD ON/OFF
+R   RESET
+SEL ENTER
+STR ZOOM/DEL
+A   FIRE/VKBD KEY
+B   RUN
+X   CAT
+Y   LOAD DSK
+*/
+
+extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL;
+int STATUTON=-1;
+#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
+#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
 int Retro_PollEvent()
 {
 	//   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
     //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
-    //   C64          BOOT VKB  M/J  R/S  UP   DWN  LEFT RGT  B1   GUI  F7   F1   F5   F3   SPC  1 
+    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT SND  ?    ? 
 
    int SAVPAS=PAS;	
    int i;
@@ -460,10 +523,10 @@ int Retro_PollEvent()
 
    if(SHOWKEY==-1 && pauseg==0)Process_key();
 
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F12) /*|| input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y)*/)
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F12)) //gui /*|| input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y))*/
       pauseg=1;
-
-if(pauseg==0){
+ 
+if(pauseg==0){ // if emulation running
 
 	  //Joy mode
 
@@ -475,6 +538,10 @@ if(pauseg==0){
 
       if(SHOWKEY==-1)retro_joy0(MXjoy[0]);
 
+
+if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
+   //shortcut for joy mode only
+
    i=1;//show vkbd toggle
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
@@ -484,7 +551,71 @@ if(pauseg==0){
       SHOWKEY=-SHOWKEY;
    }
 
-}
+   i=3;//type ENTER
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
+   {
+      mbt[i]=0;
+      TYPE_ENTER=!TYPE_ENTER;
+      if(TYPE_ENTER)cmd_cpt=0;
+   }
+/*
+   i=10;//type DEL / ZOOM
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      TYPE_DEL=!TYPE_DEL;
+      if(TYPE_DEL)cmd_cpt=0;
+      ZOOM++;if(ZOOM>4)ZOOM=-1;
+
+   }
+*/
+   i=0;//type RUN
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      TYPE_RUN=!TYPE_RUN;
+      if(TYPE_RUN)cmd_cpt=0;
+   }
+
+   i=10;//Type CAT 
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      TYPE_CAT=!TYPE_CAT; 
+      if(TYPE_CAT)cmd_cpt=0;
+      //Screen_SetFullUpdate();
+   }
+
+   i=12;//show/hide statut
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      STATUTON=-STATUTON;
+     // Screen_SetFullUpdate();
+   }
+/*
+   i=13;//snd on/off
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      SND=-SND;		
+   }
+*/
+   i=11;//reset
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      emu_reset();		
+   }
+
    i=2;//mouse/joy toggle
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
@@ -492,6 +623,11 @@ if(pauseg==0){
       mbt[i]=0;
       MOUSE_EMULATED=-MOUSE_EMULATED;
    }
+
+}//if amstrad_devices=joy
+
+
+}// if pauseg=0
 
 
    if(MOUSE_EMULATED==1){
