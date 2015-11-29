@@ -490,7 +490,6 @@ void CPC_ClearKey(int KeyID)
 }
 
 static int KeySymToCPCKey[512];
-static int KeySymFromAscii[512];
 
 void	retro_InitialiseKeyboardMapping()
 {
@@ -499,59 +498,58 @@ void	retro_InitialiseKeyboardMapping()
 	for (i=0; i<512; i++)
 	{
 		KeySymToCPCKey[i] = CPC_KEY_NULL;
-		KeySymFromAscii[i]= -1;
 	}
 
 	/* International key mappings */
-	KeySymToCPCKey[RETROK_0] = CPC_KEY_ZERO; KeySymFromAscii[RETROK_0]='0';
-	KeySymToCPCKey[RETROK_1] = CPC_KEY_1;KeySymFromAscii[RETROK_1]='1';
-	KeySymToCPCKey[RETROK_2] = CPC_KEY_2;KeySymFromAscii[RETROK_2]='2';
-	KeySymToCPCKey[RETROK_3] = CPC_KEY_3;KeySymFromAscii[RETROK_3]='3';
-	KeySymToCPCKey[RETROK_4] = CPC_KEY_4;KeySymFromAscii[RETROK_4]='4';
-	KeySymToCPCKey[RETROK_5] = CPC_KEY_5;KeySymFromAscii[RETROK_5]='5';
-	KeySymToCPCKey[RETROK_6] = CPC_KEY_6;KeySymFromAscii[RETROK_6]='6';
-	KeySymToCPCKey[RETROK_7] = CPC_KEY_7;KeySymFromAscii[RETROK_7]='7';
-	KeySymToCPCKey[RETROK_8] = CPC_KEY_8;KeySymFromAscii[RETROK_8]='8';
-	KeySymToCPCKey[RETROK_9] = CPC_KEY_9;KeySymFromAscii[RETROK_9]='9';
-	KeySymToCPCKey[RETROK_a] = CPC_KEY_A;KeySymFromAscii[RETROK_a]='a';
-	KeySymToCPCKey[RETROK_b] = CPC_KEY_B;KeySymFromAscii[RETROK_b]='b';
-	KeySymToCPCKey[RETROK_c] = CPC_KEY_C;KeySymFromAscii[RETROK_c]='c';
-	KeySymToCPCKey[RETROK_d] = CPC_KEY_D;KeySymFromAscii[RETROK_d]='d';
-	KeySymToCPCKey[RETROK_e] = CPC_KEY_E;KeySymFromAscii[RETROK_e]='e';
-	KeySymToCPCKey[RETROK_f] = CPC_KEY_F;KeySymFromAscii[RETROK_f]='f';
-	KeySymToCPCKey[RETROK_g] = CPC_KEY_G;KeySymFromAscii[RETROK_g]='g';
-	KeySymToCPCKey[RETROK_h] = CPC_KEY_H;KeySymFromAscii[RETROK_h]='h';
-	KeySymToCPCKey[RETROK_i] = CPC_KEY_I;KeySymFromAscii[RETROK_i]='i';
-	KeySymToCPCKey[RETROK_j] = CPC_KEY_J;KeySymFromAscii[RETROK_j]='j';
-	KeySymToCPCKey[RETROK_k] = CPC_KEY_K;KeySymFromAscii[RETROK_k]='k';
-	KeySymToCPCKey[RETROK_l] = CPC_KEY_L;KeySymFromAscii[RETROK_l]='l';
-	KeySymToCPCKey[RETROK_m] = CPC_KEY_M;KeySymFromAscii[RETROK_m]='m';
-	KeySymToCPCKey[RETROK_n] = CPC_KEY_N;KeySymFromAscii[RETROK_n]='n';
-	KeySymToCPCKey[RETROK_o] = CPC_KEY_O;KeySymFromAscii[RETROK_o]='o';
-	KeySymToCPCKey[RETROK_p] = CPC_KEY_P;KeySymFromAscii[RETROK_p]='p';
-	KeySymToCPCKey[RETROK_q] = CPC_KEY_Q;KeySymFromAscii[RETROK_k]='q';
-	KeySymToCPCKey[RETROK_r] = CPC_KEY_R;KeySymFromAscii[RETROK_r]='r';
-	KeySymToCPCKey[RETROK_s] = CPC_KEY_S;KeySymFromAscii[RETROK_s]='s';
-	KeySymToCPCKey[RETROK_t] = CPC_KEY_T;KeySymFromAscii[RETROK_t]='t';
-	KeySymToCPCKey[RETROK_u] = CPC_KEY_U;KeySymFromAscii[RETROK_u]='u';
-	KeySymToCPCKey[RETROK_v] = CPC_KEY_V;KeySymFromAscii[RETROK_v]='v';
-	KeySymToCPCKey[RETROK_w] = CPC_KEY_W;KeySymFromAscii[RETROK_w]='w';
-	KeySymToCPCKey[RETROK_x] = CPC_KEY_X;KeySymFromAscii[RETROK_x]='x';
-	KeySymToCPCKey[RETROK_y] = CPC_KEY_Y;KeySymFromAscii[RETROK_y]='y';
-	KeySymToCPCKey[RETROK_z] = CPC_KEY_Z;KeySymFromAscii[RETROK_z]='z';
-	KeySymToCPCKey[RETROK_SPACE] = CPC_KEY_SPACE;KeySymFromAscii[RETROK_SPACE]=' ';
-	KeySymToCPCKey[RETROK_COMMA] = CPC_KEY_COMMA;KeySymFromAscii[RETROK_COMMA]=',';
-	KeySymToCPCKey[RETROK_PERIOD] = CPC_KEY_DOT;KeySymFromAscii[RETROK_PERIOD]='.';
-	KeySymToCPCKey[RETROK_SEMICOLON] = CPC_KEY_COLON;KeySymFromAscii[RETROK_SEMICOLON]=';';
-	KeySymToCPCKey[RETROK_MINUS] = CPC_KEY_MINUS;KeySymFromAscii[RETROK_MINUS]='-';
-	KeySymToCPCKey[RETROK_EQUALS] = CPC_KEY_HAT;KeySymFromAscii[RETROK_EQUALS]='=';
-	KeySymToCPCKey[RETROK_LEFTBRACKET] = CPC_KEY_AT;KeySymFromAscii[RETROK_LEFTBRACKET]='@';
-	KeySymToCPCKey[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;KeySymFromAscii[RETROK_RIGHTBRACKET]=']';
+	KeySymToCPCKey[RETROK_0] = CPC_KEY_ZERO;
+	KeySymToCPCKey[RETROK_1] = CPC_KEY_1;
+	KeySymToCPCKey[RETROK_2] = CPC_KEY_2;
+	KeySymToCPCKey[RETROK_3] = CPC_KEY_3;
+	KeySymToCPCKey[RETROK_4] = CPC_KEY_4;
+	KeySymToCPCKey[RETROK_5] = CPC_KEY_5;
+	KeySymToCPCKey[RETROK_6] = CPC_KEY_6;
+	KeySymToCPCKey[RETROK_7] = CPC_KEY_7;
+	KeySymToCPCKey[RETROK_8] = CPC_KEY_8;
+	KeySymToCPCKey[RETROK_9] = CPC_KEY_9;
+	KeySymToCPCKey[RETROK_a] = CPC_KEY_A;
+	KeySymToCPCKey[RETROK_b] = CPC_KEY_B;
+	KeySymToCPCKey[RETROK_c] = CPC_KEY_C;
+	KeySymToCPCKey[RETROK_d] = CPC_KEY_D;
+	KeySymToCPCKey[RETROK_e] = CPC_KEY_E;
+	KeySymToCPCKey[RETROK_f] = CPC_KEY_F;
+	KeySymToCPCKey[RETROK_g] = CPC_KEY_G;
+	KeySymToCPCKey[RETROK_h] = CPC_KEY_H;
+	KeySymToCPCKey[RETROK_i] = CPC_KEY_I;
+	KeySymToCPCKey[RETROK_j] = CPC_KEY_J;
+	KeySymToCPCKey[RETROK_k] = CPC_KEY_K;
+	KeySymToCPCKey[RETROK_l] = CPC_KEY_L;
+	KeySymToCPCKey[RETROK_m] = CPC_KEY_M;
+	KeySymToCPCKey[RETROK_n] = CPC_KEY_N;
+	KeySymToCPCKey[RETROK_o] = CPC_KEY_O;
+	KeySymToCPCKey[RETROK_p] = CPC_KEY_P;
+	KeySymToCPCKey[RETROK_q] = CPC_KEY_Q;
+	KeySymToCPCKey[RETROK_r] = CPC_KEY_R;
+	KeySymToCPCKey[RETROK_s] = CPC_KEY_S;
+	KeySymToCPCKey[RETROK_t] = CPC_KEY_T;
+	KeySymToCPCKey[RETROK_u] = CPC_KEY_U;
+	KeySymToCPCKey[RETROK_v] = CPC_KEY_V;
+	KeySymToCPCKey[RETROK_w] = CPC_KEY_W;
+	KeySymToCPCKey[RETROK_x] = CPC_KEY_X;
+	KeySymToCPCKey[RETROK_y] = CPC_KEY_Y;
+	KeySymToCPCKey[RETROK_z] = CPC_KEY_Z;
+	KeySymToCPCKey[RETROK_SPACE] = CPC_KEY_SPACE;
+	KeySymToCPCKey[RETROK_COMMA] = CPC_KEY_COMMA;
+	KeySymToCPCKey[RETROK_PERIOD] = CPC_KEY_DOT;
+	KeySymToCPCKey[RETROK_SEMICOLON] = CPC_KEY_COLON;
+	KeySymToCPCKey[RETROK_MINUS] = CPC_KEY_MINUS;
+	KeySymToCPCKey[RETROK_EQUALS] = CPC_KEY_HAT;
+	KeySymToCPCKey[RETROK_LEFTBRACKET] = CPC_KEY_AT;
+	KeySymToCPCKey[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;
 
-	KeySymToCPCKey[RETROK_TAB] = CPC_KEY_TAB;KeySymFromAscii[RETROK_TAB]='\t';
-	KeySymToCPCKey[RETROK_RETURN] = CPC_KEY_RETURN;KeySymFromAscii[RETROK_RIGHTBRACKET]='\n';
-	KeySymToCPCKey[RETROK_BACKSPACE] = CPC_KEY_DEL;KeySymFromAscii[RETROK_RIGHTBRACKET]=']';
-	KeySymToCPCKey[RETROK_ESCAPE] = CPC_KEY_ESC;KeySymFromAscii[RETROK_RIGHTBRACKET]=']';
+	KeySymToCPCKey[RETROK_TAB] = CPC_KEY_TAB;
+	KeySymToCPCKey[RETROK_RETURN] = CPC_KEY_RETURN;
+	KeySymToCPCKey[RETROK_BACKSPACE] = CPC_KEY_DEL;
+	KeySymToCPCKey[RETROK_ESCAPE] = CPC_KEY_ESC;
 
 	//KeySymToCPCKey[RETROK_Equals & 0x0ff)] = CPC_KEY_CLR;
 
