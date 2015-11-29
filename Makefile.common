@@ -1,5 +1,5 @@
 INCFLAGS := -I$(CORE_DIR) \
-            -I$(CORE_DIR)/cap32 \
+            -I$(CORE_DIR)/cap32  -I$(CORE_DIR)/cap32/libcpccat\
             -I$(CORE_DIR)/libretro -I$(CORE_DIR)/libretro/core \
 			-I$(CORE_DIR)/libretro/include \
 	
@@ -43,3 +43,6 @@ SOURCES_C += $(CORE_DIR)/cap32/fdc.c
 SOURCES_C += $(CORE_DIR)/cap32/psg.c
 SOURCES_C += $(CORE_DIR)/cap32/tape.c
 SOURCES_C += $(CORE_DIR)/cap32/z80.c
+SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
+SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
+

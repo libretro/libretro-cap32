@@ -630,6 +630,7 @@ bool retro_load_game(const struct retro_game_info *info)
 	if (strlen(RPATH) >= strlen("cdt"))
 		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
 			tape_insert ((char *)full_path);
+      		kbd_buf_feed("|tape\nrun\"\n^");
    			return true;
 		}
 	loadadsk((char *)full_path,0);

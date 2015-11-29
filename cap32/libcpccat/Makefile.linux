@@ -1,0 +1,24 @@
+CC=gcc
+AR=ar
+RANLIB=ranlib
+
+CFLAGS=-O2 -Wall -DLINUX_MODE
+
+OBJS=fs.o
+TARGET=libcpccat.a
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(AR) cru $@ $?
+	$(RANLIB) $@
+
+clean:
+	-@rm -f $(OBJS) $(TARGET)
+
+
+.c.o :
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+
+

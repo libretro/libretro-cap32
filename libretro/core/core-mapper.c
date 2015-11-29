@@ -30,7 +30,6 @@ char TAPE_NAME[512]="\0";
 
 typedef enum
 {
-	/* line 0, bit 0..bit 7 */
 	GUI_NONE = 0,
 	GUI_LOAD ,
 	GUI_SNAP ,
@@ -178,7 +177,6 @@ void enter_options(void) {}
 
 #endif
 
-extern int  cmd_cpt,TYPE_CAT,TYPE_RUN,TYPE_ENTER,TYPE_DEL,TYPE_RUNTAPE;
 int STATUTON=-1;
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
 #define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
@@ -485,17 +483,14 @@ void Process_key()
 					printf("Modifier alt pressed %d \n",KBMOD); 
 					continue;
 				}
-printf("press: %d \n",i);
+//printf("press: %d \n",i);
 				retro_key_down(i);
 	
         	}	
         	else if ( !Key_Sate[i] && Key_Sate[i]!=old_Key_Sate[i]  )
         	{
 				if(i==RETROK_F12){
-
-      			TYPE_RUNTAPE=!TYPE_RUNTAPE;
-      			if(TYPE_RUNTAPE)cmd_cpt=0;
-					//play_tape();
+      				kbd_buf_feed("|tape\nrun\"\n^");
 					continue;
 				}
 /*
@@ -515,7 +510,7 @@ printf("press: %d \n",i);
 					printf("Modifier alt released %d \n",KBMOD); 
 					continue;
 				}
-printf("release: %d \n",i);
+//printf("release: %d \n",i);
 				retro_key_up(i);
 	
         	}	
@@ -621,37 +616,34 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
    {
       mbt[i]=0;
-      TYPE_ENTER=!TYPE_ENTER;
-      if(TYPE_ENTER)cmd_cpt=0;
+	  kbd_buf_feed("\n");
    }
+
 /*
    i=10;//type DEL / ZOOM
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       mbt[i]=0;
-      TYPE_DEL=!TYPE_DEL;
-      if(TYPE_DEL)cmd_cpt=0;
       ZOOM++;if(ZOOM>4)ZOOM=-1;
 
    }
 */
-   i=0;//type RUN
+
+   i=0;//type RUN"
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       mbt[i]=0;
-      TYPE_RUN=!TYPE_RUN;
-      if(TYPE_RUN)cmd_cpt=0;
+	  kbd_buf_feed("RUN\"");
    }
 
-   i=10;//Type CAT 
+   i=10;//Type CAT\n 
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       mbt[i]=0;
-      TYPE_CAT=!TYPE_CAT; 
-      if(TYPE_CAT)cmd_cpt=0;
+	  kbd_buf_feed("CAT\n");
       //Screen_SetFullUpdate();
    }
 
@@ -669,9 +661,7 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       mbt[i]=1;
    else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       mbt[i]=0;
-     	
-	  TYPE_RUNTAPE=!TYPE_RUNTAPE;
-      if(TYPE_RUNTAPE)cmd_cpt=0;
+      kbd_buf_feed("|tape\nrun\"\n^");
    }
 
    i=11;//reset
