@@ -1320,7 +1320,7 @@ int  select_format(uchar *track)
         /* correct number of sides? */
         if (disk_header.nbof_heads==cur_entry->dpb.HDS) 
         {
-          if (disk_header.nbof_tracks == cur_entry->dpb.TRKS)
+          if (disk_header.nbof_tracks  >=40 /*== cur_entry->dpb.TRKS*/)
           {
             // found a format that appears to match the format on the disc
             if (dpb_entry_found==NULL)
