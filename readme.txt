@@ -1,11 +1,8 @@
 		
-	CAPRICE32 4.2 LIBRETRO DEBUG VERSION WIP
+	CAPRICE32 4.2 LIBRETRO 
 
 	 
-	What?: A quick port of caprice32-4.2.0 to LIBRETRO.
-	Why? : It was the first computer i own.
-	Who? : Rtype
-
+A quick port of caprice32-4.2.0 to LIBRETRO.
 
 	
 All the credit of the caprice32 Emulator to Ulrich Doewich 
@@ -18,72 +15,55 @@ And of course for the RetroArch/Libretro team : "http://www.libretro.org/"
 You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
 
-	
-It's a quick hack.
-At this time , works the basis but buggy on linux / android / PS3.
 
-Remember ,Everything not working well, It's a debug release , so expect bugs.
+Remember ,Everything not working well, so expect bugs.
 
+Usage: launch an TAPE (cdt) or DSK , and game should autostart.
 
-
-Compile:
-
-	Go to linux directory, and type make .
-
-
-
-Usage:
-
-	Launch retroarch , select a startup dsk/sna , and cap32 sould boot.
 
 
 Control:
 
-	- Joy/Overlay
+
+	- Joy/Overlay  (Choose AMSTRAD JOYSTICK in input controller setting)
 
 	L2  STATUS ON/OFF
-	R2  SND ON/OFF
-	L   ZOOM/DEL
+	R2  AUTOLOAD TAPE
+	L   CAT
 	R   RESET
-	SEL ENTER
-	STR VKBD ON/OFF
-	A   FIRE/VKBD KEY
+	SEL MOUSE/JOY IN GUI
+	STR ENTER/RETURN
+	A   FIRE1/VKBD KEY
 	B   RUN
-	X   CAT
-	Y   LOAD DSK
+	X   FIRE2
+	Y   VKBD ON/OFF
 
-	- In vkbd page 2 
+	- In vkbd (page 2) 
 
 	"EXT" EXIT EMU
 	"SNA" SAVE SNA
 	"DSK" SWITCH DSK DRIVE A/B
 	"Col" SWTICH FGCOL ON/OFF
 
+	
+	- Keayboard (Choose AMSTRAD KEYBOARD in input controller setting)
+
+	F8 LOAD DSK/TAPE
+	F9 MEM SNAPSHOT LOAD/SAVE
+	F10 MAIN GUI
+	F12 PLAY TAPE
+
+
 Core options:
+
   Autorun - 	disable/enable
 	
-        If enabled a RUN"DISK command will be done at startup. To make it
-        work with your games, you need to create a DISK.BAS file on the
-        game disk that. Currently this needs to be done using a different
-        Amstrad emulator as libretro-cap32 currently does not save changes
-        to disk files.
-	
-        Follow these steps using a different Amstrad emulator:
-        1. Load the emulator and mount your game disk file
-        2. Type "CAT" at the BASIC prompt and find the name of the game
-           file on the disk. Usually it's an abbreviation of the game. For
-           this example I will use Boulderdash which has a game file on
-           the disk called BOULDER.BAS								
-        3. At the BASIC prompt type:
-             10 RUN"BOULDER.BAS
-             SAVE "DISK.BAS"
+        If enabled a RUN the first bas/bin found in DSK
+  	
 
-        When Autorun is enabled DISK.BAS will be launched at startup which
-        will then run the real game file.
-	
 Knows Bugs: 
  
 
-	- Everything not working well, It's a debug release , so expect to more bug.
+	- Everything not working well .
 
 
