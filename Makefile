@@ -51,6 +51,14 @@ else ifneq (,$(findstring linux-portable,$(platform)))
 	LIBM :=
 	LIBZ :=
 	SHARED := -shared -Wl,-version-script=link.T
+# android arm
+else ifneq (,$(findstring android,$(platform)))
+   	TARGET := $(TARGET_NAME)_libretro.so
+   	fpic = -fPIC
+   	SHARED := -lstdc++ -llog -lz -shared -Wl,--version-script=link.T -Wl,--no-undefined
+
+   	CC = arm-linux-androideabi-gcc
+   	CXX = arm-linux-androideabi-g++
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so

@@ -175,7 +175,6 @@ void theloop(void);
 int capmain (int argc, char **argv);
 void retro_audio_cb( short l, short r);
 void mixsnd (void);
-void shortcut_check(void);
 void theloop(void);
 long GetTicks(void);
 int HandleExtension(char *path,char *ext);
@@ -183,10 +182,12 @@ int HandleExtension(char *path,char *ext);
 extern unsigned short int bmp[400 * 300];
 extern char RPATH[512];
 extern int SND;
-extern int autorun;
-int TYPE_CAT=0,TYPE_RUN=0,TYPE_ENTER=0,TYPE_DEL=0,TYPE_RUNDISK=0;
-int cmd_cpt=-1;
-int rundisk_wait=0;
+extern int autorun,kbd_runcmd;
+int autoboot_delay=0;
+
+extern char DISKA_NAME[512];
+extern char DISKB_NAME[512];
+extern char TAPE_NAME[512];
 
 #include "cap32.h"
 #include "crtc.h"
@@ -289,7 +290,7 @@ FILE *pfileObject;
 FILE *pfoPrinter;
 
 #ifdef DEBUG
-//#define DEBUG_KEY SDLK_F9
+//#define DEBUG_KEY RETROK_F9
 uint32_t dwDebugFlag = 1;
 FILE *pfoDebug;
 #endif
@@ -355,163 +356,240 @@ typedef enum {
    CAP32_TAPEPLAY
 } CAP32_KEYS;
 
-typedef enum {
-   CPC_0,
-   CPC_1,
-   CPC_2,
-   CPC_3,
-   CPC_4,
-   CPC_5,
-   CPC_6,
-   CPC_7,
-   CPC_8,
-   CPC_9,
-   CPC_A,
-   CPC_B,
-   CPC_C,
-   CPC_D,
-   CPC_E,
-   CPC_F,
-   CPC_G,
-   CPC_H,
-   CPC_I,
-   CPC_J,
-   CPC_K,
-   CPC_L,
-   CPC_M,
-   CPC_N,
-   CPC_O,
-   CPC_P,
-   CPC_Q,
-   CPC_R,
-   CPC_S,
-   CPC_T,
-   CPC_U,
-   CPC_V,
-   CPC_W,
-   CPC_X,
-   CPC_Y,
-   CPC_Z,
-   CPC_a,
-   CPC_b,
-   CPC_c,
-   CPC_d,
-   CPC_e,
-   CPC_f,
-   CPC_g,
-   CPC_h,
-   CPC_i,
-   CPC_j,
-   CPC_k,
-   CPC_l,
-   CPC_m,
-   CPC_n,
-   CPC_o,
-   CPC_p,
-   CPC_q,
-   CPC_r,
-   CPC_s,
-   CPC_t,
-   CPC_u,
-   CPC_v,
-   CPC_w,
-   CPC_x,
-   CPC_y,
-   CPC_z,
-   CPC_AMPERSAND,
-   CPC_ASTERISK,
-   CPC_AT,
-   CPC_BACKQUOTE,
-   CPC_BACKSLASH,
-   CPC_CAPSLOCK,
-   CPC_CLR,
-   CPC_COLON,
-   CPC_COMMA,
-   CPC_CONTROL,
-   CPC_COPY,
-   CPC_CPY_DOWN,
-   CPC_CPY_LEFT,
-   CPC_CPY_RIGHT,
-   CPC_CPY_UP,
-   CPC_CUR_DOWN,
-   CPC_CUR_LEFT,
-   CPC_CUR_RIGHT,
-   CPC_CUR_UP,
-   CPC_CUR_ENDBL,
-   CPC_CUR_HOMELN,
-   CPC_CUR_ENDLN,
-   CPC_CUR_HOMEBL,
-   CPC_DBLQUOTE,
-   CPC_DEL,
-   CPC_DOLLAR,
-   CPC_ENTER,
-   CPC_EQUAL,
-   CPC_ESC,
-   CPC_EXCLAMATN,
-   CPC_F0,
-   CPC_F1,
-   CPC_F2,
-   CPC_F3,
-   CPC_F4,
-   CPC_F5,
-   CPC_F6,
-   CPC_F7,
-   CPC_F8,
-   CPC_F9,
-   CPC_FPERIOD,
-   CPC_GREATER,
-   CPC_HASH,
-   CPC_LBRACKET,
-   CPC_LCBRACE,
-   CPC_LEFTPAREN,
-   CPC_LESS,
-   CPC_LSHIFT,
-   CPC_MINUS,
-   CPC_PERCENT,
-   CPC_PERIOD,
-   CPC_PIPE,
-   CPC_PLUS,
-   CPC_POUND,
-   CPC_POWER,
-   CPC_QUESTION,
-   CPC_QUOTE,
-   CPC_RBRACKET,
-   CPC_RCBRACE,
-   CPC_RETURN,
-   CPC_RIGHTPAREN,
-   CPC_RSHIFT,
-   CPC_SEMICOLON,
-   CPC_SLASH,
-   CPC_SPACE,
-   CPC_TAB,
-   CPC_UNDERSCORE,
-   CPC_J0_UP,
-   CPC_J0_DOWN,
-   CPC_J0_LEFT,
-   CPC_J0_RIGHT,
-   CPC_J0_FIRE1,
-   CPC_J0_FIRE2,
-   CPC_J1_UP,
-   CPC_J1_DOWN,
-   CPC_J1_LEFT,
-   CPC_J1_RIGHT,
-   CPC_J1_FIRE1,
-   CPC_J1_FIRE2,
-   CPC_ES_NTILDE,
-   CPC_ES_nTILDE,
-   CPC_ES_PESETA,
-   CPC_FR_eACUTE,
-   CPC_FR_eGRAVE,
-   CPC_FR_cCEDIL,
-   CPC_FR_aGRAVE,
-   CPC_FR_uGRAVE
-} CPC_KEYS;
+
+#define KMOD_CTRL (KMOD_LCTRL|KMOD_RCTRL)
+#define KMOD_SHIFT  (KMOD_LSHIFT|KMOD_RSHIFT)
+#define KMOD_ALT  (KMOD_LALT|KMOD_RALT)
+#define KMOD_META (KMOD_LMETA|KMOD_RMETA)
 
 #define MOD_PC_SHIFT    (KMOD_SHIFT << 16)
 #define MOD_PC_CTRL     (KMOD_CTRL << 16)
 #define MOD_PC_MODE     (KMOD_MODE << 16)
 
 #define KBD_MAX_ENTRIES 160
+
+#include "libretro.h"
+
+//TAKEN FORM ARNOLD
+typedef enum
+{
+	/* line 0, bit 0..bit 7 */
+	CPC_KEY_CURSOR_UP = 0,
+	CPC_KEY_CURSOR_RIGHT,
+	CPC_KEY_CURSOR_DOWN,
+	CPC_KEY_F9,
+	CPC_KEY_F6,
+	CPC_KEY_F3,
+	CPC_KEY_SMALL_ENTER,
+	CPC_KEY_FDOT,
+	/* line 1, bit 0..bit 7 */
+	CPC_KEY_CURSOR_LEFT,
+	CPC_KEY_COPY,
+	CPC_KEY_F7,
+	CPC_KEY_F8,
+	CPC_KEY_F5,
+	CPC_KEY_F1,
+	CPC_KEY_F2,
+	CPC_KEY_F0,
+	/* line 2, bit 0..bit 7 */
+	CPC_KEY_CLR,
+	CPC_KEY_OPEN_SQUARE_BRACKET,
+	CPC_KEY_RETURN,
+	CPC_KEY_CLOSE_SQUARE_BRACKET,
+	CPC_KEY_F4,
+	CPC_KEY_SHIFT,
+	CPC_KEY_FORWARD_SLASH,
+	CPC_KEY_CONTROL,
+	/* line 3, bit 0.. bit 7 */
+	CPC_KEY_HAT,
+	CPC_KEY_MINUS,
+	CPC_KEY_AT,
+	CPC_KEY_P,
+	CPC_KEY_SEMICOLON,
+	CPC_KEY_COLON,
+	CPC_KEY_BACKSLASH,
+	CPC_KEY_DOT,
+	/* line 4, bit 0..bit 7 */
+	CPC_KEY_ZERO,
+	CPC_KEY_9,
+	CPC_KEY_O,
+	CPC_KEY_I,
+	CPC_KEY_L,
+	CPC_KEY_K,
+	CPC_KEY_M,
+	CPC_KEY_COMMA,
+	/* line 5, bit 0..bit 7 */
+	CPC_KEY_8,
+	CPC_KEY_7,
+	CPC_KEY_U,
+	CPC_KEY_Y,
+	CPC_KEY_H,
+	CPC_KEY_J,
+	CPC_KEY_N,
+	CPC_KEY_SPACE,
+	/* line 6, bit 0..bit 7 */
+	CPC_KEY_6,
+	CPC_KEY_5,
+	CPC_KEY_R,
+	CPC_KEY_T,
+	CPC_KEY_G,
+	CPC_KEY_F,
+	CPC_KEY_B,
+	CPC_KEY_V,
+	/* line 7, bit 0.. bit 7 */
+	CPC_KEY_4,
+	CPC_KEY_3,
+	CPC_KEY_E,
+	CPC_KEY_W,
+	CPC_KEY_S,
+	CPC_KEY_D,
+	CPC_KEY_C,
+	CPC_KEY_X,
+	/* line 8, bit 0.. bit 7 */
+	CPC_KEY_1,
+	CPC_KEY_2,
+	CPC_KEY_ESC,
+	CPC_KEY_Q,
+	CPC_KEY_TAB,
+	CPC_KEY_A,
+	CPC_KEY_CAPS_LOCK,
+	CPC_KEY_Z,
+	/* line 9, bit 7..bit 0 */
+	CPC_KEY_JOY_UP,
+	CPC_KEY_JOY_DOWN,
+	CPC_KEY_JOY_LEFT,
+	CPC_KEY_JOY_RIGHT,
+	CPC_KEY_JOY_FIRE1,
+	CPC_KEY_JOY_FIRE2,
+	CPC_KEY_SPARE,
+	CPC_KEY_DEL,
+
+
+	/* no key press */
+	CPC_KEY_NULL
+} CPC_KEY_ID;
+
+void CPC_SetKey(int KeyID)
+{
+	if (KeyID!=CPC_KEY_NULL)
+	{
+		int Line = KeyID>>3;
+		int Bit = KeyID & 0x07;
+		keyboard_matrix/*KeyboardData*/[Line] &= ~(1<<Bit);
+	}
+}
+
+void CPC_ClearKey(int KeyID)
+{
+	if (KeyID!=CPC_KEY_NULL)
+	{
+		int Line = KeyID>>3;
+		int Bit = KeyID & 0x07;
+		keyboard_matrix/*KeyboardData*/[Line] |= (1<<Bit);
+	}
+}
+
+static int KeySymToCPCKey[512];
+
+void	retro_InitialiseKeyboardMapping()
+{
+	int	 i;
+
+	for (i=0; i<512; i++)
+	{
+		KeySymToCPCKey[i] = CPC_KEY_NULL;
+	}
+
+	/* International key mappings */
+	KeySymToCPCKey[RETROK_0] = CPC_KEY_ZERO;
+	KeySymToCPCKey[RETROK_1] = CPC_KEY_1;
+	KeySymToCPCKey[RETROK_2] = CPC_KEY_2;
+	KeySymToCPCKey[RETROK_3] = CPC_KEY_3;
+	KeySymToCPCKey[RETROK_4] = CPC_KEY_4;
+	KeySymToCPCKey[RETROK_5] = CPC_KEY_5;
+	KeySymToCPCKey[RETROK_6] = CPC_KEY_6;
+	KeySymToCPCKey[RETROK_7] = CPC_KEY_7;
+	KeySymToCPCKey[RETROK_8] = CPC_KEY_8;
+	KeySymToCPCKey[RETROK_9] = CPC_KEY_9;
+	KeySymToCPCKey[RETROK_a] = CPC_KEY_A;
+	KeySymToCPCKey[RETROK_b] = CPC_KEY_B;
+	KeySymToCPCKey[RETROK_c] = CPC_KEY_C;
+	KeySymToCPCKey[RETROK_d] = CPC_KEY_D;
+	KeySymToCPCKey[RETROK_e] = CPC_KEY_E;
+	KeySymToCPCKey[RETROK_f] = CPC_KEY_F;
+	KeySymToCPCKey[RETROK_g] = CPC_KEY_G;
+	KeySymToCPCKey[RETROK_h] = CPC_KEY_H;
+	KeySymToCPCKey[RETROK_i] = CPC_KEY_I;
+	KeySymToCPCKey[RETROK_j] = CPC_KEY_J;
+	KeySymToCPCKey[RETROK_k] = CPC_KEY_K;
+	KeySymToCPCKey[RETROK_l] = CPC_KEY_L;
+	KeySymToCPCKey[RETROK_m] = CPC_KEY_M;
+	KeySymToCPCKey[RETROK_n] = CPC_KEY_N;
+	KeySymToCPCKey[RETROK_o] = CPC_KEY_O;
+	KeySymToCPCKey[RETROK_p] = CPC_KEY_P;
+	KeySymToCPCKey[RETROK_q] = CPC_KEY_Q;
+	KeySymToCPCKey[RETROK_r] = CPC_KEY_R;
+	KeySymToCPCKey[RETROK_s] = CPC_KEY_S;
+	KeySymToCPCKey[RETROK_t] = CPC_KEY_T;
+	KeySymToCPCKey[RETROK_u] = CPC_KEY_U;
+	KeySymToCPCKey[RETROK_v] = CPC_KEY_V;
+	KeySymToCPCKey[RETROK_w] = CPC_KEY_W;
+	KeySymToCPCKey[RETROK_x] = CPC_KEY_X;
+	KeySymToCPCKey[RETROK_y] = CPC_KEY_Y;
+	KeySymToCPCKey[RETROK_z] = CPC_KEY_Z;
+	KeySymToCPCKey[RETROK_SPACE] = CPC_KEY_SPACE;
+	KeySymToCPCKey[RETROK_COMMA] = CPC_KEY_COMMA;
+	KeySymToCPCKey[RETROK_PERIOD] = CPC_KEY_DOT;
+	KeySymToCPCKey[RETROK_SEMICOLON] = CPC_KEY_COLON;
+	KeySymToCPCKey[RETROK_MINUS] = CPC_KEY_MINUS;
+	KeySymToCPCKey[RETROK_EQUALS] = CPC_KEY_HAT;
+	KeySymToCPCKey[RETROK_LEFTBRACKET] = CPC_KEY_AT;
+	KeySymToCPCKey[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;
+
+	KeySymToCPCKey[RETROK_TAB] = CPC_KEY_TAB;
+	KeySymToCPCKey[RETROK_RETURN] = CPC_KEY_RETURN;
+	KeySymToCPCKey[RETROK_BACKSPACE] = CPC_KEY_DEL;
+	KeySymToCPCKey[RETROK_ESCAPE] = CPC_KEY_ESC;
+
+	//KeySymToCPCKey[RETROK_Equals & 0x0ff)] = CPC_KEY_CLR;
+
+	KeySymToCPCKey[RETROK_UP] = CPC_KEY_CURSOR_UP;
+	KeySymToCPCKey[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
+	KeySymToCPCKey[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
+	KeySymToCPCKey[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
+
+	KeySymToCPCKey[RETROK_KP0] = CPC_KEY_F0;
+	KeySymToCPCKey[RETROK_KP1] = CPC_KEY_F1;
+	KeySymToCPCKey[RETROK_KP2] = CPC_KEY_F2;
+	KeySymToCPCKey[RETROK_KP3] = CPC_KEY_F3;
+	KeySymToCPCKey[RETROK_KP4] = CPC_KEY_F4;
+	KeySymToCPCKey[RETROK_KP5] = CPC_KEY_F5;
+	KeySymToCPCKey[RETROK_KP6] = CPC_KEY_F6;
+	KeySymToCPCKey[RETROK_KP7] = CPC_KEY_F7;
+	KeySymToCPCKey[RETROK_KP8] = CPC_KEY_F8;
+	KeySymToCPCKey[RETROK_KP9] = CPC_KEY_F9;
+
+	KeySymToCPCKey[RETROK_KP_PERIOD] = CPC_KEY_FDOT;
+
+	KeySymToCPCKey[RETROK_LSHIFT] = CPC_KEY_SHIFT;
+	KeySymToCPCKey[RETROK_RSHIFT] = CPC_KEY_SHIFT;
+	KeySymToCPCKey[RETROK_LCTRL] = CPC_KEY_CONTROL;
+	KeySymToCPCKey[RETROK_RCTRL] = CPC_KEY_CONTROL;
+	KeySymToCPCKey[RETROK_CAPSLOCK] = CPC_KEY_CAPS_LOCK;
+
+	KeySymToCPCKey[RETROK_KP_ENTER] = CPC_KEY_SMALL_ENTER;
+
+	KeySymToCPCKey[RETROK_DELETE] = CPC_KEY_JOY_LEFT;
+	KeySymToCPCKey[RETROK_END] = CPC_KEY_JOY_DOWN;
+	KeySymToCPCKey[RETROK_PAGEDOWN] = CPC_KEY_JOY_RIGHT;
+	KeySymToCPCKey[RETROK_INSERT] = CPC_KEY_JOY_FIRE1;
+	KeySymToCPCKey[RETROK_HOME] = CPC_KEY_JOY_UP;
+	KeySymToCPCKey[RETROK_PAGEUP] = CPC_KEY_JOY_FIRE2;
+
+	KeySymToCPCKey[0x0134] = CPC_KEY_COPY;			/* Alt */
+	KeySymToCPCKey[0x0137] = CPC_KEY_COPY;			/* Compose */
+
+}
 
 
 #define MAX_ROM_MODS 2
@@ -1810,6 +1888,7 @@ exit:
 
    if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
+		
    return iRetCode;
 }
 
@@ -2116,6 +2195,8 @@ int tape_insert (char *pchFileName)
 
    Tape_Rewind();
 
+   sprintf(TAPE_NAME,"%s",pchFileName);
+
    return 0;
 }
 
@@ -2353,6 +2434,8 @@ int tape_insert_voc (char *pchFileName)
    pbTapeImageEnd = pbTapeImagePtr + 3;
 
    Tape_Rewind();
+
+   sprintf(TAPE_NAME,"%s",pchFileName);
 
    return 0;
 }
@@ -2710,6 +2793,7 @@ void input_swap_joy (void)
 
 int input_init (void)
 {
+
    return 0;
 }
 
@@ -3068,17 +3152,55 @@ void emu_reset(void)
 	emulator_reset(false);
 }
 
+extern int retro_ui_finalized;
+
+void change_model(int val){
+
+	CPC.model=val;
+
+   if ((CPC.model == 2) && (CPC.ram_size < 128))
+      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+//printf("change model %d ---------------\n",val);
+}
+
+void change_ram(int val){
+
+	CPC.ram_size=val;
+
+   if ((CPC.model == 2) && (CPC.ram_size < 128))
+      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+//printf("change ram %d ---------------\n",val);
+}
+
 void retro_key_down(int key)
 {
-	keyboard_matrix[key >> 4] &= ~bit_values[key & 7];	
+	int code;
+
+	if(key<512)
+ 		code=KeySymToCPCKey[key];	
+	else code = CPC_KEY_NULL;
+	CPC_SetKey(code);
 }
 
 void retro_key_up(int key)
 {
-	keyboard_matrix[key >> 4] |= bit_values[key & 7];	
+	int code;
+
+	if(key<512)
+ 		code=KeySymToCPCKey[key];
+	else code = CPC_KEY_NULL;
+	CPC_ClearKey(code);
 }
 
-static int jflag[5]={0,0,0,0,0};
+static int jflag[6]={0,0,0,0,0,0};
 
 void retro_joy0(unsigned char joy0)
 {
@@ -3091,7 +3213,7 @@ void retro_joy0(unsigned char joy0)
    {
       if(jflag[0]==0)
       {
-         retro_key_down(0x90);
+         retro_key_down(RETROK_HOME);
          jflag[0]=1;
       }
    }
@@ -3099,7 +3221,7 @@ void retro_joy0(unsigned char joy0)
    {
       if(jflag[0]==1)
       {
-         retro_key_up(0x90);
+         retro_key_up(RETROK_HOME);
          jflag[0]=0;
       }
    }
@@ -3107,12 +3229,12 @@ void retro_joy0(unsigned char joy0)
    //Down
    if(joy0&0x02){
       if(jflag[1]==0){
-         retro_key_down(0x91);
+         retro_key_down(RETROK_END);
          jflag[1]=1;
       }
    }else {
       if(jflag[1]==1){
-         retro_key_up(0x91);
+         retro_key_up(RETROK_END);
          jflag[1]=0;
       }
    }
@@ -3120,12 +3242,12 @@ void retro_joy0(unsigned char joy0)
    //Left
    if(joy0&0x04){
       if(jflag[2]==0){
-         retro_key_down(0x92);
+         retro_key_down(RETROK_DELETE);
          jflag[2]=1;
       }
    }else {
       if(jflag[2]==1){
-         retro_key_up(0x92);
+         retro_key_up(RETROK_DELETE);
          jflag[2]=0;
       }
    }
@@ -3133,12 +3255,12 @@ void retro_joy0(unsigned char joy0)
    //Right
    if(joy0&0x08){
       if(jflag[3]==0){
-         retro_key_down(0x93);
+         retro_key_down(RETROK_PAGEDOWN);
          jflag[3]=1;
       }
    }else {
       if(jflag[3]==1){
-         retro_key_up(0x93);
+         retro_key_up(RETROK_PAGEDOWN);
          jflag[3]=0;
       }
    }
@@ -3146,16 +3268,28 @@ void retro_joy0(unsigned char joy0)
    //btn0
    if(joy0&0x80){
       if(jflag[4]==0){
-         retro_key_down(0x94); 
+         retro_key_down(RETROK_INSERT); 
          jflag[4]=1;
       }
    }else {
       if(jflag[4]==1){
-         retro_key_up(0x94); 
+         retro_key_up(RETROK_INSERT); 
          jflag[4]=0;
       }
    }
 
+   //btn1
+   if(joy0&0x40){
+      if(jflag[5]==0){
+         retro_key_down(RETROK_PAGEUP); 
+         jflag[5]=1;
+      }
+   }else {
+      if(jflag[5]==1){
+         retro_key_up(RETROK_PAGEUP); 
+         jflag[5]=0;
+      }
+   }
 }
 
 void mixsnd(void)
@@ -3172,9 +3306,17 @@ void mixsnd(void)
       retro_audio_cb(p[x],p[x+1]);
 }
 
+
+int skel_main(int argc, char *argv[])
+{
+   retro_InitialiseKeyboardMapping();
+   capmain(argc,argv);
+   return 0;
+}
+
 int InitOSGLU(void)
 {
-   capmain(1,NULL);
+
    return 0;
 }
 
@@ -3182,217 +3324,6 @@ int  UnInitOSGLU(void)
 {
    doCleanUp();
    return 0;
-}
-
-void shortcut_check(void)
-{
-   if(TYPE_CAT)
-   {
-      switch(cmd_cpt)
-      {
-         // C
-         case 0:
-            keyboard_matrix[0x76 >> 4] &= ~bit_values[0x76 & 7];// key is being held down
-            break;
-         case 1:
-            keyboard_matrix[0x76 >> 4] |= bit_values[0x76 & 7]; // key has been released
-            break;
-            // A
-         case 2:
-            keyboard_matrix[0x85 >> 4] &= ~bit_values[0x85 & 7];// key is being held down
-            break;
-         case 3:
-            keyboard_matrix[0x85 >> 4] |= bit_values[0x85 & 7]; // key has been released
-            break;
-            // T
-         case 4:
-            keyboard_matrix[0x63 >> 4] &= ~bit_values[0x63 & 7];// key is being held down
-            break;
-         case 5:
-            keyboard_matrix[0x63 >> 4] |= bit_values[0x63 & 7]; // key has been released
-            break;
-            // Enter
-         case 6:
-            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
-            break;
-         case 7:
-            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
-            break;
-         case 8:
-            TYPE_CAT=!TYPE_CAT;cmd_cpt=-1;
-            break;
-         default:
-            break;
-      }
-      cmd_cpt++;	
-
-   }
-   else if(TYPE_RUN)
-   {
-      switch(cmd_cpt)
-      {
-         // R
-         case 0:
-            keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
-            break;
-         case 1:
-            keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
-            break;
-            // U
-         case 2:
-            keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
-            break;
-         case 3:
-            keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
-            break;
-            // N
-         case 4:
-            keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
-            break;
-         case 5:
-            keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
-            break;
-            // shft+2 => "
-         case 6:
-            keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
-            keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
-            break;
-         case 7:
-            keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
-            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
-            break;
-
-         case 8:TYPE_RUN=!TYPE_RUN;cmd_cpt=-1;
-                break;
-
-         default: break;
-
-      }
-      cmd_cpt++;	
-
-   }
-   else if(TYPE_RUNDISK)
-   {
-
-      switch(cmd_cpt)
-      {
-         // R
-         case 0:
-            keyboard_matrix[0x62 >> 4] &= ~bit_values[0x62 & 7];// key is being held down
-            break;
-         case 1:
-            keyboard_matrix[0x62 >> 4] |= bit_values[0x62 & 7]; // key has been released
-            break;
-            // U
-         case 2:
-            keyboard_matrix[0x52 >> 4] &= ~bit_values[0x52 & 7];// key is being held down
-            break;
-         case 3:
-            keyboard_matrix[0x52 >> 4] |= bit_values[0x52 & 7]; // key has been released
-            break;
-            // N
-         case 4:
-            keyboard_matrix[0x56 >> 4] &= ~bit_values[0x56 & 7];// key is being held down
-            break;
-         case 5:
-            keyboard_matrix[0x56 >> 4] |= bit_values[0x56 & 7]; // key has been released
-            break;
-            /* shft+2 => " */
-         case 6:
-            keyboard_matrix[0x25 >> 4] &= ~bit_values[0x25 & 7];// key is being held down
-            keyboard_matrix[0x81 >> 4] &= ~bit_values[0x81 & 7];// key is being held down
-            break;
-         case 7:
-            keyboard_matrix[0x81 >> 4] |= bit_values[0x81 & 7]; // key has been released
-            keyboard_matrix[0x25 >> 4] |= bit_values[0x25 & 7]; // key has been released
-            break;
-            // D
-         case 8:
-            keyboard_matrix[0x75 >> 4] &= ~bit_values[0x75 & 7];// key is being held down
-            break;
-         case 9:
-            keyboard_matrix[0x75 >> 4] |= bit_values[0x75 & 7]; // key has been released
-            break;
-            // I
-         case 10:
-            keyboard_matrix[0x43 >> 4] &= ~bit_values[0x43 & 7];// key is being held down
-            break;
-         case 11:
-            keyboard_matrix[0x43 >> 4] |= bit_values[0x43 & 7]; // key has been released
-            break;
-            // S
-         case 12:
-            keyboard_matrix[0x74 >> 4] &= ~bit_values[0x74 & 7];// key is being held down
-            break;
-         case 13:
-            keyboard_matrix[0x74 >> 4] |= bit_values[0x74 & 7]; // key has been released
-            break;
-            // K
-         case 14:
-            keyboard_matrix[0x45 >> 4] &= ~bit_values[0x45 & 7];// key is being held down
-            break;
-         case 15:
-            keyboard_matrix[0x45 >> 4] |= bit_values[0x45 & 7]; // key has been released
-            break;
-            // Enter
-         case 16:
-            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7]; /* key is being held down */
-            break;
-         case 17:
-            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; /* key has been released */
-            break;
-         case 18:
-            TYPE_RUNDISK=!TYPE_RUNDISK;
-            cmd_cpt=-1;
-            break;
-         default:
-            break;
-      }
-      cmd_cpt++;
-
-   }
-   else  if(TYPE_ENTER)
-   {
-      switch(cmd_cpt)
-      {
-         /* ENTER */
-         case 0:
-            keyboard_matrix[0x22 >> 4] &= ~bit_values[0x22 & 7];// key is being held down
-            break;
-         case 1:
-            keyboard_matrix[0x22 >> 4] |= bit_values[0x22 & 7]; // key has been released
-            break;		
-         case 2:
-            TYPE_ENTER=!TYPE_ENTER;cmd_cpt=-1;
-            break;
-         default:
-            break;
-      }
-      cmd_cpt++;	
-
-   }
-   else if(TYPE_DEL)
-   {
-      switch(cmd_cpt)
-      {
-         // DEL
-         case 0:
-            keyboard_matrix[0x97 >> 4] &= ~bit_values[0x97 & 7];// key is being held down
-            break;
-         case 1:
-            keyboard_matrix[0x97 >> 4] |= bit_values[0x97 & 7]; // key has been released
-            break;		
-         case 2:
-            TYPE_DEL=!TYPE_DEL;
-            cmd_cpt=-1;
-            break;
-         default:
-            break;
-      }
-      cmd_cpt++;	
-
-   }
-
 }
 
 uint32_t dwSndDist;
@@ -3404,16 +3335,133 @@ bool have_SNA = false;
 bool have_TAP = false;
 
 //FIXME RETRO
+//AUTOBOOT TAKEN FROM CPCDROID
+#include "cpc_cat.h"
+
+static int cur_name_id  = 0;
+static int cur_name_top = 0;
+
+int cpc_dsk_system = 0;
+int
+cap32_disk_dir(char *FileName)
+{
+  cpc_dsk_system = 0;
+  int error = cpc_dsk_dir(FileName);
+  if (! error) {
+    if (cpc_dsk_num_entry > 20) {
+      int index;
+      for (index = 0; index < cpc_dsk_num_entry; index++) {
+        int cpos = 0;
+        for (cpos = 0; cpc_dsk_dirent[index][cpos]; cpos++) {
+          /* High number of files with no printable chars ? might be CPM */
+          if (cpc_dsk_dirent[index][cpos] < 32) {
+            cpc_dsk_system = 1;
+            cpc_dsk_num_entry = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return error;
+}
+
+int retro_disk_auto()
+{
+  char Buffer[128];
+  int  index;
+  int  found = 0;
+  int  first_bas = -1;
+  int  first_spc = -1;
+  int  first_bin = -1;
+
+  cur_name_id = 0;
+/*
+  char *RunName = psp_run_search(CPC.cpc_save_name);
+
+  if (RunName != (char *)0 ) {
+
+    if (!strcasecmp(RunName, "|CPM")) strcpy(Buffer, "|CPM");
+    else  snprintf(Buffer, MAX_PATH, "RUN\"%s", RunName);
+
+  } else */ {
+
+    for (index = 0; index < cpc_dsk_num_entry; index++) {
+      char* scan = strchr(cpc_dsk_dirent[index], '.');
+      if (scan) {
+        if (! strcasecmp(scan+1, "BAS")) {
+          if (first_bas == -1) first_bas = index;
+          found = 1;
+        } else
+        if (! strcasecmp(scan+1, "")) {
+          if (first_spc == -1) first_spc = index;
+          found = 1;
+        } else 
+        if (! strcasecmp(scan+1, "BIN")) {
+          if (first_bin == -1) first_bin = index;
+          found = 1;
+        }
+      }
+    }
+    if (! found) {
+
+      if (cpc_dsk_system) {
+        strcpy(Buffer, "|CPM");
+      } else {
+			printf("autoload not found\n");
+			return -1;
+      }
+
+    } else {
+      if (first_bas != -1) cur_name_id = first_bas;
+      else 
+      if (first_spc != -1) cur_name_id = first_spc;
+      else 
+      if (first_bin != -1) cur_name_id = first_bin;
+
+      sprintf(Buffer, "RUN\"%s", cpc_dsk_dirent[cur_name_id]);
+    }
+  }
+
+  //if (CPC.psp_explore_disk == CPC_EXPLORE_FULL_AUTO) 
+  {
+    strcat(Buffer, "\n");
+  }
+
+  //printf("(%s)\n",Buffer);
+  kbd_buf_feed(Buffer);
+
+  return 1;
+}
+
+int detach_disk(int drive)
+{
+	if(drive==0){
+	   dsk_eject(&driveA);
+		sprintf(DISKA_NAME,"\0"); 
+	}
+	else {
+   		dsk_eject(&driveB);
+		sprintf(DISKB_NAME,"\0"); 
+	}
+}
 
 int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
       if(drive==0)
-         dsk_load( arv, &driveA, 'A'); 
+	     if(dsk_load( arv, &driveA, 'A') == 0){
+			sprintf(DISKA_NAME,"%s",arv);
+            cap32_disk_dir(arv);
+			retro_disk_auto();
+		 }
       else
-         dsk_load( arv, &driveB, 'B');   
-
+         if(dsk_load( arv, &driveB, 'B') == 0){   
+			sprintf(DISKB_NAME,"%s",arv); 
+            cap32_disk_dir(arv);
+			retro_disk_auto();
+		 }
       have_DSK = true;
       sprintf(RPATH,"%s%d.SNA",arv,drive);		
    }
@@ -3426,30 +3474,58 @@ int loadadsk (char *arv,int drive)
    return 0;
 }
 
+void play_tape(){
+
+	if (pbTapeImage) {
+
+		if (CPC.tape_play_button) {
+			CPC.tape_play_button = 0;
+		} else {
+			CPC.tape_play_button = 0x10;
+		}
+
+	}
+}
+
+
+void check_kbd_command()
+{
+
+   	if (autoboot_delay<50)
+    	autoboot_delay++;
+   	else if (autoboot_delay==50)
+   	{
+   		if (!autorun)
+   			kbd_runcmd=false; 
+     	
+     	autoboot_delay++;
+   	}
+
+	if(kbd_runcmd==true && autoboot_delay>50){
+    
+	  	static int pair=-1;
+
+      	pair=-pair;
+      	if(pair==1)
+      	   return;
+
+		kbd_buf_update();
+
+	}
+
+}
+
 int RLOOP=1;
 
 void retro_loop(void)
 {
-   while(RLOOP==1)
-      theloop();
 
-   /* wait a while for BASIC prompt 
-    * to be ready before autorunning */
-   if (rundisk_wait<50)
-      rundisk_wait++;
-   else if (rundisk_wait==50)
-   {
-     if (autorun)
-     {
-       TYPE_RUNDISK=1;
-       cmd_cpt=0;
-     }
-     rundisk_wait++;
-   }
+	while(RLOOP==1)
+		theloop();
+	RLOOP=1;
 
-   RLOOP=1;
+	check_kbd_command();
 
-   shortcut_check();
 }
 
 void theloop(void)
@@ -3555,6 +3631,8 @@ int capmain (int argc, char **argv)
 
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
+
+   retro_ui_finalized=1;
 
    return 0;
 }
