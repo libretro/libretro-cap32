@@ -181,8 +181,6 @@ int STATUTON=-1;
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
 #define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
-
-
 void enter_gui(void)
 {
 
@@ -277,6 +275,8 @@ int CTRLON=-1;
 extern unsigned short int bmp[400*300];
 extern unsigned amstrad_devices[ 2 ];
 
+//FIXME in kdbauto.c
+extern void vkbd_key(int key,int pressed);
 
 void retro_virtualkb(void)
 {
@@ -289,7 +289,8 @@ void retro_virtualkb(void)
 
    if(oldi!=-1)
    {
-	  retro_key_up(oldi);
+	  //retro_key_up(oldi);
+	  vkbd_key(oldi,0);
       oldi=-1;
    }
 
@@ -329,10 +330,10 @@ void retro_virtualkb(void)
          vkx += 1;
       }
 
-      if(vkx<0)vkx=9;
-      if(vkx>9)vkx=0;
-      if(vky<0)vky=4;
-      if(vky>4)vky=0;
+      if(vkx<0)vkx=NPLGN-1;
+      if(vkx>NPLGN-1)vkx=0;
+      if(vky<0)vky=NLIGN-1;
+      if(vky>NLIGN-1)vky=0;
 
       virtual_kdb(( char *)Retro_Screen,vkx,vky);
  
@@ -390,29 +391,29 @@ void retro_virtualkb(void)
             oldi=-1;
          }
 
-
          else
          {
-            if(i==-10) //SHIFT
+
+            if(i==0x25 /*i==-10*/) //SHIFT
             {
-			   if(SHIFTON == 1)retro_key_up(RETROK_RSHIFT);
-			   else retro_key_down(RETROK_LSHIFT);
+//			   if(SHIFTON == 1)retro_key_up(RETROK_RSHIFT);
+//			   else retro_key_down(RETROK_LSHIFT);
                SHIFTON=-SHIFTON;
 
                oldi=-1;
             }
-            else if(i==-11) //CTRL
+            else if(i==0x27/*i==-11*/) //CTRL
             {     
-          	   if(CTRLON == 1)retro_key_up(RETROK_LCTRL);
-			   else retro_key_down(RETROK_LCTRL);
+//         	   if(CTRLON == 1)retro_key_up(RETROK_LCTRL);
+///			   else retro_key_down(RETROK_LCTRL);
                CTRLON=-CTRLON;
 
                oldi=-1;
             }
 			else if(i==-12) //RSTOP
             {
-           	   if(RSTOPON == 1)retro_key_up(RETROK_ESCAPE);
-			   else retro_key_down(RETROK_ESCAPE);            
+//           	   if(RSTOPON == 1)retro_key_up(RETROK_ESCAPE);
+//			   else retro_key_down(RETROK_ESCAPE);            
                RSTOPON=-RSTOPON;
 
                oldi=-1;
@@ -420,6 +421,7 @@ void retro_virtualkb(void)
 			else if(i==-13) //GUI
             {     
 			    pauseg=1;
+				GUISTATE=GUI_MAIN;
 				SHOWKEY=-SHOWKEY;
 				Screen_SetFullUpdate(0);
                oldi=-1;
@@ -434,7 +436,8 @@ void retro_virtualkb(void)
             else
             {
                oldi=i;
-			   retro_key_down(oldi);             
+			   //retro_key_down(oldi); 
+			   vkbd_key(oldi,1);            
             }
 
          }

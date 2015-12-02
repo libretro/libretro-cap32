@@ -23,7 +23,7 @@ unsigned *pix=(unsigned*)buffer;
 unsigned short *pix=(unsigned short *)buffer;
 #endif
 
-   page = (NPAGE == -1) ? 0 : 50;
+   page = (NPAGE == -1) ? 0 : 5*NPLGN;
    coul = RGB565(28, 28, 31);
    BKGCOLOR = (KCOL>0?0xFF808080:0);
 
@@ -48,7 +48,7 @@ int check_vkey2(int x,int y)
 {
    int page;
    //check which key is press
-   page= (NPAGE==-1) ? 0 : 50;
+   page= (NPAGE==-1) ? 0 : 5*NPLGN;
    return MVk[y*NPLGN+x+page].val;
 }
 

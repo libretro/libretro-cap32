@@ -544,13 +544,36 @@ void kbd_buf_update() {
 		if(cpc_key & MOD_CPC_SHIFT)
 			keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
 
-		kbd_feedbuf_pos++;
-
 		keyboard_matrix[(unsigned char)cpc_key >> 4] |= bit_values2[(unsigned char)cpc_key & 7];
+
 		old=0;
+		kbd_feedbuf_pos++;
 	}
 	else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')kbd_runcmd=false;
 
 }
 
+//FIXME VIRTULAL KBD HANDLE
+extern int SHIFTON;
+
+void vkbd_key(int key,int pressed){
+
+	//printf("key(%x)=%x shift:%d\n",key,pressed,SHIFTON);
+	if(pressed){
+
+		if(SHIFTON==1)
+			keyboard_matrix[0x25 >> 4] &= ~bit_values2[0x25 & 7]; // key needs to be SHIFTed
+
+		keyboard_matrix[(unsigned char)key >> 4] &= ~bit_values2[(unsigned char)key & 7]; // key is being held down
+
+	}
+	else {
+		if(SHIFTON==1)
+			keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
+
+		keyboard_matrix[(unsigned char)key >> 4] |= bit_values2[(unsigned char)key & 7];
+
+	}
+
+}
 

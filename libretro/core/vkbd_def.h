@@ -7,236 +7,141 @@ typedef struct {
 	int val;	
 } Mvk;
 
-#if 1
 Mvk MVk[NPLGN*NLIGN*2]={
 
-	{ "PG2","PG2" ,-2}, //0
-	{ "Esc","Esc" ,RETROK_ESCAPE },
-	{ " q" ," Q"  ,RETROK_q},
-	{ " w" ," W"  ,RETROK_w},
-	{ " e" ," E"  ,RETROK_e},
-	{ " r" ," R"  ,RETROK_r},
-	{ " t" ," T"  ,RETROK_t},
-	{ " y" ," Y"  ,RETROK_y},
-	{ " u"," U"   ,RETROK_u},
-	{ " i"," I"   ,RETROK_i},
+	{ "ESC" ,"ESC"  ,0x82 },//0
+	{ " 1" ," !" , 0x80 },//0
+	{ " 2" ," \"" ,0x81 },
+	{ " 3" ," #"  ,0x71 },
+	{ " 4" ," $"  ,0x70 },
+	{ " 5" ," %"  ,0x61 },
+	{ " 6" ," &"  ,0x60 },
+	{ " 7" ," \'"  ,0x51 },
+	{ " 8" ," ("  ,0x50 },
+	{ " 9" ," )"  ,0x41 },
+	{ " 0" ," _"  ,0x40 },
+	{ " ^" ,"Pnd"  ,0x30 },
 
-	{ " o"," O"   ,RETROK_o}, //10
-	{ " p" ," P"  ,RETROK_p},
-	{ " a" ," A"  ,RETROK_a},
-	{ " s" ," S"  ,RETROK_s},
-	{ " d" ," D"  ,RETROK_d},
-	{ " f" ," F"  ,RETROK_f},
-	{ " g" ," G"  ,RETROK_g},
-	{ " h" ," H"  ,RETROK_h},
-	{ " j" ," J"  ,RETROK_j},
-	{ " k" ," K"  ,RETROK_k},
-	
-	{ " l" ," L"  ,RETROK_l},//20
-	{ " z" ," Z"  ,RETROK_z},
-	{ " x" ," X"  ,RETROK_x},
-	{ " c" ," C"  ,RETROK_c},
-	{ " v" ," V"  ,RETROK_v},
-	{ " b" ," B"  ,RETROK_b},
-	{ " n" ," N"  ,RETROK_n},
-	{ " m"," M"   ,RETROK_m},
-	{ "F1" ,"F1"  ,RETROK_F1},
-	{ "F2" ,"F2"  ,RETROK_F2},
+	{ " q" ," Q"  ,0x83}, //10+2
+	{ " w" ," W"  ,0x73},
+	{ " e" ," E"  ,0x72},
+	{ " r" ," R"  ,0x62},
+	{ " t" ," T"  ,0x63},
+	{ " y" ," Y"  ,0x53},
+	{ " u" ," U"  ,0x52},
+	{ " i" ," I"  ,0x43},
+	{ " o" ," O"  ,0x42},
+	{ " p" ," P"  ,0x33},
+	{ " @" ," |"  ,0x32},
+	{ " [" ," ["  ,0x21},
 
-	{ "F3" ,"F3"  ,RETROK_F3},//30
-	{ "F4" ,"F4"  ,RETROK_F4},
-	{ "F5" ,"F5"  ,RETROK_F5},
-	{ "F6" ,"F6"  ,RETROK_F6},
-	{ "F7" ,"F7"  ,RETROK_F7},
-	{ "F8" ,"F8"  ,RETROK_F8},	
-	{ "F9" ,"F9"  ,RETROK_F9},
-	{ "F0" ,"F0" ,RETROK_F10},
-	{ "F11","F11" ,RETROK_F11},
-	{ "F12","F12" ,RETROK_F12},
+	{ " a" ," A"  ,0x85}, //20+4
+	{ " s" ," S"  ,0x74},
+	{ " d" ," D"  ,0x75},
+	{ " f" ," F"  ,0x65},
+	{ " g" ," G"  ,0x64},
+	{ " h" ," H"  ,0x54},
+	{ " j" ," J"  ,0x55},
+	{ " k" ," K"  ,0x45},	
+	{ " l" ," L"  ,0x44},
+	{ " :" ," *"  ,0x35},
+	{ " ;" ," +"  ,0x34},
+	{ " ]" ," ]"  ,0x23},
 
-	{ " 1" ," !" , RETROK_1},//40
-	{ " 2" ," \"" ,RETROK_2 },
-	{ " 3" ," #"  ,RETROK_3 },
-	{ " 4" ," $"  ,RETROK_4 },
-	{ " 5" ," %"  ,RETROK_5 },
-	{ " 6" ," &"  ,RETROK_6 },
-	{ " 7" ," \'"  ,RETROK_7 },
-	{ " 8" ," ("  ,RETROK_8 },
-	{ " 9" ," )"  ,RETROK_9},
-	{ " 0" ," _"  ,RETROK_0},
+	{ " z" ," Z"  ,0x87},//30+6
+	{ " x" ," X"  ,0x77},
+	{ " c" ," C"  ,0x76},
+	{ " v" ," V"  ,0x67},
+	{ " b" ," B"  ,0x66},
+	{ " n" ," N"  ,0x56},
+	{ " m"," M"   ,0x46},
+	{ " ,"," <"   ,0x47},
+	{ " ."," >"   ,0x37},
+	{ " /" ," ?"  ,0x36},
+	{ " \\"," \\"   ,0x26},
+	{ "SHFT" ,"SHFT"  ,0x25},
 
-	{ "PG2","PG2" ,-2}, //50
-	{ " `" ," ` " ,-1}, 
-	{ " -" ," _" , RETROK_MINUS},
-	{ " =" ," +" , RETROK_EQUALS},
-	{ "Bks","Bks" ,RETROK_BACKSPACE},
-	{ "Scr","Scr" ,RETROK_PRINT},
-	{ "Pse","Pse" ,RETROK_PAUSE},
-	{ "Ins","Ins" ,RETROK_HELP},
-	{ "Hme","Hme" ,RETROK_HOME},
-	{ "PgU","PgU" ,RETROK_PAGEUP},
-
-	{ "Tab" ,"Tab",RETROK_TAB}, //60	
-	{ " [" ,"  {" ,RETROK_LEFTBRACKET},
-	{ " ]" ,"  }" ,RETROK_RIGHTBRACKET},
-	{ "Ent" ,"Ent",RETROK_RETURN},
-	{ "Del" ,"Del",RETROK_DELETE},
-	{ "End" ,"End",RETROK_END},
-	{ "PgD" ,"PgD",RETROK_PAGEDOWN},
-	{ "SHF" ,"SHF",RETROK_LSHIFT},
-	{ " \\" ," |" ,RETROK_BACKSLASH},	
-	{ " Dw" ," Dw",RETROK_DOWN},	
-	
-	{ "Cps","Cps" ,RETROK_CAPSLOCK}, //70
-	{ " ;"," :"   ,RETROK_SEMICOLON},
-	{ " '"," @"   ,RETROK_QUOTE},
-	{ " #"," ~"   ,RETROK_HASH},
-	{ "Ctr" ,"Ctr",RETROK_LCTRL},
-	{ "Alt" ,"Alt",RETROK_LALT},
-	{ "Spc" ,"Spc",RETROK_SPACE},
-	{ "Lft"," 4"  ,RETROK_LEFT},
-	{ " Up"," 8"  ,RETROK_UP},
-	{ "Rgt" ," 6" ,RETROK_RIGHT},
-
-	{ " ,"," <"   ,RETROK_COMMA},//80
-	{ " ."," >"   ,RETROK_PERIOD},
-	{ " /"," ?"   ,RETROK_SLASH},
-	{ " |" ," ^"  ,RETROK_BACKSLASH|(3 << 16)},
-	{ " Num"," Num",RETROK_NUMLOCK},
-	{ " /" ," /"  ,RETROK_KP_DIVIDE},
-	{ " *" ," *"  ,RETROK_KP_MULTIPLY},
-	{ " -" ," -"  ,RETROK_KP_MINUS},
-	{ " Hme" ," 7",RETROK_HOME},
-	{ " ^"," Y"   ,RETROK_CARET},
-
-	{ " PgU"," U" ,RETROK_PAGEUP},//90
-	{ " +"," I"   ,RETROK_PLUS},
-	{ " 5" ," 5"  ,RETROK_5},
-	{ " 6" ,"Rgt" ,RETROK_6},
-	{ "P/S" ,"P/S" ,-8},
-	{ "EXT","EXT" ,-6},
-	{ "SNA" ,"SNA",-7},
-	{ "DSK","DSK",-5},//switch DSK A/B
-	{ "Col" ,"Col",-3},
-	{ "Kbd" ,"Kbd",-4},
-} ;
-#else
-
-Mvk MVk[NPLGN*NLIGN*2]={
-
-	{ " 1" ," !" , RETROK_1 },//0
-	{ " 2" ," \"" ,RETROK_2 },
-	{ " 3" ," 3"  ,RETROK_3 },
-	{ " 4" ," $"  ,RETROK_4 },
-	{ " 5" ," %"  ,RETROK_5 },
-	{ " 6" ," ^"  ,RETROK_6 },
-	{ " 7" ," &"  ,RETROK_7 },
-	{ " 8" ," *"  ,RETROK_8 },
-	{ " 9" ," ("  ,RETROK_9 },
-	{ " 0" ," )"  ,RETROK_0 },
-
-	{ " q" ," Q"  ,RETROK_q}, //10
-	{ " w" ," W"  ,RETROK_w},
-	{ " e" ," E"  ,RETROK_e},
-	{ " r" ," R"  ,RETROK_r},
-	{ " t" ," T"  ,RETROK_t},
-	{ " y" ," Y"  ,RETROK_y},
-	{ " u" ," U"  ,RETROK_u},
-	{ " i" ," I"  ,RETROK_i},
-	{ " o" ," O"  ,RETROK_o},
-	{ " p" ," P"  ,RETROK_p},
-
-	{ " a" ," A"  ,RETROK_a}, //20
-	{ " s" ," S"  ,RETROK_s},
-	{ " d" ," D"  ,RETROK_d},
-	{ " f" ," F"  ,RETROK_f},
-	{ " g" ," G"  ,RETROK_g},
-	{ " h" ," H"  ,RETROK_h},
-	{ " j" ," J"  ,RETROK_j},
-	{ " k" ," K"  ,RETROK_k},	
-	{ " l" ," L"  ,RETROK_l},
-	{ " ;" ," :"  ,RETROK_SEMICOLON},
-
-	{ " z" ," Z"  ,RETROK_z},//30
-	{ " x" ," X"  ,RETROK_x},
-	{ " c" ," C"  ,RETROK_c},
-	{ " v" ," V"  ,RETROK_v},
-	{ " b" ," B"  ,RETROK_b},
-	{ " n" ," N"  ,RETROK_n},
-	{ " m"," M"   ,RETROK_m},
-	{ " ,"," <"   ,RETROK_COMMA},
-	{ " ."," >"   ,RETROK_COLON},
-	{ " /" ," /"  ,RETROK_SLASH},
-
-	{ "PG2","PG2" ,-2}, //40
-	{ "Esc","Esc" ,RETROK_ESCAPE},
-	{ "F1" ,"F1"  ,RETROK_F1},
-	{ "F3" ,"F3"  ,RETROK_F3},
-	{ "F5" ,"F5"  ,RETROK_F5},
-	{ "F7" ,"F7"  ,RETROK_F7},
-	{ "C=" ,"c=" , RETROK_RCTRL},
-	{ "Spc" ,"Spc",RETROK_SPACE},
-	{ "<-" ,"<-"  ,RETROK_BACKSPACE},
-	{ "Ent" ,"Ent",RETROK_RETURN},
+	{ "PG2","PG2" ,-2}, //40+8
+	{ "TAB","TAB" ,0x54},
+	{ "CPSL" ,"CPSL"  ,0x86},
+	{ "RET" ,"RET"  ,0x22},
+	{ "DEL" ,"DEL"  ,0x97},
+	{ "CTRL" ,"CTRL"  ,0x27},
+	{ "CLR" ,"CLR" , 0x20},
+	{ "Spc" ,"Spc",0x57},
+	{ "COPY" ,"COPY"  ,0x11},
+	{ " ." ," .",0x07},
+	{ "F0" ,"F0"  ,0x17},
+	{ "Ent" ,"Ent",0x06},
 
 
-	{ "DEL" ,"DEL" ,RETROK_DELETE}, //50
-	{ "UP" ,"F3"   ,RETROK_UP},
-	{ "CLR" ,"CLR" ,RETROK_CLEAR},
-	{ "F5" ,"F5"  ,RETROK_F5},
-	{ "SHL" ,"F6"  ,RETROK_LSHIFT},
-	{ " @ " ," @ " , RETROK_AT},
-	{ " ^ " ," ^ "  ,RETROK_CARET},	
-	{ " : " ," : "  ,RETROK_COLON},
-	{ " = "," = " ,RETROK_EQUALS},
-	{ "SHR","SHR" ,RETROK_RSHIFT},
+	{ "ESC" ,"ESC"  ,0x82 },//50+10
+	{ " 1" ," !" , 0x80 },
+	{ " 2" ," \"" ,0x81 },
+	{ " 3" ," #"  ,0x71 },
+	{ " 4" ," $"  ,0x70 },
+	{ " 5" ," %"  ,0x61 },
+	{ " 6" ," &"  ,0x60 },
+	{ " 7" ," \'"  ,0x51 },
+	{ " 8" ," ("  ,0x50 },
+	{ " 9" ," )"  ,0x41 },
+	{ " 0" ," _"  ,0x40 },
+	{ " ^" ,"Pnd"  ,0x30 },
+
+	{ " F7" ," F7"  ,0x12}, //60+12
+	{ " F8" ," F8"  ,0x13},
+	{ " F9" ," F9"  ,0x03},
+	{ " F0" ," F0"  ,0x17},
+	{ " t" ," T"  ,0x63},
+	{ " /\\" ," /\\"  ,0x00},
+	{ " u" ," U"  ,0x52},
+	{ " i" ," I"  ,0x43},
+	{ " o" ," O"  ,0x42},
+	{ " p" ," P"  ,0x33},
+	{ " @" ," |"  ,0x32},
+	{ " [" ," ["  ,0x21},
+
+	{ " F4" ," F4"  ,0x24}, //70+14
+	{ " F5" ," F5"  ,0x14},
+	{ " F6" ," F6"  ,0x04},
+	{ " ." ," ."  ,0x07},
+	{ " <-" ," <-"  ,0x10},
+	{ "COPY" ,"COPY"  ,0x11},
+	{ " ->" ," ->"  ,0x01},
+	{ " k" ," K"  ,0x45},	
+	{ " l" ," L"  ,0x44},
+	{ " :" ," *"  ,0x35},
+	{ " ;" ," +"  ,0x34},
+	{ " ]" ," ]"  ,0x23},
+
+	{ " F1" ," F1"  ,0x15},//80+16
+	{ " F2" ," F2"  ,0x16},
+	{ " F3" ," F3"  ,0x05},
+	{ "Ent" ,"Ent"  ,0x06},
+	{ " b" ," B"  ,0x66},
+	{ " \\/" ," \\/"  ,0x02},
+	{ " m"," M"   ,0x46},
+	{ " ,"," <"   ,0x47},
+	{ " ."," >"   ,0x37},
+	{ "TAPE" ,"TAPE"  ,-8},
+	{ "EXIT","EXIT"   ,-6},
+	{ "SNA" ,"SNA"  ,-7},
 
 
-	{ "LF" ,"LF" , RETROK_LEFT },//60
-	{ "Ent" ,"Ent" ,RETROK_RETURN},
-	{ "RG" ,"RG"  ,RETROK_RIGHT},
-	{ " 4" ," $"  ,RETROK_4 },
-	{ " 5" ," %"  ,RETROK_5 },
-	{ " 6" ," ^"  ,RETROK_6 },
-	{ " 7" ," &"  ,RETROK_7 },
-	{ " 8" ," *"  ,RETROK_8 },
-	{ " 9" ," ("  ,RETROK_9 },
-	{ " 0" ," )"  ,RETROK_0},
-
-	{ "HOM","HOM" ,RETROK_HOME}, //70
-	{ "DW" ,"DW" ,RETROK_DOWN}, 
-	{ " - " ," - " , RETROK_MINUS},
-	{ "CTL" ,"CTL" , RETROK_LCTRL},
-	{ " * "," * " ,RETROK_RIGHTBRACKET},
-	{ " + "," + " ,RETROK_PLUS},
-	{ "AMP","AMP" ,RETROK_AMPERSAND},
-	{ "Ins","Ins" ,RETROK_INSERT},
-	{ "Hme","Hme" ,RETROK_HOME},
-	{ "PgU","PgU" ,RETROK_PAGEUP},
-
-	{ "Tab" ,"Tab",RETROK_TAB}, //80	
-	{ " [" ,"  {" ,RETROK_LEFTBRACKET},
-	{ " ]" ,"  }" ,RETROK_RIGHTBRACKET},
-	{ "Ent" ,"Ent",RETROK_RETURN},
-	{ "Del" ,"Del",RETROK_DELETE},
-	{ "R/S" ,"End",RETROK_END},
-	{ "c= " ,"c= ",RETROK_RCTRL},
-	{ "SHL" ,"SHL",RETROK_LSHIFT},
-	{ "SHR" ,"SHR" ,RETROK_RSHIFT},	
-	{ "SPC" ,"SPC",RETROK_SPACE},	
-	
-	{ "PG1","PG1" ,-2},//90
-	{ "JOY","JOY"   ,-14},
+	{ "PG1","PG1"  ,-2},//90+18
+	{ "DSK","DSK"  ,-5},
 	{ "GUI","GUI"  ,-13},
-	{ "CTR" ,"CTR" ,-12},
-	{ "R/S" ,"R/S" ,-11},
-	{ "SHI" ,"SHI" ,-10},
-	{ "VFL","VFL",-5},
 	{ "COL" ,"COL",-3},
-	{ "Ent" ,"Ent",RETROK_RETURN},
+	{ "CTRL" ,"CTRL" ,0x27},
+	{ "SPC" ,"SPC" ,0x57},
+	{ "SHFT" ,"SHFT" ,0x25},
+	{ "ESC","ESC",0x82},
+	{ "CLR" ,"CLR",0x20},
+	{ "DEL" ,"DEL",0x97},
+	{ "Ent" ,"Ent",0x22},
 	{ "KBD" ,"KBD",-4},
 
 } ;
-#endif
+
 
 #endif

@@ -52,7 +52,7 @@ extern int pauseg;
 #define LOGI printf
 #endif
 
-#define NPLGN 10
+#define NPLGN 12
 #define NLIGN 5
 #define NLETT 5
 
