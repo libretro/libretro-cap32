@@ -9,7 +9,7 @@ All the credit of the caprice32 Emulator to Ulrich Doewich
 Also 6128.h & amsdos.h (and psg for ps3 )files taken from wiituka (author:dantoine)
 http://code.google.com/p/wiituka/
 
-And of course for the RetroArch/Libretro team : "http://www.libretro.org/"
+And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
 
 You can download the caprice32 original source code here :
