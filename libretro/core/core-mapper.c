@@ -586,8 +586,19 @@ int Retro_PollEvent()
 		GUISTATE=GUI_MAIN;
 		pauseg=1;
    }
-
+   
+if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
+	
+    i=2;//mouse/joy toggle
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
+      mbt[i]=1;
+   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      mbt[i]=0;
+      MOUSE_EMULATED=-MOUSE_EMULATED;
+   }
  
+}
+
 if(pauseg==0){ // if emulation running
 
 	  //Joy mode
@@ -674,7 +685,7 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       mbt[i]=0;
       emu_reset();		
    }
-
+/*
    i=2;//mouse/joy toggle
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
       mbt[i]=1;
@@ -682,7 +693,7 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       mbt[i]=0;
       MOUSE_EMULATED=-MOUSE_EMULATED;
    }
-
+*/
 }//if amstrad_devices=joy
 
 
