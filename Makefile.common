@@ -1,10 +1,12 @@
 INCFLAGS := -I$(CORE_DIR) \
-            -I$(CORE_DIR)/cap32  -I$(CORE_DIR)/cap32/libcpccat\
-            -I$(CORE_DIR)/libretro -I$(CORE_DIR)/libretro/core \
-			-I$(CORE_DIR)/libretro/include \
+            -I$(CORE_DIR)/cap32 \
+				-I$(CORE_DIR)/cap32/libcpccat\
+            -I$(CORE_DIR)/libretro \
+				-I$(CORE_DIR)/libretro/core \
+				-I$(CORE_DIR)/libretro/include
 	
 CPPFLAGS += -DNO_LIBCO
-CFLAGS += -DNO_LIBCO
+CFLAGS   += -DNO_LIBCO
 CXXFLAGS += -DNO_LIBCO
 
 SOURCES_C += \
