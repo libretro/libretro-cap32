@@ -1,13 +1,22 @@
+LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro/libretro-common
+
 INCFLAGS := -I$(CORE_DIR) \
             -I$(CORE_DIR)/cap32 \
 				-I$(CORE_DIR)/cap32/libcpccat\
             -I$(CORE_DIR)/libretro \
 				-I$(CORE_DIR)/libretro/core \
-				-I$(CORE_DIR)/libretro/include
-	
-CPPFLAGS += -DNO_LIBCO
-CFLAGS   += -DNO_LIBCO
-CXXFLAGS += -DNO_LIBCO
+				-I$(CORE_DIR)/libretro/include \
+				-I$(LIBRETRO_COMM_DIR)/include
+
+SOURCES_C :=
+
+ifeq ($(HAVE_LIBCO), 1)
+CPPFLAGS += -DHAVE_LIBCO
+CFLAGS   += -DHAVE_LIBCO
+CXXFLAGS += -DHAVE_LIBCO
+
+SOURCES_C += $(LIBRETRO_COMM_DIR)/libco/libco.c
+endif
 
 SOURCES_C += \
 	$(CORE_DIR)/libretro/core/libretro-core.c \

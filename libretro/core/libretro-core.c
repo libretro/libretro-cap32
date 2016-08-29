@@ -2,7 +2,7 @@
 
 #include "libretro-core.h"
 
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
 cothread_t mainThread;
 cothread_t emuThread;
 #else
@@ -307,8 +307,8 @@ static void retro_wrap_emulator()
 
    pre_main(RPATH);
 
-#ifndef NO_LIBCO
-LOGI("EXIT EMU THD\n");
+#ifdef HAVE_LIBCO
+   LOGI("EXIT EMU THD\n");
    pauseg=-1;
 
    //environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, 0); 
@@ -336,7 +336,7 @@ void Emu_init(){
    memset(Key_Sate,0,512);
    memset(Key_Sate2,0,512);
 
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
    if(!emuThread && !mainThread)
    {
       mainThread = co_active();
@@ -349,7 +349,7 @@ void Emu_init(){
 }
 
 void Emu_uninit(){
-#ifdef NO_LIBCO
+#ifndef HAVE_LIBCO
 	//quit_cap32_emu();
 #endif
    texture_uninit();
@@ -359,7 +359,7 @@ void retro_shutdown_core(void)
 {
    LOGI("SHUTDOWN\n");
 //main_exit();
-#ifdef NO_LIBCO
+#ifndef HAVE_LIBCO
 	//quit_vice_emu();
 #endif
    texture_uninit();
@@ -443,7 +443,7 @@ LOGI("PIXEL FORMAT is not supported.\n");
 		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" }
 	};
 	environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
    Emu_init();
 #endif
    texture_init();
@@ -457,7 +457,7 @@ void retro_deinit(void)
 
    UnInitOSGLU();	
 
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
    co_switch(emuThread);
 LOGI("exit emu\n");
   // main_exit();
@@ -531,12 +531,11 @@ void retro_audio_cb( short l, short r)
 }
 
 void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
- 	int x;
-    if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);	
+   if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);	
 }
 
 
-#ifdef NO_LIBCO
+#ifndef HAVE_LIBCO
 //FIXME nolibco Gui endless loop -> no retro_run() call
 void retro_run_gui(void)
 {
@@ -559,8 +558,6 @@ void retro_blit(){
 
 void retro_run(void)
 {
-   int x;
-
    bool updated = false;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
@@ -577,7 +574,7 @@ void retro_run(void)
 
    video_cb(Retro_Screen,retrow,retroh,retrow<<PIXEL_BYTES);
 
-#ifndef NO_LIBCO   
+#ifdef HAVE_LIBCO
    co_switch(emuThread);
 #endif
 
@@ -622,7 +619,7 @@ bool retro_load_game(const struct retro_game_info *info)
 #endif
 	memset(SNDBUF,0,1024*2*2);
 
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
 	co_switch(emuThread);
 #else
 	Emu_init();

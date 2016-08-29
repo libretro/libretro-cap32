@@ -32,7 +32,7 @@
 #define WINDOW_WIDTH 384//400
 #define WINDOW_HEIGHT 272//300
 
-#ifndef NO_LIBCO
+#ifdef HAVE_LIBCO
 #include "libco/libco.h"
 
 extern cothread_t mainThread;
