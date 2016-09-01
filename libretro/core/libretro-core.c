@@ -531,6 +531,7 @@ void retro_audio_cb( short l, short r)
 }
 
 void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
+   int x; 
    if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);	
 }
 
