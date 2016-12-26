@@ -202,14 +202,11 @@ static int
 file_browser_run(struct file_browser *browser, struct nk_context *ctx)
 {
     int ret = 0;
-    struct nk_panel layout;
-
     struct nk_rect total_space;
 
-    if (nk_begin(ctx, &layout, "File Browser", nk_rect(32, 32, 320, 240),
-        NK_WINDOW_BORDER|/*NK_WINDOW_NO_SCROLLBAR|*/NK_WINDOW_MOVABLE|NK_WINDOW_TITLE))
+    if (nk_begin(ctx, "File Browser", nk_rect(32, 32, 320, 240),
+        NK_WINDOW_BORDER|NK_WINDOW_NO_SCROLLBAR|/*NK_WINDOW_MOVABLE|*/NK_WINDOW_TITLE))
     {
-        struct nk_panel sub;
         static float ratio[] = {0.25f, NK_UNDEFINED};
         float spacing_x = ctx->style.window.spacing.x;
 
@@ -224,7 +221,7 @@ file_browser_run(struct file_browser *browser, struct nk_context *ctx)
             while (*d++) {
                 if (*d == '/') {
                     *d = '\0';
-                    if (nk_button_label(ctx, begin, NK_BUTTON_DEFAULT)) {
+                    if (nk_button_label(ctx, begin)) {
                         *d++ = '/'; *d = '\0';
                         file_browser_reload_directory_content(browser, browser->directory);
                         break;
@@ -240,21 +237,21 @@ file_browser_run(struct file_browser *browser, struct nk_context *ctx)
         /* window layout */
         total_space = nk_window_get_content_region(ctx);
         nk_layout_row(ctx, NK_DYNAMIC, total_space.h, 2, ratio);
-        nk_group_begin(ctx, &sub, "Special", NK_WINDOW_NO_SCROLLBAR);
+        nk_group_begin(ctx,"Special", NK_WINDOW_NO_SCROLLBAR);
         {
 
             nk_layout_row_dynamic(ctx, 32, 1);
-            if (nk_button_label(ctx,  "Home", NK_BUTTON_DEFAULT))
+            if (nk_button_label(ctx,  "Home"))
                 file_browser_reload_directory_content(browser, browser->home);
-            if (nk_button_label(ctx,"Desktop", NK_BUTTON_DEFAULT))
+            if (nk_button_label(ctx,"Desktop"))
                 file_browser_reload_directory_content(browser, browser->desktop);
-            if (nk_button_label(ctx,"/",NK_BUTTON_DEFAULT))
+            if (nk_button_label(ctx,"/"))
                 file_browser_reload_directory_content(browser, "/");
             nk_group_end(ctx);
         }
 
         /* output directory content window */
-        nk_group_begin(ctx, &sub, "Content", 0);
+        nk_group_begin(ctx, "Content", 0);
         {
             int index = -1;
             size_t i = 0, j = 0, k = 0;
@@ -271,14 +268,14 @@ file_browser_run(struct file_browser *browser, struct nk_context *ctx)
                     /* draw one row of icons */
                     if (j < browser->dir_count) {
                         /* draw and execute directory buttons */
-                        if (nk_button_label(ctx,browser->directories[j],NK_BUTTON_DEFAULT))
+                        if (nk_button_label(ctx,browser->directories[j]))
                             index = (int)j;
                     } else {
                         /* draw and execute files buttons */
                        
                         size_t fileIndex = ((size_t)j - browser->dir_count);
                        
-                        if (nk_button_label(ctx, browser->files[fileIndex], NK_BUTTON_DEFAULT)) {
+                        if (nk_button_label(ctx, browser->files[fileIndex])) {
                             strncpy(browser->file, browser->directory, MAX_PATH_LEN);
                             n = strlen(browser->file);
                             strncpy(browser->file + n, browser->files[fileIndex], MAX_PATH_LEN - n);
@@ -312,7 +309,7 @@ file_browser_run(struct file_browser *browser, struct nk_context *ctx)
                     browser->directory[n+1] = '\0';
                 }
                 file_browser_reload_directory_content(browser, browser->directory);
-                sub.offset->y = 0;
+
             }
             nk_group_end(ctx);
         }

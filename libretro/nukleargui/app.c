@@ -76,6 +76,8 @@ struct nk_color background;
 /* GUI */
 struct nk_context *ctx;
 
+static nk_sdl_Font *RSDL_font;
+
 #include "style.i"
 #include "filebrowser.i"
 #include "gui.i"
@@ -135,8 +137,14 @@ int app_init()
 
     Retro_Screen=(unsigned int *)screen_surface->pixels;
 
+    RSDL_font = (nk_sdl_Font*)calloc(1, sizeof(nk_sdl_Font));
+    RSDL_font->width = 8; /* Default in  the RSDL_gfx library */
+    RSDL_font->height = 8; /* Default in  the RSDL_gfx library */
+    if (!RSDL_font)
+        return NULL;
+
     /* GUI */
-    ctx = nk_sdl_init(screen_surface);
+    ctx = nk_sdl_init(RSDL_font,screen_surface,rwidth,rheight);
 
     /* style.c */
     /* THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK */
@@ -168,6 +176,7 @@ int app_init()
 int app_free()
 {
 //FIXME: memory leak here
+    free(RSDL_font);
     filebrowser_free();
     nk_sdl_shutdown();
     Retro_FreeSurface(screen_surface);

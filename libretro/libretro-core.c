@@ -1147,7 +1147,7 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
 
-#ifdef __EMSCRIPTEN__ 
+#if 0//def __EMSCRIPTEN__ 
    static int firstinit=0;
    if(firstinit==0){
 	firstinit++;
@@ -1224,7 +1224,7 @@ bool retro_load_game(const struct retro_game_info *info)
    app_init();
 
 	memset(SNDBUF,0,1024*2*2);
-#ifndef __EMSCRIPTEN__
+#if 1//ndef __EMSCRIPTEN__
 	Emu_init();
 
 	if (strlen(RPATH) >= strlen("cdt"))

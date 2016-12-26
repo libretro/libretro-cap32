@@ -1,5 +1,5 @@
 /*
- * Nuklear - v1.00 - public domain
+ * Nuklear - v1.17 - public domain
  * no warrenty implied; use at your own risk.
  * authored from 2015-2016 by Micha Mettke
  */
@@ -16,11 +16,15 @@
 #include "SDL_wrapper.h"
 
 typedef struct nk_sdl_Font nk_sdl_Font;
-NK_API struct nk_context*   nk_sdl_init(RSDL_Surface *screen_surface);
+
+NK_API struct nk_context*   nk_sdl_init(nk_sdl_Font *font,RSDL_Surface *screen_surface ,unsigned int width, unsigned int height);
 NK_API void                 nk_sdl_handle_event(int *evt);
 NK_API void                 nk_sdl_render(struct nk_color clear);
 NK_API void                 nk_sdl_shutdown(void);
 
+NK_API nk_sdl_Font* nk_sdlfont_create(const char *name, int size);
+NK_API void nk_sdlfont_del(nk_sdl_Font *font);
+NK_API void nk_sdl_set_font(nk_sdl_Font *font);
 #endif
 /*
  * ==============================================================
@@ -49,15 +53,16 @@ NK_API void                 nk_sdl_shutdown(void);
 struct nk_sdl_Font {
     int width;
     int height;
-    int handle;
+    struct nk_user_font handle;
 };
 
 static struct nk_sdl {
     RSDL_Surface *screen_surface;
+    unsigned int width;
+    unsigned int height;
     struct nk_context ctx;
 } sdl;
 
-static nk_sdl_Font *RSDL_font;
 static RSDL_Rect RSDL_clip_rect;
 
 static void
@@ -370,32 +375,71 @@ nk_sdl_clipbard_copy(nk_handle usr, const char *text, int len)
     /* Not supported in SDL 1.2. Use platform specific code.  */
 }
 
+nk_sdl_Font*
+nk_sdlfont_create(const char *name, int size)
+{
+
+   nk_sdl_Font *font = (nk_sdl_Font*)calloc(1, sizeof(nk_sdl_Font));
+    font->width = 8; /* Default in  the RSDL_gfx library */
+    font->height = 8; /* Default in  the RSDL_gfx library */
+    if (!font)
+        return NULL;
+   //font->handle
+
+    return font;
+}
+void
+nk_sdlfont_del(nk_sdl_Font *font)
+{
+    if(!font) return;
+    //DeleteObject(font->handle);
+    //DeleteDC(font->dc);
+    free(font);
+}
+
 static float
 nk_sdl_get_text_width(nk_handle handle, float height, const char *text, int len)
 {
-    return len * RSDL_font->width;
+    nk_sdl_Font *font = (nk_sdl_Font*)handle.ptr;
+ 
+    if(!font || !text)
+        return 0;
+    return len * font->width;
 }
 
 NK_API struct nk_context*
-nk_sdl_init(RSDL_Surface *screen_surface)
+nk_sdl_init(nk_sdl_Font *rsdlfont,RSDL_Surface *screen_surface,unsigned int w, unsigned int h)
 {
-    struct nk_user_font font;
-    RSDL_font = (nk_sdl_Font*)calloc(1, sizeof(nk_sdl_Font));
-    RSDL_font->width = 8; /* Default in  the RSDL_gfx library */
-    RSDL_font->height = 8; /* Default in  the RSDL_gfx library */
-    if (!RSDL_font)
-        return NULL;
+    struct nk_user_font *font=&rsdlfont->handle;
 
+    font->userdata = nk_handle_ptr(rsdlfont);
+    font->height = (float)rsdlfont->height;
+    font->width = nk_sdl_get_text_width;
+
+//RSDL_font
+/*
     font.userdata = nk_handle_ptr(RSDL_font);
     font.height = (float)RSDL_font->height;
     font.width = nk_sdl_get_text_width;
-
+    nk_style_set_font(&sdl.ctx, &font);
+*/
     sdl.screen_surface = screen_surface;
-    nk_init_default(&sdl.ctx, &font);
+
+    nk_init_default(&sdl.ctx, font);
     sdl.ctx.clip.copy = nk_sdl_clipbard_copy;
     sdl.ctx.clip.paste = nk_sdl_clipbard_paste;
     sdl.ctx.clip.userdata = nk_handle_ptr(0);
     return &sdl.ctx;
+}
+
+NK_API void
+nk_sdl_set_font(nk_sdl_Font *xfont)
+{
+    struct nk_user_font *font = &xfont->handle;
+    font->userdata = nk_handle_ptr(xfont);
+    font->height = (float)xfont->height;
+    font->width = nk_sdl_get_text_width;
+    nk_style_set_font(&sdl.ctx, font);
 }
 
 NK_API void
@@ -478,7 +522,7 @@ nk_sdl_handle_event(int *evt)
 NK_API void
 nk_sdl_shutdown(void)
 {
-    free(RSDL_font);
+    //free(RSDL_font);
     nk_free(&sdl.ctx);
 }
 

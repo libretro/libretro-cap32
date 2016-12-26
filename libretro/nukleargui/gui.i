@@ -15,9 +15,8 @@ extern int loadadsk (char *arv,int drive);
 static void
 gui(struct nk_context *ctx)
 {
-   struct nk_panel layout;
 
- if (nk_begin(ctx, &layout, "Caprice32 GUI", nk_rect(10,30, 364, 212),
+ if (nk_begin(ctx,"Caprice32 GUI", nk_rect(10,30, 364, 212),
 NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
             /*NK_WINDOW_MINIMIZABLE|*/NK_WINDOW_TITLE))
  //       NK_WINDOW_BORDER|NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_MOVABLE))
@@ -42,8 +41,7 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
   	   		{               
 		
 				if (nk_button_text(ctx,SHIFTON==-1?MVk[(y*NPLGN)+x+page].norml:MVk[(y*NPLGN)+x+page].shift , \
-				       SHIFTON==-1?strlen(MVk[(y*NPLGN)+x+page].norml):strlen(MVk[(y*NPLGN)+x+page].shift),\
-					 NK_BUTTON_DEFAULT)) {
+				       SHIFTON==-1?strlen(MVk[(y*NPLGN)+x+page].norml):strlen(MVk[(y*NPLGN)+x+page].shift))) {
 
 					LOGI("(%s) pressed! (%d,%d)\n",SHIFTON==-1?MVk[(y*NPLGN)+x+page].norml:MVk[(y*NPLGN)+x+page].shift,x,y);
 					vkey_pressed=MVk[(y*NPLGN)+x+page].val;
@@ -104,11 +102,11 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
 */
 	    // button toggle GUI/EMU
             nk_layout_row_static(ctx, DEFHSZ, DEFWSZ, 2);
-            if (nk_button_label(ctx, "Resume", NK_BUTTON_DEFAULT)){
+            if (nk_button_label(ctx, "Resume")){
                 fprintf(stdout, "quit GUI\n");
 		pauseg=0;
 	    }
-            if (nk_button_label(ctx, "Reset", NK_BUTTON_DEFAULT)){
+            if (nk_button_label(ctx, "Reset")){
                 fprintf(stdout, "quit GUI & reset\n");
 		pauseg=0;
 		emu_reset();
@@ -177,7 +175,7 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
             nk_label(ctx, "DISKA:", NK_TEXT_LEFT);
             nk_layout_row_dynamic(ctx, DEFHSZ, 1);
 
-            if (nk_button_label(ctx, DF8NAME, NK_BUTTON_DEFAULT)){
+            if (nk_button_label(ctx, DF8NAME)){
                 fprintf(stdout, "LOAD DISKA\n");
 		LOADCONTENT=1;
 		LDRIVE=8;
@@ -188,7 +186,7 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
             nk_label(ctx, "DF9:", NK_TEXT_LEFT);
             nk_layout_row_dynamic(ctx, DEFHSZ, 1);
 
-            if (nk_button_label(ctx, DF9NAME, NK_BUTTON_DEFAULT)){
+            if (nk_button_label(ctx, DF9NAME)){
                 fprintf(stdout, "LOAD DISKA\n");
 		LOADCONTENT=1;
 		LDRIVE=9;
