@@ -3530,6 +3530,7 @@ void retro_loop(void)
 
 void theloop(void)
 {
+#if 0	
    /* run the emulation */
    dwTicks = /*SDL_*/GetTicks();
 
@@ -3540,7 +3541,7 @@ void theloop(void)
       dwFrameCount = 0;
       dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
    }
-
+#endif
    if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
    {
       int iTicksAdj = 0; // no adjustment necessary by default
@@ -3558,6 +3559,7 @@ void theloop(void)
          else if (dwSndDist > dwSndMaxSafeDist)
             iTicksAdj = 5; // slow emulation down to compensate
       }
+#if 0	   
       dwTicks = /*SDL_*/GetTicks();
 
       if (dwTicks < (dwTicksTarget+iTicksAdj)) /* limit speed? */
@@ -3565,7 +3567,8 @@ void theloop(void)
 
       dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
    }
-
+#endif
+	
    uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
    if (VDU.scrln > 0)
       CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
