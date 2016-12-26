@@ -186,6 +186,9 @@ extern int SND;
 extern int autorun,kbd_runcmd;
 int autoboot_delay=0;
 
+extern void kbd_buf_feed(char *s);
+extern void kbd_buf_update();
+
 extern char DISKA_NAME[512];
 extern char DISKB_NAME[512];
 extern char TAPE_NAME[512];

@@ -8,7 +8,9 @@ extern int vkey_pressed;
 extern char DISKA_NAME[512];
 extern char DISKB_NAME[512];
 extern char TAPE_NAME[512];
+
 extern void emu_reset(void);
+extern int loadadsk (char *arv,int drive);
 
 static void
 gui(struct nk_context *ctx)

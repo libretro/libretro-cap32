@@ -31,7 +31,26 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
+
+extern void change_model(int val);
+extern int loadadsk (char *arv,int drive);
+extern int tape_insert (char *pchFileName);
+extern void enter_gui(void);
+extern void kbd_buf_feed(char *s);
+extern int Retro_PollEvent();
+extern void retro_loop(void);
+extern int video_set_palette (void);
+extern int InitOSGLU(void);
+extern int  UnInitOSGLU(void);
+extern void emu_reset(void);
+extern void change_ram(int val);
+extern int snapshot_save (char *pchFileName);
+extern void play_tape();
+extern void retro_joy0(unsigned char joy0);
+extern void retro_key_down(int key);
+extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
+
 
 long frame=0;
 unsigned long  Ktime=0 , LastFPSTime=0;
@@ -86,6 +105,7 @@ extern int app_init(void);
 extern int app_free(void);
 extern int app_render(void);
 extern int app_event(int type);
+extern void app_vkb_handle();
 
 int CROP_WIDTH;
 int CROP_HEIGHT;
@@ -1137,7 +1157,7 @@ void retro_run(void)
 		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
 			tape_insert ((char *)RPATH);
       		kbd_buf_feed("|tape\nrun\"\n^");
-   			return true;
+   			return ;
 		}
 	loadadsk((char *)RPATH,0);
    }

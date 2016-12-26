@@ -14,7 +14,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-//#include <ctype.h>
+#ifdef __EMSCRIPTEN__
+#include <ctype.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>

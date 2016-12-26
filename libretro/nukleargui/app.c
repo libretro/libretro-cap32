@@ -12,6 +12,12 @@
 
 #include <libretro.h>
 
+
+extern int snapshot_save (char *pchFileName);
+extern void play_tape();
+extern void Screen_SetFullUpdate(int scr);
+extern void vkbd_key(int key,int pressed);
+
 extern long GetTicks(void); 
 
 extern retro_input_poll_t input_poll_cb;
