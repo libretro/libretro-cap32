@@ -132,6 +132,7 @@ else ifeq ($(platform), ps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
+	MSB_FIRST = 1
 
 # sncps3
 else ifeq ($(platform), sncps3)
@@ -143,6 +144,7 @@ else ifeq ($(platform), sncps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
+	MSB_FIRST = 1
 
 # Lightweight PS3 Homebrew SDK
 else ifeq ($(platform), psl1ght)
@@ -154,6 +156,7 @@ else ifeq ($(platform), psl1ght)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
+	MSB_FIRST = 1
 
 # PSP
 else ifeq ($(platform), psp1)
@@ -168,6 +171,7 @@ else ifeq ($(platform), psp1)
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	EXTRA_INCLUDES := -I$(shell psp-config --pspsdk-path)/include
+	MSB_FIRST = 1
 
 # Xbox 360
 else ifeq ($(platform), xenon)
@@ -189,6 +193,7 @@ else ifeq ($(platform), ngc)
 	PLATFORM_DEFINES += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
+	MSB_FIRST = 1
 
 # Nintendo Wii
 else ifeq ($(platform), wii)
@@ -200,6 +205,7 @@ else ifeq ($(platform), wii)
 	PLATFORM_DEFINES += -DGEKKO -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
+	MSB_FIRST = 1
 
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
@@ -247,6 +253,10 @@ CAP32_DIR := $(CORE_DIR)/cap32
 
 ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
+endif
+
+ifneq ($(MSB_FIRST), 1)
+	PLATFORM_DEFINES += -DLSB_FIRST
 endif
 
 ifeq ($(DEBUG), 1)

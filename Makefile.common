@@ -1,52 +1,20 @@
-LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro/libretro-common
+GUI = $(CORE_DIR)/libretro/nukleargui
 
-INCFLAGS := -I$(CORE_DIR) \
-            -I$(CORE_DIR)/cap32 \
-				-I$(CORE_DIR)/cap32/libcpccat\
-            -I$(CORE_DIR)/libretro \
-				-I$(CORE_DIR)/libretro/core \
-				-I$(CORE_DIR)/libretro/include \
-				-I$(LIBRETRO_COMM_DIR)/include
-
-SOURCES_C :=
-
-ifeq ($(HAVE_LIBCO), 1)
-CPPFLAGS += -DHAVE_LIBCO
-CFLAGS   += -DHAVE_LIBCO
-CXXFLAGS += -DHAVE_LIBCO
-
-SOURCES_C += $(LIBRETRO_COMM_DIR)/libco/libco.c
-endif
+INCFLAGS := \
+	-I$(CORE_DIR) \
+	-I$(CORE_DIR)/cap32 \
+	-I$(CORE_DIR)/cap32/libcpccat \
+	-I$(CORE_DIR)/libretro  \
+	-I$(GUI) \
+	-I$(GUI)/sdl_wrapper 
 
 SOURCES_C += \
-	$(CORE_DIR)/libretro/core/libretro-core.c \
-	$(CORE_DIR)/libretro/core/core-mapper.c \
-	$(CORE_DIR)/libretro/core/graph.c 
+	$(CORE_DIR)/libretro/libretro-core.c \
 
-SOURCES_C += $(CORE_DIR)/libretro/core/diskutils.c
-SOURCES_C += $(CORE_DIR)/libretro/core/vkbd.c
-
-GUI = $(CORE_DIR)/libretro/gui
-
-SOURCES_C += $(GUI)/dialog.c\
-				 $(GUI)/paths.c \
-				 $(GUI)/file.c \
-				 $(GUI)/unzip.c \
-				 $(GUI)/thumb.c \
-				 $(GUI)/zip.c \
-				 $(GUI)/str.c \
-				 $(GUI)/dlgFloppy.c \
-				 $(GUI)/dlgFileSelect.c \
-				 $(GUI)/dlgJoystick.c \
-				 $(GUI)/dlgAbout.c \
-				 $(GUI)/dlgSound.c \
-				 $(GUI)/dlgAlert.c \
-				 $(GUI)/dlgMisc.c \
-				 $(GUI)/dlgVideo.c \
-				 $(GUI)/dlgMain.c \
-				 $(GUI)/dlgSnapshot.c \
-				 $(GUI)/dlgOption.c \
-				 $(GUI)/sdlgui.c
+SOURCES_C += \
+	$(GUI)/sdl_wrapper/SDL_gfxPrimitives.c \
+	$(GUI)/sdl_wrapper/retro_surface.c  \
+	$(GUI)/app.c
 
 SOURCES_C += $(CORE_DIR)/cap32/cap32.c
 SOURCES_C += $(CORE_DIR)/cap32/crtc.c
@@ -56,4 +24,3 @@ SOURCES_C += $(CORE_DIR)/cap32/tape.c
 SOURCES_C += $(CORE_DIR)/cap32/z80.c
 SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
 SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
-

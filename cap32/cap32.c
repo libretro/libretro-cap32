@@ -179,7 +179,8 @@ void theloop(void);
 long GetTicks(void);
 int HandleExtension(char *path,char *ext);
 
-extern unsigned short int bmp[400 * 300];
+#include "libretro-core.h"
+extern unsigned int bmp[WINDOW_SIZE];//[400 * 300];
 extern char RPATH[512];
 extern int SND;
 extern int autorun,kbd_runcmd;
@@ -862,22 +863,14 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                if (GateArray.pen < 2) {
 
 //FIXME RETRO 
-unsigned char r,g,b;
-unsigned char r2,g2,b2;
-
-r=colours[GateArray.ink_values[0]]>>11;
-g=(colours[GateArray.ink_values[0]]>>5)&0x2F;
-b=colours[GateArray.ink_values[0]]&0x1F;
-r2=colours[GateArray.ink_values[1]]>>11;
-g2=(colours[GateArray.ink_values[1]]>>5)&0x2F;
-b2=colours[GateArray.ink_values[1]]&0x1F;
-
-r=((uint32_t)r + (uint32_t)r2)>>1;
-g=((uint32_t)g + (uint32_t)g2)>>1;
-b=((uint32_t)b + (uint32_t)b2)>>1;
-uint32_t colur = b | (g << 5) | (r << 11);
-colur = colur | (colur << 16);
-GateArray.palette[18] = colur;
+unsigned char r,g,b,r2,g2,b2;
+r=(colours[GateArray.ink_values[0]]>>16)&0xFF;
+g=(colours[GateArray.ink_values[0]]>>8)&0xFF;
+b=colours[GateArray.ink_values[0]]&0xFF;
+r2=(colours[GateArray.ink_values[1]]>>16)&0xFF;
+g2=(colours[GateArray.ink_values[1]]>>8)&0xFF;
+b2=colours[GateArray.ink_values[1]]&0xFF;
+GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
 
                }
             }
@@ -2666,7 +2659,9 @@ void audio_resume (void) {}
 
 int video_set_palette (void)
 {
+
    int n;
+  
 
    if (!CPC.scr_tube)
    {
@@ -2674,20 +2669,20 @@ int video_set_palette (void)
       {
          uint32_t red, green, blue, colr;
 
-         red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 31);
-         if (red > 31) /* limit to the maximum */
-            red = 31;
+         red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
+         if (red > 255) /* limit to the maximum */
+            red = 255;
 
-         green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 63);
-         if (green > 63)
-            green = 63;
+         green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
+         if (green > 255)
+            green = 255;
 
-         blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 31);
-         if (blue > 31)
-            blue = 31;
+         blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
+         if (blue > 255)
+            blue = 255;
 
-         colr       = blue | (green << 5) | (red << 11);
-         colours[n] = colr | (colr << 16);
+         colr       = blue | (green << 8) | (red << 16);
+         colours[n] = colr ;//| (colr << 16);
 
       }
    }
@@ -2695,14 +2690,12 @@ int video_set_palette (void)
    {
       for (n = 0; n < 32; n++)
       {
-         uint32_t colr;
-         uint32_t green = (uint32_t)(colours_green[n] * (CPC.scr_intensity / 10.0) * 63);
+         uint32_t green = (uint32_t)(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
 
-         if (green > 63)
-            green = 63;
+         if (green > 255)
+            green = 255;
 
-         colr       = green << 5;
-         colours[n] = colr | (colr << 16);
+         colours[n] = green << 8;
 
       }
    }
@@ -2749,6 +2742,12 @@ void video_set_style (void)
 
    switch(CPC.scr_bpp)
    {
+      case 32:
+         CPC.scr_render = (void(*)(void))render32bpp;
+         break;
+      case 24:
+         CPC.scr_render = (void(*)(void))render24bpp;
+         break;
       case 16:
       case 15:
          CPC.scr_render = (void(*)(void))render16bpp;
@@ -2762,13 +2761,13 @@ void video_set_style (void)
 int video_init (void)
 { 
    int error_code;
-   CPC.scr_bpp = 16;
+   CPC.scr_bpp = 32;
 
    error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
    if (error_code)
       return error_code; 
 
-   CPC.scr_bps       = 400 * 2 / 4;
+   CPC.scr_bps       = WINDOW_WIDTH/*400*/ * 4 / 4;
    CPC.scr_pos       = CPC.scr_base = (uint32_t *)&bmp[0];
    CPC.scr_line_offs = CPC.scr_bps * 1;
 
@@ -2905,10 +2904,10 @@ void loadConfiguration (void)
       CPC.keyboard = 0;
    CPC.joysticks     = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
 
-   CPC.scr_fs_width  = getConfigValueInt(chFileName, "video", "scr_width", 400);
-   CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 300);
-   CPC.scr_fs_bpp    = getConfigValueInt(chFileName, "video", "scr_bpp", 16);
-   CPC.scr_style     = getConfigValueInt(chFileName, "video", "scr_style", 3);
+   CPC.scr_fs_width  = getConfigValueInt(chFileName, "video", "scr_width", 384);
+   CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 288);
+   CPC.scr_fs_bpp    = getConfigValueInt(chFileName, "video", "scr_bpp", 32);
+   CPC.scr_style     = getConfigValueInt(chFileName, "video", "scr_style", 4);
    CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 0) & 1;
    CPC.scr_vsync     = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
    CPC.scr_led       = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
@@ -3465,7 +3464,7 @@ int loadadsk (char *arv,int drive)
       have_DSK = true;
       sprintf(RPATH,"%s%d.SNA",arv,drive);		
    }
-   else
+   else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
    {
       snapshot_load (arv);
       have_SNA = true;
@@ -3530,6 +3529,49 @@ void retro_loop(void)
 
 void theloop(void)
 {
+     if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
+   {
+      int iTicksAdj = 0; // no adjustment necessary by default
+
+      if (CPC.snd_enabled)
+      {
+
+         if (pbSndStream < CPC.snd_bufferptr)
+            dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
+         else
+            dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
+
+         if (dwSndDist < dwSndMinSafeDist)
+            iTicksAdj = -5; // speed emulation up to compensate
+         else if (dwSndDist > dwSndMaxSafeDist)
+            iTicksAdj = 5; // slow emulation down to compensate
+      }
+
+   }
+
+   uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+   if (VDU.scrln > 0)
+      CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
+   else
+      CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
+
+   CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
+
+   iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+
+   if (iExitCondition == EC_FRAME_COMPLETE)
+   {
+      /* emulation finished rendering a complete frame? */
+      dwFrameCount++;
+      RLOOP=0; /* exit retro_loop for retro_run */
+   }
+   else if (iExitCondition == EC_SOUND_BUFFER)
+      mixsnd();
+
+}
+#if 0
+void theloop(void)
+{
    /* run the emulation */
    dwTicks = /*SDL_*/GetTicks();
 
@@ -3585,6 +3627,7 @@ void theloop(void)
    else if (iExitCondition == EC_SOUND_BUFFER)
       mixsnd();
 }
+#endif
 
 int capmain (int argc, char **argv)
 {
