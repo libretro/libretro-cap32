@@ -3532,6 +3532,7 @@ void retro_loop(void)
 
 void theloop(void)
 {
+
      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
    {
       int iTicksAdj = 0; // no adjustment necessary by default
@@ -3572,65 +3573,6 @@ void theloop(void)
       mixsnd();
 
 }
-#if 0
-void theloop(void)
-{
-   /* run the emulation */
-   dwTicks = /*SDL_*/GetTicks();
-
-   if (dwTicks >= dwTicksTargetFPS)
-   {
-      /* update FPS counter? */
-      dwFPS = dwFrameCount;
-      dwFrameCount = 0;
-      dwTicksTargetFPS = dwTicks + 1000*1000; // prep counter for the next run
-   }
-
-   if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
-   {
-      int iTicksAdj = 0; // no adjustment necessary by default
-
-      if (CPC.snd_enabled)
-      {
-
-         if (pbSndStream < CPC.snd_bufferptr)
-            dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-         else
-            dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-
-         if (dwSndDist < dwSndMinSafeDist)
-            iTicksAdj = -5; // speed emulation up to compensate
-         else if (dwSndDist > dwSndMaxSafeDist)
-            iTicksAdj = 5; // slow emulation down to compensate
-      }
-      dwTicks = /*SDL_*/GetTicks();
-
-      if (dwTicks < (dwTicksTarget+iTicksAdj)) /* limit speed? */
-         return; /* delay emulation */
-
-      dwTicksTarget = dwTicks + dwTicksOffset*1000; // prep counter for the next run
-   }
-
-   uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
-   if (VDU.scrln > 0)
-      CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
-   else
-      CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
-
-   CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
-
-   iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-
-   if (iExitCondition == EC_FRAME_COMPLETE)
-   {
-      /* emulation finished rendering a complete frame? */
-      dwFrameCount++;
-      RLOOP=0; /* exit retro_loop for retro_run */
-   }
-   else if (iExitCondition == EC_SOUND_BUFFER)
-      mixsnd();
-}
-#endif
 
 int capmain (int argc, char **argv)
 {
