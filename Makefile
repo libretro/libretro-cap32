@@ -255,8 +255,8 @@ ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
 endif
 
-ifneq ($(MSB_FIRST), 1)
-	PLATFORM_DEFINES += -DLSB_FIRST
+ifeq ($(MSB_FIRST), 1)
+	PLATFORM_DEFINES += -DMSB_FIRST
 endif
 
 ifeq ($(DEBUG), 1)

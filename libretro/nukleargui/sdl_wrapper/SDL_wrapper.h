@@ -108,33 +108,28 @@ static __inline__ unsigned RSDL_Swap32(unsigned x){
 }
 
 
-#ifdef LSB_FIRST
-
-#define RSDL_SwapLE16(X)	(X)
-#define RSDL_SwapLE32(X) (X)
-
-#define RSDL_SwapBE16(X) RSDL_Swap16(X)
-#define RSDL_SwapBE32(X) RSDL_Swap32(X)
-
-#else
-
+#ifdef MSB_FIRST
 #define RSDL_SwapLE16(X)	RSDL_Swap16(X)
-#define RSDL_SwapLE32(X) RSDL_Swap32(X)
+#define RSDL_SwapLE32(X)   RSDL_Swap32(X)
 
-#define RSDL_SwapBE16(X) (X)
-#define RSDL_SwapBE32(X) (X)
+#define RSDL_SwapBE16(X)   (X)
+#define RSDL_SwapBE32(X)   (X)
+#else
+#define RSDL_SwapLE16(X)	(X)
+#define RSDL_SwapLE32(X)   (X)
+
+#define RSDL_SwapBE16(X)   RSDL_Swap16(X)
+#define RSDL_SwapBE32(X)   RSDL_Swap32(X)
 
 #endif
 
 #define RSDL_LIL_ENDIAN	1234
 #define RSDL_BIG_ENDIAN	4321
 
-//RETRO HACK
-//FIXME: TODO LSB as default
-#ifdef LSB_FIRST
-#define RSDL_BYTEORDER RSDL_LIL_ENDIAN         
-#else    
+#ifdef MSB_FIRST
 #define RSDL_BYTEORDER RSDL_BIG_ENDIAN
+#else    
+#define RSDL_BYTEORDER RSDL_LIL_ENDIAN         
 #endif
 
 #ifdef __cplusplus
