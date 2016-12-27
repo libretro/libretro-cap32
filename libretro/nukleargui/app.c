@@ -476,8 +476,7 @@ int app_render()
 {
 	if(pauseg==1)restore_bgk();
 
-        gui(ctx);
-	if(LOADCONTENT==1)filebrowser(ctx);
+        gui(&browser,ctx);
 
         /* Draw */
         //nk_color_fv(bg, background);

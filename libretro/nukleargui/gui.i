@@ -13,13 +13,28 @@ extern void emu_reset(void);
 extern int loadadsk (char *arv,int drive);
 
 static void
-gui(struct nk_context *ctx)
+gui(struct file_browser *browser,struct nk_context *ctx)
 {
+    struct nk_rect total_space;
 
- if (nk_begin(ctx,"Caprice32 GUI", nk_rect(10,30, 364, 212),
-NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-            /*NK_WINDOW_MINIMIZABLE|*/NK_WINDOW_TITLE))
- //       NK_WINDOW_BORDER|NK_WINDOW_NO_SCROLLBAR|NK_WINDOW_MOVABLE))
+    /* window flags */
+    static int border = nk_true;
+    static int resize = nk_true;
+    static int movable = nk_true;
+    static int no_scrollbar = nk_false;
+    static nk_flags window_flags = 0;
+    static int minimizable = nk_true;
+
+    /* window flags */
+    window_flags = 0;
+
+    if (border) window_flags |= NK_WINDOW_BORDER;
+    if (resize) window_flags |= NK_WINDOW_SCALABLE;
+    if (movable) window_flags |= NK_WINDOW_MOVABLE;
+    if (no_scrollbar || (pauseg==1 && LOADCONTENT==1) ) window_flags |= NK_WINDOW_NO_SCROLLBAR;
+    if (minimizable) window_flags |= NK_WINDOW_MINIMIZABLE;
+
+    if (nk_begin(ctx,"Caprice32 GUI", nk_rect(10,30, 364, 212), window_flags|NK_WINDOW_TITLE))
     {
 
 	if(pauseg==1 && SHOWKEY==1)SHOWKEY=-1;
@@ -53,6 +68,119 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
 
 
     	}
+	else
+	// Filebrowser
+	if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT==1)
+	{
+        static float ratio[] = {0.25f, NK_UNDEFINED};
+        float spacing_x = ctx->style.window.spacing.x;
+
+        /* output path directory selector in the menubar */
+        ctx->style.window.spacing.x = 0;
+        nk_menubar_begin(ctx);
+        {
+            char *d = browser->directory;
+            char *begin = d + 1;
+            nk_layout_row_dynamic(ctx, 25, 6);
+
+            while (*d++) {
+                if (*d == '/') {
+                    *d = '\0';
+                    if (nk_button_label(ctx, begin)) {
+                        *d++ = '/'; *d = '\0';
+                        file_browser_reload_directory_content(browser, browser->directory);
+                        break;
+                    }
+                    *d = '/';
+                    begin = d + 1;
+                }
+            }
+        }
+        nk_menubar_end(ctx);
+        ctx->style.window.spacing.x = spacing_x;
+
+        /* window layout */
+        total_space = nk_window_get_content_region(ctx);
+        nk_layout_row(ctx, NK_DYNAMIC, total_space.h, 2, ratio);
+        nk_group_begin(ctx,"Special", NK_WINDOW_NO_SCROLLBAR);
+        {
+
+            nk_layout_row_dynamic(ctx, 32, 1);
+            if (nk_button_label(ctx,  "Home"))
+                file_browser_reload_directory_content(browser, browser->home);
+            if (nk_button_label(ctx,"Desktop"))
+                file_browser_reload_directory_content(browser, browser->desktop);
+            if (nk_button_label(ctx,"/"))
+                file_browser_reload_directory_content(browser, "/");
+            nk_group_end(ctx);
+        }
+
+        /* output directory content window */
+        nk_group_begin(ctx, "Content", 0);
+        {
+            int index = -1;
+            size_t i = 0, j = 0, k = 0;
+            size_t rows = 0, cols = 0;
+            size_t count = browser->dir_count + browser->file_count;
+
+            cols = 1;
+            rows = count / cols;
+            for (i = 0; i <= rows; i += 1) {
+#if 1
+                {size_t n = j + cols;
+                nk_layout_row_dynamic(ctx, 16, (int)cols);
+                for (; j < count && j < n; ++j) {
+                    /* draw one row of icons */
+                    if (j < browser->dir_count) {
+                        /* draw and execute directory buttons */
+                        if (nk_button_label(ctx,browser->directories[j]))
+                            index = (int)j;
+                    } else {
+                        /* draw and execute files buttons */
+                       
+                        size_t fileIndex = ((size_t)j - browser->dir_count);
+                       
+                        if (nk_button_label(ctx, browser->files[fileIndex])) {
+                            strncpy(browser->file, browser->directory, MAX_PATH_LEN);
+                            n = strlen(browser->file);
+                            strncpy(browser->file + n, browser->files[fileIndex], MAX_PATH_LEN - n);
+                            //ret = 1;
+			    sprintf(LCONTENT,"%s\0",browser->file);
+			    LOADCONTENT=2;
+                        }
+                    }
+                }}
+#else
+                {size_t n = k + cols;
+                nk_layout_row_dynamic(ctx, 20, (int)cols);
+                for (; k < count && k < n; k++) {
+                    /* draw one row of labels */
+                    if (k < browser->dir_count) {
+                        nk_label(ctx, browser->directories[k], NK_TEXT_CENTERED);
+                    } else {
+                        size_t t = k-browser->dir_count;
+                        nk_label(ctx,browser->files[t],NK_TEXT_CENTERED);
+                    }
+                }}
+#endif
+            }
+
+            if (index != -1) {
+                size_t n = strlen(browser->directory);
+                strncpy(browser->directory + n, browser->directories[index], MAX_PATH_LEN - n);
+                n = strlen(browser->directory);
+                if (n < MAX_PATH_LEN - 1) {
+                    browser->directory[n] = '/';
+                    browser->directory[n+1] = '\0';
+                }
+                file_browser_reload_directory_content(browser, browser->directory);
+
+            }
+            nk_group_end(ctx);
+        }
+    
+
+	}
 	else
 	// GUI IN PAUSE
 	if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT!=1)
@@ -212,8 +340,7 @@ NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
 */
         }
 
-
-   	nk_end(ctx);
    }
+   	nk_end(ctx);
 }
 
