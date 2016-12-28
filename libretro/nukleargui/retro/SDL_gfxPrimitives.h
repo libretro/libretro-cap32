@@ -1,5 +1,6 @@
 //#warning Altered source only for use with RSDL_wrapper
 //#warning RETRO HACK This is just an SDL wrapper for liretro core.
+//original copyright follows:
 
 /* 
 
@@ -38,7 +39,7 @@ Andreas Schiffler -- aschiffler at ferzkopp dot net
 #define M_PI	3.1415926535897932384626433832795
 #endif
 
-#include "SDL_wrapper.h"
+#include "RSDL_wrapper.h"
 
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus

@@ -1,7 +1,67 @@
 
-#include "SDL_wrapper.h"
+#include "RSDL_wrapper.h"
 #include <stdio.h>
 #include <string.h>
+
+static const char *cross[] = {
+  "X                               ",
+  "XX                              ",
+  "X.X                             ",
+  "X..X                            ",
+  "X...X                           ",
+  "X....X                          ",
+  "X.....X                         ",
+  "X......X                        ",
+  "X.......X                       ",
+  "X........X                      ",
+  "X.....XXXXX                     ",
+  "X..X..X                         ",
+  "X.X X..X                        ",
+  "XX  X..X                        ",
+  "X    X..X                       ",
+  "     X..X                       ",
+  "      X..X                      ",
+  "      X..X                      ",
+  "       XX                       ",
+  "                                ",
+};
+
+#ifdef M16B
+void DrawPointBmp(unsigned short int *buffer,int x, int y, unsigned short int color,int rwidth,int rheight)
+#else
+void DrawPointBmp(unsigned int *buffer,int x, int y, unsigned int color,int rwidth,int rheight)
+#endif
+
+{
+   int idx;
+
+   idx=x+y*rwidth;
+   if(idx>=0 && idx<rwidth*rheight)
+   	buffer[idx]=color;	
+}
+
+void draw_cross(RSDL_Surface *surface,int x,int y) {
+
+	int i,j,idx;
+	int dx=32,dy=20;
+#ifdef M16B
+	unsigned short int col=0xffff;
+#else
+	unsigned int col=0xffffffff;
+#endif
+	int w=surface->w;
+	int h=surface->h;
+
+	for(j=y;j<y+dy;j++){
+		idx=0;
+		for(i=x;i<x+dx;i++){
+
+			if(cross[j-y][idx]=='.')DrawPointBmp(surface->pixels,i,j,col,w,h);
+			else if(cross[j-y][idx]=='X')DrawPointBmp(surface->pixels,i,j,0,w,h);
+			idx++;			
+		}
+	}
+}
 
 unsigned int Retro_MapRGB(RSDL_PixelFormat *a, int r, int g, int b){
 
@@ -235,12 +295,12 @@ printf("create surface RGB565 libretro\n");
    bitmp->format->BitsPerPixel = 16;
    bitmp->format->BytesPerPixel = 2;
    bitmp->format->Rloss=3;
-   bitmp->format->Gloss=3;
+   bitmp->format->Gloss=2;
    bitmp->format->Bloss=3;
    bitmp->format->Aloss=0;
 
    bitmp->format->Rshift=11;
-   bitmp->format->Gshift=6;
+   bitmp->format->Gshift=5;
    bitmp->format->Bshift=0;
    bitmp->format->Ashift=0;
 

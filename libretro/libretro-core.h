@@ -7,11 +7,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 #include <stdbool.h>
 
-#define TEX_WIDTH 384//400
-#define TEX_HEIGHT 272//300
+// DEVICE AMSTRAD
+#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
+#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
+
+extern unsigned amstrad_devices[ 2 ];
+
+#define TEX_WIDTH 384
+#define TEX_HEIGHT 272
 
 //LOG
 #if  defined(__ANDROID__) || defined(ANDROID)
@@ -29,7 +34,6 @@
 #define uint32 uint32_t
 #define uint8 uint8_t
 
-
 //SCREEN
 extern unsigned int *Retro_Screen;
 
@@ -37,12 +41,9 @@ extern unsigned int *Retro_Screen;
 #define PIXEL_TYPE UINT32
 #define PITCH 4	
 
-#define WINDOW_WIDTH 384//400
-#define WINDOW_HEIGHT 272//300
+#define WINDOW_WIDTH 384
+#define WINDOW_HEIGHT 272
 #define WINDOW_SIZE (384*272)
-//KBD
-extern char Key_Sate[512];
-extern char Key_Sate2[512];
 
 //VKBD
 #define NPLGN 12
@@ -79,17 +80,5 @@ extern int CROP_HEIGHT;
 extern int VIRTUAL_WIDTH;
 extern int retrow ; 
 extern int retroh ;
-
-
-#define XSIDE  (CROP_WIDTH/NPLGN -1)
-#define YSIDE  (CROP_HEIGHT/8 -1)
-
-#define YBASE0 (CROP_HEIGHT - NLIGN*YSIDE -8)
-#define XBASE0 0+4+2
-#define XBASE3 0
-#define YBASE3 YBASE0 -4
-
-#define STAT_DECX 120
-#define STAT_YSZ  20
 
 #endif

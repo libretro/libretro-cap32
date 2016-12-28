@@ -1,8 +1,8 @@
 /* nuklear - v1.00 - public domain */
 
+
 extern int pauseg;
 extern int NPAGE,SHIFTON;
-extern unsigned char *keymat,  *revmat,  *joy;
 extern int vkey_pressed;
 
 extern char DISKA_NAME[512];

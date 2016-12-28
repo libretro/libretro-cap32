@@ -1,12 +1,10 @@
-
+#include <stdio.h>
+#include <stdlib.h>
 /* ===============================================================
  *
  *                          GUI
  *
  * ===============================================================*/
-
-extern int LOADCONTENT;
-extern char LCONTENT[512];
 
 #define MAX_PATH_LEN 512
 struct file_browser {
@@ -208,12 +206,6 @@ void filebrowser_free()
 {
 
     file_browser_free(&browser);
-
-}
-
-void filebrowser(struct nk_context *ctx)
-{
- // file_browser_run(&browser, ctx);
 
 }
 

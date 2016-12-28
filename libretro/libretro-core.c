@@ -31,7 +31,6 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
-
 extern void change_model(int val);
 extern int loadadsk (char *arv,int drive);
 extern int tape_insert (char *pchFileName);
@@ -51,14 +50,10 @@ extern void retro_key_down(int key);
 extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
 
-
-long frame=0;
-unsigned long  Ktime=0 , LastFPSTime=0;
-
 //VIDEO
 unsigned int *Retro_Screen;
-unsigned int save_Screen/*[400*300];*/[WINDOW_SIZE];
-unsigned int bmp/*[400*300];*/[WINDOW_SIZE];
+unsigned int save_Screen[WINDOW_SIZE];
+unsigned int bmp[WINDOW_SIZE];
 
 //SOUND
 short signed int SNDBUF[1024*2];
@@ -67,63 +62,27 @@ int snd_sampler = 44100 / 50;
 //PATH
 char RPATH[512];
 
-//EMU FLAGS
-int NPAGE=-1, KCOL=1, BKGCOLOR=0;
-int SHOWKEY=-1;
 
-int MAXPAS=6,SHIFTON=-1,MOUSE_EMULATED=-1,MOUSEMODE=-1,PAS=4;
-int SND=1; //SOUND ON/OFF
-static int firstps=0;
 int pauseg=0; //enter_gui
-int touch=-1; // gui mouse btn
-//JOY
-int al[2][2];//left analog1
-int ar[2][2];//right analog1
-unsigned char MXjoy[2]; // joy
-int NUMjoy=1;
-int NUMDRV=1;
-
-//MOUSE
-extern int pushi;  // gui mouse btn
-int gmx,gmy; //gui mouse
-int c64mouse_enable=0;
-int slowdown=0;
-
-//KEYBOARD
-char Key_Sate[512];
-char Key_Sate2[512];
-static char old_Key_Sate[512];
-
-static int mbt[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-//STATS GUI
-int BOXDEC= 32+2;
-int STAT_BASEY;
 
 extern unsigned int *RetroScreen;
 extern int app_init(void);
 extern int app_free(void);
-extern int app_render(void);
-extern int app_event(int type);
-extern void app_vkb_handle();
+extern int app_render(int poll);
 
 int CROP_WIDTH;
 int CROP_HEIGHT;
 int VIRTUAL_WIDTH ;
-int retrow=WINDOW_WIDTH;//400; 
-int retroh=WINDOW_HEIGHT;//300;
+int retrow=WINDOW_WIDTH; 
+int retroh=WINDOW_HEIGHT;
 
 #include "vkbd.i"
-
-
-#define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
-#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
 unsigned amstrad_devices[ 2 ];
 
 int autorun=0;
 
-int RETROJOY=0,RETROPT0=0,RETROSTATUS=0,RETRODRVTYPE=0;
+int RETROJOY=0,RETROSTATUS=0,RETRODRVTYPE=0;
 int retrojoy_init=0,retro_ui_finalized=0;
 
 int cap32_statusbar=0;
@@ -133,19 +92,6 @@ int cap32_statusbar=0;
 #include "z80.h"
 extern t_CPC CPC;
 //CAP32 DEF END
-
-extern void Keymap_KeyUp(int symkey);  // define in retrostubs.c
-extern void Keymap_KeyDown(int symkey);  // define in retrostubs.c
-
-int STATUTON=-1;
-int bitstart=0;
-int pushi=0; //mouse button
-int keydown=0,keyup=0;
-int KBMOD=-1;
-int RSTOPON=-1;
-int CTRLON=-1;
-
-
 
 extern void update_input(void);
 extern void texture_init(void);
@@ -378,15 +324,10 @@ void restore_bgk()
 
 void texture_uninit(void)
 {
-
 }
 
 void texture_init(void)
 {
-   //memset(Retro_Screen, 0, sizeof(Retro_Screen));
-
-   gmx=(retrow/2)-1;
-   gmy=(retroh/2)-1;
 }
 
 void Screen_SetFullUpdate(int scr)
@@ -394,302 +335,6 @@ void Screen_SetFullUpdate(int scr)
    if(scr==0 ||scr>1)memset(Retro_Screen, 0, sizeof(Retro_Screen));
    if(scr>0)memset(bmp,0,sizeof(bmp));
 }
-
-void Process_key()
-{
-	int i;
-
-	for(i=0;i<320;i++)
-        	Key_Sate[i]=input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0,i) ? 0x80: 0;
-   
-	if(memcmp( Key_Sate,old_Key_Sate , sizeof(Key_Sate) ) )
-	 	for(i=0;i<320;i++)
-			if(Key_Sate[i] && Key_Sate[i]!=old_Key_Sate[i]  )
-        	{	
-				if(i==RETROK_F12){
-					//play_tape();
-					continue;
-				}
-/*
-				if(i==RETROK_RCTRL){
-					//CTRLON=-CTRLON;
-					printf("Modifier crtl pressed %d \n",CTRLON); 
-					continue;
-				}
-				if(i==RETROK_RSHIFT){
-					//SHITFON=-SHITFON;
-					printf("Modifier shift pressed %d \n",SHIFTON); 
-					continue;
-				}
-*/
-				if(i==RETROK_LALT){
-					//KBMOD=-KBMOD;
-					printf("Modifier alt pressed %d \n",KBMOD); 
-					continue;
-				}
-//printf("press: %d \n",i);
-				retro_key_down(i);
-	
-        	}	
-        	else if ( !Key_Sate[i] && Key_Sate[i]!=old_Key_Sate[i]  )
-        	{
-				if(i==RETROK_F12){
-      				kbd_buf_feed("|tape\nrun\"\n^");
-					continue;
-				}
-/*
-				if(i==RETROK_RCTRL){
-					CTRLON=-CTRLON;
-					printf("Modifier crtl released %d \n",CTRLON); 
-					continue;
-				}
-				if(i==RETROK_RSHIFT){
-					SHIFTON=-SHIFTON;
-					printf("Modifier shift released %d \n",SHIFTON); 
-					continue;
-				}
-*/
-				if(i==RETROK_LALT){
-					KBMOD=-KBMOD;
-					printf("Modifier alt released %d \n",KBMOD); 
-					continue;
-				}
-//printf("release: %d \n",i);
-				retro_key_up(i);
-	
-        	}	
-
-	memcpy(old_Key_Sate,Key_Sate , sizeof(Key_Sate) );
-
-}
-
-int Retro_PollEvent()
-{
-	//   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
-    //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
-    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT TAPE ?    ? 
-
-   int SAVPAS=PAS;	
-   int i;
-   static int vbt[16]={0x1C,0x39,0x01,0x3B,0x01,0x02,0x04,0x08,0x80,0x40,0x15,0x31,0x24,0x1F,0x6E,0x6F};
-   static int kbt[4]={0,0,0,0};
-
-   MXjoy[0]=0;
-
-   input_poll_cb();
-
-   int mouse_l;
-   int mouse_r;
-   int16_t mouse_x,mouse_y;
-   mouse_x=mouse_y=0;
-
-   if(SHOWKEY==-1 && pauseg==0)Process_key();
-
-   // F9 vkbd
-   i=0;
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) && kbt[i]==0){ 
-      kbt[i]=1;
-   }   
-   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) ){
-      kbt[i]=0;
-      SHOWKEY=-SHOWKEY;
-   }
-   // F10 GUI
-   i=1;
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) && kbt[i]==0){ 
-      kbt[i]=1;
-   }   
-   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) ){
-      kbt[i]=0;
-      pauseg=1;
-      save_bkg();
-      printf("enter gui!\n");
-   }
-
-   
-if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
-	
-    i=2;//mouse/joy toggle
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      MOUSE_EMULATED=-MOUSE_EMULATED;
-   }
- 
-}
-
-if(pauseg==0){ // if emulation running
-
-	  //Joy mode
-
-      for(i=4;i<10;i++)
-      {
-         if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i))
-            MXjoy[0] |= vbt[i]; // Joy press	
-      }
-
-      if(SHOWKEY==-1)retro_joy0(MXjoy[0]);
-
-
-if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
-   //shortcut for joy mode only
-
-   i=1;//show vkbd toggle
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
-   {
-      mbt[i]=0;
-      SHOWKEY=-SHOWKEY;
-   }
-
-   i=3;//type ENTER
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
-   {
-      mbt[i]=0;
-	  kbd_buf_feed("\n");
-   }
-
-/*
-   i=10;//type DEL / ZOOM
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      ZOOM++;if(ZOOM>4)ZOOM=-1;
-
-   }
-*/
-
-   i=0;//type RUN"
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-	  kbd_buf_feed("RUN\"");
-   }
-
-   i=10;//Type CAT\n 
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-	  kbd_buf_feed("CAT\n");
-      //Screen_SetFullUpdate();
-   }
-
-   i=12;//show/hide statut
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      STATUTON=-STATUTON;
-     // Screen_SetFullUpdate();
-   }
-
-   i=13;//auto load tape
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      kbd_buf_feed("|tape\nrun\"\n^");
-   }
-
-   i=11;//reset
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      emu_reset();		
-   }
-/*
-   i=2;//mouse/joy toggle
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )
-      mbt[i]=1;
-   else if ( mbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      mbt[i]=0;
-      MOUSE_EMULATED=-MOUSE_EMULATED;
-   }
-*/
-}//if amstrad_devices=joy
-
-
-}// if pauseg=0
-
-#if 0
-   if(MOUSE_EMULATED==1){
-
-	  if(slowdown>0)return 1;
-
-      if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT))mouse_x += PAS;
-      if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT))mouse_x -= PAS;
-      if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN))mouse_y += PAS;
-      if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP))mouse_y -= PAS;
-      mouse_l=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
-      mouse_r=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
-
-      PAS=SAVPAS;
-
-	  slowdown=1;
-   }
-   else {
-
-      mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
-      mouse_y = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
-      mouse_l    = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
-      mouse_r    = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT);
-   }
-
-   static int mmbL=0,mmbR=0;
-
-   if(mmbL==0 && mouse_l){
-
-      mmbL=1;		
-      pushi=1;
-	  touch=1;
-
-   }
-   else if(mmbL==1 && !mouse_l) {
-
-      mmbL=0;
-      pushi=0;
-	  touch=-1;
-   }
-
-   if(mmbR==0 && mouse_r){
-      mmbR=1;		
-   }
-   else if(mmbR==1 && !mouse_r) {
-      mmbR=0;
-   }
-
-if(pauseg==0 && c64mouse_enable){
-/*
-	mouse_move((int)mouse_x, (int)mouse_y);
-	mouse_button(0,mmbL);
-	mouse_button(1,mmbR);
-*/
-}
-
-   gmx+=mouse_x;
-   gmy+=mouse_y;
-   if(gmx<0)gmx=0;
-   if(gmx>retrow-1)gmx=retrow-1;
-   if(gmy<0)gmy=0;
-   if(gmy>retroh-1)gmy=retroh-1;
-
-
-  if(SHOWKEY && pauseg==0)retro_virtualkb();
-
-#endif
-
-return 1;
-
-}
-
 
 void retro_set_environment(retro_environment_t cb)
 {
@@ -937,15 +582,6 @@ static void update_variables(void)
 
 void Emu_init(){
 
-#ifdef RETRO_AND
-   MOUSEMODE=1;
-#endif
-
- //  update_variables();
-
-   memset(Key_Sate,0,512);
-   memset(Key_Sate2,0,512);
-
    pre_main(RPATH);
 
    update_variables();
@@ -1123,21 +759,11 @@ void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
    int x; 
    if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);	
 }
-#if 0
-void retro_blit(){
-  	// Update display
-	#define DEC (8+14*400*4)
-	int i;
-	for(i=0;i<272;i++)
-		memcpy((unsigned char *)Retro_Screen+i*400*4+DEC,(unsigned char *)bmp+i*400*4,384*4);
-}
-#else
-void retro_blit(){
 
-memcpy(Retro_Screen,bmp,PITCH*WINDOW_SIZE);
-
+void retro_blit()
+{
+   memcpy(Retro_Screen,bmp,PITCH*WINDOW_SIZE);
 }
-#endif
 
 void retro_run(void)
 {
@@ -1147,44 +773,17 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
 
-#if 0//def __EMSCRIPTEN__ 
-   static int firstinit=0;
-   if(firstinit==0){
-	firstinit++;
-	Emu_init();
-
-	if (strlen(RPATH) >= strlen("cdt"))
-		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
-			tape_insert ((char *)RPATH);
-      		kbd_buf_feed("|tape\nrun\"\n^");
-   			return ;
-		}
-	loadadsk((char *)RPATH,0);
-   }
-#endif
-
    if(pauseg==0)
    {
       	retro_loop();
 	retro_blit();
-	Retro_PollEvent();
-
-	if( SHOWKEY==1 ){
-        	app_vkb_handle();
-		app_event(0);
-	}
+	Core_PollEvent();
    }
 
-   if(pauseg==1) app_event(1);
-
-   if( pauseg==1 || SHOWKEY==1 )app_render();
+   app_render(pauseg);
 
 
    video_cb(Retro_Screen,retrow,retroh,retrow<<PIXEL_BYTES);
-
-#ifdef HAVE_LIBCO
-   co_switch(emuThread);
-#endif
 
 }
 
@@ -1224,17 +823,17 @@ bool retro_load_game(const struct retro_game_info *info)
    app_init();
 
 	memset(SNDBUF,0,1024*2*2);
-#if 1//ndef __EMSCRIPTEN__
+
 	Emu_init();
 
 	if (strlen(RPATH) >= strlen("cdt"))
 		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
 			tape_insert ((char *)full_path);
-      		kbd_buf_feed("|tape\nrun\"\n^");
+      			kbd_buf_feed("|tape\nrun\"\n^");
    			return true;
 		}
 	loadadsk((char *)full_path,0);
-#endif
+
    return true;
 }
 
