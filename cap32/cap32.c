@@ -3438,14 +3438,18 @@ int retro_disk_auto()
 
 int detach_disk(int drive)
 {
-	if(drive==0){
-	   dsk_eject(&driveA);
-		sprintf(DISKA_NAME,"\0"); 
-	}
-	else {
-   		dsk_eject(&driveB);
-		sprintf(DISKB_NAME,"\0"); 
-	}
+   if(drive==0)
+   {
+      dsk_eject(&driveA);
+      sprintf(DISKA_NAME,"\0"); 
+   }
+   else
+   {
+      dsk_eject(&driveB);
+      sprintf(DISKB_NAME,"\0"); 
+   }
+
+   return 0;
 }
 
 int loadadsk (char *arv,int drive)

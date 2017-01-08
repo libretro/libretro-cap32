@@ -31,6 +31,8 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
+extern int Core_PollEvent(void);
+
 extern void change_model(int val);
 extern int loadadsk (char *arv,int drive);
 extern int tape_insert (char *pchFileName);
@@ -165,9 +167,9 @@ int pre_main(const char *argv)
    if(Only1Arg)
    {  Add_Option("x64");
 
-	if (strlen(RPATH) >= strlen("crt"))
-		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("crt")], "crt"))
-			Add_Option("-cartcrt");
+      if (strlen(RPATH) >= strlen("crt"))
+         if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("crt")], "crt"))
+            Add_Option("-cartcrt");
 
       Add_Option(RPATH/*ARGUV[0]*/);
    }
@@ -186,6 +188,8 @@ int pre_main(const char *argv)
    skel_main(PARAMCOUNT,( char **)xargv_cmd); 
 
    xargv_cmd[PARAMCOUNT - 2] = NULL;
+
+   return 0;
 }
 
 void parse_cmdline(const char *argv)
@@ -332,8 +336,10 @@ void texture_init(void)
 
 void Screen_SetFullUpdate(int scr)
 {
-   if(scr==0 ||scr>1)memset(Retro_Screen, 0, sizeof(Retro_Screen));
-   if(scr>0)memset(bmp,0,sizeof(bmp));
+   if(scr==0 ||scr>1)
+      memset(&Retro_Screen, 0, sizeof(Retro_Screen));
+   if(scr>0)
+      memset(&bmp,0,sizeof(bmp));
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -392,12 +398,13 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_scr_intensity",
          "scr_intensity; 5|6|7|8|9|10|11|12|13|14|15",
       },
-/*
+#if 0
+
       {
          "cap32_scr_remanency",
          "scr_remanency; disabled|enabled",
       },
-*/
+#endif
       {
          "cap32_RetroJoy",
          "Retro joy0; disabled|enabled",
@@ -545,7 +552,8 @@ static void update_variables(void)
 		  video_set_palette();
 	  }	
    }
-/*
+
+#if 0
    var.key = "cap32_scr_remanency";
    var.value = NULL;
 
@@ -558,7 +566,8 @@ static void update_variables(void)
          		 CPC.scr_remanency=0;video_set_palette();}//set_truedrive_emultion(0);
 		}
    }
-*/
+#endif
+
    var.key = "cap32_RetroJoy";
    var.value = NULL;
 
@@ -706,12 +715,12 @@ unsigned retro_api_version(void)
 
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
-  if ( port < 2 )
-  {
-    amstrad_devices[ port ] = device;
+   if ( port < 2 )
+   {
+      amstrad_devices[ port ] = device;
 
-printf(" (%d)=%d \n",port,device);
-  }
+      printf(" (%d)=%d \n",port,device);
+   }
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -727,7 +736,7 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-//FIXME handle vice PAL/NTSC
+   /* FIXME handle PAL/NTSC */
    struct retro_game_geometry geom = { retrow, retroh, 400, 300,4.0 / 3.0 };
    struct retro_system_timing timing = { 50.0, 44100.0 };
 

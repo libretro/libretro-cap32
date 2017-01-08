@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <zlib.h>
 #include "fs.h"
 
@@ -54,37 +55,42 @@ static int  gz_format = 0;
 
 int image_type = 0;
 
-static int
-my_open(const char* name)
+static int my_open(const char* name)
 {
    char *scan = strrchr(name, '.');
    gz_format = 0;
-   if (scan && (!strcasecmp(scan, ".dsz"))) {
-     gz_format = 1;
-   }
+   if (scan && (!strcasecmp(scan, ".dsz")))
+      gz_format = 1;
 
-  if (gz_format) {
-    gz_imagefile = gzopen(name, "rb");
-    if (! gz_imagefile) return -1; 
-  } else {
-    imagefile = open(name, O_RDONLY);
-    if (imagefile < 0) return -1;
-  }
-  return 0;
+   if (gz_format)
+   {
+      gz_imagefile = gzopen(name, "rb");
+      if (! gz_imagefile) return -1; 
+   }
+   else
+   {
+      imagefile = open(name, O_RDONLY);
+      if (imagefile < 0) return -1;
+   }
+   return 0;
 }
 
-static int
-my_close()
+static int my_close(void)
 {
   int ret_val = 0;
-  if (gz_format) {
-    if (gz_imagefile) {
+  if (gz_format)
+  {
+    if (gz_imagefile)
+    {
       ret_val = gzclose(gz_imagefile);
       gz_imagefile = 0;
     }
 
-  } else {
-    if (imagefile >= 0) {
+  }
+  else
+  {
+    if (imagefile >= 0)
+    {
       ret_val = close(imagefile);
       imagefile = -1;
     }
@@ -92,21 +98,17 @@ my_close()
   return ret_val;
 }
 
-static int
-my_read(uchar* a_ptr, size_t a_size)
+static int my_read(uchar* a_ptr, size_t a_size)
 {  
-  if (gz_format) {
+  if (gz_format)
     return gzread( gz_imagefile, a_ptr, a_size);
-  }
   return read(imagefile, a_ptr, a_size);
 }
 
-static int
-my_lseek(long offs, int whence) 
+static int my_lseek(long offs, int whence) 
 {
-  if (gz_format) {
+  if (gz_format)
     return gzseek( gz_imagefile, offs, whence);
-  }
   return lseek(imagefile, offs, whence);
 } 
 
@@ -846,38 +848,36 @@ int  get_sector_size_from_n(int n)
 
 uchar  *get_sector_data_ptr(int r,int h)
 {
-  struct t_header *track_header = (struct t_header*)track;
+   struct t_header *track_header = (struct t_header*)track;
 
-  /* using sector id find sector pos in track */
-  int pos = get_sector_pos_in_track(r,h);
-    int sector_offset = 0;
+   /* using sector id find sector pos in track */
+   int pos = get_sector_pos_in_track(r,h);
+   int sector_offset = 0;
 
-  if (pos==-1)
-    return NULL;
+   if (pos==-1)
+      return NULL;
 
-    switch (image_type)
-    {
-        case 0:
-        {
+   switch (image_type)
+   {
+      case 0:
+         {
             /* for standard disk images, N in the track header should
-            define the largest sector size */
+               define the largest sector size */
             int sector_size = get_sector_size_from_n(track_header->BPS);
-    
+
             sector_offset = 0x0100 + pos*sector_size;
-        }
-        break;
+         }
+         break;
 
-        case 1:
-        {
-            sector_offset = 0x0100 + get_sector_data_offset_extended(pos);
-        }
-        break;
+      case 1:
+         sector_offset = 0x0100 + get_sector_data_offset_extended(pos);
+         break;
 
-        default:
-            return NULL;
-    }
+      default:
+         return NULL;
+   }
 
-  return track+sector_offset;
+   return track+sector_offset;
 }
 
 uchar *read_block (int blk) {
@@ -1423,7 +1423,7 @@ int result;
   if (my_open(name) < 0) {
     return -1;
   }
-  n = my_read(&disk_header,0x100);
+  n = my_read((uchar*)&disk_header,0x100);
   if (n!=0x100) {
     return -1;
   }
