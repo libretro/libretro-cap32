@@ -437,7 +437,7 @@ static void update_variables(void)
    {
       char *pch;
       char str[100];
-      snprintf(str, sizeof(str), var.value);
+      snprintf(str, sizeof(str), "%s", var.value);
 
       pch = strtok(str, "x");
       if (pch)
@@ -465,14 +465,14 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       char str[100];
-	  int val;
-      snprintf(str, sizeof(str), var.value);
+      int val;
+      snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
       if(val==464)val=0;
       else if(val==664)val=1;
       else if(val==6128)val=2;
-	  if(retro_ui_finalized)
-		  change_model(val);
+      if(retro_ui_finalized)
+         change_model(val);
 
    }
 
@@ -482,12 +482,12 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       char str[100];
-	  int val;
-      snprintf(str, sizeof(str), var.value);
+      int val;
+      snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
-      
-	  if(retro_ui_finalized)
-		  change_ram(val);
+
+      if(retro_ui_finalized)
+         change_ram(val);
 
    }
 
@@ -515,13 +515,13 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       char str[100];
-	  int val;
-      snprintf(str, sizeof(str), var.value);
+      int val;
+      snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-	  if(retro_ui_finalized)
-		  ;//set_drive_type(8, val);
-	  else RETRODRVTYPE=val;
+      if(retro_ui_finalized)
+         ;//set_drive_type(8, val);
+      else RETRODRVTYPE=val;
    }
 
    var.key = "cap32_scr_tube";
@@ -543,14 +543,14 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       char str[100];
-	  int val;
-      snprintf(str, sizeof(str), var.value);
+      int val;
+      snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-	  if(retro_ui_finalized){
-		  CPC.scr_intensity = val;
-		  video_set_palette();
-	  }	
+      if(retro_ui_finalized){
+         CPC.scr_intensity = val;
+         video_set_palette();
+      }	
    }
 
 #if 0

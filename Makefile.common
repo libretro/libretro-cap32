@@ -9,14 +9,11 @@ INCFLAGS := \
 	-I$(GUI)/nuklear \
 	-I$(GUI)/retro 
 
-SOURCES_C += \
-	$(CORE_DIR)/libretro/libretro-core.c \
-
-SOURCES_C += \
-	$(GUI)/retro/SDL_gfxPrimitives.c \
-	$(GUI)/retro/retro_surface.c  \
-	$(GUI)/app.c
-#	$(GUI)/filebrowser.c 
+SOURCES_C := \
+				 $(CORE_DIR)/libretro/libretro-core.c \
+				 $(GUI)/retro/SDL_gfxPrimitives.c \
+				 $(GUI)/retro/retro_surface.c  \
+				 $(GUI)/app.c
 
 SOURCES_C += $(CORE_DIR)/cap32/cap32.c
 SOURCES_C += $(CORE_DIR)/cap32/crtc.c

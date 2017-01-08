@@ -689,57 +689,64 @@ nk_retro_handle_event(int *evt,int poll)
    		if(revent.gmy>retro.height-1)revent.gmy=retro.height-1;
 
 	}
-	else{
+   else{
 
-		//absolute
-		//FIXME FULLSCREEN no pointer
-		int p_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
- 		int p_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
+      //absolute
+      //FIXME FULLSCREEN no pointer
+      int p_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
+      int p_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
 
- 		if(p_x!=0 && p_y!=0){
-			int px=(int)((p_x+0x7fff)*retro.width/0xffff);
-			int py=(int)((p_y+0x7fff)*retro.height/0xffff);
-			//printf("px:%d py:%d (%d,%d)\n",p_x,p_y,px,py);
-			revent.gmx=px;
-			revent.gmy=py;
-
+      if(p_x!=0 && p_y!=0){
+         int px=(int)((p_x+0x7fff)*retro.width/0xffff);
+         int py=(int)((p_y+0x7fff)*retro.height/0xffff);
+         //printf("px:%d py:%d (%d,%d)\n",p_x,p_y,px,py);
+         revent.gmx=px;
+         revent.gmy=py;
+#if 0
 #if defined(__ANDROID__) || defined(ANDROID)
-  			//mouse_l=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
- 			//mouse_r=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
+         //mouse_l=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
+         //mouse_r=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
 
-			if(holdleft==0){
-				starthold=GetTicks();
-				holdleft=1;	
-			}
-			else if(holdleft==1){
-	
-				timehold=GetTicks()-starthold;
-	
-				if(timehold>250){
-					mouse_l=input_state_cb(0, RETRO_DEVICE_POINTER, 	0,RETRO_DEVICE_ID_POINTER_PRESSED);
-				}
-			}
-	
-			//mouse_l=input_state_cb(0, RETRO_DEVICE_POINTER, 0,RETRO_DEVICE_ID_POINTER_PRESSED);
+         if(holdleft==0)
+         {
+            starthold=GetTicks();
+            holdleft=1;	
+         }
+         else if(holdleft==1)
+         {
 
-			//FIXME: mouse left button in scale widget.
+            timehold=GetTicks()-starthold;
+
+            if(timehold>250)
+            {
+               mouse_l=input_state_cb(0, RETRO_DEVICE_POINTER, 	0,RETRO_DEVICE_ID_POINTER_PRESSED);
+            }
+         }
+
+         //mouse_l=input_state_cb(0, RETRO_DEVICE_POINTER, 0,RETRO_DEVICE_ID_POINTER_PRESSED);
+
+         //FIXME: mouse left button in scale widget.
+#endif
 #endif
 
- 		}
+      }
 
-	}
+   }
 
     if(mmbL==0 && mouse_l){
 
 		mmbL=1;		
 		mousebut(1,1,revent.gmx,revent.gmy);
     }
-    else if(mmbL==1 && !mouse_l) {
+    else if(mmbL==1 && !mouse_l)
+    {
+#if 0
 #if defined(__ANDROID__) || defined(ANDROID)
-		holdleft=0;
+       holdleft=0;
 #endif
-		mmbL=0;
-		mousebut(1,0,revent.gmx,revent.gmy);
+#endif
+       mmbL=0;
+       mousebut(1,0,revent.gmx,revent.gmy);
     }
 
     if(mmbR==0 && mouse_r){
