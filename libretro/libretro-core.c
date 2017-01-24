@@ -819,6 +819,9 @@ bool retro_load_game(const struct retro_game_info *info)
 
    (void)info;
 
+   if (!info)
+      return false;
+
 /*
    struct retro_keyboard_callback cb = { keyboard_cb };
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
