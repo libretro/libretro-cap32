@@ -146,24 +146,23 @@ void RSDL_GetClipRect(RSDL_Surface *surface, RSDL_Rect *rect)
 
 void Retro_FreeSurface(RSDL_Surface *surf )
 {   
+   if (!surf)
+      return;
 
-printf("free surf format palette color\n");
+   printf("free surf format palette color\n");
+
    if(surf->format->palette->colors)	
       free(surf->format->palette->colors);
 
-printf("free surf format palette \n");
+   printf("free surf format palette \n");
    if(surf->format->palette)	
       free(surf->format->palette);
-printf("free surf format  \n");
+   printf("free surf format  \n");
    if(surf->format)	
       free(surf->format);
-printf("free surf pixel  \n"); 
+   printf("free surf pixel  \n"); 
    if(surf->pixels)
       free(surf->pixels);       
-printf("free surf  \n"); 
-   if(surf)	
-      free(surf);	
-
 }
 
 

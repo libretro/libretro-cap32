@@ -117,13 +117,19 @@ int app_init()
 
 int app_free()
 {
-//FIXME: memory leak here
-    free(RSDL_font);
-    filebrowser_free();
-    nk_retro_shutdown();
-    Retro_FreeSurface(screen_surface);
+   //FIXME: memory leak here
+   if (RSDL_font)
+      free(RSDL_font);
+   RSDL_font = NULL;
+   filebrowser_free();
+   nk_retro_shutdown();
 
- return 0;
+   Retro_FreeSurface(screen_surface);
+   if (screen_surface)
+      free(screen_surface);
+   screen_surface = NULL;
+
+   return 0;
 }
 
 int app_event(int poll)
