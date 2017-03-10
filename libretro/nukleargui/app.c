@@ -341,12 +341,13 @@ int Core_PollEvent()
     //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
     //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT TAPE ?    ? 
 
-   int i;
+   int i,j;
    static int jbt[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    static int vbt[16]={0x1C,0x39,0x01,0x3B,0x01,0x02,0x04,0x08,0x80,0x40,0x15,0x31,0x24,0x1F,0x6E,0x6F};
    static int kbt[4]={0,0,0,0};
 
    MXjoy[0]=0;
+   MXjoy[1]=0;
 
    input_poll_cb();
 
@@ -396,14 +397,20 @@ if(pauseg==0){ // if emulation running
 
 	  //Joy mode
 
+    for(j=0;j<2;j++){
+
       for(i=4;i<10;i++)
       {
-         if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i))
-            MXjoy[0] |= vbt[i]; // Joy press	
+         if( input_state_cb(j, RETRO_DEVICE_JOYPAD, 0, i))
+            MXjoy[j] |= vbt[i]; // Joy press		
       }
 
-      if(SHOWKEY==-1)retro_joy0(MXjoy[0]);
+      if(SHOWKEY==-1){
+		if(j==0)retro_joy0(MXjoy[j]);
+		else if (j==1)retro_joy1(MXjoy[j]);
+      }
 
+    }
 
 if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
    //shortcut for joy mode only

@@ -386,7 +386,7 @@ typedef enum
 	CPC_KEY_F3,
 	CPC_KEY_SMALL_ENTER,
 	CPC_KEY_FDOT,
-	/* line 1, bit 0..bit 7 */
+	/* line 1, bit 0..bit 7 */ //8
 	CPC_KEY_CURSOR_LEFT,
 	CPC_KEY_COPY,
 	CPC_KEY_F7,
@@ -395,7 +395,7 @@ typedef enum
 	CPC_KEY_F1,
 	CPC_KEY_F2,
 	CPC_KEY_F0,
-	/* line 2, bit 0..bit 7 */
+	/* line 2, bit 0..bit 7 */  //16
 	CPC_KEY_CLR,
 	CPC_KEY_OPEN_SQUARE_BRACKET,
 	CPC_KEY_RETURN,
@@ -404,7 +404,7 @@ typedef enum
 	CPC_KEY_SHIFT,
 	CPC_KEY_FORWARD_SLASH,
 	CPC_KEY_CONTROL,
-	/* line 3, bit 0.. bit 7 */
+	/* line 3, bit 0.. bit 7 */ //24
 	CPC_KEY_HAT,
 	CPC_KEY_MINUS,
 	CPC_KEY_AT,
@@ -413,7 +413,7 @@ typedef enum
 	CPC_KEY_COLON,
 	CPC_KEY_BACKSLASH,
 	CPC_KEY_DOT,
-	/* line 4, bit 0..bit 7 */
+	/* line 4, bit 0..bit 7 */ //32
 	CPC_KEY_ZERO,
 	CPC_KEY_9,
 	CPC_KEY_O,
@@ -422,7 +422,7 @@ typedef enum
 	CPC_KEY_K,
 	CPC_KEY_M,
 	CPC_KEY_COMMA,
-	/* line 5, bit 0..bit 7 */
+	/* line 5, bit 0..bit 7 */ //40
 	CPC_KEY_8,
 	CPC_KEY_7,
 	CPC_KEY_U,
@@ -431,7 +431,7 @@ typedef enum
 	CPC_KEY_J,
 	CPC_KEY_N,
 	CPC_KEY_SPACE,
-	/* line 6, bit 0..bit 7 */
+	/* line 6, bit 0..bit 7 */ //48
 	CPC_KEY_6,
 	CPC_KEY_5,
 	CPC_KEY_R,
@@ -440,7 +440,7 @@ typedef enum
 	CPC_KEY_F,
 	CPC_KEY_B,
 	CPC_KEY_V,
-	/* line 7, bit 0.. bit 7 */
+	/* line 7, bit 0.. bit 7 */ //56
 	CPC_KEY_4,
 	CPC_KEY_3,
 	CPC_KEY_E,
@@ -449,7 +449,7 @@ typedef enum
 	CPC_KEY_D,
 	CPC_KEY_C,
 	CPC_KEY_X,
-	/* line 8, bit 0.. bit 7 */
+	/* line 8, bit 0.. bit 7 */ //64
 	CPC_KEY_1,
 	CPC_KEY_2,
 	CPC_KEY_ESC,
@@ -458,7 +458,7 @@ typedef enum
 	CPC_KEY_A,
 	CPC_KEY_CAPS_LOCK,
 	CPC_KEY_Z,
-	/* line 9, bit 7..bit 0 */
+	/* line 9, bit 7..bit 0 */  //72
 	CPC_KEY_JOY_UP,
 	CPC_KEY_JOY_DOWN,
 	CPC_KEY_JOY_LEFT,
@@ -3203,6 +3203,104 @@ void retro_key_up(int key)
 }
 
 static int jflag[6]={0,0,0,0,0,0};
+
+void Keyhdl(unsigned char cpc_key,int press){
+
+	if(press)keyboard_matrix[(unsigned char)cpc_key >> 4] &= ~bit_values[(unsigned char)cpc_key & 7]; // key is being held down
+	else keyboard_matrix[(unsigned char)cpc_key >> 4] |= bit_values[(unsigned char)cpc_key & 7];
+
+}
+
+void retro_joy1(unsigned char joy1)
+{
+   //0x01,0x02,0x04,0x08,0x80
+   // UP  DWN  LEFT RGT  BTN0
+   // 0    1     2   3    4
+
+   //UP
+   if(joy1&0x01)
+   {
+      if(jflag[0]==0)
+      {
+         Keyhdl(0x60,1);
+         jflag[0]=1;
+      }
+   }
+   else
+   {
+      if(jflag[0]==1)
+      {
+         Keyhdl(0x60,0);
+         jflag[0]=0;
+      }
+   }
+
+   //Down
+   if(joy1&0x02){
+      if(jflag[1]==0){
+         Keyhdl(0x61,1);
+         jflag[1]=1;
+      }
+   }else {
+      if(jflag[1]==1){
+         Keyhdl(0x61,0);
+         jflag[1]=0;
+      }
+   }
+
+   //Left
+   if(joy1&0x04){
+      if(jflag[2]==0){
+         Keyhdl(0x62,1);
+         jflag[2]=1;
+      }
+   }else {
+      if(jflag[2]==1){
+         Keyhdl(0x62,0);
+         jflag[2]=0;
+      }
+   }
+
+   //Right
+   if(joy1&0x08){
+      if(jflag[3]==0){
+         Keyhdl(0x63,1);
+         jflag[3]=1;
+      }
+   }else {
+      if(jflag[3]==1){
+         Keyhdl(0x63,0);
+         jflag[3]=0;
+      }
+   }
+
+   //btn0
+   if(joy1&0x80){
+      if(jflag[4]==0){
+         Keyhdl(0x64,1);
+         jflag[4]=1;
+      }
+   }else {
+      if(jflag[4]==1){
+         Keyhdl(0x64,0);
+         jflag[4]=0;
+      }
+   }
+
+   //btn1
+   if(joy1&0x40){
+      if(jflag[5]==0){
+         Keyhdl(0x65,1);
+         jflag[5]=1;
+      }
+   }else {
+      if(jflag[5]==1){
+         Keyhdl(0x65,0);
+         jflag[5]=0;
+      }
+   }
+
+}
 
 void retro_joy0(unsigned char joy0)
 {
