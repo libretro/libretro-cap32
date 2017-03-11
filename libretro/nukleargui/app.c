@@ -145,7 +145,7 @@ int app_event(int poll)
 
 int app_render(int poll)
 {
-	if( poll==0 && SHOWKEY==-1 )return;
+	if( poll==0 && SHOWKEY==-1 )return 0;
 
 	if(poll==0)
 		app_vkb_handle();
@@ -158,6 +158,8 @@ int app_render(int poll)
 
     /* Draw */
     //nk_color_fv(bg, background);
+    if(pauseg==0 && SHOWKEY==-1);
+    else
 	nk_retro_render(nk_rgba(0,0,0,0));
 
     return 0;
@@ -197,7 +199,7 @@ void app_vkb_handle()
          {
             //VKbd show/hide 			
             oldi=-1;
-            Screen_SetFullUpdate(0);
+           // Screen_SetFullUpdate(0);
             SHOWKEY=-SHOWKEY;
          }
          else if(i==-5)
@@ -256,7 +258,7 @@ void app_vkb_handle()
 
 				SHOWKEY=-SHOWKEY;
 
-				Screen_SetFullUpdate(0);
+				//Screen_SetFullUpdate(0);
                oldi=-1;
             }
 			else if(i==-14) //JOY PORT TOGGLE
