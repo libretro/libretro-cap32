@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+
 /* ===============================================================
  *
  *                          GUI
@@ -25,7 +27,6 @@ struct file_browser {
 static struct file_browser browser;
 
 #ifdef __unix__
-#include <dirent.h>
 #include <unistd.h>
 #endif
 

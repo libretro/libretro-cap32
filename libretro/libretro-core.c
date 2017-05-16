@@ -91,7 +91,7 @@ int cap32_statusbar=0;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
-#include "z80.h"
+//#include "z80.h"
 extern t_CPC CPC;
 //CAP32 DEF END
 

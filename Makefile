@@ -236,6 +236,15 @@ else ifneq (,$(findstring armv,$(platform)))
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
 	PLATFORM_DEFINES +=-s USE_ZLIB=1
+# cross Windows
+else ifeq ($(platform), wincross64)
+	TARGET := $(TARGET_NAME)_libretro.dll
+	AR = x86_64-w64-mingw32-ar
+	CC = x86_64-w64-mingw32-gcc
+	CXX = x86_64-w64-mingw32-g++ 
+	SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
+	LDFLAGS += -static-libgcc -static-libstdc++ 
+	EXTRA_LDF := -lwinmm -Wl,--export-all-symbols
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
