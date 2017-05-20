@@ -90,8 +90,8 @@ int app_init()
     Retro_Screen=(unsigned int *)screen_surface->pixels;
 
     RSDL_font = (nk_retro_Font*)calloc(1, sizeof(nk_retro_Font));
-    RSDL_font->width = 8;
-    RSDL_font->height = 8;
+    RSDL_font->width = 4;
+    RSDL_font->height = 7;
     if (!RSDL_font)
         return -1;
 
@@ -145,7 +145,8 @@ int app_event(int poll)
 
 int app_render(int poll)
 {
-	if( poll==0 && SHOWKEY==-1 )return 0;
+	static int prevpoll=0,prevstate=0,reset_state=0;
+	if(prevpoll!=poll || reset_state){nk_clear(ctx);reset_state=0;}
 
 	if(poll==0)
 		app_vkb_handle();
@@ -154,13 +155,13 @@ int app_render(int poll)
 
 	app_event(poll);
 
-    gui(&browser,ctx);
+    	int state=gui(&browser,ctx);
+	if(state==1 && prevstate!=1)reset_state=1;
 
-    /* Draw */
-    //nk_color_fv(bg, background);
-    if(pauseg==0 && SHOWKEY==-1);
-    else
 	nk_retro_render(nk_rgba(0,0,0,0));
+
+	prevpoll=poll;
+	prevstate=state;
 
     return 0;
 }
@@ -339,9 +340,9 @@ void Core_Processkey()
 // Core input (not GUI) 
 int Core_PollEvent()
 {
-	//   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
+    //   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
     //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
-    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  RST  STAT TAPE ?    ? 
+    //   AMSTRAD      RUN  VKB  M/J  RTRN UP   DWN  LEFT RGT  B1   B2   CAT  STAT RST  TAPE ?    ? 
 
    int i,j;
    static int jbt[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -452,13 +453,21 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       //Screen_SetFullUpdate();
    }
 
-   i=12;//show/hide statut
+   i=11;//show/hide statut
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && jbt[i]==0 )
       jbt[i]=1;
    else if ( jbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
       jbt[i]=0;
       STATUTON=-STATUTON;
      // Screen_SetFullUpdate();
+   }
+
+   i=12;//reset
+   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && jbt[i]==0 )
+      jbt[i]=1;
+   else if ( jbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
+      jbt[i]=0;
+      emu_reset();		
    }
 
    i=13;//auto load tape
@@ -469,13 +478,7 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
       kbd_buf_feed("|tape\nrun\"\n^");
    }
 
-   i=11;//reset
-   if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && jbt[i]==0 )
-      jbt[i]=1;
-   else if ( jbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) ){
-      jbt[i]=0;
-      emu_reset();		
-   }
+
 
 }//if amstrad_devices=joy
 

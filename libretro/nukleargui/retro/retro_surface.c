@@ -524,8 +524,8 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 
         strlen = 1;
 
-	int surfw=strlen * 7 * xscale;
-	int surfh=8 * yscale;
+	int surfw=strlen * charWidthLocal;
+	int surfh=charHeightLocal;
 
 #ifdef M16B	
         linesurf =(unsigned char *)malloc(sizeof(unsigned short)*surfw*surfh );
@@ -572,6 +572,40 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
              		if(*yptr!=0 && (xrepeat+yrepeat*VIRTUAL_WIDTH) < surface->w*surface->h )mbuffer[xrepeat+yrepeat*VIRTUAL_WIDTH] = *yptr;
 
 	free(linesurf);
+
+}
+
+#include "3x5_font.h"
+
+#define CHAR_WIDTH 3
+#define CHAR_HEIGHT 7
+
+void print(RSDL_Surface *buffer,int x, int y, unsigned    couleur,unsigned char c)
+{
+    unsigned *mbuffer=(unsigned*)buffer->pixels;
+    int i,j;
+
+    int w=buffer->w;
+    int h=buffer->h;
+
+    c = c & 0x7F;
+    if (c < ' ') {
+        c = 0;
+    } else {
+        c -= ' ';
+    }
+
+   unsigned char *chr = font35[c];
+
+    for (j=0; j<CHAR_WIDTH; j++) {
+ 	 for (i=0; i<CHAR_HEIGHT; i++) { 
+            if (chr[j] & (1<<i)) 
+	    {
+		int idx=x+j+((y+i)*w);
+   		mbuffer[idx]=couleur;
+            }
+        }
+    }
 
 }
 

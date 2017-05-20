@@ -31,6 +31,7 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
+extern int SHOWKEY;
 extern int Core_PollEvent(void);
 
 extern void change_model(int val);
@@ -787,10 +788,9 @@ void retro_run(void)
       	retro_loop();
 	retro_blit();
 	Core_PollEvent();
+	if(SHOWKEY==1)app_render(0);
    }
-
-   app_render(pauseg);
-
+   else if (pauseg==1)app_render(1);
 
    video_cb(Retro_Screen,retrow,retroh,retrow<<PIXEL_BYTES);
 

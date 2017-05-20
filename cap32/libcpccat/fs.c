@@ -64,12 +64,16 @@ static int my_open(const char* name)
 
    if (gz_format)
    {
-      gz_imagefile = gzopen(name, "rb");
+      gz_imagefile = gzopen(name, "rb+");
       if (! gz_imagefile) return -1; 
    }
    else
    {
-      imagefile = open(name, O_RDONLY);
+	int fmode = O_RDONLY;
+#ifdef _WIN32
+ 	fmode |=O_BINARY;
+#endif
+      imagefile = open(name, fmode);
       if (imagefile < 0) return -1;
    }
    return 0;

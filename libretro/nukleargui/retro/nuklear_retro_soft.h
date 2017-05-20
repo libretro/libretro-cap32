@@ -244,12 +244,13 @@ nk_retro_draw_text(RSDL_Surface *surface, short x, short y, unsigned short w, un
     for (i = 0; i < len; i++) {
         //characterRGBA(surface, x, y, text[i], cfg.r, cfg.g, cfg.b, cfg.a);
 #ifdef M16B
-
-	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,cfg.r<<8|cfg.g<<3|cfg.b>>3,0);
+//	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,cfg.r<<8|cfg.g<<3|cfg.b>>3,0);
 
 //	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,/*cfg.a<<8|*/cfg.r<<8|cfg.g<<3|cfg.b>>3, /*cbg.a<<24|*/cbg.r<<8|cbg.g<<3|cbg.b>>3);
 #else
-	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,cfg.a<<24|cfg.r<<16|cfg.g<<8|cfg.b, cbg.a<<24|cbg.r<<16|cbg.g<<8|cbg.b);
+//	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,cfg.a<<24|cfg.r<<16|cfg.g<<8|cfg.b, cbg.a<<24|cbg.r<<16|cbg.g<<8|cbg.b);
+
+print(surface , x,  y, cfg.a<<24|cfg.r<<16|cfg.g<<8|cfg.b,text[i]);
 #endif
         x += font->width;
     }
@@ -410,8 +411,8 @@ nk_retrofont_create(const char *name, int size)
 {
 
    nk_retro_Font *font = (nk_retro_Font*)calloc(1, sizeof(nk_retro_Font));
-    font->width = 8; /* Default in  the RSDL_gfx library */
-    font->height = 8; /* Default in  the RSDL_gfx library */
+    font->width = 8;//8; /* Default in  the RSDL_gfx library */
+    font->height = 8;//8; /* Default in  the RSDL_gfx library */
     if (!font)
         return NULL;
    //font->handle

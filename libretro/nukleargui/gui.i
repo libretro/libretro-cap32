@@ -1,6 +1,6 @@
 /* nuklear - v1.00 - public domain */
 
-#define GUIRECT nk_rect(10,30, 364, 212)
+#define GUIRECT nk_rect(5,25, 364+10, 222)
 
 typedef enum
 {
@@ -24,7 +24,7 @@ extern char TAPE_NAME[512];
 extern void emu_reset(void);
 extern int loadadsk (char *arv,int drive);
 
-static void
+static int
 gui(struct file_browser *browser,struct nk_context *ctx)
 {
     struct nk_rect total_space;
@@ -35,9 +35,9 @@ gui(struct file_browser *browser,struct nk_context *ctx)
     static int movable = nk_true;
     static int no_scrollbar = nk_false;
     static nk_flags window_flags = 0;
-    static int minimizable = nk_true;
-    static int title = nk_true
-;
+    static int minimizable = nk_false;//nk_true;//FIXME
+    static int title = nk_true;
+
     /* window flags */
     window_flags = 0;
 
@@ -84,5 +84,11 @@ gui(struct file_browser *browser,struct nk_context *ctx)
 
     }
 
+    if(pauseg==1 && SHOWKEY==1)SHOWKEY=-1;
+    if(pauseg==0 && SHOWKEY==1)GUISTATE=GUI_VKBD;
+    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT==1)GUISTATE=GUI_BROWSE;
+    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT!=1)GUISTATE=GUI_MAIN;
+
+return GUISTATE;
 }
 
