@@ -3203,6 +3203,7 @@ void retro_key_up(int key)
 }
 
 static int jflag[6]={0,0,0,0,0,0};
+static int jflag0[6]={0,0,0,0,0,0};
 
 void Keyhdl(unsigned char cpc_key,int press){
 
@@ -3311,83 +3312,83 @@ void retro_joy0(unsigned char joy0)
    //UP
    if(joy0&0x01)
    {
-      if(jflag[0]==0)
+      if(jflag0[0]==0)
       {
          retro_key_down(RETROK_HOME);
-         jflag[0]=1;
+         jflag0[0]=1;
       }
    }
    else
    {
-      if(jflag[0]==1)
+      if(jflag0[0]==1)
       {
          retro_key_up(RETROK_HOME);
-         jflag[0]=0;
+         jflag0[0]=0;
       }
    }
 
    //Down
    if(joy0&0x02){
-      if(jflag[1]==0){
+      if(jflag0[1]==0){
          retro_key_down(RETROK_END);
-         jflag[1]=1;
+         jflag0[1]=1;
       }
    }else {
-      if(jflag[1]==1){
+      if(jflag0[1]==1){
          retro_key_up(RETROK_END);
-         jflag[1]=0;
+         jflag0[1]=0;
       }
    }
 
    //Left
    if(joy0&0x04){
-      if(jflag[2]==0){
+      if(jflag0[2]==0){
          retro_key_down(RETROK_DELETE);
-         jflag[2]=1;
+         jflag0[2]=1;
       }
    }else {
-      if(jflag[2]==1){
+      if(jflag0[2]==1){
          retro_key_up(RETROK_DELETE);
-         jflag[2]=0;
+         jflag0[2]=0;
       }
    }
 
    //Right
    if(joy0&0x08){
-      if(jflag[3]==0){
+      if(jflag0[3]==0){
          retro_key_down(RETROK_PAGEDOWN);
-         jflag[3]=1;
+         jflag0[3]=1;
       }
    }else {
-      if(jflag[3]==1){
+      if(jflag0[3]==1){
          retro_key_up(RETROK_PAGEDOWN);
-         jflag[3]=0;
+         jflag0[3]=0;
       }
    }
 
    //btn0
    if(joy0&0x80){
-      if(jflag[4]==0){
+      if(jflag0[4]==0){
          retro_key_down(RETROK_INSERT); 
-         jflag[4]=1;
+         jflag0[4]=1;
       }
    }else {
-      if(jflag[4]==1){
+      if(jflag0[4]==1){
          retro_key_up(RETROK_INSERT); 
-         jflag[4]=0;
+         jflag0[4]=0;
       }
    }
 
    //btn1
    if(joy0&0x40){
-      if(jflag[5]==0){
+      if(jflag0[5]==0){
          retro_key_down(RETROK_PAGEUP); 
-         jflag[5]=1;
+         jflag0[5]=1;
       }
    }else {
-      if(jflag[5]==1){
+      if(jflag0[5]==1){
          retro_key_up(RETROK_PAGEUP); 
-         jflag[5]=0;
+         jflag0[5]=0;
       }
    }
 }

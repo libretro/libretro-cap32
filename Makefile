@@ -194,7 +194,18 @@ else ifeq ($(platform), ngc)
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	MSB_FIRST = 1
-
+# Nintendo Wii U
+else ifeq ($(platform), wiiu)
+       TARGET := $(TARGET_NAME)_libretro_$(platform).a
+       CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
+       CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
+       AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
+       COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DMSB_FIRST -DWORDS_BIGENDIAN=1
+       COMMONFLAGS += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
+       STATIC_LINKING = 1
+       PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
+       HAVE_COMPAT = 1
+       MSB_FIRST = 1
 # Nintendo Wii
 else ifeq ($(platform), wii)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
