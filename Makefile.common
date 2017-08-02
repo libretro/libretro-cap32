@@ -18,7 +18,11 @@ SOURCES_C := \
 SOURCES_C += $(CORE_DIR)/cap32/cap32.c
 SOURCES_C += $(CORE_DIR)/cap32/crtc.c
 SOURCES_C += $(CORE_DIR)/cap32/fdc.c
+ifeq ($(MSB_FIRST), 1)
+SOURCES_C += $(CORE_DIR)/cap32/psgbe.c
+else
 SOURCES_C += $(CORE_DIR)/cap32/psg.c
+endif
 SOURCES_C += $(CORE_DIR)/cap32/tape.c
 SOURCES_C += $(CORE_DIR)/cap32/z80.c
 SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c

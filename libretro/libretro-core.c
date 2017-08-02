@@ -64,8 +64,7 @@ int snd_sampler = 44100 / 50;
 
 //PATH
 char RPATH[512];
-
-
+bool retro_load_ok = false;
 int pauseg=0; //enter_gui
 
 extern unsigned int *RetroScreen;
@@ -777,11 +776,36 @@ void retro_blit()
 
 void retro_run(void)
 {
-
+   static int mfirst=1;
    bool updated = false;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
+
+   if(mfirst==1)
+   {
+      mfirst++;
+      printf("MAIN FIRST\n");
+      retro_load_ok=true;
+
+      Emu_init();
+
+	if (strlen(RPATH) >= strlen("cdt"))
+
+		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
+
+			tape_insert ((char *)RPATH);
+
+      			kbd_buf_feed("|tape\nrun\"\n^");
+
+   			return;
+
+		}
+
+	loadadsk((char *)RPATH,0);
+
+      return;
+   }
 
    if(pauseg==0)
    {
@@ -835,7 +859,7 @@ bool retro_load_game(const struct retro_game_info *info)
    app_init();
 
 	memset(SNDBUF,0,1024*2*2);
-
+/*
 	Emu_init();
 
 	if (strlen(RPATH) >= strlen("cdt"))
@@ -845,7 +869,7 @@ bool retro_load_game(const struct retro_game_info *info)
    			return true;
 		}
 	loadadsk((char *)full_path,0);
-
+*/
    return true;
 }
 

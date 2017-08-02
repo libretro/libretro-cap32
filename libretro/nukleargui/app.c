@@ -26,6 +26,7 @@ extern long GetTicks(void);
 extern retro_input_poll_t input_poll_cb;
 extern retro_input_state_t input_state_cb;
 
+extern bool retro_load_ok;
 extern char RPATH[512];
 
 //EMU FLAGS
@@ -352,6 +353,7 @@ int Core_PollEvent()
    MXjoy[0]=0;
    MXjoy[1]=0;
 
+   if(!retro_load_ok)return 1;
    input_poll_cb();
 
    int mouse_l;

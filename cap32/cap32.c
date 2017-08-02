@@ -168,6 +168,8 @@
 #define tmpnam(a)
 #endif
 
+#define AUTODELAY 50
+
 /* forward declarations - some libretro port callbacks */
 void retro_loop(void);
 void doCleanUp (void);
@@ -183,7 +185,8 @@ int HandleExtension(char *path,char *ext);
 extern unsigned int bmp[WINDOW_SIZE];//[400 * 300];
 extern char RPATH[512];
 extern int SND;
-extern int autorun,kbd_runcmd;
+extern int autorun;
+extern bool kbd_runcmd;
 int autoboot_delay=0;
 
 extern void kbd_buf_feed(char *s);
@@ -3596,23 +3599,23 @@ void play_tape(){
 void check_kbd_command()
 {
 
-   	if (autoboot_delay<50)
+   	if (autoboot_delay<AUTODELAY)
     	autoboot_delay++;
-   	else if (autoboot_delay==50)
+   	else if (autoboot_delay==AUTODELAY)
    	{
    		if (!autorun)
    			kbd_runcmd=false; 
      	
-     	autoboot_delay++;
+     		autoboot_delay++;
    	}
 
-	if(kbd_runcmd==true && autoboot_delay>50){
+	if(kbd_runcmd==true && autoboot_delay>AUTODELAY){
     
 	  	static int pair=-1;
 
-      	pair=-pair;
-      	if(pair==1)
-      	   return;
+      		pair=-pair;
+      		if(pair==1)
+      	   		return;
 
 		kbd_buf_update();
 
@@ -3630,7 +3633,7 @@ void retro_loop(void)
 	RLOOP=1;
 
 	check_kbd_command();
-
+//printf("auto:%d run:%d cmd:%d\n",autoboot_delay,autorun,kbd_runcmd);
 }
 
 void theloop(void)

@@ -513,7 +513,7 @@ void kbd_buf_feed(char *s) {
 	strcpy(kbd_feedbuf, s);
 	kbd_feedbuf_pos=0;
 	kbd_runcmd=true;
-//	printf("cmd:%s\n",s);
+	//printf("cmd:%s\n",s);
 }
 
 void kbd_buf_update() {
