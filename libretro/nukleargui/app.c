@@ -84,6 +84,9 @@ static nk_retro_Font *RSDL_font;
 #include "filebrowser.c"
 #include "gui.i"
 
+/* Forward declarations */
+void app_vkb_handle();
+
 int app_init()
 {
     screen_surface=Retro_CreateRGBSurface32(retrow,retroh,32,0,0,0,0);
