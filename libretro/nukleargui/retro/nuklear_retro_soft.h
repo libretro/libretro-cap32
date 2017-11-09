@@ -650,7 +650,7 @@ nk_retro_handle_event(int *evt,int poll)
 
    if(revent.MOUSE_EMULATED==1){
 
-      if(revent.slowdown>0)return 1;
+      if(revent.slowdown>0)return;
 
       mouse_l=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
       mouse_r=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B);
