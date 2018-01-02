@@ -13,7 +13,7 @@
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
 #define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
-extern unsigned amstrad_devices[ 2 ];
+extern unsigned amstrad_devices[ 1 ];
 
 #define TEX_WIDTH 384
 #define TEX_HEIGHT 272

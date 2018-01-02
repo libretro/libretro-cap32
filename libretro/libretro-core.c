@@ -350,15 +350,9 @@ void retro_set_environment(retro_environment_t cb)
     { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
     { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
   };
-  static const struct retro_controller_description p2_controllers[] = {
-    { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-    { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
-  };
-
 
   static const struct retro_controller_info ports[] = {
     { p1_controllers, 2  }, // port 1
-    { p2_controllers, 2  }, // port 2
     { NULL, 0 }
   };
 
@@ -715,7 +709,7 @@ unsigned retro_api_version(void)
 
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
-   if ( port < 2 )
+   if ( port < 1 )
    {
       amstrad_devices[ port ] = device;
 
