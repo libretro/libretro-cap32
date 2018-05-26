@@ -10,7 +10,9 @@
 */
 
 #include <stdio.h>
+#ifndef __CELLOS_LV2__
 #include <malloc.h>
+#endif
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>

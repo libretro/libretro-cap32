@@ -26,6 +26,12 @@ extern long GetTicks(void);
 extern retro_input_poll_t input_poll_cb;
 extern retro_input_state_t input_state_cb;
 
+extern void kbd_buf_feed(char *s);
+extern void retro_joy0(unsigned char joy0);
+extern void retro_joy1(unsigned char joy1);
+extern void retro_key_down(int key);
+extern void retro_key_up(int key);
+
 extern bool retro_load_ok;
 extern char RPATH[512];
 

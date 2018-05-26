@@ -55,6 +55,8 @@ NK_API struct nk_retro_event* nk_retro_event_ptr();
 
 extern retro_input_poll_t input_poll_cb;
 extern retro_input_state_t input_state_cb;
+extern void print(RSDL_Surface *buffer,int x, int y, unsigned couleur,unsigned char c);
+extern void draw_cross(RSDL_Surface *surface,int x,int y);
 
 struct nk_retro_event {
 
