@@ -12,7 +12,7 @@ And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
 
-Remember ,Everything not working well, so expect bugs.
+Remember, everything not working well, so expect bugs.
 
 ## Usage 
 
