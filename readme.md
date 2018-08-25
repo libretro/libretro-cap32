@@ -12,7 +12,9 @@ And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
 
-Remember, everything not working well, so expect bugs.
+The core work pretty well and give the fantastic ability to use the RetroArch Shaders.
+
+Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 
 ## Usage 
 
@@ -57,7 +59,9 @@ This core now support the usage of M3U file and disk control from within RetroAr
 
 A M3U file is a simple text file with one disk per line (see https://en.wikipedia.org/wiki/M3U).
 
-Example (Alive (F).m3u):
+Example :
+
+Alive (F).m3u
 ```
 Alive (F) - Disk 1A.dsk
 Alive (F) - Disk 1B.dsk
@@ -68,7 +72,31 @@ In RetroArch you can change the current disk in the 'Disk Control' menu. Just se
 
 No need to eject disk ('Disk Cycle Tray Status'), you just have to cycle through disk indexes.
 
-On start the first disk will be mounted and the first executable autostarted.
+On start, the first disk will be mounted and the first executable autostarted.
+
+### Special feature for frontend users
+
+You can specify a command to be executed on the CPC when the emu launch.
+
+All you have to do is to add a comment like this in the m3u file :
+
+```
+#COMMAND:<YOUR_COMMAND_HERE>
+```
+
+If the autolaunch option of the core does a pretty good job to guess what command must be executed to launch a game on the CPC, there is some problems (cpm disk and strange catalogs for the most).
+
+Here, this little option come to the rescue.
+
+Even for one disk game, you can create a m3u file like this one :
+
+Jack the Nipper II... In Coconut Capers.m3u
+```
+#COMMAND:|CPM
+Jack the Nipper II... In Coconut Capers (E).dsk
+```
+
+And it's done.
 
 ## Core options
 
@@ -76,8 +104,8 @@ On start the first disk will be mounted and the first executable autostarted.
 
 If enabled a RUN the first bas/bin found in DSK
 
-## Knows Bugs 
+## Known Bugs 
 
-- Everything not working well.
+- Sometime tricky to use (Keyboard usage for instance).
 
 

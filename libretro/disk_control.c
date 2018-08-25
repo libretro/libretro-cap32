@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #define COMMENT "#"
+#define M3U_SPECIAL_COMMAND "#COMMAND:"
 
 #ifdef _WIN32
 #define PATH_JOIN_SEPERATOR   "\\"
@@ -60,6 +61,13 @@ char *trimwhitespace(char *str)
   return str;
 }
 
+char* substring(char* str, char* word)
+{
+	int len = strlen(str) - strlen(word) + 1;
+	char* result = calloc(len, sizeof(char));
+	strncpy(result, str + strlen(word), len);
+	return result;
+}
 int file_exist (char *filename)
 {
   struct stat buffer;   
@@ -103,6 +111,13 @@ void dc_reset(dc_storage* dc)
 	// Verify
 	if(dc == NULL)
 		return;
+	
+	// Clean the command
+	if(dc->command)
+	{
+		free(dc->command);
+		dc->command = NULL;
+	}
 
 	// Clean the struct
 	for(unsigned i=0; i < dc->count; i++)
@@ -125,6 +140,7 @@ dc_storage* dc_create(void)
 		dc->count = 0;
 		dc->index = -1;
 		dc->eject_state = true;
+		dc->command = NULL;
 		for(int i = 0; i < DC_MAX_SIZE; i++)
 		{
 			dc->files[i] = NULL;
@@ -197,8 +213,13 @@ void dc_parse_m3u(dc_storage* dc, char* m3u_file)
 	{
 		char* string = trimwhitespace(buffer);
 		
-		// If it's not a comment
-		if ((strlen(string) >= strlen(COMMENT)) && strncmp(string, COMMENT, strlen(COMMENT)))
+		// If it's a m3u special key or a file
+		if ((strlen(buffer) >= strlen(M3U_SPECIAL_COMMAND)) && !strncmp(&buffer, M3U_SPECIAL_COMMAND, strlen(M3U_SPECIAL_COMMAND)))
+		{
+			dc->command = substring(string, M3U_SPECIAL_COMMAND);
+			printf("%s\n", dc->command);
+		}
+		else if ((strlen(string) >= strlen(COMMENT)) && strncmp(string, COMMENT, strlen(COMMENT)))
 		{
 			// Search the file (absolute, relative to m3u)
 			char* filename;

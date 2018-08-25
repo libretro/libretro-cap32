@@ -926,8 +926,23 @@ void retro_run(void)
 				// Insert the first disk and autoplay
 				if(disk_set_image_index(0))
 				{
-					retro_disk_auto();
-					sprintf(RPATH,"%s%d.SNA",RPATH,0);
+					// If command was specified
+					if(dc->command)
+					{
+						// Execute the command
+						log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+						char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+						sprintf(command, "%s\n", dc->command);
+						kbd_buf_feed(command);
+						kbd_buf_update();
+						free(command);
+					}						
+					else
+					{
+						// Autoplay
+						retro_disk_auto();
+						sprintf(RPATH,"%s%d.SNA",RPATH,0);
+					}
 				}
 
 				return;

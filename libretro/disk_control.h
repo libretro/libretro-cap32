@@ -24,6 +24,7 @@
 #define DC_MAX_SIZE 20
 
 struct dc_storage{
+	char* command;
 	char* files[DC_MAX_SIZE];
 	unsigned count;
 	int index;
