@@ -16,7 +16,7 @@ Remember ,Everything not working well, so expect bugs.
 
 ## Usage 
 
-launch a TAPE (cdt), DSK or M3U, and game should autostart.
+Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 ## Control
 
@@ -44,10 +44,12 @@ Y   VKBD ON/OFF
 
 ### Keyboard (Choose AMSTRAD KEYBOARD in input controller setting)
 
+```
 F8 LOAD DSK/TAPE
 F9 MEM SNAPSHOT LOAD/SAVE
 F10 MAIN GUI
 F12 PLAY TAPE
+```
 
 ## M3U and Disk control
 
@@ -72,7 +74,7 @@ On start the first disk will be mounted and the first executable autostarted.
 
 ### Autorun - 	disable/enable
 
-	If enabled a RUN the first bas/bin found in DSK
+If enabled a RUN the first bas/bin found in DSK
 
 ## Knows Bugs 
 
