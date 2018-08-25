@@ -27,3 +27,5 @@ SOURCES_C += $(CORE_DIR)/cap32/tape.c
 SOURCES_C += $(CORE_DIR)/cap32/z80.c
 SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
 SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
+SOURCES_C += $(CORE_DIR)/libretro/disk_control.c
+
