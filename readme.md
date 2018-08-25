@@ -22,6 +22,7 @@ launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 ### Joy/Overlay  (Choose AMSTRAD JOYSTICK in input controller setting)
 
+```
 L2  STATUS ON/OFF
 R2  AUTOLOAD TAPE
 L   CAT
@@ -39,7 +40,7 @@ Y   VKBD ON/OFF
 "SNA" SAVE SNA
 "DSK" SWITCH DSK DRIVE A/B
 "Col" SWTICH FGCOL ON/OFF
-
+```
 
 ### Keyboard (Choose AMSTRAD KEYBOARD in input controller setting)
 
