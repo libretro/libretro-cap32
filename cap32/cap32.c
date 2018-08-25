@@ -3434,10 +3434,6 @@ uint32_t dwSndDist;
 int iExitCondition;
 bool bolDone;
 
-bool have_DSK = false; 
-bool have_SNA = false;
-bool have_TAP = false;
-
 //FIXME RETRO
 //AUTOBOOT TAKEN FROM CPCDROID
 #include "cpc_cat.h"
@@ -3538,6 +3534,26 @@ int retro_disk_auto()
   return 1;
 }
 
+int attach_disk(char *arv, int drive)
+{
+	int result = 1;
+	
+	if(drive==0)
+		if((result = dsk_load( arv, &driveA, 'A')) == 0)
+		{
+			sprintf(DISKA_NAME,"%s",arv);
+			cap32_disk_dir(arv);
+		}
+	else
+		if((result = dsk_load( arv, &driveB, 'B')) == 0)
+		{   
+			sprintf(DISKB_NAME,"%s",arv); 
+			cap32_disk_dir(arv);
+		}
+
+   return result;
+}
+
 int detach_disk(int drive)
 {
    if(drive==0)
@@ -3558,25 +3574,15 @@ int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
-      if(drive==0)
-	     if(dsk_load( arv, &driveA, 'A') == 0){
-			sprintf(DISKA_NAME,"%s",arv);
-            cap32_disk_dir(arv);
-			retro_disk_auto();
-		 }
-      else
-         if(dsk_load( arv, &driveB, 'B') == 0){   
-			sprintf(DISKB_NAME,"%s",arv); 
-            cap32_disk_dir(arv);
-			retro_disk_auto();
-		 }
-      have_DSK = true;
-      sprintf(RPATH,"%s%d.SNA",arv,drive);		
+	  if(attach_disk(arv, drive) == 0)
+	  {
+		  retro_disk_auto();
+		  sprintf(RPATH,"%s%d.SNA",arv,drive);
+	  }		  
    }
    else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
    {
       snapshot_load (arv);
-      have_SNA = true;
       sprintf(RPATH,"%s",arv);
    }
    return 0;

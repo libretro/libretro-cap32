@@ -31,14 +31,25 @@ char TAPE_NAME[512]="\0";
 #include <time.h>
 #endif
 
+// DISK CONTROL
+#include "disk_control.h"
+static dc_storage* dc;
+
+// LOG
+retro_log_printf_t log_cb;
+
 extern int SHOWKEY;
 extern int Core_PollEvent(void);
 
+extern int retro_disk_auto();
 extern void change_model(int val);
-extern int loadadsk (char *arv,int drive);
+extern int snapshot_load (char *pchFileName);
+extern int attach_disk(char *arv, int drive);
+extern int detach_disk(int drive);
 extern int tape_insert (char *pchFileName);
 extern void enter_gui(void);
 extern void kbd_buf_feed(char *s);
+extern void kbd_buf_update();
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
@@ -618,10 +629,103 @@ void retro_reset(void){
 	emu_reset();
 }
 
+//*****************************************************************************
+//*****************************************************************************
+// Disk control
+static bool disk_set_eject_state(bool ejected)
+{
+	// Not implemented
+	// No need to eject disk before change it
+	return true;
+}
+
+static bool disk_get_eject_state(void)
+{
+	// Not implemented
+	// No need to eject disk before change it
+	return true;
+}
+
+static unsigned disk_get_image_index(void)
+{
+	if (dc)
+		return dc->index;
+	
+	return 0;
+}
+
+static bool disk_set_image_index(unsigned index)
+{
+	// Insert disk
+	if (dc)
+		// Same disk...
+		// This can mess things in the emu
+		if(index == dc->index)
+			return false;
+		
+		if ((index < dc->count) && (dc->files[index]))
+		{
+			detach_disk(0);
+			dc->index = index;
+			attach_disk((char *)dc->files[index],0);
+			log_cb(RETRO_LOG_INFO, "Disk Inserted (%d): %s\n", index+1, dc->files[index]);
+			return true;
+		}
+	
+	return false;
+}
+
+static unsigned disk_get_num_images(void)
+{
+	if (dc)
+		return dc->count;
+
+	return 0;
+}
+
+static bool disk_replace_image_index(unsigned index, const struct retro_game_info *info)
+{
+	// Not implemented
+	// No many infos on this in the libretro doc...
+	return false;
+}
+
+static bool disk_add_image_index(void)
+{
+	// Not implemented
+	// No many infos on this in the libretro doc...
+	return false;
+}
+
+static struct retro_disk_control_callback disk_interface = {
+   disk_set_eject_state,
+   disk_get_eject_state,
+   disk_get_image_index,
+   disk_set_image_index,
+   disk_get_num_images,
+   disk_replace_image_index,
+   disk_add_image_index,
+};
+
+//*****************************************************************************
+//*****************************************************************************
+// Init
+static void fallback_log(enum retro_log_level level, const char *fmt, ...)
+{
+}
+
 void retro_init(void)
 {    	
+   struct retro_log_callback log;	
    const char *system_dir = NULL;
+   dc = dc_create();
 
+	// Init log
+	if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
+		log_cb = log.log;
+	else
+		log_cb = fallback_log;
+	
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
       // if defined, use the system directory			
@@ -692,7 +796,10 @@ LOGI("PIXEL FORMAT is not supported.\n");
 	};
 	environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
 
-   texture_init();
+	// Disk control interface
+	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
+
+	texture_init();
 
 }
 
@@ -703,7 +810,13 @@ void retro_deinit(void)
  
    Emu_uninit(); 
 
-   UnInitOSGLU();	
+   UnInitOSGLU();
+
+   // Clean the m3u storage
+	if(dc)
+	{
+		dc_free(dc);
+	}
 
    LOGI("Retro DeInit\n");
 }
@@ -729,7 +842,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
    info->library_version  = "4.2";
-   info->valid_extensions = "dsk|sna|zip|tap|cdt|voc";
+   info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;
 
@@ -775,6 +888,11 @@ void retro_blit()
    memcpy(Retro_Screen,bmp,PITCH*WINDOW_SIZE);
 }
 
+#define CDT_FILE_EXT "cdt"
+#define DSK_FILE_EXT "dsk"
+#define M3U_FILE_EXT "m3u"
+#define SNA_FILE_EXT "sna"
+
 void retro_run(void)
 {
    static int mfirst=1;
@@ -785,27 +903,90 @@ void retro_run(void)
 
    if(mfirst==1)
    {
-      mfirst++;
-      printf("MAIN FIRST\n");
-      retro_load_ok=true;
+		mfirst++;
+		printf("MAIN FIRST\n");
+		retro_load_ok=true;
 
-      Emu_init();
+		Emu_init();
 
-	if (strlen(RPATH) >= strlen("cdt"))
+		// If it's a m3u file
+		if (strlen(RPATH) >= strlen(M3U_FILE_EXT))
+			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(M3U_FILE_EXT)], M3U_FILE_EXT))
+			{
+				// Parse the m3u file
+				dc_parse_m3u(dc, RPATH);
 
-		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
+				// Some debugging
+				log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
+				for(unsigned i = 0; i < dc->count; i++)
+				{
+					log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
+				}
+				
+				// Insert the first disk and autoplay
+				if(disk_set_image_index(0))
+				{
+					// If command was specified
+					if(dc->command)
+					{
+						// Execute the command
+						log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+						char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+						sprintf(command, "%s\n", dc->command);
+						kbd_buf_feed(command);
+						kbd_buf_update();
+						free(command);
+					}						
+					else
+					{
+						// Autoplay
+						retro_disk_auto();
+						sprintf(RPATH,"%s%d.SNA",RPATH,0);
+					}
+				}
 
-			tape_insert ((char *)RPATH);
+				return;
+			}
 
-      			kbd_buf_feed("|tape\nrun\"\n^");
+		// If it's a disk
+		if (strlen(RPATH) >= strlen(DSK_FILE_EXT))
+			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(DSK_FILE_EXT)], DSK_FILE_EXT))
+			{
+				// Add the file to disk control context
+				// Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
+				dc_add_file(dc, RPATH);
+				
+				// Insert the first disk and autoplay
+				if(disk_set_image_index(0))
+				{
+					retro_disk_auto();
+					sprintf(RPATH,"%s%d.SNA",RPATH,0);
+				}
+				
+				return;
+			}
+			
+		// If it's a tape
+		if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
+			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
+			{
+				tape_insert ((char *)RPATH);
+				kbd_buf_feed("|tape\nrun\"\n^");
+				kbd_buf_update();
+				return;
 
-   			return;
+			}
 
-		}
-
-	loadadsk((char *)RPATH,0);
-
-      return;
+		// If it's a snapshot
+		if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
+			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
+			{
+				snapshot_load (RPATH);
+				sprintf(RPATH,"%s",RPATH);
+				return;
+			}
+		
+		return;
    }
 
    if(pauseg==0)

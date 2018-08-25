@@ -18,9 +18,7 @@ You can download the caprice32 original source code here :
 
 Remember ,Everything not working well, so expect bugs.
 
-Usage: launch an TAPE (cdt) or DSK , and game should autostart.
-
-
+Usage: launch an TAPE (cdt), DSK or M3U, and game should autostart.
 
 Control:
 
@@ -52,6 +50,25 @@ Control:
 	F9 MEM SNAPSHOT LOAD/SAVE
 	F10 MAIN GUI
 	F12 PLAY TAPE
+
+
+M3U and Disk control:
+
+
+	This core now support the usage of M3U file and disk control from within RetroArch for multi disk games.
+	
+	A M3U file is a simple text file with one disk per line (see https://en.wikipedia.org/wiki/M3U).
+	
+	Example (Alive (F).m3u):
+	```
+	Alive (F) - Disk 1A.dsk
+	Alive (F) - Disk 1B.dsk
+	```
+	Path can be absolute or relative to the location of the M3U file.
+	
+	In RetroArch you can change the current disk in the 'Disk Control' menu. Just select the right disk index when a game ask for it.
+	
+	No need to eject disk ('Disk Cycle Tray Status'), you just have to cycle through disk indexes.
 
 
 Core options:
