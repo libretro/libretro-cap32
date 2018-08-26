@@ -21,7 +21,6 @@
 #include <sys/types.h> 
 #include <sys/stat.h> 
 #include <ctype.h>
-#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,12 +30,14 @@
 #define M3U_SPECIAL_COMMAND "#COMMAND:"
 
 #ifdef _WIN32
-#define PATH_JOIN_SEPERATOR   "\\"
+#define PATH_JOIN_SEPARATOR   		"\\"
+// Windows also support the unix path separator
+#define PATH_JOIN_SEPARATOR_ALT   	"/"
 #else
-#define PATH_JOIN_SEPERATOR   "/"
+#define PATH_JOIN_SEPARATOR   		"/"
 #endif
 
-// Note: This function returns a pointer to a substring of the original string.
+// Note: This function returns a pointer to a substring_left of the original string.
 // If the given string was allocated dynamically, the caller must not overwrite
 // that pointer with the returned value, since the original pointer must be
 // deallocated using the same allocator with which it was allocated.  The return
@@ -61,14 +62,47 @@ char *trimwhitespace(char *str)
   return str;
 }
 
-char* substring(char* str, char* word)
+// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
+char* strleft(char* str, int len)
 {
-	int len = strlen(str) - strlen(word) + 1;
-	char* result = calloc(len, sizeof(char));
-	strncpy(result, str + strlen(word), len);
+	char* result = calloc(len + 1, sizeof(char));
+	strncpy(result, str, len);
 	return result;
 }
-int file_exist (char *filename)
+
+// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
+char* strright(char* str, int len)
+{
+	int pos = strlen(str) - len;
+	char* result = calloc(len + 1, sizeof(char));
+	strncpy(result, str + pos, len);
+	return result;
+}
+
+// Return the directory name of filename 'filename'.
+char* dirname_int(char* filename)
+{
+	if (filename == NULL)
+		return NULL;
+	
+	char* right;
+	int len = strlen(filename);
+	
+	if ((right = strrchr(filename, PATH_JOIN_SEPARATOR[0])) != NULL)
+		return strleft(filename, len - strlen(right));
+	
+#ifdef _WIN32
+	// Alternative search for windows beceause it also support the UNIX seperator
+	if ((right = strrchr(filename, PATH_JOIN_SEPARATOR_ALT[0])) != NULL)
+		return strleft(filename, len - strlen(right));
+#endif
+	
+	// Not found
+	return NULL;
+}
+
+// Verify if file exists
+int file_exist(char *filename)
 {
   struct stat buffer;   
   return (stat(filename, &buffer) == 0);
@@ -76,9 +110,9 @@ int file_exist (char *filename)
 
 char* path_join(char* basedir, char* filename)
 {
-	int len = strlen(basedir) + strlen(PATH_JOIN_SEPERATOR) + strlen(filename) + 1;
-	char* result = calloc(len, sizeof(char));
-	sprintf(result, "%s%s%s", basedir, PATH_JOIN_SEPERATOR, filename);
+	int len = strlen(basedir) + strlen(PATH_JOIN_SEPARATOR) + strlen(filename);
+	char* result = calloc(len + 1, sizeof(char));
+	sprintf(result, "%s%s%s", basedir, PATH_JOIN_SEPARATOR, filename);
 	return result;
 }	
 
@@ -88,19 +122,24 @@ char* m3u_search_file(char* basedir, char* dskName)
 	if (file_exist(dskName))
 	{
 		// Copy and return
-		char* result = calloc(strlen(dskName) + 1, sizeof(char));
-		strncpy(result, dskName, strlen(dskName));
+		int len = strlen(dskName);
+		char* result = calloc(len + 1, sizeof(char));
+		strncpy(result, dskName, len);
 		return result;
 	}
 	
-	// Verify if this item is a relative filename (append it to the m3u path)
-	char* dskPath = path_join(basedir, dskName);
-	if (file_exist(dskPath))
+	// If basedir was provided
+	if(basedir != NULL)
 	{
-		// Return
-		return dskPath;
+		// Verify if this item is a relative filename (append it to the m3u path)
+		char* dskPath = path_join(basedir, dskName);
+		if (file_exist(dskPath))
+		{
+			// Return
+			return dskPath;
+		}
+		free(dskPath);
 	}
-	free(dskPath);
 	
 	// File not found
 	return NULL;
@@ -181,8 +220,9 @@ bool dc_add_file(dc_storage* dc, char* filename)
 		return false;
 
 	// Copy and return
-	char* filename_int = calloc(strlen(filename) + 1, sizeof(char));
-	strncpy(filename_int, filename, strlen(filename));
+	int len = strlen(filename);
+	char* filename_int = calloc(len + 1, sizeof(char));
+	strncpy(filename_int, filename, len);
 	return dc_add_file_int(dc, filename);
 }
 
@@ -205,7 +245,7 @@ void dc_parse_m3u(dc_storage* dc, char* m3u_file)
 	dc_reset(dc);
 	
 	// Get the m3u base dir for resolving relative path
-	char* basedir = dirname(m3u_file);
+	char* basedir = dirname_int(m3u_file);
 	
 	// Read the lines while there is line to read and we have enough space
 	char buffer[2048];
@@ -214,10 +254,9 @@ void dc_parse_m3u(dc_storage* dc, char* m3u_file)
 		char* string = trimwhitespace(buffer);
 		
 		// If it's a m3u special key or a file
-		if ((strlen(buffer) >= strlen(M3U_SPECIAL_COMMAND)) && !strncmp(&buffer, M3U_SPECIAL_COMMAND, strlen(M3U_SPECIAL_COMMAND)))
+		if ((strlen(buffer) >= strlen(M3U_SPECIAL_COMMAND)) && !strncmp((char*)&buffer, M3U_SPECIAL_COMMAND, strlen(M3U_SPECIAL_COMMAND)))
 		{
-			dc->command = substring(string, M3U_SPECIAL_COMMAND);
-			printf("%s\n", dc->command);
+			dc->command = strright(string, strlen(string) - strlen(M3U_SPECIAL_COMMAND));
 		}
 		else if ((strlen(string) >= strlen(COMMENT)) && strncmp(string, COMMENT, strlen(COMMENT)))
 		{
@@ -232,6 +271,10 @@ void dc_parse_m3u(dc_storage* dc, char* m3u_file)
 		}
 	}
 	
+	// If basedir was provided
+	if(basedir != NULL)
+		free(basedir);
+
 	// Close the file 
 	fclose(fp);
 }
