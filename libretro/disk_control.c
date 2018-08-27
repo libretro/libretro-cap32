@@ -223,7 +223,7 @@ bool dc_add_file(dc_storage* dc, char* filename)
 	int len = strlen(filename);
 	char* filename_int = calloc(len + 1, sizeof(char));
 	strncpy(filename_int, filename, len);
-	return dc_add_file_int(dc, filename);
+	return dc_add_file_int(dc, filename_int);
 }
 
 void dc_parse_m3u(dc_storage* dc, char* m3u_file)
