@@ -934,7 +934,6 @@ void retro_run(void)
 						char* command = calloc(strlen(dc->command) + 1, sizeof(char));
 						sprintf(command, "%s\n", dc->command);
 						kbd_buf_feed(command);
-						kbd_buf_update();
 						free(command);
 					}						
 					else
@@ -972,7 +971,6 @@ void retro_run(void)
 			{
 				tape_insert ((char *)RPATH);
 				kbd_buf_feed("|tape\nrun\"\n^");
-				kbd_buf_update();
 				return;
 
 			}
