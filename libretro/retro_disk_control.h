@@ -16,11 +16,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef DISK_CONTROL_H__
-#define DISK_CONTROL_H__
+#ifndef RETRO_DISK_CONTROL_H__
+#define RETRO_DISK_CONTROL_H__
 
 #include <stdbool.h>
 
+//*****************************************************************************
+// Disk control structure and functions
 #define DC_MAX_SIZE 20
 
 struct dc_storage{
@@ -32,10 +34,9 @@ struct dc_storage{
 };
 
 typedef struct dc_storage dc_storage;
-
 dc_storage* dc_create(void);
-void dc_parse_m3u(dc_storage* dc, char* m3u_file);
-bool dc_add_file(dc_storage* dc, char* filename);
+void dc_parse_m3u(dc_storage* dc, const char* m3u_file);
+bool dc_add_file(dc_storage* dc, const char* filename);
 void dc_free(dc_storage* dc);
 
 #endif
