@@ -55,7 +55,7 @@ F12 PLAY TAPE
 
 ## M3U and Disk control
 
-This core now support the usage of M3U file and disk control from within RetroArch for multi disk games.
+When you have a multi disk game, you can use a m3u file to specify each disk of the game and change them from the RetroArch Disk control interface.
 
 A M3U file is a simple text file with one disk per line (see https://en.wikipedia.org/wiki/M3U).
 
@@ -68,13 +68,16 @@ Alive (F) - Disk 1B.dsk
 ```
 Path can be absolute or relative to the location of the M3U file.
 
-In RetroArch you can change the current disk in the 'Disk Control' menu. Just select the right disk index when a game ask for it.
+When a game ask for it, you can change the current disk in the RetroArch 'Disk Control' menu :
+- Eject the current disk with 'Disk Cycle Tray Status'.
+- Select the right disk index.
+- Insert the new disk with 'Disk Cycle Tray Status'.
 
-No need to eject disk ('Disk Cycle Tray Status'), you just have to cycle through disk indexes.
+When the core start, the first disk will be mounted and the first executable autostarted (if autostart is enabled).
 
-On start, the first disk will be mounted and the first executable autostarted.
+### Specify a specific command to launch a game
 
-### Special feature for frontend users
+If the autolaunch option of the core does a pretty good job to guess what command must be executed to launch a game on the CPC, there is some problems (cpm disk and strange catalogs for the most).
 
 You can specify a command to be executed on the CPC when the emu launch.
 
@@ -84,10 +87,6 @@ All you have to do is to add a comment like this in the m3u file :
 #COMMAND:<YOUR_COMMAND_HERE>
 ```
 
-If the autolaunch option of the core does a pretty good job to guess what command must be executed to launch a game on the CPC, there is some problems (cpm disk and strange catalogs for the most).
-
-Here, this little option come to the rescue.
-
 Even for one disk game, you can create a m3u file like this one :
 
 Jack the Nipper II... In Coconut Capers.m3u
@@ -95,8 +94,6 @@ Jack the Nipper II... In Coconut Capers.m3u
 #COMMAND:|CPM
 Jack the Nipper II... In Coconut Capers (E).dsk
 ```
-
-And it's done.
 
 ## Core options
 
