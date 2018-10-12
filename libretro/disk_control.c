@@ -147,6 +147,8 @@ char* m3u_search_file(char* basedir, char* dskName)
 
 void dc_reset(dc_storage* dc)
 {
+	unsigned i;
+
 	// Verify
 	if(dc == NULL)
 		return;
@@ -159,7 +161,7 @@ void dc_reset(dc_storage* dc)
 	}
 
 	// Clean the struct
-	for(unsigned i=0; i < dc->count; i++)
+	for(i=0; i < dc->count; i++)
 	{
 		free(dc->files[i]);
 		dc->files[i] = NULL;
@@ -171,6 +173,8 @@ void dc_reset(dc_storage* dc)
 
 dc_storage* dc_create(void)
 {
+	int i;
+
 	// Initialize the struct
 	dc_storage* dc = NULL;
 	
@@ -180,7 +184,7 @@ dc_storage* dc_create(void)
 		dc->index = -1;
 		dc->eject_state = true;
 		dc->command = NULL;
-		for(int i = 0; i < DC_MAX_SIZE; i++)
+		for(i = 0; i < DC_MAX_SIZE; i++)
 		{
 			dc->files[i] = NULL;
 		}
