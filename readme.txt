@@ -6,7 +6,7 @@ A quick port of caprice32-4.2.0 to LIBRETRO.
 
 	
 All the credit of the caprice32 Emulator to Ulrich Doewich 
-Also 6128.h & amsdos.h (and psg for ps3 )files taken from wiituka (author:dantoine)
+Also 6128.h & amsdos.h (and psg for ps3 )files taken from wiituka (author:dskywalk)
 http://code.google.com/p/wiituka/
 
 And of course for the RetroArch/Libretro team : "http://www.libretro.com"
