@@ -897,6 +897,7 @@ void retro_run(void)
 {
    static int mfirst=1;
    bool updated = false;
+   unsigned i;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
@@ -918,7 +919,7 @@ void retro_run(void)
 
 				// Some debugging
 				log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
-				for(unsigned i = 0; i < dc->count; i++)
+				for(i = 0; i < dc->count; i++)
 				{
 					log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
 				}
