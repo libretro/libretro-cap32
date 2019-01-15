@@ -35,12 +35,19 @@ extern unsigned amstrad_devices[ 2 ];
 #define uint8 uint8_t
 
 //SCREEN
+//#define RENDER16B
 
-#define PIXEL_BYTES 2
-#define PIXEL_TYPE UINT32
-#define PITCH 4	
+#ifdef RENDER16B
+ #define PIXEL_BYTES 1
+ #define PIXEL_TYPE UINT16
+ #define PITCH 2
+#else
+ #define PIXEL_BYTES 2
+ #define PIXEL_TYPE UINT32
+ #define PITCH 4	
+#endif
 
-extern uint32_t *Retro_Screen;
+extern PIXEL_TYPE *Retro_Screen;
 
 #define WINDOW_MAX_SIZE (768*544)
 

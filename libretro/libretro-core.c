@@ -65,7 +65,7 @@ extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
-uint32_t *Retro_Screen;
+PIXEL_TYPE *Retro_Screen;
 uint32_t save_Screen[WINDOW_MAX_SIZE];
 uint32_t bmp[WINDOW_MAX_SIZE];
 

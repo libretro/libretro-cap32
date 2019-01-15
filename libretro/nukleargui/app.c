@@ -60,7 +60,6 @@ char Core_old_Key_Sate[512];
 #include "nuklear_retro_soft.h"
 
 static RSDL_Surface *screen_surface;
-extern unsigned int *Retro_Screen;
 extern void restore_bgk();
 extern void save_bkg();
 
@@ -89,8 +88,11 @@ void app_vkb_handle();
 
 int app_init(int width, int height)
 {
-    //screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
+    #ifdef RENDER16B
+    screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
+    #else
     screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);
+    #endif
 
     Retro_Screen=(PIXEL_TYPE *)screen_surface->pixels;
 

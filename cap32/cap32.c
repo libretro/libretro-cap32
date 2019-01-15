@@ -2663,6 +2663,12 @@ void audio_shutdown (void) {}
 void audio_pause (void) {}
 void audio_resume (void) {}
 
+#ifdef RENDER16B
+    #define RGB2COLOR(r, g, b) ((((r>>3)<<11) | ((g>>2)<<5) | (b>>3)))
+#else
+    #define RGB2COLOR(r, g, b) (b | ((g << 8) | (r << 16)))
+#endif
+
 int video_set_palette (void)
 {
 
@@ -2673,7 +2679,8 @@ int video_set_palette (void)
    {
       for (n = 0; n < 32; n++)
       {
-         uint32_t red, green, blue, colr;
+         uint32_t red, green, blue;
+         PIXEL_TYPE colr;
 
          red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
          if (red > 255) /* limit to the maximum */
@@ -2687,7 +2694,7 @@ int video_set_palette (void)
          if (blue > 255)
             blue = 255;
 
-         colr       = blue | (green << 8) | (red << 16);
+         colr       = (PIXEL_TYPE) RGB2COLOR(red, green, blue);
          colours[n] = colr ;//| (colr << 16);
 
       }
@@ -2730,7 +2737,7 @@ void video_set_style (void)
       dwXScale = 2;
       dwYScale = 2;
    }
-   printf("style: %u, dwScale: %ux%u\n", CPC.scr_style, dwXScale, dwYScale);
+   printf("style: %u, dwScale: %ux%u, offset: %u\n", CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
 
    switch (dwXScale)
    {
@@ -2782,7 +2789,8 @@ int video_init (void)
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = (uint32_t *)&bmp[0];
-   CPC.scr_line_offs = CPC.scr_bps * (CPC.scr_style - 2);
+   CPC.scr_line_offs = ((CPC.scr_bps * (CPC.scr_style - 2)) // because is double height
+                         / (2 / PIXEL_BYTES) ) ;
 
    video_set_style(); 
    memset(bmp, 0, sizeof(bmp));
