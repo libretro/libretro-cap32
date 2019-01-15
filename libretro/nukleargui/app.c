@@ -88,7 +88,7 @@ void app_vkb_handle();
 
 int app_init(int width, int height)
 {
-    #ifdef RENDER16B
+    #ifdef M16B
     screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
     #else
     screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);

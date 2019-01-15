@@ -582,7 +582,13 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 
 void print(RSDL_Surface *buffer,int x, int y, unsigned    couleur,unsigned char c)
 {
+
+#ifdef M16B
+    unsigned short *mbuffer=(unsigned short*)buffer->pixels;
+#else
     unsigned *mbuffer=(unsigned*)buffer->pixels;
+#endif
+
     int i,j;
 
     int w=buffer->w;

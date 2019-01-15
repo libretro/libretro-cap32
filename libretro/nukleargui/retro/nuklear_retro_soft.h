@@ -244,6 +244,7 @@ nk_retro_draw_text(RSDL_Surface *surface, short x, short y, unsigned short w, un
     for (i = 0; i < len; i++) {
         //characterRGBA(surface, x, y, text[i], cfg.r, cfg.g, cfg.b, cfg.a);
 #ifdef M16B
+    print(surface , x,  y, cfg.r<<8|cfg.g<<3|cfg.b>>3, text[i]);
 //	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,cfg.r<<8|cfg.g<<3|cfg.b>>3,0);
 
 //	Retro_Draw_char(surface,  x,  y,  text[i],  1, 1,/*cfg.a<<8|*/cfg.r<<8|cfg.g<<3|cfg.b>>3, /*cbg.a<<24|*/cbg.r<<8|cbg.g<<3|cbg.b>>3);

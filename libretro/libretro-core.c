@@ -1,12 +1,6 @@
 #include "libretro.h"
 #include "libretro-core.h"
 
-//#define RENDER16B
-//#undef RENDER16B
-#ifdef RENDER16B
-#define M16B
-#endif
-
 //CORE VAR
 #ifdef _WIN32
 char slash = '\\';
@@ -767,7 +761,7 @@ void retro_init(void)
    LOGI("Retro SAVE_DIRECTORY %s\n",retro_save_directory);
    LOGI("Retro CONTENT_DIRECTORY %s\n",retro_content_directory);
 
-#ifndef RENDER16B
+#ifndef M16B
     	enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
 #else
     	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;

@@ -34,10 +34,10 @@ extern unsigned amstrad_devices[ 2 ];
 #define uint32 uint32_t
 #define uint8 uint8_t
 
-//SCREEN
-//#define RENDER16B
+//SCREEN 16BITS
+//#define M16B 
 
-#ifdef RENDER16B
+#ifdef M16B
  #define PIXEL_BYTES 1
  #define PIXEL_TYPE UINT16
  #define PITCH 2

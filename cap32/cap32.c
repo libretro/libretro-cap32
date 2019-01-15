@@ -2663,7 +2663,7 @@ void audio_shutdown (void) {}
 void audio_pause (void) {}
 void audio_resume (void) {}
 
-#ifdef RENDER16B
+#ifdef M16B
     #define RGB2COLOR(r, g, b) ((((r>>3)<<11) | ((g>>2)<<5) | (b>>3)))
 #else
     #define RGB2COLOR(r, g, b) (b | ((g << 8) | (r << 16)))
