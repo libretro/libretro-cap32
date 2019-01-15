@@ -65,9 +65,9 @@ extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
-unsigned int *Retro_Screen;
-unsigned int save_Screen[WINDOW_SIZE];
-unsigned int bmp[WINDOW_SIZE];
+uint32_t *Retro_Screen;
+uint32_t save_Screen[WINDOW_MAX_SIZE];
+uint32_t bmp[WINDOW_MAX_SIZE];
 
 //SOUND
 short signed int SNDBUF[1024*2];
@@ -78,16 +78,14 @@ char RPATH[512];
 bool retro_load_ok = false;
 int pauseg=0; //enter_gui
 
-extern unsigned int *RetroScreen;
-extern int app_init(void);
+extern int app_init(int width, int height);
 extern int app_free(void);
 extern int app_render(int poll);
 
-int CROP_WIDTH;
-int CROP_HEIGHT;
-int VIRTUAL_WIDTH ;
-int retrow=WINDOW_WIDTH; 
-int retroh=WINDOW_HEIGHT;
+int retrow=0;
+int retroh=0;
+int retro_scr_style=3, retro_scr_w=0, retro_scr_h=0;
+int gfx_buffer_size=0;
 
 #include "vkbd.i"
 
@@ -116,7 +114,7 @@ extern void input_gui(void);
 const char *retro_save_directory;
 const char *retro_system_directory;
 const char *retro_content_directory;
-char retro_system_data_directory[512];;
+char retro_system_data_directory[512];
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -133,6 +131,25 @@ void retro_set_input_state(retro_input_state_t cb)
 void retro_set_input_poll(retro_input_poll_t cb)
 {
    input_poll_cb = cb;
+}
+
+int retro_getStyle(){
+    printf("getStyle: %u\n", retro_scr_style);
+    return retro_scr_style;
+}
+
+int retro_getGfxBpp(){
+    printf("getBPP: %u\n", 16 * PIXEL_BYTES);
+    return 16 * PIXEL_BYTES;
+}
+
+int retro_getGfxBps(){
+    printf("getBPS: %u\n", retro_scr_w);
+    return retro_scr_w;
+}
+
+uint32_t * retro_getScreenPtr(){
+    return (uint32_t *)&bmp[0];
 }
 
 #include <ctype.h>
@@ -328,13 +345,13 @@ void enter_options(void) {}
 
 void save_bkg()
 {
-	memcpy(save_Screen,Retro_Screen,PITCH*WINDOW_SIZE/*400*300*/);
+	memcpy(save_Screen,Retro_Screen,gfx_buffer_size);
 
 }
 
 void restore_bgk()
 {
-	memcpy(Retro_Screen,save_Screen,PITCH*WINDOW_SIZE/*400*300*/);
+	memcpy(Retro_Screen,save_Screen,gfx_buffer_size);
 }
 
 void texture_uninit(void)
@@ -348,9 +365,9 @@ void texture_init(void)
 void Screen_SetFullUpdate(int scr)
 {
    if(scr==0 ||scr>1)
-      memset(&Retro_Screen, 0, sizeof(Retro_Screen));
+      memset(&Retro_Screen, 0, gfx_buffer_size);
    if(scr>0)
-      memset(&bmp,0,sizeof(bmp));
+      memset(&bmp,0, gfx_buffer_size);
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -383,7 +400,7 @@ void retro_set_environment(retro_environment_t cb)
 	  },
       {
          "cap32_resolution",
-         "Internal resolution; 384x272|400x300",
+         "Internal resolution; 384x272|768x544",
       },
       {
          "cap32_Model",
@@ -456,18 +473,6 @@ static void update_variables(void)
       pch = strtok(NULL, "x");
       if (pch)
          retroh = strtoul(pch, NULL, 0);
-
-	//FIXME remove force res
-	retrow=WINDOW_WIDTH;
-	retroh=WINDOW_HEIGHT;
-
-      fprintf(stderr, "[libretro-cap32]: Got size: %u x %u.\n", retrow, retroh);
-
-      CROP_WIDTH =retrow;
-      CROP_HEIGHT= (retroh-80);
-      VIRTUAL_WIDTH = retrow;
-      texture_init();
-      //reset_screen();
    }
 
    var.key = "cap32_Model";
@@ -602,9 +607,9 @@ static void update_variables(void)
 
 void Emu_init(){
 
+   update_variables();
    pre_main(RPATH);
 
-   update_variables();
 }
 
 void Emu_uninit(){
@@ -799,7 +804,23 @@ LOGI("PIXEL FORMAT is not supported.\n");
 	// Disk control interface
 	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
 
-	texture_init();
+	update_variables();
+
+    // save screen values from user variables
+    retro_scr_w = retrow;
+    retro_scr_h = retroh;
+    gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
+
+    if(retrow==384)
+       retro_scr_style = 3;
+    else if(retrow==768)
+       retro_scr_style = 4;
+
+    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
+         retrow, retroh, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+
+    // init screen once
+    app_init(retrow, retroh);
 
 }
 
@@ -851,7 +872,7 @@ void retro_get_system_info(struct retro_system_info *info)
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    /* FIXME handle PAL/NTSC */
-   struct retro_game_geometry geom = { retrow, retroh, 400, 300,4.0 / 3.0 };
+   struct retro_game_geometry geom = { retro_scr_w, retro_scr_h, TEX_MAX_WIDTH, TEX_MAX_HEIGHT, 4.0 / 3.0 };
    struct retro_system_timing timing = { 50.0, 44100.0 };
 
    info->geometry = geom;
@@ -885,7 +906,7 @@ void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
 
 void retro_blit()
 {
-   memcpy(Retro_Screen,bmp,PITCH*WINDOW_SIZE);
+   memcpy(Retro_Screen,bmp,gfx_buffer_size);
 }
 
 #define CDT_FILE_EXT "cdt"
@@ -998,7 +1019,7 @@ void retro_run(void)
    }
    else if (pauseg==1)app_render(1);
 
-   video_cb(Retro_Screen,retrow,retroh,retrow<<PIXEL_BYTES);
+   video_cb(Retro_Screen,retro_scr_w,retro_scr_h,retro_scr_w<<PIXEL_BYTES);
 
 }
 
@@ -1038,7 +1059,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    update_variables();
 
-   app_init();
+   //app_init();
 
 	memset(SNDBUF,0,1024*2*2);
 /*

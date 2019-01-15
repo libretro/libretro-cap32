@@ -182,7 +182,7 @@ long GetTicks(void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
-extern unsigned int bmp[WINDOW_SIZE];//[400 * 300];
+extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char RPATH[512];
 extern int SND;
 extern int autorun;
@@ -2717,21 +2717,21 @@ int video_set_palette (void)
    return 0;
 }
 
-#define STYLE 3
-
 void video_set_style (void)
 {
-   if (STYLE == 3/*vid_plugin->half_pixels*/)
+   if (CPC.scr_style == 3) //384x272
    {
       dwXScale = 1;
       dwYScale = 1;
 
    }
-   else
+   else                    //768x544
    {
       dwXScale = 2;
-      dwYScale = 1;
+      dwYScale = 2;
    }
+   printf("style: %u, dwScale: %ux%u\n", CPC.scr_style, dwXScale, dwYScale);
+
    switch (dwXScale)
    {
       case 1:
@@ -2749,14 +2749,20 @@ void video_set_style (void)
    switch(CPC.scr_bpp)
    {
       case 32:
-         CPC.scr_render = (void(*)(void))render32bpp;
+         if(dwYScale == 2)
+            CPC.scr_render = (void(*)(void))render32bpp_doubleY;
+         else
+            CPC.scr_render = (void(*)(void))render32bpp;
          break;
       case 24:
          CPC.scr_render = (void(*)(void))render24bpp;
          break;
       case 16:
       case 15:
-         CPC.scr_render = (void(*)(void))render16bpp;
+         if(dwYScale == 2)
+            CPC.scr_render = (void(*)(void))render16bpp_doubleY;
+         else
+            CPC.scr_render = (void(*)(void))render16bpp;
          break;
       case 8:
          CPC.scr_render = (void(*)(void))render8bpp;
@@ -2767,15 +2773,16 @@ void video_set_style (void)
 int video_init (void)
 { 
    int error_code;
-   CPC.scr_bpp = 32;
+   CPC.scr_bpp = retro_getGfxBpp();
 
    error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
    if (error_code)
       return error_code; 
 
-   CPC.scr_bps       = WINDOW_WIDTH/*400*/ * 4 / 4;
+   CPC.scr_style     = retro_getStyle();
+   CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = (uint32_t *)&bmp[0];
-   CPC.scr_line_offs = CPC.scr_bps * 1;
+   CPC.scr_line_offs = CPC.scr_bps * (CPC.scr_style - 2);
 
    video_set_style(); 
    memset(bmp, 0, sizeof(bmp));
