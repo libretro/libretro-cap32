@@ -2680,7 +2680,6 @@ int video_set_palette (void)
       for (n = 0; n < 32; n++)
       {
          uint32_t red, green, blue;
-         PIXEL_TYPE colr;
 
          red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
          if (red > 255) /* limit to the maximum */
@@ -2694,8 +2693,7 @@ int video_set_palette (void)
          if (blue > 255)
             blue = 255;
 
-         colr       = (PIXEL_TYPE) RGB2COLOR(red, green, blue);
-         colours[n] = colr ;//| (colr << 16);
+         colours[n] = (PIXEL_TYPE) RGB2COLOR(red, green, blue);
 
       }
    }
