@@ -601,8 +601,8 @@ static void update_variables(void)
 
 void Emu_init(){
 
-   update_variables();
    pre_main(RPATH);
+   update_variables();
 
 }
 
