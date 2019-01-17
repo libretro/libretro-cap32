@@ -60,7 +60,6 @@ char Core_old_Key_Sate[512];
 #include "nuklear_retro_soft.h"
 
 static RSDL_Surface *screen_surface;
-extern unsigned int *Retro_Screen;
 extern void restore_bgk();
 extern void save_bkg();
 
@@ -87,11 +86,15 @@ static nk_retro_Font *RSDL_font;
 /* Forward declarations */
 void app_vkb_handle();
 
-int app_init()
+int app_init(int width, int height)
 {
-    screen_surface=Retro_CreateRGBSurface32(retrow,retroh,32,0,0,0,0);
+    #ifdef M16B
+    screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
+    #else
+    screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);
+    #endif
 
-    Retro_Screen=(unsigned int *)screen_surface->pixels;
+    Retro_Screen=(PIXEL_TYPE *)screen_surface->pixels;
 
     RSDL_font = (nk_retro_Font*)calloc(1, sizeof(nk_retro_Font));
     RSDL_font->width = 4;
@@ -100,7 +103,7 @@ int app_init()
         return -1;
 
     /* GUI */
-    ctx = nk_retro_init(RSDL_font,screen_surface,retrow,retroh);
+    ctx = nk_retro_init(RSDL_font,screen_surface,width,height);
 
     /* style.c */
     /* THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK */
@@ -114,7 +117,7 @@ int app_init()
 	memset(Core_Key_Sate,0,512);
 	memset(Core_old_Key_Sate ,0, sizeof(Core_old_Key_Sate));
 
-    printf("Init nuklear %d\n",0);
+    printf("Init nuklear %ux%u\n", width, height);
 
  return 0;
 }

@@ -15,8 +15,8 @@
 
 extern unsigned amstrad_devices[ 2 ];
 
-#define TEX_WIDTH 384
-#define TEX_HEIGHT 272
+#define TEX_MAX_WIDTH 768
+#define TEX_MAX_HEIGHT 544
 
 //LOG
 #if  defined(__ANDROID__) || defined(ANDROID)
@@ -34,16 +34,22 @@ extern unsigned amstrad_devices[ 2 ];
 #define uint32 uint32_t
 #define uint8 uint8_t
 
-//SCREEN
-extern unsigned int *Retro_Screen;
+//SCREEN 16BITS
+//#define M16B 
 
-#define PIXEL_BYTES 2
-#define PIXEL_TYPE UINT32
-#define PITCH 4	
+#ifdef M16B
+ #define PIXEL_BYTES 1
+ #define PIXEL_TYPE UINT16
+ #define PITCH 2
+#else
+ #define PIXEL_BYTES 2
+ #define PIXEL_TYPE UINT32
+ #define PITCH 4	
+#endif
 
-#define WINDOW_WIDTH 384
-#define WINDOW_HEIGHT 272
-#define WINDOW_SIZE (384*272)
+extern PIXEL_TYPE *Retro_Screen;
+
+#define WINDOW_MAX_SIZE (768*544)
 
 //VKBD
 #define NPLGN 12
@@ -75,10 +81,10 @@ typedef struct{
 
 //VARIABLES
 extern int pauseg; 
-extern int CROP_WIDTH;
-extern int CROP_HEIGHT;
-extern int VIRTUAL_WIDTH;
-extern int retrow ; 
-extern int retroh ;
+
+//SCREEN FUNCTIONS
+extern int retro_getStyle();
+extern int retro_getGfxBpp();
+extern int retro_getGfxBps();
 
 #endif

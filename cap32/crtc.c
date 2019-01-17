@@ -917,7 +917,7 @@ void render16bpp(void)
 void render16bpp_doubleY(void)
 {
    register uint16_t *pwPos = (uint16_t *)CPC.scr_pos;
-   register uint32_t dwLineOffs = CPC.scr_bps << 1;
+   register uint16_t dwLineOffs = CPC.scr_bps;
    register uint8_t bCount = *RendWid++;
    while (bCount--) {
       register uint16_t val = GateArray.palette[*RendOut++];
