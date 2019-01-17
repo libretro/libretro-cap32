@@ -2708,7 +2708,7 @@ int video_set_palette (void)
          if (green > 255)
             green = 255;
 
-         colours[n] = green << 8;
+         colours[n] = (PIXEL_TYPE) RGB2COLOR(0, green, 0);
 
       }
    }
