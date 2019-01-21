@@ -170,7 +170,7 @@ void Add_Option(const char* option)
       first++;
    }
 
-   sprintf(XARGV[PARAMCOUNT++],"%s\0",option);
+   sprintf(XARGV[PARAMCOUNT++],"%s",option);
 }
 
 int pre_main(const char *argv)
@@ -761,10 +761,10 @@ void retro_init(void)
       retro_save_directory=retro_system_directory;
    }
 
-   if(retro_system_directory==NULL)sprintf(RETRO_DIR, "%s\0",".");
-   else sprintf(RETRO_DIR, "%s\0", retro_system_directory);
+   if(retro_system_directory==NULL)sprintf(RETRO_DIR, "%c",'.');
+   else sprintf(RETRO_DIR, "%s", retro_system_directory);
 
-   sprintf(retro_system_data_directory, "%s/data\0",RETRO_DIR);
+   sprintf(retro_system_data_directory, "%s%cdata",RETRO_DIR, slash); // TODO: unused ?
 
    LOGI("Retro SYSTEM_DIRECTORY %s\n",retro_system_directory);
    LOGI("Retro SAVE_DIRECTORY %s\n",retro_save_directory);
