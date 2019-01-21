@@ -16,71 +16,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "disk_control.h"
+#include "retro_disk_control.h"
+#include "retro_strings.h"
+#include "retro_files.h"
 
-#include <sys/types.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+/*#include <sys/types.h> 
 #include <sys/stat.h> 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <unistd.h>*/
 
 #define COMMENT "#"
 #define M3U_SPECIAL_COMMAND "#COMMAND:"
 
-#ifdef _WIN32
-#define PATH_JOIN_SEPARATOR   		"\\"
-// Windows also support the unix path separator
-#define PATH_JOIN_SEPARATOR_ALT   	"/"
-#else
-#define PATH_JOIN_SEPARATOR   		"/"
-#endif
-
-// Note: This function returns a pointer to a substring_left of the original string.
-// If the given string was allocated dynamically, the caller must not overwrite
-// that pointer with the returned value, since the original pointer must be
-// deallocated using the same allocator with which it was allocated.  The return
-// value must NOT be deallocated using free() etc.
-char *trimwhitespace(char *str)
-{
-  char *end;
-
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
-
-  if(*str == 0)  // All spaces?
-    return str;
-
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
-
-  // Write new null terminator character
-  end[1] = '\0';
-
-  return str;
-}
-
-// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
-char* strleft(char* str, int len)
-{
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str, len);
-	return result;
-}
-
-// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
-char* strright(char* str, int len)
-{
-	int pos = strlen(str) - len;
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str + pos, len);
-	return result;
-}
-
 // Return the directory name of filename 'filename'.
-char* dirname_int(char* filename)
+char* dirname_int(const char* filename)
 {
 	if (filename == NULL)
 		return NULL;
@@ -88,12 +42,12 @@ char* dirname_int(char* filename)
 	char* right;
 	int len = strlen(filename);
 	
-	if ((right = strrchr(filename, PATH_JOIN_SEPARATOR[0])) != NULL)
+	if ((right = strrchr(filename, RETRO_PATH_SEPARATOR[0])) != NULL)
 		return strleft(filename, len - strlen(right));
 	
 #ifdef _WIN32
 	// Alternative search for windows beceause it also support the UNIX seperator
-	if ((right = strrchr(filename, PATH_JOIN_SEPARATOR_ALT[0])) != NULL)
+	if ((right = strrchr(filename, RETRO_PATH_SEPARATOR_ALT[0])) != NULL)
 		return strleft(filename, len - strlen(right));
 #endif
 	
@@ -101,39 +55,26 @@ char* dirname_int(char* filename)
 	return NULL;
 }
 
-// Verify if file exists
-int file_exist(char *filename)
-{
-  struct stat buffer;   
-  return (stat(filename, &buffer) == 0);
-}
-
-char* path_join(char* basedir, char* filename)
-{
-	int len = strlen(basedir) + strlen(PATH_JOIN_SEPARATOR) + strlen(filename);
-	char* result = calloc(len + 1, sizeof(char));
-	sprintf(result, "%s%s%s", basedir, PATH_JOIN_SEPARATOR, filename);
-	return result;
-}	
-
-char* m3u_search_file(char* basedir, char* dskName)
+char* m3u_search_file(const char* basedir, const char* dskName)
 {
 	// Verify if this item is an absolute pathname (or the file is in working dir)
-	if (file_exist(dskName))
+	if (file_exists(dskName))
 	{
 		// Copy and return
-		int len = strlen(dskName);
-		char* result = calloc(len + 1, sizeof(char));
-		strncpy(result, dskName, len);
+		char* result = calloc(strlen(dskName) + 1, sizeof(char));
+		strcpy(result, dskName);
 		return result;
 	}
 	
 	// If basedir was provided
 	if(basedir != NULL)
 	{
+		// Join basedir and dskName
+		char* dskPath = calloc(RETRO_PATH_MAX, sizeof(char));
+		path_join(dskPath, basedir, dskName);
+
 		// Verify if this item is a relative filename (append it to the m3u path)
-		char* dskPath = path_join(basedir, dskName);
-		if (file_exist(dskPath))
+		if (file_exists(dskPath))
 		{
 			// Return
 			return dskPath;
@@ -214,7 +155,7 @@ bool dc_add_file_int(dc_storage* dc, char* filename)
 	return false;
 }
 
-bool dc_add_file(dc_storage* dc, char* filename)
+bool dc_add_file(dc_storage* dc, const char* filename)
 {
 	// Verify
 	if(dc == NULL)
@@ -224,13 +165,12 @@ bool dc_add_file(dc_storage* dc, char* filename)
 		return false;
 
 	// Copy and return
-	int len = strlen(filename);
-	char* filename_int = calloc(len + 1, sizeof(char));
-	strncpy(filename_int, filename, len);
+	char* filename_int = calloc(strlen(filename) + 1, sizeof(char));
+	strcpy(filename_int, filename);
 	return dc_add_file_int(dc, filename_int);
 }
 
-void dc_parse_m3u(dc_storage* dc, char* m3u_file)
+void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
 {
 	// Verify
 	if(dc == NULL)
@@ -258,11 +198,11 @@ void dc_parse_m3u(dc_storage* dc, char* m3u_file)
 		char* string = trimwhitespace(buffer);
 		
 		// If it's a m3u special key or a file
-		if ((strlen(buffer) >= strlen(M3U_SPECIAL_COMMAND)) && !strncmp((char*)&buffer, M3U_SPECIAL_COMMAND, strlen(M3U_SPECIAL_COMMAND)))
+		if (strstartswith(string, M3U_SPECIAL_COMMAND))
 		{
 			dc->command = strright(string, strlen(string) - strlen(M3U_SPECIAL_COMMAND));
 		}
-		else if ((strlen(string) >= strlen(COMMENT)) && strncmp(string, COMMENT, strlen(COMMENT)))
+		else if (!strstartswith(string, COMMENT))
 		{
 			// Search the file (absolute, relative to m3u)
 			char* filename;

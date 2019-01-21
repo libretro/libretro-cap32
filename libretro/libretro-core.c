@@ -26,7 +26,7 @@ char TAPE_NAME[512]="\0";
 #endif
 
 // DISK CONTROL
-#include "disk_control.h"
+#include "retro_disk_control.h"
 static dc_storage* dc;
 
 // LOG
@@ -633,15 +633,24 @@ void retro_reset(void){
 // Disk control
 static bool disk_set_eject_state(bool ejected)
 {
-	// Not implemented
-	// No need to eject disk before change it
+	if (dc)
+	{
+		dc->eject_state = ejected;
+		
+		if(dc->eject_state)
+			detach_disk(0);
+		else
+			attach_disk((char *)dc->files[dc->index],0);
+	}
+	
 	return true;
 }
 
 static bool disk_get_eject_state(void)
 {
-	// Not implemented
-	// No need to eject disk before change it
+	if (dc)
+		return dc->eject_state;
+	
 	return true;
 }
 
@@ -657,19 +666,19 @@ static bool disk_set_image_index(unsigned index)
 {
 	// Insert disk
 	if (dc)
+	{
 		// Same disk...
 		// This can mess things in the emu
 		if(index == dc->index)
-			return false;
+			return true;
 		
 		if ((index < dc->count) && (dc->files[index]))
 		{
-			detach_disk(0);
 			dc->index = index;
-			attach_disk((char *)dc->files[index],0);
-			log_cb(RETRO_LOG_INFO, "Disk Inserted (%d): %s\n", index+1, dc->files[index]);
+			log_cb(RETRO_LOG_INFO, "Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
 			return true;
 		}
+	}
 	
 	return false;
 }
@@ -939,27 +948,30 @@ void retro_run(void)
 					log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
 				}
 				
-				// Insert the first disk and autoplay
-				if(disk_set_image_index(0))
+				// Init first disk
+				dc->index = 0;
+				dc->eject_state = false;
+				printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+				attach_disk((char *)dc->files[dc->index],0);
+
+				// If command was specified
+				if(dc->command)
 				{
-					// If command was specified
-					if(dc->command)
-					{
-						// Execute the command
-						log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
-						char* command = calloc(strlen(dc->command) + 1, sizeof(char));
-						sprintf(command, "%s\n", dc->command);
-						kbd_buf_feed(command);
-						kbd_buf_update();
-						free(command);
-					}						
-					else
-					{
-						// Autoplay
-						retro_disk_auto();
-						sprintf(RPATH,"%s%d.SNA",RPATH,0);
-					}
+					// Execute the command
+					log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+					char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+					sprintf(command, "%s\n", dc->command);
+					kbd_buf_feed(command);
+					free(command);
+				}						
+				else
+				{
+					// Autoplay
+					retro_disk_auto();
 				}
+				
+				// Prepare SNA
+				sprintf(RPATH,"%s%d.SNA",RPATH,0);
 
 				return;
 			}
@@ -972,12 +984,15 @@ void retro_run(void)
 				// Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
 				dc_add_file(dc, RPATH);
 				
-				// Insert the first disk and autoplay
-				if(disk_set_image_index(0))
-				{
-					retro_disk_auto();
-					sprintf(RPATH,"%s%d.SNA",RPATH,0);
-				}
+				// Init first disk
+				dc->index = 0;
+				dc->eject_state = false;
+				printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+				attach_disk((char *)dc->files[dc->index],0);
+				retro_disk_auto();
+
+				// Prepare SNA
+				sprintf(RPATH,"%s%d.SNA",RPATH,0);
 				
 				return;
 			}
@@ -988,7 +1003,6 @@ void retro_run(void)
 			{
 				tape_insert ((char *)RPATH);
 				kbd_buf_feed("|tape\nrun\"\n^");
-				kbd_buf_update();
 				return;
 
 			}
