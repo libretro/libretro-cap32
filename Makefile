@@ -9,7 +9,6 @@ SOURCES_C   :=
 SOURCES_CXX :=
 LIBS    :=
 
-
 ifeq ($(platform),)
 	platform = unix
 	ifeq ($(shell uname -a),)
