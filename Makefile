@@ -9,6 +9,7 @@ SOURCES_C   :=
 SOURCES_CXX :=
 LIBS    :=
 
+
 ifeq ($(platform),)
 	platform = unix
 	ifeq ($(shell uname -a),)
@@ -295,6 +296,10 @@ ifeq ($(LOG_PERFORMANCE), 1)
 	CXXFLAGS += -DLOG_PERFORMANCE
 endif
 
+GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+    CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
 
 DEFINES := -D__LIBRETRO__ $(PLATFORM_DEFINES) -DINLINE="inline"
 DEFINES += -DHAVE_CONFIG_H

@@ -865,7 +865,10 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
-   info->library_version  = "4.2";
+   #ifndef GIT_VERSION
+   #define GIT_VERSION ""
+   #endif
+   info->library_version  = "4.2" GIT_VERSION;
    info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;
