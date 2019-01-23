@@ -866,14 +866,13 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
                if (!asic_locked) {
                   int membank = (val >> 3) & 3;
                   if (membank == 3) { // Map register page at 0x4000
-                     printf("Register page on\n");
+                     //printf("Register page on\n");
                      GateArray.registerPageOn = true;
                      membank = 0;
                   } else {
-                     printf("Register page off\n");
+                     //printf("Register page off\n");
                      GateArray.registerPageOn = false;
                   }
-                  //int page = (val & 0x7);
                   GateArray.lower_ROM_bank = membank;
                   pbROMlo = pbCartridgePages[(val & 0x7)];
                   ga_memory_manager();
@@ -1081,16 +1080,16 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
          if (CPC.mf2)
             *(pbMF2ROM + 0x03aac) = val;
       } else {
-         uint32_t page = 1; // Default to basic page
-         printf("ROM select: %u\n", (int) val);
+         //printf("ROM select: %u\n", (int) val);
          if (val == 7) {
-            page = 3;
+            pbExpansionROM = pbCartridgePages[3];
          } else if (val >= 128) {
-            page = val & 31;
+            pbExpansionROM = pbCartridgePages[val & 31];
+         } else {
+            pbExpansionROM = pbCartridgePages[1];
          }
-         pbExpansionROM = pbCartridgePages[page];
-         printf("ROM-PAGE select: %u\n", (int) page);
-         printf("ROM-PAGE val: %u\n", (int) pbExpansionROM[0]);
+         //printf("ROM-PAGE select: %u\n", (int) page);
+         //printf("ROM-PAGE val: %u\n", (int) pbExpansionROM[0]);
       }
 
    }
@@ -1176,7 +1175,7 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
    }
 
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
-      printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
+      //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
       FDC.motor = val & 0x01;
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
@@ -2706,6 +2705,7 @@ int cart_insert (char *pchFileName) {
    emulator_shutdown();
    emulator_init();
 
+   return 0;
 }
 
 int printer_start (void)
