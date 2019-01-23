@@ -195,46 +195,17 @@ extern void kbd_buf_update();
 extern char DISKA_NAME[512];
 extern char DISKB_NAME[512];
 extern char TAPE_NAME[512];
+extern char cart_name[512];
 
 #include "cap32.h"
 #include "crtc.h"
 #include "tape.h"
-
+#include "cart.h"
 #include "z80.h"
+#include "asic.h"
+#include "errors.h"
 
 #define VERSION_STRING "v4.2.0"
-
-#define ERR_INPUT_INIT           1
-#define ERR_VIDEO_INIT           2
-#define ERR_VIDEO_SET_MODE       3
-#define ERR_VIDEO_SURFACE        4
-#define ERR_VIDEO_PALETTE        5
-#define ERR_VIDEO_COLOUR_DEPTH   6
-#define ERR_AUDIO_INIT           7
-#define ERR_AUDIO_RATE           8
-#define ERR_OUT_OF_MEMORY        9
-#define ERR_CPC_ROM_MISSING      10
-#define ERR_NOT_A_CPC_ROM        11
-#define ERR_ROM_NOT_FOUND        12
-#define ERR_FILE_NOT_FOUND       13
-#define ERR_FILE_BAD_ZIP         14
-#define ERR_FILE_EMPTY_ZIP       15
-#define ERR_FILE_UNZIP_FAILED    16
-#define ERR_SNA_INVALID          17
-#define ERR_SNA_SIZE             18
-#define ERR_SNA_CPC_TYPE         19
-#define ERR_SNA_WRITE            20
-#define ERR_DSK_INVALID          21
-#define ERR_DSK_SIDES            22
-#define ERR_DSK_SECTORS          23
-#define ERR_DSK_WRITE            24
-#define MSG_DSK_ALTERED          25
-#define ERR_TAP_INVALID          26
-#define ERR_TAP_UNSUPPORTED      27
-#define ERR_TAP_BAD_VOC          28
-#define ERR_PRINTER              29
-#define ERR_BAD_MF2_ROM          30
-#define ERR_SDUMP                31
 
 #define MSG_SNA_LOAD             32
 #define MSG_SNA_SAVE             33
@@ -265,7 +236,6 @@ extern uint16_t MaxVSync;
 extern t_flags1 flags1;
 extern t_new_dt new_dt;
 
-
 //video_plugin* vid_plugin;
 uint32_t dwSndMinSafeDist=0, dwSndMaxSafeDist=2*2*882;
 
@@ -282,6 +252,7 @@ uint8_t *pbSndBufferEnd = NULL;
 uint8_t *pbSndStream = NULL;
 uint8_t *membank_read[4], *membank_write[4], *memmap_ROM[256];
 uint8_t *pbRAM = NULL;
+uint8_t *pbROM = NULL;
 uint8_t *pbROMlo = NULL;
 uint8_t *pbROMhi = NULL;
 uint8_t *pbExpansionROM = NULL;
@@ -729,11 +700,15 @@ void ga_memory_manager (void)
    }
    if (!(GateArray.ROM_config & 0x04)) { // lower ROM is enabled?
       if (dwMF2Flags & MF2_ACTIVE) { // is the Multiface 2 paged in?
-         membank_read[0] = pbMF2ROM;
-         membank_write[0] = pbMF2ROM;
+         membank_read[GateArray.lower_ROM_bank] = pbMF2ROM;
+         membank_write[GateArray.lower_ROM_bank] = pbMF2ROM;
       } else {
-         membank_read[0] = pbROMlo; // 'page in' lower ROM
+         membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
+   }
+   if (CPC.model >= 3 && GateArray.registerPageOn) {
+      membank_read[1] = pbRegisterPage;
+      membank_write[1] = pbRegisterPage;
    }
    if (!(GateArray.ROM_config & 0x08)) { // upper/expansion ROM is enabled?
       membank_read[3] = pbExpansionROM; // 'page in' upper/expansion ROM
@@ -886,20 +861,39 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
             }
             break;
          case 2: // set mode
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "rom 0x%02x\r\n", val);
-            }
-            #endif
-            GateArray.ROM_config = val;
-            GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
-            ga_memory_manager();
-            if (val & 0x10) { // delay Z80 interrupt?
-               z80.int_pending = 0; // clear pending interrupts
-               GateArray.sl_count = 0; // reset GA scanline counter
-            }
-            if (CPC.mf2) { // MF2 enabled?
-               *(pbMF2ROM + 0x03fef) = val;
+            if (val& 0x20){
+               // 6128+ RMR2 register
+               if (!asic_locked) {
+                  int membank = (val >> 3) & 3;
+                  if (membank == 3) { // Map register page at 0x4000
+                     printf("Register page on\n");
+                     GateArray.registerPageOn = true;
+                     membank = 0;
+                  } else {
+                     printf("Register page off\n");
+                     GateArray.registerPageOn = false;
+                  }
+                  //int page = (val & 0x7);
+                  GateArray.lower_ROM_bank = membank;
+                  pbROMlo = pbCartridgePages[(val & 0x7)];
+                  ga_memory_manager();
+               }
+            }else{
+               #ifdef DEBUG_GA
+               if (dwDebugFlag) {
+                  fprintf(pfoDebug, "rom 0x%02x\r\n", val);
+               }
+               #endif
+               GateArray.ROM_config = val;
+               GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
+               ga_memory_manager();
+               if (val & 0x10) { // delay Z80 interrupt?
+                  z80.int_pending = 0; // clear pending interrupts
+                  GateArray.sl_count = 0; // reset GA scanline counter
+               }
+               if (CPC.mf2) { // MF2 enabled?
+                  *(pbMF2ROM + 0x03fef) = val;
+               }
             }
             break;
          case 3: // set memory configuration
@@ -921,6 +915,8 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
    if (!(port.b.h & 0x40)) { // CRTC chip select?
       uint8_t crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
+         // 6128+: this is where we should detect the ASIC (un)locking sequence
+         asic_poke_lock_sequence(val);
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
             *(pbMF2ROM + 0x03cff) = val;
@@ -1070,19 +1066,33 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
    {
       /* ROM select? */
       GateArray.upper_ROM = val;
-      pbExpansionROM = memmap_ROM[val];
+      if (CPC.model <= 2) {
+         pbExpansionROM = memmap_ROM[val];
 
-      /* selected expansion ROM not present? */
-      if (pbExpansionROM == NULL)
-         pbExpansionROM = pbROMhi; /* revert to BASIC ROM */
+         /* selected expansion ROM not present? */
+         if (pbExpansionROM == NULL)
+            pbExpansionROM = pbROMhi; /* revert to BASIC ROM */
 
-      /* upper/expansion ROM is enabled? */
-      if (!(GateArray.ROM_config & 0x08))
-         membank_read[3] = pbExpansionROM; /* 'page in' upper/expansion ROM */
+         /* upper/expansion ROM is enabled? */
+         if (!(GateArray.ROM_config & 0x08))
+            membank_read[3] = pbExpansionROM; /* 'page in' upper/expansion ROM */
 
-      /* MF2 enabled? */
-      if (CPC.mf2)
-         *(pbMF2ROM + 0x03aac) = val;
+         /* MF2 enabled? */
+         if (CPC.mf2)
+            *(pbMF2ROM + 0x03aac) = val;
+      } else {
+         uint32_t page = 1; // Default to basic page
+         printf("ROM select: %u\n", (int) val);
+         if (val == 7) {
+            page = 3;
+         } else if (val >= 128) {
+            page = val & 31;
+         }
+         pbExpansionROM = pbCartridgePages[page];
+         printf("ROM-PAGE select: %u\n", (int) page);
+         printf("ROM-PAGE val: %u\n", (int) pbExpansionROM[0]);
+      }
+
    }
 
    /* printer port */
@@ -1166,6 +1176,7 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
    }
 
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
+      printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
       FDC.motor = val & 0x01;
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
@@ -1372,7 +1383,7 @@ int snapshot_load (char *pchFileName)
       if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
          uint8_t *pbTemp;
 
-         pbTemp = malloc(dwSnapSize*1024 * sizeof(uint8_t));
+         pbTemp = (uint8_t*) malloc(dwSnapSize*1024 * sizeof(uint8_t));
          if (pbTemp) {
             free(pbRAM);
             CPC.ram_size = dwSnapSize;
@@ -1470,7 +1481,7 @@ int snapshot_load (char *pchFileName)
       { // does the snapshot have version 2 data?
          dwModel = sh.cpc_model; // determine the model it was saved for
          if (dwModel != CPC.model) { // different from what we're currently running?
-            if (dwModel > 2) { // not one of the known models?
+            if (dwModel > 3) { // not one of the known models?
                emulator_reset(false);
                return ERR_SNA_CPC_TYPE;
             }
@@ -1478,7 +1489,7 @@ int snapshot_load (char *pchFileName)
             strcat(chPath, "/");
             strncat(chPath, chROMFile[dwModel], sizeof(chPath)-1 - strlen(chPath)); // path to the required ROM image
             if ((pfileObject = fopen(chPath, "rb")) != NULL) {
-               n = fread(pbROMlo, 2*16384, 1, pfileObject);
+               n = fread(pbROM, 2*16384, 1, pfileObject);
                fclose(pfileObject);
                if (!n) {
                   emulator_reset(false);
@@ -2491,17 +2502,24 @@ int emulator_patch_ROM (void)
    strcat(chPath, "/");
    strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
 
-   if ((pfileObject = fopen(chPath, "rb")) != NULL)
-   {
-      /* load CPC OS + Basic */
-      if(!fread(pbROMlo, 2*16384, 1, pfileObject)) {
+   if(CPC.model <= 2) { // Normal CPC range
+      if ((pfileObject = fopen(chPath, "rb")) != NULL)
+      {
+         /* load CPC OS + Basic */
+         if(!fread(pbROM, 2*16384, 1, pfileObject)) {
+            fclose(pfileObject);
+            return ERR_CPC_ROM_MISSING;
+         }
+         pbROMlo = pbROM;
          fclose(pfileObject);
-         return ERR_CPC_ROM_MISSING;
       }
-      fclose(pfileObject);
+      else
+         return ERR_CPC_ROM_MISSING;
+   } else { // Plus range
+      if (pbCartridgeImage != NULL) {
+         pbROMlo = &pbCartridgeImage[0];
+      }
    }
-   else
-      return ERR_CPC_ROM_MISSING;
 
    if (CPC.keyboard)
    {
@@ -2554,9 +2572,12 @@ void emulator_reset (bool bolMF2Reset)
    // CRTC
    crtc_reset();
 
+   asic_locked = true;
+
    // Gate Array
    memset(&GateArray, 0, sizeof(GateArray)); // clear GA data structure
    GateArray.scr_mode = GateArray.requested_scr_mode = 1; // set to mode 1
+   GateArray.registerPageOn = false;
    ga_init_banking();
 
    // PPI
@@ -2611,15 +2632,24 @@ int emulator_init (void)
    (void)iRomNum;
    (void)iErr;
 
-   pbGPBuffer    = malloc(128*1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
-   pbRAM         = malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
+   pbGPBuffer    = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   pbRAM         = (uint8_t*) malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbROM         = (uint8_t *)&OS[0]; // CPC 6128
 
-   pbROMlo       = (uint8_t *)&OS[0]; // CPC 6128
+   // FIXME
+   if(cart_name[0] == '\0') {
+      pbROMlo = pbROM;
+      printf("no cart!\n");
+   } else if (pbCartridgeImage != NULL) {
+      pbROMlo = &pbCartridgeImage[0];
+      printf("loaded cart: %s\n", cart_name);
+   }
 
-   if (!pbGPBuffer || !pbRAM)
+   if (!pbGPBuffer || !pbRAM || !pbRegisterPage)
       return ERR_OUT_OF_MEMORY;
 
-   pbROMhi       = pbExpansionROM = (uint8_t *)pbROMlo + 16384;
+   pbROMhi = pbExpansionROM = (uint8_t *)pbROMlo + 16384;
 
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
@@ -2639,6 +2669,9 @@ void emulator_shutdown (void)
 {
    int iRomNum;
 
+   if(pbRegisterPage)
+      free(pbRegisterPage);
+
    if (pbMF2ROMbackup)
       free(pbMF2ROMbackup);
    if (pbMF2ROM)
@@ -2655,6 +2688,24 @@ void emulator_shutdown (void)
       free(pbRAM);
    if (pbGPBuffer)
       free(pbGPBuffer);
+}
+
+int cart_insert (char *pchFileName) {
+
+   sprintf(cart_name,"%s",pchFileName);
+   int result = cpr_fload(pchFileName);
+
+   if(result != 0) {
+      fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+      return result;
+   }
+
+   // set mode cpc+
+   CPC.model=3;
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+
 }
 
 int printer_start (void)
@@ -2944,7 +2995,7 @@ void loadConfiguration (void)
    memset(&CPC, 0, sizeof(CPC));
    CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
 
-   if (CPC.model > 2)
+   if (CPC.model > 3)
       CPC.model = 2;
 
    CPC.jumpers       = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
@@ -2952,7 +3003,7 @@ void loadConfiguration (void)
 
    if (CPC.ram_size > 576)
       CPC.ram_size   = 576;
-   else if ((CPC.model == 2) && (CPC.ram_size < 128))
+   else if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
    CPC.speed = getConfigValueInt(chFileName, "system", "speed", DEF_SPEED_SETTING); // original CPC speed
@@ -3198,6 +3249,7 @@ void doCleanUp (void)
    dsk_eject(&driveB);
 
    tape_eject();
+   cpr_eject();
 
    if (zip_info.pchFileNames)
       free(zip_info.pchFileNames);
@@ -3222,7 +3274,7 @@ void change_model(int val){
 
 	CPC.model=val;
 
-   if ((CPC.model == 2) && (CPC.ram_size < 128))
+   if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
    /* Reconfigure emulator */
@@ -3235,7 +3287,7 @@ void change_ram(int val){
 
 	CPC.ram_size=val;
 
-   if ((CPC.model == 2) && (CPC.ram_size < 128))
+   if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
    /* Reconfigure emulator */
@@ -3622,7 +3674,7 @@ int detach_disk(int drive)
    else
    {
       dsk_eject(&driveB);
-      DISKB_NAME[0] = '0';
+      DISKB_NAME[0] = '\0';
    }
 
    return 0;

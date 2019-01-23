@@ -13,6 +13,7 @@ char RETRO_DIR[512];
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
 char TAPE_NAME[512]="\0";
+char cart_name[512]="\0";
 
 //TIME
 #ifdef __CELLOS_LV2__
@@ -41,6 +42,7 @@ extern int snapshot_load (char *pchFileName);
 extern int attach_disk(char *arv, int drive);
 extern int detach_disk(int drive);
 extern int tape_insert (char *pchFileName);
+extern int cart_insert (char *pchFileName);
 extern void enter_gui(void);
 extern void kbd_buf_feed(char *s);
 extern void kbd_buf_update();
@@ -166,7 +168,7 @@ void Add_Option(const char* option)
 
    if(first==0)
    {
-      PARAMCOUNT=0;	
+      PARAMCOUNT=0;
       first++;
    }
 
@@ -178,7 +180,7 @@ int pre_main(const char *argv)
    int i;
    bool Only1Arg;
 
-   parse_cmdline(argv); 
+   parse_cmdline(argv);
 
    Only1Arg = (strcmp(ARGUV[0],"x64") == 0) ? 0 : 1;
 
@@ -207,7 +209,7 @@ int pre_main(const char *argv)
       LOGI("%2d  %s\n",i,XARGV[i]);
    }
 
-   skel_main(PARAMCOUNT,( char **)xargv_cmd); 
+   skel_main(PARAMCOUNT,( char **)xargv_cmd);
 
    xargv_cmd[PARAMCOUNT - 2] = NULL;
 
@@ -220,7 +222,7 @@ void parse_cmdline(const char *argv)
 	int c,c2;
 	static char buffer[512*4];
 	enum states { DULL, IN_WORD, IN_STRING } state = DULL;
-	
+
 	strcpy(buffer,argv);
 	strcat(buffer," \0");
 
@@ -250,7 +252,7 @@ void parse_cmdline(const char *argv)
                //... do something with the word ...
                for (c2 = 0,p2 = start_of_word; p2 < p; p2++, c2++)
                   ARGUV[ARGUC][c2] = (unsigned char) *p2;
-               ARGUC++; 
+               ARGUC++;
 
                state = DULL; /* back to "not in word, not in string" state */
             }
@@ -263,12 +265,12 @@ void parse_cmdline(const char *argv)
                //... do something with the word ...
                for (c2 = 0,p2 = start_of_word; p2 <p; p2++,c2++)
                   ARGUV[ARGUC][c2] = (unsigned char) *p2;
-               ARGUC++; 
+               ARGUC++;
 
                state = DULL; /* back to "not in word, not in string" state */
             }
             continue; /* either still IN_WORD or we handled the end above */
-      }	
+      }
    }
 }
 
@@ -302,7 +304,7 @@ long GetTicks(void)
    return (now.tv_sec*1000000 + now.tv_nsec/1000);///1000;
 #endif
 
-} 
+}
 
 int HandleExtension(char *path,char *ext)
 {
@@ -388,7 +390,7 @@ void retro_set_environment(retro_environment_t cb)
 
    struct retro_variable variables[] = {
 
-	  { 
+	  {
 		"cap32_autorun",
 		"Autorun; disabled|enabled" ,
 	  },
@@ -398,7 +400,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_Model",
-         "Model:; 464|664|6128",
+         "Model:; 464|664|6128|6129",
       },
       {
          "cap32_Ram",
@@ -468,7 +470,7 @@ static void update_variables(void)
       if (pch)
          retroh = strtoul(pch, NULL, 0);
    }
-
+   // TODO: FIXME 6129
    var.key = "cap32_Model";
    var.value = NULL;
 
@@ -481,6 +483,7 @@ static void update_variables(void)
       if(val==464)val=0;
       else if(val==664)val=1;
       else if(val==6128)val=2;
+      else if(val==6129)val=3;
       if(retro_ui_finalized)
          change_model(val);
 
@@ -560,7 +563,7 @@ static void update_variables(void)
       if(retro_ui_finalized){
          CPC.scr_intensity = val;
          video_set_palette();
-      }	
+      }
    }
 
 #if 0
@@ -636,13 +639,13 @@ static bool disk_set_eject_state(bool ejected)
 	if (dc)
 	{
 		dc->eject_state = ejected;
-		
+
 		if(dc->eject_state)
 			detach_disk(0);
 		else
 			attach_disk((char *)dc->files[dc->index],0);
 	}
-	
+
 	return true;
 }
 
@@ -650,7 +653,7 @@ static bool disk_get_eject_state(void)
 {
 	if (dc)
 		return dc->eject_state;
-	
+
 	return true;
 }
 
@@ -658,7 +661,7 @@ static unsigned disk_get_image_index(void)
 {
 	if (dc)
 		return dc->index;
-	
+
 	return 0;
 }
 
@@ -671,7 +674,7 @@ static bool disk_set_image_index(unsigned index)
 		// This can mess things in the emu
 		if(index == dc->index)
 			return true;
-		
+
 		if ((index < dc->count) && (dc->files[index]))
 		{
 			dc->index = index;
@@ -679,7 +682,7 @@ static bool disk_set_image_index(unsigned index)
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -723,8 +726,8 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 }
 
 void retro_init(void)
-{    	
-   struct retro_log_callback log;	
+{
+   struct retro_log_callback log;
    const char *system_dir = NULL;
    dc = dc_create();
 
@@ -733,27 +736,27 @@ void retro_init(void)
 		log_cb = log.log;
 	else
 		log_cb = fallback_log;
-	
+
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
-      // if defined, use the system directory			
-      retro_system_directory=system_dir;		
-   }		   
+      // if defined, use the system directory
+      retro_system_directory=system_dir;
+   }
 
    const char *content_dir = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_CONTENT_DIRECTORY, &content_dir) && content_dir)
    {
-      // if defined, use the system directory			
-      retro_content_directory=content_dir;		
-   }			
+      // if defined, use the system directory
+      retro_content_directory=content_dir;
+   }
 
    const char *save_dir = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &save_dir) && save_dir)
    {
       // If save directory is defined use it, otherwise use system directory
-      retro_save_directory = *save_dir ? save_dir : retro_system_directory;      
+      retro_save_directory = *save_dir ? save_dir : retro_system_directory;
    }
    else
    {
@@ -775,7 +778,7 @@ void retro_init(void)
 #else
     	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 #endif
-   
+
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
       fprintf(stderr, "PIXEL FORMAT is not supported.\n");
@@ -830,9 +833,9 @@ LOGI("PIXEL FORMAT is not supported.\n");
 extern void main_exit();
 void retro_deinit(void)
 {
-   app_free(); 
- 
-   Emu_uninit(); 
+   app_free();
+
+   Emu_uninit();
 
    UnInitOSGLU();
 
@@ -869,7 +872,7 @@ void retro_get_system_info(struct retro_system_info *info)
    #define GIT_VERSION ""
    #endif
    info->library_version  = "4.2" GIT_VERSION;
-   info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|m3u";
+   info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;
 
@@ -906,8 +909,8 @@ void retro_audio_cb( short l, short r)
 }
 
 void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
-   int x; 
-   if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);	
+   int x;
+   if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);
 }
 
 void retro_blit()
@@ -919,6 +922,7 @@ void retro_blit()
 #define DSK_FILE_EXT "dsk"
 #define M3U_FILE_EXT "m3u"
 #define SNA_FILE_EXT "sna"
+#define CPR_FILE_EXT "cpr"
 
 void retro_run(void)
 {
@@ -950,7 +954,7 @@ void retro_run(void)
 				{
 					log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
 				}
-				
+
 				// Init first disk
 				dc->index = 0;
 				dc->eject_state = false;
@@ -966,13 +970,13 @@ void retro_run(void)
 					sprintf(command, "%s\n", dc->command);
 					kbd_buf_feed(command);
 					free(command);
-				}						
+				}
 				else
 				{
 					// Autoplay
 					retro_disk_auto();
 				}
-				
+
 				// Prepare SNA
 				sprintf(RPATH,"%s%d.SNA",RPATH,0);
 
@@ -986,7 +990,7 @@ void retro_run(void)
 				// Add the file to disk control context
 				// Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
 				dc_add_file(dc, RPATH);
-				
+
 				// Init first disk
 				dc->index = 0;
 				dc->eject_state = false;
@@ -996,10 +1000,10 @@ void retro_run(void)
 
 				// Prepare SNA
 				sprintf(RPATH,"%s%d.SNA",RPATH,0);
-				
+
 				return;
 			}
-			
+
 		// If it's a tape
 		if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
 			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
@@ -1018,7 +1022,17 @@ void retro_run(void)
 				sprintf(RPATH,"%s",RPATH);
 				return;
 			}
-		
+
+      // If it's a cart
+		if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
+			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
+			{
+				cart_insert (RPATH);
+				sprintf(RPATH,"%s",RPATH);
+				return;
+			}
+
+
 		return;
    }
 
@@ -1141,4 +1155,3 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
    (void)enabled;
    (void)code;
 }
-

@@ -27,10 +27,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdbool.h>
-//RETRO HACK 
+//RETRO HACK
 //TODO ENDIANNESS
 //#define DEBUG 1
 //#define DEBUG_CRTC
+#define DEBUG_CART
 //#define DEBUG_FDC
 //#define DEBUG_GA
 //#define DEBUG_NO_VIDEO
@@ -250,7 +251,7 @@ typedef struct {
          unsigned int high;
          unsigned int low;
       };
-#else     
+#else
       struct
       {
          unsigned int low;
@@ -342,6 +343,8 @@ typedef struct {
 typedef struct {
 	unsigned int hs_count;
    unsigned char ROM_config;
+   unsigned char lower_ROM_bank;
+   bool registerPageOn;
    unsigned char RAM_bank;
    unsigned char RAM_config;
    unsigned char upper_ROM;
@@ -371,7 +374,7 @@ typedef struct
          unsigned int high;
          unsigned int low;
       };
-#else     
+#else
       struct
       {
          unsigned int low;

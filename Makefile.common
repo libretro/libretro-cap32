@@ -7,7 +7,7 @@ INCFLAGS := \
 	-I$(CORE_DIR)/libretro  \
 	-I$(GUI) \
 	-I$(GUI)/nuklear \
-	-I$(GUI)/retro 
+	-I$(GUI)/retro
 
 SOURCES_C := \
 				 $(CORE_DIR)/libretro/libretro-core.c \
@@ -24,10 +24,11 @@ else
 SOURCES_C += $(CORE_DIR)/cap32/psg.c
 endif
 SOURCES_C += $(CORE_DIR)/cap32/tape.c
+SOURCES_C += $(CORE_DIR)/cap32/cart.c
+SOURCES_C += $(CORE_DIR)/cap32/asic.c
 SOURCES_C += $(CORE_DIR)/cap32/z80.c
 SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
 SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_files.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
-
