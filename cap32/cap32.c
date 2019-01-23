@@ -868,7 +868,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                 //colours[colour].r, colours[colour].g, colours[colour].b);
                if (GateArray.pen < 2) {
 
-//FIXME RETRO 
+//FIXME RETRO
 unsigned char r,g,b,r2,g2,b2;
 r=(colours[GateArray.ink_values[0]]>>16)&0xFF;
 g=(colours[GateArray.ink_values[0]]>>8)&0xFF;
@@ -998,7 +998,7 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
 
                      // matches maximum raster address?
                      if (CRTC.raster_count == CRTC.registers[9])
-                     { 
+                     {
                         temp = 1;
                         CRTC.flag_resscan = 1; // request a raster counter reset
                      }
@@ -1092,7 +1092,7 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
       if (pfoPrinter)
       {
          /* only grab data bytes; ignore the strobe signal */
-         if (!(CPC.printer_port & 0x80)) 
+         if (!(CPC.printer_port & 0x80))
             fputc(CPC.printer_port, pfoPrinter); // capture printer output to file
       }
    }
@@ -1566,7 +1566,7 @@ int snapshot_save (char *pchFileName)
 
    memset(&sh, 0, sizeof(sh));
 
-   strcpy(sh.id, "MV - SNA");
+   memcpy(sh.id, "MV - SNA", sizeof(sh.id));
 
    sh.version = 3;
 
@@ -1903,7 +1903,7 @@ exit:
 
    if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
-		
+
    return iRetCode;
 }
 
@@ -1915,7 +1915,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
 
    if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
       memset(&dh, 0, sizeof(dh));
-      strcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n");
+      memcpy(dh.id, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", sizeof(dh.id));
       strcpy(dh.unused1, "Caprice32\r\n");
       dh.tracks = drive->tracks;
       dh.sides = (drive->sides+1) | (drive->random_DEs); // correct side count and indicate random DEs, if necessary
@@ -1938,7 +1938,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
       }
 
       memset(&th, 0, sizeof(th));
-      strcpy(th.id, "Track-Info\r\n"); // TODO: check this buffer overflow - strcpy adds the null byte
+      memcpy(th.id, "Track-Info\r\n", sizeof(th.id));
       for (track = 0; track < drive->tracks; track++) { // loop for all tracks
          for (side = 0; side <= drive->sides; side++) { // loop for all sides
             if (drive->track[track][side].size) { // track is formatted?
@@ -1992,7 +1992,7 @@ int dsk_format (t_drive *drive, int iFormat)
    for (track = 0; track < drive->tracks; track++)
    {
       /* loop for all tracks */
-      
+
       for (side = 0; side <= drive->sides; side++)
       {
          /* loop for all sides */
@@ -2397,7 +2397,7 @@ int tape_insert_voc (char *pchFileName)
                uint8_t bVocSample = *pbVocDataBlockPtr++;
 
                dwBit--;
-               
+
                if (bVocSample > VOC_THRESHOLD)
                   bByte |= bit_values[dwBit];
 
@@ -2500,7 +2500,7 @@ int emulator_patch_ROM (void)
       }
       fclose(pfileObject);
    }
-   else 
+   else
       return ERR_CPC_ROM_MISSING;
 
    if (CPC.keyboard)
@@ -2719,7 +2719,7 @@ int video_set_palette (void)
 {
 
    int n;
-  
+
 
    if (!CPC.scr_tube)
    {
@@ -2822,13 +2822,13 @@ void video_set_style (void)
 }
 
 int video_init (void)
-{ 
+{
    int error_code;
    CPC.scr_bpp = retro_getGfxBpp();
 
    error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
    if (error_code)
-      return error_code; 
+      return error_code;
 
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
@@ -2836,7 +2836,7 @@ int video_init (void)
    CPC.scr_line_offs = ((CPC.scr_bps * (CPC.scr_style - 2)) // because is double height
                          / (2 / PIXEL_BYTES) ) ;
 
-   video_set_style(); 
+   video_set_style();
    memset(bmp, 0, sizeof(bmp));
 
    return 0;
@@ -2899,7 +2899,7 @@ void getConfigValueString (char* pchFileName, char* pchSection,
    if ((pfoConfigFile = fopen(pchFileName, "r")) != NULL)
    {
       /* open the config file */
-      
+
       while(fgets(chLine, MAX_LINE_LEN, pfoConfigFile) != NULL)
       {
          /* grab one line */
@@ -3193,7 +3193,7 @@ void doCleanUp (void)
 {
    printer_stop();
    emulator_shutdown();
-     
+
    dsk_eject(&driveA);
    dsk_eject(&driveB);
 
@@ -3249,7 +3249,7 @@ void retro_key_down(int key)
 	int code;
 
 	if(key<512)
- 		code=KeySymToCPCKey[key];	
+ 		code=KeySymToCPCKey[key];
 	else code = CPC_KEY_NULL;
 	CPC_SetKey(code);
 }
@@ -3431,12 +3431,12 @@ void retro_joy0(unsigned char joy0)
    //btn0
    if(joy0&0x80){
       if(jflag0[4]==0){
-         retro_key_down(RETROK_INSERT); 
+         retro_key_down(RETROK_INSERT);
          jflag0[4]=1;
       }
    }else {
       if(jflag0[4]==1){
-         retro_key_up(RETROK_INSERT); 
+         retro_key_up(RETROK_INSERT);
          jflag0[4]=0;
       }
    }
@@ -3444,12 +3444,12 @@ void retro_joy0(unsigned char joy0)
    //btn1
    if(joy0&0x40){
       if(jflag0[5]==0){
-         retro_key_down(RETROK_PAGEUP); 
+         retro_key_down(RETROK_PAGEUP);
          jflag0[5]=1;
       }
    }else {
       if(jflag0[5]==1){
-         retro_key_up(RETROK_PAGEUP); 
+         retro_key_up(RETROK_PAGEUP);
          jflag0[5]=0;
       }
    }
@@ -3554,7 +3554,7 @@ int retro_disk_auto()
         if (! strcasecmp(scan+1, "")) {
           if (first_spc == -1) first_spc = index;
           found = 1;
-        } else 
+        } else
         if (! strcasecmp(scan+1, "BIN")) {
           if (first_bin == -1) first_bin = index;
           found = 1;
@@ -3572,16 +3572,16 @@ int retro_disk_auto()
 
     } else {
       if (first_bas != -1) cur_name_id = first_bas;
-      else 
+      else
       if (first_spc != -1) cur_name_id = first_spc;
-      else 
+      else
       if (first_bin != -1) cur_name_id = first_bin;
 
       sprintf(Buffer, "RUN\"%s", cpc_dsk_dirent[cur_name_id]);
     }
   }
 
-  //if (CPC.psp_explore_disk == CPC_EXPLORE_FULL_AUTO) 
+  //if (CPC.psp_explore_disk == CPC_EXPLORE_FULL_AUTO)
   {
     strcat(Buffer, "\n");
   }
@@ -3595,7 +3595,7 @@ int retro_disk_auto()
 int attach_disk(char *arv, int drive)
 {
 	int result = 1;
-	
+
 	if(!drive) {
 		if((result = dsk_load( arv, &driveA, 'A')) == 0)
 		{
@@ -3604,8 +3604,8 @@ int attach_disk(char *arv, int drive)
 		}
 	} else {
 		if((result = dsk_load( arv, &driveB, 'B')) == 0)
-		{   
-			sprintf(DISKB_NAME,"%s",arv); 
+		{
+			sprintf(DISKB_NAME,"%s",arv);
 			cap32_disk_dir(arv);
 		}
    }
@@ -3636,7 +3636,7 @@ int loadadsk (char *arv,int drive)
 	  {
 		  retro_disk_auto();
 		  sprintf(RPATH,"%s%d.SNA",arv,drive);
-	  }		  
+	  }
    }
    else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
    {
@@ -3668,13 +3668,13 @@ void check_kbd_command()
    	else if (autoboot_delay==AUTODELAY)
    	{
    		if (!autorun)
-   			kbd_runcmd=false; 
-     	
+   			kbd_runcmd=false;
+
      		autoboot_delay++;
    	}
 
 	if(kbd_runcmd==true && autoboot_delay>AUTODELAY){
-    
+
 	  	static int pair=-1;
 
       		pair=-pair;
@@ -3759,7 +3759,7 @@ int capmain (int argc, char **argv)
    }
 
    /* init Z80 emulation */
-   z80_init_tables(); 
+   z80_init_tables();
 
    if (video_init())
    {
@@ -3794,4 +3794,3 @@ int capmain (int argc, char **argv)
 
    return 0;
 }
-
