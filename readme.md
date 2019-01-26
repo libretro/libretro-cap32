@@ -4,13 +4,18 @@
 A quick port of caprice32-4.2.0 to LIBRETRO.
 	
 All the credit of the caprice32 Emulator to Ulrich Doewich 
-Also 6128.h & amsdos.h (and psg for ps3 )files taken from wiituka (author:dskywalk)
-http://code.google.com/p/wiituka/
-
-And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
 You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
+
+
+6128.h & amsdos.h (and psg for ps3 ) files taken from wiituka (author:dskywalk)
+http://code.google.com/p/wiituka/
+
+Plus Range: CPC464+/CPC6128+/GX4000 (c) Copyright 2016-2019 Colin Pitrat
+https://github.com/ColinPitrat/caprice32
+
+And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
 The core work pretty well and give the fantastic ability to use the RetroArch Shaders.
 
