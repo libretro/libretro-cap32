@@ -68,6 +68,7 @@ void asic_poke_lock_sequence(uint8_t val) {
 }
 
 void asic_register_page_write(uint16_t addr, uint8_t val) {
+   #ifdef DEBUG_ASIC
    if (addr >= 0x4000 && addr < 0x5000) {
       LOG("Received sprite data %x", addr);
    } else if (addr >= 0x6000 && addr < 0x607D) {
@@ -83,4 +84,5 @@ void asic_register_page_write(uint16_t addr, uint8_t val) {
    } else {
       printf("Received unused write at %x - val: %u\n", addr, (int) val);
    }
+   #endif
 }

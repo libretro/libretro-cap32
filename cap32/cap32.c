@@ -2650,8 +2650,8 @@ int emulator_init (void)
          break;
       case 3: // 6128+
          if(cart_name[0] == '\0') {
-            pbROMlo = pbROM = (uint8_t *)&OS_6128P[0]; // CPC 6128 +
             cpr_load(&OS_6128P[0]);
+            pbROM = pbROMlo;
             printf("used internal bios!\n");
          } else if (pbCartridgeImage != NULL) {
             //pbROM = (uint8_t *)&OS[0]; // FIXME ?
@@ -2709,6 +2709,11 @@ void emulator_shutdown (void)
 }
 
 int cart_insert (char *pchFileName) {
+
+   if(retro_computer_cfg.model != 3) {
+      fprintf(stderr, "Cartridge ERROR: Please select CPC6128+.\n");
+      return ERR_CPR_INVALID;
+   }
 
    sprintf(cart_name,"%s",pchFileName);
    int result = cpr_fload(pchFileName);

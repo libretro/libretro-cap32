@@ -409,7 +409,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_Model",
-         "Model:; 464|664|6128|6128+",
+         "Model:; 464|664|6128", // 6128+ - WIP
       },
       {
          "cap32_Ram",
