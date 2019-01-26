@@ -148,7 +148,7 @@ int Left_Chan, Right_Chan;
 
 
 
-inline void SetMixerRegister(byte Value)
+static INLINE void SetMixerRegister(byte Value)
 {
    PSG.RegisterAY.Mixer = Value;
    Ton_EnA = Value & 1 ? false : true;
@@ -161,7 +161,7 @@ inline void SetMixerRegister(byte Value)
 
 
 
-inline void SetAmplA(byte Value)
+static INLINE void SetAmplA(byte Value)
 {
    PSG.RegisterAY.AmplitudeA = Value;
    Envelope_EnA = Value & 16 ? false : true;
@@ -169,7 +169,7 @@ inline void SetAmplA(byte Value)
 
 
 
-inline void SetAmplB(byte Value)
+static INLINE void SetAmplB(byte Value)
 {
    PSG.RegisterAY.AmplitudeB = Value;
    Envelope_EnB = Value & 16 ? false : true;
@@ -177,7 +177,7 @@ inline void SetAmplB(byte Value)
 
 
 
-inline void SetAmplC(byte Value)
+static INLINE void SetAmplC(byte Value)
 {
    PSG.RegisterAY.AmplitudeC = Value;
    Envelope_EnC = Value & 16 ? false : true;
@@ -290,7 +290,7 @@ void Case_EnvType_14(void)
 
 
 
-inline void SetEnvelopeRegister(byte Value)
+static INLINE void SetEnvelopeRegister(byte Value)
 {
    Envelope_Counter.Hi = 0;
    PSG.FirstPeriod = true;
@@ -380,7 +380,7 @@ void SetAYRegister(int Num, byte Value)
 
 
 
-inline void Synthesizer_Logic_Q(void)
+static INLINE void Synthesizer_Logic_Q(void)
 {
 #if 0
    static int nd = 0;
@@ -435,7 +435,7 @@ inline void Synthesizer_Logic_Q(void)
 
 
 
-inline void Synthesizer_Mixer_Q(void)
+static INLINE void Synthesizer_Mixer_Q(void)
 {
    int LevL, LevR, k;
 
@@ -582,7 +582,7 @@ void Synthesizer_Stereo8(void)
 
 
 
-inline void Synthesizer_Mixer_Q_Mono(void)
+static INLINE void Synthesizer_Mixer_Q_Mono(void)
 {
    int Lev, k;
 
