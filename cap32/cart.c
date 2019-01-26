@@ -212,11 +212,7 @@ int cpr_load(const uint8_t* pbCtBuffer)
    LOG("Final offset: %u", offset);
    LOG("Final cartridge offset: %u", cartOffset);
 
-   //pbROMlo = (uint8_t *) &pbCartridgeImage[0];
-
-   FILE* fp = fopen("page1dump.bin", "wb");
-   fwrite (pbCartridgePages[1], CPR_PAGE_SIZE, 1, fp);
-   fclose(fp);
+   pbROMlo = (uint8_t *) &pbCartridgeImage[0];
 
    return 0;
 }

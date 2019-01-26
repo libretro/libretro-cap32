@@ -35,7 +35,7 @@ extern unsigned amstrad_devices[ 2 ];
 #define uint8 uint8_t
 
 //SCREEN 16BITS
-//#define M16B 
+//#define M16B
 
 #ifdef M16B
  #define PIXEL_BYTES 1
@@ -44,12 +44,24 @@ extern unsigned amstrad_devices[ 2 ];
 #else
  #define PIXEL_BYTES 2
  #define PIXEL_TYPE UINT32
- #define PITCH 4	
+ #define PITCH 4
 #endif
 
 extern PIXEL_TYPE *Retro_Screen;
 
 #define WINDOW_MAX_SIZE (768*544)
+
+// COMPUTER STATUS
+#define COMPUTER_OFF     0
+#define COMPUTER_BOOTING 1
+#define COMPUTER_READY   5
+extern int retro_status;
+
+typedef struct {
+   int model;
+   int ram;
+} computer_cfg_t;
+extern computer_cfg_t retro_computer_cfg;
 
 //VKBD
 #define NPLGN 12
@@ -59,7 +71,7 @@ extern PIXEL_TYPE *Retro_Screen;
 typedef struct {
 	char norml[NLETT];
 	char shift[NLETT];
-	int val;	
+	int val;
 } Mvk;
 
 extern Mvk MVk[NPLGN*NLIGN*2];
@@ -80,7 +92,7 @@ typedef struct{
 } retro_pal;
 
 //VARIABLES
-extern int pauseg; 
+extern int pauseg;
 
 //SCREEN FUNCTIONS
 extern int retro_getStyle();

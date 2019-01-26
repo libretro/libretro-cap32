@@ -2618,6 +2618,7 @@ void emulator_reset (bool bolMF2Reset)
 }
 
 #include "rom/6128.h"
+#include "rom/6128p.h"
 #include "rom/amsdos.h"
 
 int emulator_init (void)
@@ -2634,15 +2635,33 @@ int emulator_init (void)
    pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
    pbGPBuffer    = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
    pbRAM         = (uint8_t*) malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
-   pbROM         = (uint8_t *)&OS[0]; // CPC 6128
 
-   // FIXME
-   if(cart_name[0] == '\0') {
-      pbROMlo = pbROM;
-      printf("no cart!\n");
-   } else if (pbCartridgeImage != NULL) {
-      pbROMlo = &pbCartridgeImage[0];
-      printf("loaded cart: %s\n", cart_name);
+   // TODO load custom bios
+   switch(CPC.model)
+   {
+      case 0: // 464
+         pbROMlo = pbROM = (uint8_t *)&OS[0]; // FIXME FOR CPC 464
+         break;
+      case 1: // 664
+         pbROMlo = pbROM = (uint8_t *)&OS[0]; // FIXME FOR CPC 664
+         break;
+      case 2: // 6128
+         pbROMlo = pbROM = (uint8_t *)&OS[0]; // CPC 6128
+         break;
+      case 3: // 6128+
+         if(cart_name[0] == '\0') {
+            pbROMlo = pbROM = (uint8_t *)&OS_6128P[0]; // CPC 6128 +
+            cpr_load(&OS_6128P[0]);
+            printf("used internal bios!\n");
+         } else if (pbCartridgeImage != NULL) {
+            //pbROM = (uint8_t *)&OS[0]; // FIXME ?
+            printf("loaded cart: %s\n", cart_name);
+         }
+         break;
+      default: // CPC 6128
+         CPC.model = 2;
+         pbROMlo = pbROM = (uint8_t *)&OS[0]; // CPC 6128
+         printf("ERROR: unknown model\n");
    }
 
    if (!pbGPBuffer || !pbRAM || !pbRegisterPage)
@@ -2699,11 +2718,11 @@ int cart_insert (char *pchFileName) {
       return result;
    }
 
-   // set mode cpc+
-   CPC.model=3;
-   /* Reconfigure emulator */
-   emulator_shutdown();
-   emulator_init();
+   /* Restart emulator if initiated */
+   if( retro_status == COMPUTER_READY) {
+      emulator_shutdown();
+      emulator_init();
+   }
 
    return 0;
 }
@@ -2993,13 +3012,15 @@ void loadConfiguration (void)
    strcat(chFileName, "/cap32.cfg");
 
    memset(&CPC, 0, sizeof(CPC));
-   CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
 
+   //CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
+   CPC.model = retro_computer_cfg.model;
    if (CPC.model > 3)
       CPC.model = 2;
 
    CPC.jumpers       = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
-   CPC.ram_size      = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM
+   //CPC.ram_size      = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM
+   CPC.ram_size = retro_computer_cfg.ram;
 
    if (CPC.ram_size > 576)
       CPC.ram_size   = 576;
@@ -3267,8 +3288,6 @@ void emu_reset(void)
 {
 	emulator_reset(false);
 }
-
-extern int retro_ui_finalized;
 
 void change_model(int val){
 
@@ -3842,7 +3861,7 @@ int capmain (int argc, char **argv)
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
 
-   retro_ui_finalized=1;
+   retro_status = COMPUTER_READY; // set computer init as completed
 
    return 0;
 }

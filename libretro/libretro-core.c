@@ -33,6 +33,8 @@ static dc_storage* dc;
 // LOG
 retro_log_printf_t log_cb;
 
+computer_cfg_t retro_computer_cfg;
+
 extern int SHOWKEY;
 extern int Core_PollEvent(void);
 
@@ -71,7 +73,6 @@ int snd_sampler = 44100 / 50;
 
 //PATH
 char RPATH[512];
-bool retro_load_ok = false;
 int pauseg=0; //enter_gui
 
 extern int app_init(int width, int height);
@@ -90,7 +91,8 @@ unsigned amstrad_devices[ 2 ];
 int autorun=0;
 
 int RETROJOY=0,RETROSTATUS=0,RETRODRVTYPE=0;
-int retrojoy_init=0,retro_ui_finalized=0;
+int retrojoy_init=0;
+int retro_status = COMPUTER_OFF;
 
 int cap32_statusbar=0;
 
@@ -118,6 +120,13 @@ static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
+
+// allowed file types
+#define CDT_FILE_EXT "cdt"
+#define DSK_FILE_EXT "dsk"
+#define M3U_FILE_EXT "m3u"
+#define SNA_FILE_EXT "sna"
+#define CPR_FILE_EXT "cpr"
 
 void retro_set_input_state(retro_input_state_t cb)
 {
@@ -400,7 +409,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_Model",
-         "Model:; 464|664|6128|6129",
+         "Model:; 464|664|6128|6128+",
       },
       {
          "cap32_Ram",
@@ -476,17 +485,19 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      char str[100];
-      int val;
-      snprintf(str, sizeof(str), "%s", var.value);
-      val = strtoul(str, NULL, 0);
-      if(val==464)val=0;
-      else if(val==664)val=1;
-      else if(val==6128)val=2;
-      else if(val==6129)val=3;
-      if(retro_ui_finalized)
-         change_model(val);
-
+      int val = 2; // DEFAULT 6128
+      if (strcmp(var.value, "464") == 0) val=0;
+      else if (strcmp(var.value, "664") == 0) val=1;
+      else if (strcmp(var.value, "6128") == 0) val=2;
+      else if (strcmp(var.value, "6128+") == 0) val=3;
+      if (retro_computer_cfg.model != val) {
+         if( retro_status == COMPUTER_READY ) {
+            printf("REBOOT - CPC MODEL: %u\n", val);
+            change_model(val);
+         } else  {
+            retro_computer_cfg.model = val;
+         }
+      }
    }
 
    var.key = "cap32_Ram";
@@ -498,10 +509,14 @@ static void update_variables(void)
       int val;
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
-
-      if(retro_ui_finalized)
-         change_ram(val);
-
+      if (retro_computer_cfg.ram != val) {
+         if(retro_status == COMPUTER_READY) {
+            printf("REBOOT - CPC RAM: %u\n", val);
+            change_ram(val);
+         } else {
+            retro_computer_cfg.ram = val;
+         }
+      }
    }
 
    var.key = "cap32_Statusbar";
@@ -509,7 +524,7 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(retro_ui_finalized){
+		if(retro_status == COMPUTER_READY){
     		  if (strcmp(var.value, "enabled") == 0)
     		     cap32_statusbar=1;
     		  if (strcmp(var.value, "disabled") == 0)
@@ -532,7 +547,7 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-      if(retro_ui_finalized)
+      if(retro_status == COMPUTER_READY)
          ;//set_drive_type(8, val);
       else RETRODRVTYPE=val;
    }
@@ -542,7 +557,7 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(retro_ui_finalized){
+		if(retro_status == COMPUTER_READY){
       		if (strcmp(var.value, "enabled") == 0){
          		  CPC.scr_tube=1;video_set_palette();}
       		if (strcmp(var.value, "disabled") == 0){
@@ -560,7 +575,7 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-      if(retro_ui_finalized){
+      if(retro_status == COMPUTER_READY){
          CPC.scr_intensity = val;
          video_set_palette();
       }
@@ -572,7 +587,7 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(retro_ui_finalized){
+		if(retro_status == COMPUTER_READY){
       		if (strcmp(var.value, "enabled") == 0){
          		  CPC.scr_remanency=1;video_set_palette();}//set_truedrive_emultion(1);
       		if (strcmp(var.value, "disabled") == 0){
@@ -725,6 +740,107 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
 }
 
+// load bios content
+void computer_load_bios() {
+   // TODO add load customs bios
+
+   // cart is like a system bios
+   if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
+      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
+      {
+         cart_insert (RPATH);
+         sprintf(RPATH,"%s",RPATH);
+         return;
+      }
+}
+
+// load content
+void computer_load_file() {
+   int i;
+   // If it's a m3u file
+   if (strlen(RPATH) >= strlen(M3U_FILE_EXT))
+      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(M3U_FILE_EXT)], M3U_FILE_EXT))
+      {
+         // Parse the m3u file
+         dc_parse_m3u(dc, RPATH);
+
+         // Some debugging
+         log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
+         for(i = 0; i < dc->count; i++)
+         {
+            log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
+         }
+
+         // Init first disk
+         dc->index = 0;
+         dc->eject_state = false;
+         printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+         attach_disk((char *)dc->files[dc->index],0);
+
+         // If command was specified
+         if(dc->command)
+         {
+            // Execute the command
+            log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+            char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+            sprintf(command, "%s\n", dc->command);
+            kbd_buf_feed(command);
+            free(command);
+         }
+         else
+         {
+            // Autoplay
+            retro_disk_auto();
+         }
+
+         // Prepare SNA
+         sprintf(RPATH,"%s%d.SNA",RPATH,0);
+
+         return;
+      }
+
+   // If it's a disk
+   if (strlen(RPATH) >= strlen(DSK_FILE_EXT))
+      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(DSK_FILE_EXT)], DSK_FILE_EXT))
+      {
+         // Add the file to disk control context
+         // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
+         dc_add_file(dc, RPATH);
+
+         // Init first disk
+         dc->index = 0;
+         dc->eject_state = false;
+         printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+         attach_disk((char *)dc->files[dc->index],0);
+         retro_disk_auto();
+
+         // Prepare SNA
+         sprintf(RPATH,"%s%d.SNA",RPATH,0);
+
+         return;
+      }
+
+   // If it's a tape
+   if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
+      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
+      {
+         tape_insert ((char *)RPATH);
+         kbd_buf_feed("|tape\nrun\"\n^");
+         return;
+
+      }
+
+   // If it's a snapshot
+   if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
+      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
+      {
+         snapshot_load (RPATH);
+         sprintf(RPATH,"%s",RPATH);
+         return;
+      }
+
+}
+
 void retro_init(void)
 {
    struct retro_log_callback log;
@@ -809,6 +925,10 @@ LOGI("PIXEL FORMAT is not supported.\n");
 
 	// Disk control interface
 	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
+
+   // prepare shared variables
+   retro_computer_cfg.model = -1;
+   retro_computer_cfg.ram = -1;
 
 	update_variables();
 
@@ -918,17 +1038,10 @@ void retro_blit()
    memcpy(Retro_Screen,bmp,gfx_buffer_size);
 }
 
-#define CDT_FILE_EXT "cdt"
-#define DSK_FILE_EXT "dsk"
-#define M3U_FILE_EXT "m3u"
-#define SNA_FILE_EXT "sna"
-#define CPR_FILE_EXT "cpr"
-
 void retro_run(void)
 {
    static int mfirst=1;
    bool updated = false;
-   unsigned i;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
@@ -937,101 +1050,10 @@ void retro_run(void)
    {
 		mfirst++;
 		printf("MAIN FIRST\n");
-		retro_load_ok=true;
+		retro_status = COMPUTER_BOOTING;
 
 		Emu_init();
-
-		// If it's a m3u file
-		if (strlen(RPATH) >= strlen(M3U_FILE_EXT))
-			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(M3U_FILE_EXT)], M3U_FILE_EXT))
-			{
-				// Parse the m3u file
-				dc_parse_m3u(dc, RPATH);
-
-				// Some debugging
-				log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
-				for(i = 0; i < dc->count; i++)
-				{
-					log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
-				}
-
-				// Init first disk
-				dc->index = 0;
-				dc->eject_state = false;
-				printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-				attach_disk((char *)dc->files[dc->index],0);
-
-				// If command was specified
-				if(dc->command)
-				{
-					// Execute the command
-					log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
-					char* command = calloc(strlen(dc->command) + 1, sizeof(char));
-					sprintf(command, "%s\n", dc->command);
-					kbd_buf_feed(command);
-					free(command);
-				}
-				else
-				{
-					// Autoplay
-					retro_disk_auto();
-				}
-
-				// Prepare SNA
-				sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-				return;
-			}
-
-		// If it's a disk
-		if (strlen(RPATH) >= strlen(DSK_FILE_EXT))
-			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(DSK_FILE_EXT)], DSK_FILE_EXT))
-			{
-				// Add the file to disk control context
-				// Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
-				dc_add_file(dc, RPATH);
-
-				// Init first disk
-				dc->index = 0;
-				dc->eject_state = false;
-				printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-				attach_disk((char *)dc->files[dc->index],0);
-				retro_disk_auto();
-
-				// Prepare SNA
-				sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-				return;
-			}
-
-		// If it's a tape
-		if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
-			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
-			{
-				tape_insert ((char *)RPATH);
-				kbd_buf_feed("|tape\nrun\"\n^");
-				return;
-
-			}
-
-		// If it's a snapshot
-		if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
-			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
-			{
-				snapshot_load (RPATH);
-				sprintf(RPATH,"%s",RPATH);
-				return;
-			}
-
-      // If it's a cart
-		if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
-			if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
-			{
-				cart_insert (RPATH);
-				sprintf(RPATH,"%s",RPATH);
-				return;
-			}
-
+      computer_load_file();
 
 		return;
    }
@@ -1099,6 +1121,7 @@ bool retro_load_game(const struct retro_game_info *info)
 		}
 	loadadsk((char *)full_path,0);
 */
+   computer_load_bios();
    return true;
 }
 
