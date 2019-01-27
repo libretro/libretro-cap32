@@ -252,9 +252,9 @@ else ifeq ($(platform), wincross64)
 	TARGET := $(TARGET_NAME)_libretro.dll
 	AR = x86_64-w64-mingw32-ar
 	CC = x86_64-w64-mingw32-gcc
-	CXX = x86_64-w64-mingw32-g++ 
+	CXX = x86_64-w64-mingw32-g++
 	SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
-	LDFLAGS += -static-libgcc -static-libstdc++ 
+	LDFLAGS += -static-libgcc -static-libstdc++
 	EXTRA_LDF := -lwinmm -Wl,--export-all-symbols
 # Windows
 else
@@ -295,7 +295,7 @@ ifeq ($(LOG_PERFORMANCE), 1)
 	CXXFLAGS += -DLOG_PERFORMANCE
 endif
 
-GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
+GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
     CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif
