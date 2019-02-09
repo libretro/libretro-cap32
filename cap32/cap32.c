@@ -262,7 +262,7 @@ uint8_t *pbTapeImage = NULL;
 uint8_t *pbTapeImageEnd = NULL;
 uint8_t keyboard_matrix[16];
 
-static uint8_t *membank_config[8][4];
+uint8_t *membank_config[8][4];
 
 FILE *pfileObject;
 FILE *pfoPrinter;
@@ -282,7 +282,8 @@ uint32_t freq_table[MAX_FREQ_ENTRIES] = {
    96000
 };
 
-static double colours_rgb[32][3] = {
+double colours_rgb[32][3];
+double colours_rgb_init[32][3] = {
    { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 },{ 0.0, 1.0, 0.5 }, { 1.0, 1.0, 0.5 },
    { 0.0, 0.0, 0.5 }, { 1.0, 0.0, 0.5 },{ 0.0, 0.5, 0.5 }, { 1.0, 0.5, 0.5 },
    { 1.0, 0.0, 0.5 }, { 1.0, 1.0, 0.5 },{ 1.0, 1.0, 0.0 }, { 1.0, 1.0, 1.0 },
@@ -293,7 +294,8 @@ static double colours_rgb[32][3] = {
    { 0.5, 0.0, 0.0 }, { 0.5, 0.0, 1.0 },{ 0.5, 0.5, 0.0 }, { 0.5, 0.5, 1.0 }
 };
 
-static double colours_green[32] = {
+double colours_green[32];
+double colours_green_init[32] = {
    0.5647, 0.5647, 0.7529, 0.9412,
    0.1882, 0.3765, 0.4706, 0.6588,
    0.3765, 0.9412, 0.9098, 0.9725,
@@ -762,7 +764,10 @@ uint8_t z80_IN_handler (reg_pair port)
             break;
 
          case 1: // read from port B?
-            if (PPI.control & 2) { // port B set to input?
+            // 6128+: always use port B as input as this fixes Tintin on the moon.
+            // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
+            // TODO: verify with CPC (non-plus) if we go in the else in some cases
+            if (CPC.model > 2 || PPI.control & 2) { // port B set to input?
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
@@ -839,20 +844,18 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             {
                uint8_t colour = val & 0x1f; // isolate colour value
                GateArray.ink_values[GateArray.pen] = colour;
-               GateArray.palette[GateArray.pen] =colours[colour];//SDL_MapRGB(back_surface->format,
-                //colours[colour].r, colours[colour].g, colours[colour].b);
+               GateArray.palette[GateArray.pen] =colours[colour];
+               // mode 2 - 'anti-aliasing' colour
                if (GateArray.pen < 2) {
-
-//FIXME RETRO
-unsigned char r,g,b,r2,g2,b2;
-r=(colours[GateArray.ink_values[0]]>>16)&0xFF;
-g=(colours[GateArray.ink_values[0]]>>8)&0xFF;
-b=colours[GateArray.ink_values[0]]&0xFF;
-r2=(colours[GateArray.ink_values[1]]>>16)&0xFF;
-g2=(colours[GateArray.ink_values[1]]>>8)&0xFF;
-b2=colours[GateArray.ink_values[1]]&0xFF;
-GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
-
+                  //FIXME RETRO
+                  unsigned char r,g,b,r2,g2,b2;
+                  r=(colours[GateArray.ink_values[0]]>>16)&0xFF;
+                  g=(colours[GateArray.ink_values[0]]>>8)&0xFF;
+                  b=colours[GateArray.ink_values[0]]&0xFF;
+                  r2=(colours[GateArray.ink_values[1]]>>16)&0xFF;
+                  g2=(colours[GateArray.ink_values[1]]>>8)&0xFF;
+                  b2=colours[GateArray.ink_values[1]]&0xFF;
+                  GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
                }
             }
             if (CPC.mf2) { // MF2 enabled?
@@ -861,23 +864,21 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
             }
             break;
          case 2: // set mode
-            if (val& 0x20){
+            if (!asic.locked && (val & 0x20) && CPC.model > 2) {
                // 6128+ RMR2 register
-               if (!asic_locked) {
-                  int membank = (val >> 3) & 3;
-                  if (membank == 3) { // Map register page at 0x4000
-                     //printf("Register page on\n");
-                     GateArray.registerPageOn = true;
-                     membank = 0;
-                  } else {
-                     //printf("Register page off\n");
-                     GateArray.registerPageOn = false;
-                  }
-                  GateArray.lower_ROM_bank = membank;
-                  pbROMlo = pbCartridgePages[(val & 0x7)];
-                  ga_memory_manager();
+               int membank = (val >> 3) & 3;
+               if (membank == 3) { // Map register page at 0x4000
+                  //printf("Register page on\n");
+                  GateArray.registerPageOn = true;
+                  membank = 0;
+               } else {
+                  //printf("Register page off\n");
+                  GateArray.registerPageOn = false;
                }
-            }else{
+               GateArray.lower_ROM_bank = membank;
+               pbROMlo = pbCartridgePages[(val & 0x7)];
+               ga_memory_manager();
+            } else {
                #ifdef DEBUG_GA
                if (dwDebugFlag) {
                   fprintf(pfoDebug, "rom 0x%02x\r\n", val);
@@ -896,15 +897,20 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
             }
             break;
          case 3: // set memory configuration
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "mem 0x%02x\r\n", val);
-            }
-            #endif
-            GateArray.RAM_config = val;
-            ga_memory_manager();
-            if (CPC.mf2) { // MF2 enabled?
-               *(pbMF2ROM + 0x03fff) = val;
+            if (asic.locked) {
+               #ifdef DEBUG_GA
+               if (dwDebugFlag) {
+                  fprintf(pfoDebug, "mem 0x%02x\r\n", val);
+               }
+               #endif
+               GateArray.RAM_config = val;
+               ga_memory_manager();
+               if (CPC.mf2) { // MF2 enabled?
+                  *(pbMF2ROM + 0x03fff) = val;
+               }
+            } else {
+               // 6128+ memory mapping register
+               printf("Memory mapping register (RAM)\n");
             }
             break;
       }
@@ -1064,34 +1070,35 @@ GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
    if (!(port.b.h & 0x20))
    {
       /* ROM select? */
-      GateArray.upper_ROM = val;
       if (CPC.model <= 2) {
+         GateArray.upper_ROM = val;
          pbExpansionROM = memmap_ROM[val];
 
          /* selected expansion ROM not present? */
          if (pbExpansionROM == NULL)
             pbExpansionROM = pbROMhi; /* revert to BASIC ROM */
-
-         /* upper/expansion ROM is enabled? */
-         if (!(GateArray.ROM_config & 0x08))
-            membank_read[3] = pbExpansionROM; /* 'page in' upper/expansion ROM */
-
-         /* MF2 enabled? */
-         if (CPC.mf2)
-            *(pbMF2ROM + 0x03aac) = val;
       } else {
          //printf("ROM select: %u\n", (int) val);
          if (val == 7) {
+            GateArray.upper_ROM = 3;
             pbExpansionROM = pbCartridgePages[3];
          } else if (val >= 128) {
+            GateArray.upper_ROM = val & 31;
             pbExpansionROM = pbCartridgePages[val & 31];
          } else {
+            GateArray.upper_ROM = 1;
             pbExpansionROM = pbCartridgePages[1];
          }
          //printf("ROM-PAGE select: %u\n", (int) page);
          //printf("ROM-PAGE val: %u\n", (int) pbExpansionROM[0]);
       }
+      /* upper/expansion ROM is enabled? */
+      if (!(GateArray.ROM_config & 0x08))
+         membank_read[3] = pbExpansionROM; /* 'page in' upper/expansion ROM */
 
+      /* MF2 enabled? */
+      if (CPC.mf2)
+         *(pbMF2ROM + 0x03aac) = val;
    }
 
    /* printer port */
@@ -2548,6 +2555,14 @@ int emulator_patch_ROM (void)
 void emulator_reset (bool bolMF2Reset)
 {
    int n;
+   if(CPC.model > 2){
+      if (pbCartridgePages[0] != NULL)
+         pbROMlo = pbCartridgePages[0];
+   }
+
+   asic_reset();
+   // FIXME - generate plus palette correctly
+   video_set_palette();
 
    // Z80
    memset(&z80, 0, sizeof(z80)); // clear all Z80 registers and support variables
@@ -2571,12 +2586,13 @@ void emulator_reset (bool bolMF2Reset)
    // CRTC
    crtc_reset();
 
-   asic_locked = true;
+   asic.locked = true;
 
    // Gate Array
    memset(&GateArray, 0, sizeof(GateArray)); // clear GA data structure
    GateArray.scr_mode = GateArray.requested_scr_mode = 1; // set to mode 1
    GateArray.registerPageOn = false;
+   GateArray.lower_ROM_bank = 0;
    ga_init_banking();
 
    // PPI
@@ -2651,17 +2667,16 @@ int emulator_init (void)
       case 3: // 6128+
          if(cart_name[0] == '\0') {
             cpr_load(&OS_6128P[0]);
-            pbROM = pbROMlo;
+            //pbROM = pbROMlo;
+            if (pbCartridgePages[0] != NULL)
+               pbROMlo = pbCartridgePages[0];
+
             printf("used internal bios!\n");
          } else if (pbCartridgeImage != NULL) {
             //pbROM = (uint8_t *)&OS[0]; // FIXME ?
             printf("loaded cart: %s\n", cart_name);
          }
          break;
-      default: // CPC 6128
-         CPC.model = 2;
-         pbROMlo = pbROM = (uint8_t *)&OS[0]; // CPC 6128
-         printf("ERROR: unknown model\n");
    }
 
    if (!pbGPBuffer || !pbRAM || !pbRegisterPage)
@@ -2856,17 +2871,25 @@ void video_set_style (void)
       dwXScale = 2;
       dwYScale = 2;
    }
-   printf("style: %u, dwScale: %ux%u, offset: %u\n", CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
+   printf("model:%u, style: %u, dwScale: %ux%u, offset: %u\n", CPC.model, CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
 
    switch (dwXScale)
    {
       case 1:
+      if (CPC.model > 2) {
+         CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half_plus;
+      } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half;
+      }
          CPC.scr_prerenderbord = (void(*)(void))prerender_border_half;
          CPC.scr_prerendersync = (void(*)(void))prerender_sync_half;
          break;
       case 2:
+      if (CPC.model > 2) {
+         CPC.scr_prerendernorm = (void(*)(void))prerender_normal_plus;
+      } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal;
+      }
          CPC.scr_prerenderbord = (void(*)(void))prerender_border;
          CPC.scr_prerendersync = (void(*)(void))prerender_sync;
          break;
@@ -2880,18 +2903,13 @@ void video_set_style (void)
          else
             CPC.scr_render = (void(*)(void))render32bpp;
          break;
-      case 24:
-         CPC.scr_render = (void(*)(void))render24bpp;
-         break;
       case 16:
       case 15:
+      default:
          if(dwYScale == 2)
             CPC.scr_render = (void(*)(void))render16bpp_doubleY;
          else
             CPC.scr_render = (void(*)(void))render16bpp;
-         break;
-      case 8:
-         CPC.scr_render = (void(*)(void))render8bpp;
          break;
    }
 }

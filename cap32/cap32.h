@@ -321,6 +321,12 @@ typedef struct {
    void (*CharInstSL)(void);
    unsigned char reg_select;
    unsigned char registers[18];
+
+   // 6128+ split screen support
+   unsigned int split_addr;
+   unsigned char split_sl;
+   unsigned int sl_count;
+   unsigned char interrupt_sl;
 } t_CRTC;
 
 typedef struct {
@@ -353,7 +359,7 @@ typedef struct {
    unsigned int scr_mode;
    unsigned char pen;
    unsigned char ink_values[17];
-   unsigned int palette[19];
+   unsigned int palette[34];
    unsigned char sl_count;
    unsigned char int_delay;
 } t_GateArray;
@@ -465,6 +471,7 @@ typedef struct {
 
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
+int video_set_palette (void);
 
 // fdc.c
 #ifdef __cplusplus

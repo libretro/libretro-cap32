@@ -53,7 +53,7 @@
 extern uint8_t* pbROMlo;
 
 uint8_t* pbCartridgeImage = NULL;
-uint8_t* pbCartridgePages[CPR_PAGES];
+uint8_t* pbCartridgePages[CPR_PAGES] = { NULL };
 
 // FIXME: compatible MSB?
 uint32_t extractChunkSize(const uint8_t *pChunk)
