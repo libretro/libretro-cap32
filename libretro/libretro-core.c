@@ -90,7 +90,6 @@ unsigned amstrad_devices[ 2 ];
 
 int autorun=0;
 
-int RETROSTATUS=0;
 int retrojoy_init=0;
 int emu_status = COMPUTER_OFF;
 int gui_status = GUI_DISABLED;
