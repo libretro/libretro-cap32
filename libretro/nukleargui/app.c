@@ -407,22 +407,19 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
 
 if(pauseg==0){ // if emulation running
 
-	  //Joy mode
-
-    for(j=0;j<2;j++){
-
-      for(i=4;i<10;i++)
-      {
-         if( input_state_cb(j, RETRO_DEVICE_JOYPAD, 0, i))
-            MXjoy[j] |= vbt[i]; // Joy press
+	//Joy mode - only when keyboard is not selected
+   if(amstrad_devices[0]!=RETRO_DEVICE_AMSTRAD_KEYBOARD){
+      for(j=0;j<2;j++) {
+         for(i=4;i<10;i++) {
+            if( input_state_cb(j, RETRO_DEVICE_JOYPAD, 0, i))
+               MXjoy[j] |= vbt[i]; // Joy press
+         }
+         if(showkeyb==-1) {
+		      if(j==0)retro_joy0(MXjoy[j]);
+		      else if (j==1)retro_joy1(MXjoy[j]);
+         }
       }
-
-      if(showkeyb==-1){
-		if(j==0)retro_joy0(MXjoy[j]);
-		else if (j==1)retro_joy1(MXjoy[j]);
-      }
-
-    }
+   }
 
 if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
    //shortcut for joy mode only

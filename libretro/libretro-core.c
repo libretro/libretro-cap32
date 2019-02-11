@@ -90,11 +90,8 @@ unsigned amstrad_devices[ 2 ];
 
 int autorun=0;
 
-int retrojoy_init=0;
 int emu_status = COMPUTER_OFF;
 int gui_status = GUI_DISABLED;
-
-int cap32_statusbar=0;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
@@ -139,17 +136,17 @@ void retro_set_input_poll(retro_input_poll_t cb)
 }
 
 int retro_getStyle(){
-    printf("getStyle: %u\n", retro_scr_style);
+    LOGI("getStyle: %u\n", retro_scr_style);
     return retro_scr_style;
 }
 
 int retro_getGfxBpp(){
-    printf("getBPP: %u\n", 16 * PIXEL_BYTES);
+    LOGI("getBPP: %u\n", 16 * PIXEL_BYTES);
     return 16 * PIXEL_BYTES;
 }
 
 int retro_getGfxBps(){
-    printf("getBPS: %u\n", retro_scr_w);
+    LOGI("getBPS: %u\n", retro_scr_w);
     return retro_scr_w;
 }
 
@@ -351,7 +348,6 @@ void enter_options(void) {}
 void save_bkg()
 {
 	memcpy(save_Screen,Retro_Screen,gfx_buffer_size);
-
 }
 
 void restore_bgk()
@@ -478,7 +474,7 @@ static void update_variables(void)
 
       if (retro_computer_cfg.model != val) {
          if( emu_status == COMPUTER_READY ) {
-            printf("REBOOT - CPC MODEL: %u\n", val);
+            LOGI("REBOOT - CPC MODEL: %u\n", val);
             change_model(val);
          } else  {
             retro_computer_cfg.model = val;
@@ -497,7 +493,7 @@ static void update_variables(void)
       val = strtoul(str, NULL, 0);
       if (retro_computer_cfg.ram != val) {
          if(emu_status == COMPUTER_READY) {
-            printf("REBOOT - CPC RAM: %u\n", val);
+            LOGI("REBOOT - CPC RAM: %u\n", val);
             change_ram(val);
          } else {
             retro_computer_cfg.ram = val;
@@ -708,7 +704,7 @@ void computer_load_file() {
          // Init first disk
          dc->index = 0;
          dc->eject_state = false;
-         printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+         LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
          attach_disk((char *)dc->files[dc->index],0);
 
          // If command was specified
@@ -744,7 +740,7 @@ void computer_load_file() {
          // Init first disk
          dc->index = 0;
          dc->eject_state = false;
-         printf("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+         LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
          attach_disk((char *)dc->files[dc->index],0);
          retro_disk_auto();
 
@@ -832,7 +828,7 @@ void retro_init(void)
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
       fprintf(stderr, "PIXEL FORMAT is not supported.\n");
-LOGI("PIXEL FORMAT is not supported.\n");
+      LOGI("PIXEL FORMAT is not supported.\n");
       exit(0);
    }
 
@@ -983,7 +979,6 @@ void retro_run(void)
    if(mfirst==1)
    {
 		mfirst++;
-		printf("MAIN FIRST\n");
 		emu_status = COMPUTER_BOOTING;
 
 		Emu_init();
