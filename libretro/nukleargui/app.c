@@ -29,7 +29,7 @@ extern retro_input_state_t input_state_cb;
 extern char RPATH[512];
 
 //EMU FLAGS
-int SHOWKEY=-1;
+int showkeyb=-1;
 int SHIFTON=-1;
 int KBMOD=-1;
 int RSTOPON=-1;
@@ -207,7 +207,7 @@ void app_vkb_handle()
             //VKbd show/hide
             oldi=-1;
            // Screen_SetFullUpdate(0);
-            SHOWKEY=-SHOWKEY;
+            showkeyb=-showkeyb;
          }
          else if(i==-5)
          {
@@ -263,7 +263,7 @@ void app_vkb_handle()
             {
 			    pauseg=1;
 
-				SHOWKEY=-SHOWKEY;
+				showkeyb=-showkeyb;
 
 				//Screen_SetFullUpdate(0);
                oldi=-1;
@@ -271,7 +271,7 @@ void app_vkb_handle()
 			else if(i==-14) //JOY PORT TOGGLE
             {
 
-               SHOWKEY=-SHOWKEY;
+               showkeyb=-showkeyb;
                oldi=-1;
             }
             else
@@ -358,7 +358,7 @@ int Core_PollEvent()
    MXjoy[0]=0;
    MXjoy[1]=0;
 
-   if(retro_status != COMPUTER_READY)
+   if(emu_status != COMPUTER_READY)
       return 1;
 
    input_poll_cb();
@@ -368,7 +368,7 @@ int Core_PollEvent()
    int16_t mouse_x,mouse_y;
    mouse_x=mouse_y=0;
 
-   if(SHOWKEY==-1 && pauseg==0)Core_Processkey();
+   if(showkeyb==-1 && pauseg==0)Core_Processkey();
 
    // F9 vkbd
    i=0;
@@ -377,7 +377,7 @@ int Core_PollEvent()
    }
    else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) ){
       kbt[i]=0;
-      SHOWKEY=-SHOWKEY;
+      showkeyb=-showkeyb;
    }
    // F10 GUI
    i=1;
@@ -417,7 +417,7 @@ if(pauseg==0){ // if emulation running
             MXjoy[j] |= vbt[i]; // Joy press
       }
 
-      if(SHOWKEY==-1){
+      if(showkeyb==-1){
 		if(j==0)retro_joy0(MXjoy[j]);
 		else if (j==1)retro_joy1(MXjoy[j]);
       }
@@ -433,7 +433,7 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
    else if ( jbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) )
    {
       jbt[i]=0;
-      SHOWKEY=-SHOWKEY;
+      showkeyb=-showkeyb;
    }
 
    i=3;//type ENTER

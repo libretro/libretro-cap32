@@ -2739,7 +2739,7 @@ int cart_insert (char *pchFileName) {
    }
 
    /* Restart emulator if initiated */
-   if( retro_status == COMPUTER_READY) {
+   if( emu_status == COMPUTER_READY) {
       emulator_shutdown();
       emulator_init();
    }
@@ -3884,7 +3884,7 @@ int capmain (int argc, char **argv)
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
 
-   retro_status = COMPUTER_READY; // set computer init as completed
+   emu_status = COMPUTER_READY; // set computer init as completed
 
    return 0;
 }

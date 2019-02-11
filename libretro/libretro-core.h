@@ -51,11 +51,26 @@ extern PIXEL_TYPE *Retro_Screen;
 
 #define WINDOW_MAX_SIZE (768*544)
 
-// COMPUTER STATUS
+// BIT OPERATIONS - MACROS
+#define BIT_SET(var, bit)    var |= 1 << bit
+#define BIT_CLEAR(var, bit)  var &= ~(1 << bit)
+#define BIT_CHECK(var, bit)  var >> bit & 1
+#define BIT_TOGGLE(var, bit) var ^= 1 << bit
+
+
+// RETROGUI STATUS - BIT WISE
+#define GUI_DISABLED     0
+#define GUI_KEYBOARD     1
+#define GUI_MENU         2
+#define GUI_STATUSBAR    4
+extern int gui_status;
+
+
+// COMPUTER/EMU STATUS
 #define COMPUTER_OFF     0
 #define COMPUTER_BOOTING 1
 #define COMPUTER_READY   5
-extern int retro_status;
+extern int emu_status;
 
 typedef struct {
    int model;

@@ -48,10 +48,10 @@ gui(struct file_browser *browser,struct nk_context *ctx)
     if (minimizable) window_flags |= NK_WINDOW_MINIMIZABLE;
     if (title) window_flags |= NK_WINDOW_TITLE;
 
-    if(pauseg==1 && SHOWKEY==1)SHOWKEY=-1;
-    if(pauseg==0 && SHOWKEY==1)GUISTATE=GUI_VKBD;
-    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT==1)GUISTATE=GUI_BROWSE;
-    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT!=1)GUISTATE=GUI_MAIN;
+    if(pauseg==1 && showkeyb==1)showkeyb=-1;
+    if(pauseg==0 && showkeyb==1)GUISTATE=GUI_VKBD;
+    if(pauseg==1 && showkeyb==-1 && LOADCONTENT==1)GUISTATE=GUI_BROWSE;
+    if(pauseg==1 && showkeyb==-1 && LOADCONTENT!=1)GUISTATE=GUI_MAIN;
 
     switch(GUISTATE){
 
@@ -84,10 +84,10 @@ gui(struct file_browser *browser,struct nk_context *ctx)
 
     }
 
-    if(pauseg==1 && SHOWKEY==1)SHOWKEY=-1;
-    if(pauseg==0 && SHOWKEY==1)GUISTATE=GUI_VKBD;
-    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT==1)GUISTATE=GUI_BROWSE;
-    if(pauseg==1 && SHOWKEY==-1 && LOADCONTENT!=1)GUISTATE=GUI_MAIN;
+    if(pauseg==1 && showkeyb==1)showkeyb=-1;
+    if(pauseg==0 && showkeyb==1)GUISTATE=GUI_VKBD;
+    if(pauseg==1 && showkeyb==-1 && LOADCONTENT==1)GUISTATE=GUI_BROWSE;
+    if(pauseg==1 && showkeyb==-1 && LOADCONTENT!=1)GUISTATE=GUI_MAIN;
 
 return GUISTATE;
 }

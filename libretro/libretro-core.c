@@ -35,7 +35,7 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 
-extern int SHOWKEY;
+extern int showkeyb;
 extern int Core_PollEvent(void);
 
 extern int retro_disk_auto();
@@ -90,9 +90,10 @@ unsigned amstrad_devices[ 2 ];
 
 int autorun=0;
 
-int RETROJOY=0,RETROSTATUS=0,RETRODRVTYPE=0;
+int RETROSTATUS=0;
 int retrojoy_init=0;
-int retro_status = COMPUTER_OFF;
+int emu_status = COMPUTER_OFF;
+int gui_status = GUI_DISABLED;
 
 int cap32_statusbar=0;
 
@@ -398,49 +399,35 @@ void retro_set_environment(retro_environment_t cb)
   cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
 
    struct retro_variable variables[] = {
-
-	  {
-		"cap32_autorun",
-		"Autorun; disabled|enabled" ,
-	  },
+	   {
+		   "cap32_autorun",
+		   "Autorun; disabled|enabled" ,
+	   },
       {
          "cap32_resolution",
          "Internal resolution; 384x272|768x544",
       },
       {
-         "cap32_Model",
-         "Model:; 464|664|6128", // 6128+ - WIP
+         "cap32_model",
+         "Model; 6128|464", // 6128+ - WIP
       },
       {
-         "cap32_Ram",
-         "Ram size:; 64|128|192|512|576",
+         "cap32_ram",
+         "Ram size; 128|64|192|512|576",
       },
+      #if 0
       {
-         "cap32_Statusbar",
+         "cap32_statusbar", // unused - but i try to implement in a future
          "Status Bar; disabled|enabled",
       },
-      {
-         "cap32_Drive",
-         "Drive:; 0|1",
-      },
+      #endif
       {
          "cap32_scr_tube",
-         "scr_tube; disabled|enabled",
+         "Monitor Type; color|green",
       },
       {
          "cap32_scr_intensity",
-         "scr_intensity; 5|6|7|8|9|10|11|12|13|14|15",
-      },
-#if 0
-
-      {
-         "cap32_scr_remanency",
-         "scr_remanency; disabled|enabled",
-      },
-#endif
-      {
-         "cap32_RetroJoy",
-         "Retro joy0; disabled|enabled",
+         "Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
       },
 
       { NULL, NULL },
@@ -479,19 +466,19 @@ static void update_variables(void)
       if (pch)
          retroh = strtoul(pch, NULL, 0);
    }
-   // TODO: FIXME 6129
-   var.key = "cap32_Model";
+
+   var.key = "cap32_model";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       int val = 2; // DEFAULT 6128
       if (strcmp(var.value, "464") == 0) val=0;
-      else if (strcmp(var.value, "664") == 0) val=1;
       else if (strcmp(var.value, "6128") == 0) val=2;
       else if (strcmp(var.value, "6128+") == 0) val=3;
+
       if (retro_computer_cfg.model != val) {
-         if( retro_status == COMPUTER_READY ) {
+         if( emu_status == COMPUTER_READY ) {
             printf("REBOOT - CPC MODEL: %u\n", val);
             change_model(val);
          } else  {
@@ -500,7 +487,7 @@ static void update_variables(void)
       }
    }
 
-   var.key = "cap32_Ram";
+   var.key = "cap32_ram";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -510,7 +497,7 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
       if (retro_computer_cfg.ram != val) {
-         if(retro_status == COMPUTER_READY) {
+         if(emu_status == COMPUTER_READY) {
             printf("REBOOT - CPC RAM: %u\n", val);
             change_ram(val);
          } else {
@@ -519,37 +506,18 @@ static void update_variables(void)
       }
    }
 
-   var.key = "cap32_Statusbar";
+   var.key = "cap32_statusbar";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(retro_status == COMPUTER_READY){
-    		  if (strcmp(var.value, "enabled") == 0)
-    		     cap32_statusbar=1;
-    		  if (strcmp(var.value, "disabled") == 0)
-    		     cap32_statusbar=0;
-		}
-		else {
-				if (strcmp(var.value, "enabled") == 0)RETROSTATUS=1;
-				if (strcmp(var.value, "disabled") == 0)RETROSTATUS=0;
-		}
-   }
+		if (strcmp(var.value, "enabled") == 0)
+         BIT_SET(gui_status, GUI_STATUSBAR);
 
+		if (strcmp(var.value, "disabled") == 0)
+         BIT_CLEAR(gui_status, GUI_STATUSBAR);
 
-   var.key = "cap32_Drive";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      char str[100];
-      int val;
-      snprintf(str, sizeof(str), "%s", var.value);
-      val = strtoul(str, NULL, 0);
-
-      if(retro_status == COMPUTER_READY)
-         ;//set_drive_type(8, val);
-      else RETRODRVTYPE=val;
+         //TODO: call update status
    }
 
    var.key = "cap32_scr_tube";
@@ -557,7 +525,7 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(retro_status == COMPUTER_READY){
+		if(emu_status == COMPUTER_READY){
       		if (strcmp(var.value, "enabled") == 0){
          		  CPC.scr_tube=1;video_set_palette();}
       		if (strcmp(var.value, "disabled") == 0){
@@ -575,43 +543,10 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-      if(retro_status == COMPUTER_READY){
+      if(emu_status == COMPUTER_READY){
          CPC.scr_intensity = val;
          video_set_palette();
       }
-   }
-
-#if 0
-   var.key = "cap32_scr_remanency";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-		if(retro_status == COMPUTER_READY){
-      		if (strcmp(var.value, "enabled") == 0){
-         		  CPC.scr_remanency=1;video_set_palette();}//set_truedrive_emultion(1);
-      		if (strcmp(var.value, "disabled") == 0){
-         		 CPC.scr_remanency=0;video_set_palette();}//set_truedrive_emultion(0);
-		}
-   }
-#endif
-
-   var.key = "cap32_RetroJoy";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-		if(retrojoy_init){
-		      if (strcmp(var.value, "enabled") == 0)
-		         ;//resources_set_int( "RetroJoy", 1);
-		      if (strcmp(var.value, "disabled") == 0)
-		         ;//resources_set_int( "RetroJoy", 0);
-		}
-		else {
-			if (strcmp(var.value, "enabled") == 0)RETROJOY=1;
-			if (strcmp(var.value, "disabled") == 0)RETROJOY=0;
-		}
-
    }
 
 }
@@ -1050,7 +985,7 @@ void retro_run(void)
    {
 		mfirst++;
 		printf("MAIN FIRST\n");
-		retro_status = COMPUTER_BOOTING;
+		emu_status = COMPUTER_BOOTING;
 
 		Emu_init();
       computer_load_file();
@@ -1060,10 +995,12 @@ void retro_run(void)
 
    if(pauseg==0)
    {
-      	retro_loop();
-	retro_blit();
-	Core_PollEvent();
-	if(SHOWKEY==1)app_render(0);
+      retro_loop();
+	   retro_blit();
+	   Core_PollEvent();
+
+	   if(showkeyb==1)
+         app_render(0);
    }
    else if (pauseg==1)app_render(1);
 
