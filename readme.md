@@ -49,7 +49,7 @@ R | SHIFT
 L2 | CTRL
 R2 | COPY
 
-JOY CONFIG QAOP
+JOY CONFIG QAOP (GENERAL KEYB)
 ------------
 JOY BUTTON | CPC
 ------------ | -------------
@@ -68,7 +68,7 @@ R | SHIFT
 L2 | CTRL
 R2 | COPY
 
-JOY CONFIG 3 (GENERAL KEYB/[INCENTIVE GAMES](http://www.gamesdatabase.org/Media/SYSTEM/Amstrad_CPC/manual/Formated/Castle_Master_-_1990_-_Domark_Software.pdf))
+JOY INCENTIVE ([INCENTIVE GAMES](http://www.gamesdatabase.org/Media/SYSTEM/Amstrad_CPC/manual/Formated/Castle_Master_-_1990_-_Domark_Software.pdf))
 ------------
 JOY BUTTON | CPC
 ------------ | -------------
@@ -100,13 +100,6 @@ SELECT+DPAD-UP | [1], [Y]
 SELECT+DPAD-DOWN | [2], [N]
 SELECT+DPAD-RIGHT | [3], [R]
 SELECT+DPAD-LEFT | [4], [S]
--|-
-SELECT+L | -
-SELECT+R | -
-SELECT+L2 | -
-SELECT+R2 | -
-SELECT+L3 | -
-SELECT+R3 | CHANGE JOY CFG
 
 ### Keyboard emulated layout
 ![imagen](https://user-images.githubusercontent.com/560310/52805432-d5aac400-3086-11e9-82a0-a90682f69442.png)
@@ -170,11 +163,11 @@ If enabled a RUN the first bas/bin found in DSK
 
 ### User 1/2 Amstrad Joystick Config - joystick, qaop or incentive
 
-Select Joy/Overlay configuration on the current user
+Select Joy/Overlay configuration
 
 ### Internal resolution - 384x272/768x544
 
-Select internal resolution 544p is almost for games that uses mode 2
+Select internal resolution, the 544p option is almost for games that uses mode 2 (hires mode, very rare)
 
 ### Model - 6128/464
 
@@ -182,7 +175,7 @@ Select disk/tape model (6128) or just tape model (464), 6128 is the most compati
 
 ### Monitor Type - color/green
 
-Select monochrome or color monitor
+Select color monitor or monochrome
 
 ### Monitor Intensity - 5 to 15
 
