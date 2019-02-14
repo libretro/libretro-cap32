@@ -29,38 +29,96 @@ Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 ### Joy/Overlay  (Choose AMSTRAD JOYSTICK in input controller setting)
 
+
+JOY DEFAULT
+------------
+JOY BUTTON | CPC 
+------------ | -------------
+B | FIRE1
+Y| SPACE
+START | J (to select [J]OYSTICK on game-menu)
+DPAD-UP | JOY-UP
+DPAD-DOWN | JOY-DW
+DPAD-LEFT | JOY-LEFT
+DPAD-RIGHT | JOY-RIGHT
+A | FIRE2
+X | S
+-|-
+L | INTRO
+R | SHIFT
+L2 | CTRL
+R2 | COPY
+
+JOY CONFIG QAOP
+------------
+JOY BUTTON | CPC
+------------ | -------------
+B | F1
+Y| F2
+START | K (to select [K]EYBOARD on game-menu)
+DPAD-UP | Q
+DPAD-DOWN | A
+DPAD-LEFT | O
+DPAD-RIGHT | P
+A | SPACE
+X | H
+-|-
+L | INTRO
+R | SHIFT
+L2 | CTRL
+R2 | COPY
+
+JOY CONFIG 3 (GENERAL KEYB/[INCENTIVE GAMES](http://www.gamesdatabase.org/Media/SYSTEM/Amstrad_CPC/manual/Formated/Castle_Master_-_1990_-_Domark_Software.pdf))
+------------
+JOY BUTTON | CPC
+------------ | -------------
+B | SPACE
+Y| W
+START | F
+DPAD-UP | CURSOR-UP
+DPAD-DOWN | CURSOR-DW
+DPAD-LEFT | CURSOR-LEFT
+DPAD-RIGHT | CURSOR-RIGHT
+A | A
+X | C
+-|-
+L | P
+R | L
+L2 | R
+R2 | U
+
+If you press [SELECT] you could make a combo with other buttons:
+
+JOY BUTTON | ON CPC WRITES
+------------ | -------------
+SELECT+B | CAT
+SELECT+Y| \|CPM
+SELECT+A | RUN"DISK & RUN"DISC
+SELECT+X | \|TAPE & RUN"
+SELECT+START | SHOW VIRTUAL-KEYBOARD
+SELECT+DPAD-UP | [1], [Y]
+SELECT+DPAD-DOWN | [2], [N]
+SELECT+DPAD-RIGHT | [3], [R]
+SELECT+DPAD-LEFT | [4], [S]
+-|-
+SELECT+L | -
+SELECT+R | -
+SELECT+L2 | -
+SELECT+R2 | -
+SELECT+L3 | -
+SELECT+R3 | CHANGE JOY CFG
+
+### Keyboard emulated layout
+![imagen](https://user-images.githubusercontent.com/560310/52805432-d5aac400-3086-11e9-82a0-a90682f69442.png)
+
 ```
-L2  STATUS ON/OFF
-R2  AUTOLOAD TAPE
-L   CAT
-R   RESET
-SEL MOUSE/JOY IN GUI
-STR ENTER/RETURN
-A   FIRE1/VKBD KEY
-B   RUN
-X   FIRE2
-Y   VKBD ON/OFF
-
-- In vkbd (page 2) 
-
-"EXT" EXIT EMU
-"SNA" SAVE SNA
-"DSK" SWITCH DSK DRIVE A/B
-"Col" SWTICH FGCOL ON/OFF
-```
-
-### Keyboard (Choose AMSTRAD KEYBOARD in input controller setting)
-
-```
-F8 LOAD DSK/TAPE
 F9 MEM SNAPSHOT LOAD/SAVE
 F10 MAIN GUI
 F12 PLAY TAPE
 ```
 
-### Keyboard emulated layout
-![imagen](https://user-images.githubusercontent.com/560310/52805432-d5aac400-3086-11e9-82a0-a90682f69442.png)
-
+### Keyboard Custom Binds
+Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ to customize your retropad keys per game.
 
 ## M3U and Disk control
 
@@ -110,8 +168,27 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 
 If enabled a RUN the first bas/bin found in DSK
 
+### User 1/2 Amstrad Joystick Config - joystick, qaop or incentive
+
+Select Joy/Overlay configuration on the current user
+
+### Internal resolution - 384x272/768x544
+
+Select internal resolution 544p is almost for games that uses mode 2
+
+### Model - 6128/464
+
+Select disk/tape model (6128) or just tape model (464), 6128 is the most compatible model to play
+
+### Monitor Type - color/green
+
+Select monochrome or color monitor
+
+### Monitor Intensity - 5 to 15
+
+Emulated Monitor brightness, default value is 8.
+
 ## Known Bugs 
 
-- Sometime tricky to use (Keyboard usage for instance).
-
+- CPC-PLUS model is in WIP state, do not use yet.
 
