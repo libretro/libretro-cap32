@@ -13,7 +13,11 @@
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
 #define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 
-extern unsigned amstrad_devices[ 2 ];
+#define PORTS_NUMBER 2
+#define ID_PLAYER1 0
+#define ID_PLAYER2 1
+
+extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 544
@@ -52,7 +56,8 @@ extern PIXEL_TYPE *Retro_Screen;
 #define WINDOW_MAX_SIZE (768*544)
 
 // BIT OPERATIONS - MACROS
-#define BIT_SET(var, bit)    var |= 1 << bit
+#define BIT_SET(var, bit)    var  = 1 << bit
+#define BIT_ADD(var, bit)    var |= 1 << bit
 #define BIT_CLEAR(var, bit)  var &= ~(1 << bit)
 #define BIT_CHECK(var, bit)  var >> bit & 1
 #define BIT_TOGGLE(var, bit) var ^= 1 << bit
@@ -75,6 +80,7 @@ extern int emu_status;
 typedef struct {
    int model;
    int ram;
+   uint32_t padcfg[PORTS_NUMBER];
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 
@@ -108,6 +114,8 @@ typedef struct{
 
 //VARIABLES
 extern int pauseg;
+
+void retro_message(const char *text);
 
 //SCREEN FUNCTIONS
 extern int retro_getStyle();

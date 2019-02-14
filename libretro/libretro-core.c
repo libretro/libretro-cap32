@@ -1,5 +1,6 @@
 #include "libretro.h"
 #include "libretro-core.h"
+#include "retro_events.h"
 
 //CORE VAR
 #ifdef _WIN32
@@ -116,7 +117,7 @@ char retro_system_data_directory[512];
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
-static retro_environment_t environ_cb;
+/*static*/ retro_environment_t environ_cb;
 
 // allowed file types
 #define CDT_FILE_EXT "cdt"
@@ -371,29 +372,49 @@ void Screen_SetFullUpdate(int scr)
       memset(&bmp,0, gfx_buffer_size);
 }
 
+void retro_message(const char *text) {
+   struct retro_message msg;
+   char msg_local[256];
+
+   snprintf(msg_local, sizeof(msg_local), "CPC: %s", text);
+   msg.msg = msg_local;
+   msg.frames = 100;
+
+   environ_cb(RETRO_ENVIRONMENT_SET_MESSAGE, (void*)&msg);
+
+}
+
 void retro_set_environment(retro_environment_t cb)
 {
    environ_cb = cb;
 
-  static const struct retro_controller_description p1_controllers[] = {
-    { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-    { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
-  };
-  static const struct retro_controller_description p2_controllers[] = {
-    { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-    { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
-  };
+   static const struct retro_controller_description p1_controllers[] = {
+     { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+     { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+   };
+   static const struct retro_controller_description p2_controllers[] = {
+     { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+     { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+   };
 
 
-  static const struct retro_controller_info ports[] = {
-    { p1_controllers, 2  }, // port 1
-    { p2_controllers, 2  }, // port 2
-    { NULL, 0 }
-  };
+   static const struct retro_controller_info ports[] = {
+     { p1_controllers, 2  }, // port 1
+     { p2_controllers, 2  }, // port 2
+     { NULL, 0 }
+   };
 
-  cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
+   environ_cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
 
    struct retro_variable variables[] = {
+      {
+         "cap32_retrojoy0",
+         "User 1 Amstrad Joystick Config; joystick|qaop|incentive",
+      },
+      {
+         "cap32_retrojoy1",
+         "User 2 Amstrad Joystick Config; joystick|qaop|incentive",
+      },
 	   {
 		   "cap32_autorun",
 		   "Autorun; disabled|enabled" ,
@@ -428,22 +449,52 @@ void retro_set_environment(retro_environment_t cb)
       { NULL, NULL },
    };
 
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
+   environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
+}
+
+/**
+ * controller_port_variable:
+ * @port: user port (see DEVICE AMSTRAD)
+ * @var: retro_variable ptr (modified)
+ *
+ * Query retro_environment callback to get joy values
+ *
+ * Returns: current user joy config (0/1/2),selected in GUI
+ *          otherwise default config 0 (joystick)
+ **/
+static int controller_port_variable(unsigned port, struct retro_variable *var)
+{
+	if ((!environ_cb) || port >= PORTS_NUMBER)
+		return 0;
+
+	var->value = NULL;
+	switch (port) {
+   	case ID_PLAYER1:
+   		var->key = "cap32_retrojoy0";
+   		break;
+   	case ID_PLAYER2:
+   		var->key = "cap32_retrojoy1";
+   		break;
+   	}
+
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, var) && var->value)
+   {
+      if(strcmp(var->value, "qaop") == 0)
+         return 1;
+      if(strcmp(var->value, "incentive") == 0)
+         return 2;
+   }
+
+   return 0;
 }
 
 static void update_variables(void)
 {
-
    struct retro_variable var;
 
-   var.key = "cap32_autorun";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-     if (strcmp(var.value, "enabled") == 0)
-			 autorun = 1;
-   }
+   // user 1/2 - input config
+   retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
+   retro_computer_cfg.padcfg[ID_PLAYER2] = controller_port_variable(ID_PLAYER2, &var);
 
    var.key = "cap32_resolution";
    var.value = NULL;
@@ -507,7 +558,7 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
 		if (strcmp(var.value, "enabled") == 0)
-         BIT_SET(gui_status, GUI_STATUSBAR);
+         BIT_ADD(gui_status, GUI_STATUSBAR);
 
 		if (strcmp(var.value, "disabled") == 0)
          BIT_CLEAR(gui_status, GUI_STATUSBAR);
@@ -832,26 +883,8 @@ void retro_init(void)
       exit(0);
    }
 
-	struct retro_input_descriptor inputDescriptors[] = {
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X, "X" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y, "Y" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R, "R" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L, "L" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
-		{ }
-	};
-	environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
+   // events initialize - joy and keyboard
+   ev_init();
 
 	// Disk control interface
 	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
@@ -859,6 +892,8 @@ void retro_init(void)
    // prepare shared variables
    retro_computer_cfg.model = -1;
    retro_computer_cfg.ram = -1;
+   retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
+   retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
 
 	update_variables();
 
@@ -1002,23 +1037,6 @@ void retro_run(void)
 
 }
 
-/*
-unsigned int lastdown,lastup,lastchar;
-static void keyboard_cb(bool down, unsigned keycode,
-      uint32_t character, uint16_t mod)
-{
-
-  printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
-         down ? "yes" : "no", keycode, character, mod);
-
-
-if(down)lastdown=keycode;
-else lastup=keycode;
-lastchar=character;
-
-}
-*/
-
 bool retro_load_game(const struct retro_game_info *info)
 {
    const char *full_path;
@@ -1028,30 +1046,14 @@ bool retro_load_game(const struct retro_game_info *info)
    if (!info)
       return false;
 
-/*
-   struct retro_keyboard_callback cb = { keyboard_cb };
-   environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
-*/
    full_path = info->path;
 
    strcpy(RPATH,full_path);
 
    update_variables();
 
-   //app_init();
-
 	memset(SNDBUF,0,1024*2*2);
-/*
-	Emu_init();
 
-	if (strlen(RPATH) >= strlen("cdt"))
-		if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("cdt")], "cdt")){
-			tape_insert ((char *)full_path);
-      			kbd_buf_feed("|tape\nrun\"\n^");
-   			return true;
-		}
-	loadadsk((char *)full_path,0);
-*/
    computer_load_bios();
    return true;
 }

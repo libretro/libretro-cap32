@@ -57,6 +57,7 @@ char Core_old_Key_Sate[512];
 
 #include "nuklear.h"
 #include "nuklear_retro_soft.h"
+#include "retro_events.h"
 
 static RSDL_Surface *screen_surface;
 extern void restore_bgk();
@@ -285,6 +286,55 @@ void app_vkb_handle()
 
 }
 
+int Core_PollEvent()
+{
+   input_poll_cb(); // retroarch get keys
+
+   // --- Player 1/2 Joystick code
+   if(showkeyb < 0){
+      ev_joysticks();
+   } else {
+      ev_vkeyboard();
+   }
+
+   // --- Keyboard code --
+   // TODO: clean and change to callback
+   //if(showkeyb==-1 && pauseg==0)Core_Processkey();
+
+   int i = 0;
+   static int kbt[4]={0,0,0,0};
+
+   // F9 vkbd
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) && kbt[i]==0){
+      kbt[i]=1;
+   }
+   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) ){
+      kbt[i]=0;
+      showkeyb=-showkeyb;
+   }
+   // F10 GUI
+   i=1;
+   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) && kbt[i]==0){
+      kbt[i]=1;
+   }
+   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) ){
+      kbt[i]=0;
+      pauseg=1;
+      save_bkg();
+      printf("enter gui!\n");
+   }
+
+
+   return 1;
+
+}
+
+/**
+ * old functions - temporarily keep as reference
+ *     trying to simplify and optimize previous implementation
+ */
+#if 0
+
 // Core input Key(not GUI)
 void Core_Processkey()
 {
@@ -344,7 +394,7 @@ void Core_Processkey()
 }
 
 // Core input (not GUI)
-int Core_PollEvent()
+int Core_PollEvent_old()
 {
     //   RETRO        B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
     //   INDEX        0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
@@ -369,27 +419,6 @@ int Core_PollEvent()
    mouse_x=mouse_y=0;
 
    if(showkeyb==-1 && pauseg==0)Core_Processkey();
-
-   // F9 vkbd
-   i=0;
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) && kbt[i]==0){
-      kbt[i]=1;
-   }
-   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F9) ){
-      kbt[i]=0;
-      showkeyb=-showkeyb;
-   }
-   // F10 GUI
-   i=1;
-   if (input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) && kbt[i]==0){
-      kbt[i]=1;
-   }
-   else if ( kbt[i]==1 && ! input_state_cb(0, RETRO_DEVICE_KEYBOARD, 0, RETROK_F10) ){
-      kbt[i]=0;
-      pauseg=1;
-      save_bkg();
-      printf("enter gui!\n");
-   }
 
 /*
 if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
@@ -494,3 +523,4 @@ if(amstrad_devices[0]==RETRO_DEVICE_AMSTRAD_JOYSTICK){
 return 1;
 
 }
+#endif

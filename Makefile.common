@@ -32,3 +32,4 @@ SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_files.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
+SOURCES_C += $(CORE_DIR)/libretro/retro_events.c
