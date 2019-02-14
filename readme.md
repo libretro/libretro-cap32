@@ -58,6 +58,10 @@ F10 MAIN GUI
 F12 PLAY TAPE
 ```
 
+### Keyboard emulated layout
+![imagen](https://user-images.githubusercontent.com/560310/52805432-d5aac400-3086-11e9-82a0-a90682f69442.png)
+
+
 ## M3U and Disk control
 
 When you have a multi disk game, you can use a m3u file to specify each disk of the game and change them from the RetroArch Disk control interface.
