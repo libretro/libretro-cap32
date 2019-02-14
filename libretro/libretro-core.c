@@ -421,7 +421,12 @@ void retro_set_environment(retro_environment_t cb)
 	   },
       {
          "cap32_resolution",
+         #ifdef ANDROID
+         // TODO: removed on android, need debug crash on hires is selected (issue #48)
+         "Internal resolution; 384x272",
+         #else
          "Internal resolution; 384x272|768x544",
+         #endif
       },
       {
          "cap32_model",
