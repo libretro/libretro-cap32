@@ -501,6 +501,15 @@ static void update_variables(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
    retro_computer_cfg.padcfg[ID_PLAYER2] = controller_port_variable(ID_PLAYER2, &var);
 
+   var.key = "cap32_autorun";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "enabled") == 0)
+         autorun = 1;
+   }
+
    var.key = "cap32_resolution";
    var.value = NULL;
 
