@@ -102,7 +102,7 @@ SELECT+DPAD-RIGHT | [3], [R]
 SELECT+DPAD-LEFT | [4], [S]
 
 ### Keyboard emulated layout
-![imagen](https://user-images.githubusercontent.com/560310/52805432-d5aac400-3086-11e9-82a0-a90682f69442.png)
+![imagen](https://user-images.githubusercontent.com/560310/52809848-828a3e80-3091-11e9-8dd8-ddb6a2b4b330.png)
 
 ```
 F9 MEM SNAPSHOT LOAD/SAVE
