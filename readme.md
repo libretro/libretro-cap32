@@ -30,7 +30,7 @@ Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 ### Joy/Overlay  (Choose AMSTRAD JOYSTICK in input controller setting)
 
 
-JOY DEFAULT
+JOY CONFIG DEFAULT (JOYSTICK)
 ------------
 JOY BUTTON | CPC 
 ------------ | -------------
@@ -68,7 +68,7 @@ R | SHIFT
 L2 | CTRL
 R2 | COPY
 
-JOY INCENTIVE ([INCENTIVE GAMES](http://www.gamesdatabase.org/Media/SYSTEM/Amstrad_CPC/manual/Formated/Castle_Master_-_1990_-_Domark_Software.pdf))
+JOY INCENTIVE ([INCENTIVE GAMES](https://en.wikipedia.org/wiki/Incentive_Software))
 ------------
 JOY BUTTON | CPC
 ------------ | -------------
