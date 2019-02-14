@@ -46,7 +46,7 @@ extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
 // --- events code
-#define MAX_KEYSYMS 320
+#define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
 #define MAX_PADCFG 3
 
@@ -130,7 +130,7 @@ static void release_emulated_key(uint8_t cpc_key) {
  **/
 static uint8_t get_cpckey (unsigned int keysym)
 {
-   if (keysym >= 320) {
+   if (keysym >= MAX_KEYSYMS) {
       return CPC_KEY_NULL;
    } else {
       return keyboard_translation[keysym];
@@ -398,10 +398,12 @@ void init_keyboard_table() {
 	keyboard_translation[RETROK_CAPSLOCK] = CPC_KEY_CAPS_LOCK;
 
 	keyboard_translation[RETROK_LALT] = CPC_KEY_COPY;
+   keyboard_translation[RETROK_RALT] = CPC_KEY_COPY;
    keyboard_translation[RETROK_BACKQUOTE] = CPC_KEY_FORWARD_SLASH;
    keyboard_translation[RETROK_SLASH] = CPC_KEY_BACKSLASH;
    keyboard_translation[RETROK_QUOTE] = CPC_KEY_SEMICOLON;
    keyboard_translation[RETROK_BACKSLASH] = CPC_KEY_CLOSE_SQUARE_BRACKET;
+   keyboard_translation[RETROK_OEM_102] = CPC_KEY_FORWARD_SLASH;
 
 }
 
