@@ -129,7 +129,7 @@ else ifeq ($(platform), ps3)
 	CC_AS = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
 	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
 	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
-	PLATFORM_DEFINES := -D__CELLOS_LV2__
+	PLATFORM_DEFINES := -D__CELLOS_LV2__ -Iutils/zlib
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	MSB_FIRST = 1
