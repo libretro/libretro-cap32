@@ -2508,13 +2508,14 @@ int cart_insert (char *pchFileName) {
       return ERR_CPR_INVALID;
    }
 
-   sprintf(cart_name,"%s",pchFileName);
    int result = cpr_fload(pchFileName);
 
    if(result != 0) {
       fprintf(stderr, "Load of cartridge failed. Aborting.\n");
       return result;
    }
+
+   sprintf(cart_name,"%s",pchFileName);
 
    /* Restart emulator if initiated */
    if( emu_status == COMPUTER_READY) {

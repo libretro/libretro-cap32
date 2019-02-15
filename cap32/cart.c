@@ -47,8 +47,9 @@
 
 #define CPR_PAGES          32
 #define CPR_PAGE_SIZE      16 * 1024
-#define CPR_FILE_MAX_SIZE 256 * 1024
-#define CPR_MAX_CART_SIZE (CPR_PAGES * CPR_PAGE_SIZE)
+#define CPR_FILE_MAX_SIZE 768 * 1024
+#define CPR_MAX_HEADER_SIZE 260
+#define CPR_MAX_CART_SIZE (CPR_PAGES * CPR_PAGE_SIZE) + CPR_MAX_HEADER_SIZE
 
 extern uint8_t* pbROMlo;
 
@@ -177,7 +178,7 @@ int cpr_load(const uint8_t* pbCtBuffer)
       chunkId[CPR_CHUNK_ID_SIZE] = '\0';
 
       chunkSize = extractChunkSize(pbPtr);
-      //printf("Chunk '%s' at offset %u of size %u ", chunkId, offset, chunkSize);
+      //printf("Chunk '%s' at offset %u of size %u \n", chunkId, offset, chunkSize);
 
       // pointer to CHUNK_DATA
       pbPtr += CPR_CHUNK_HEADER_SIZE;

@@ -743,9 +743,12 @@ void computer_load_bios() {
    if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
       if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
       {
-         cart_insert (RPATH);
-         sprintf(RPATH,"%s",RPATH);
-         return;
+         int result = cart_insert(RPATH);
+         if(result != 0) {
+            retro_message("Error Loading Cart...");
+         } else {
+            sprintf(RPATH,"%s",RPATH);
+         }
       }
 }
 
