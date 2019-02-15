@@ -361,7 +361,7 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
    // 0x6C08 --- DMA channel 2 address pointer
    // 0x6C0A --- DMA channel 2 pause prescaler
    // 0x6C0B --- unused
-   else if (addr >= 0x6C00 && addr < 0x6C10) {
+   else if (addr >= 0x6C00 && addr < 0x6C0B) {
       int c = ((addr & 0xc) >> 2);
       //LOG("Received cmd DMA channel %x", c);
       t_DMA_channel *channel = NULL;
