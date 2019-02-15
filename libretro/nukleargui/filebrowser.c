@@ -30,7 +30,7 @@ static struct file_browser browser;
 #include <unistd.h>
 #endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__CELLOS_LV2__)
 # include <pwd.h>
 #endif
 
@@ -159,6 +159,12 @@ file_browser_init(struct file_browser *browser)
     memset(browser, 0, sizeof(*browser));
 
     {
+
+#ifdef __CELLOS_LV2__
+        strcpy(browser->home, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
+        strcpy(browser->directory, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
+        strcpy(browser->desktop, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
+#else
         /* load files and sub-directory list */
         const char *home = getenv("HOME");
 #ifdef _WIN32
@@ -173,6 +179,7 @@ file_browser_init(struct file_browser *browser)
             strcpy(browser->directory, browser->home);
 
         }
+#endif
 #endif
         {
             size_t l;
