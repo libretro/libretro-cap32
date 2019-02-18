@@ -16,5 +16,5 @@ LOCAL_MODULE    := retro
 LOCAL_SRC_FILES := $(SOURCES_C)
 LOCAL_CFLAGS    := $(COREFLAGS)
 LOCAL_LDFLAGS   := -Wl,-version-script=$(CORE_DIR)/link.T
-LOCAL_LDLIBS    := -lz -llog
+LOCAL_LDLIBS    := -llog
 include $(BUILD_SHARED_LIBRARY)

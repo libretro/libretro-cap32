@@ -1,4 +1,5 @@
 GUI = $(CORE_DIR)/libretro/nukleargui
+DEPS = $(CORE_DIR)/utils
 
 INCFLAGS := \
 	-I$(CORE_DIR) \
@@ -7,7 +8,8 @@ INCFLAGS := \
 	-I$(CORE_DIR)/libretro  \
 	-I$(GUI) \
 	-I$(GUI)/nuklear \
-	-I$(GUI)/retro
+	-I$(GUI)/retro \
+   -I$(DEPS)/zlib
 
 SOURCES_C := \
 				 $(CORE_DIR)/libretro/libretro-core.c \
@@ -33,3 +35,17 @@ SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_files.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_events.c
+
+SOURCES_C += \
+      $(DEPS)/zlib/adler32.c \
+      $(DEPS)/zlib/inflate.c \
+      $(DEPS)/zlib/inffast.c \
+      $(DEPS)/zlib/inftrees.c \
+      $(DEPS)/zlib/zutil.c \
+      $(DEPS)/zlib/gzread.c \
+      $(DEPS)/zlib/gzwrite.c \
+      $(DEPS)/zlib/gzclose.c \
+      $(DEPS)/zlib/gzlib.c \
+      $(DEPS)/zlib/trees.c \
+      $(DEPS)/zlib/crc32.c \
+      $(DEPS)/zlib/deflate.c

@@ -34,8 +34,7 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
 endif
 
 CC_AS ?= $(CC)
-LIBM  :=  -lm
-LIBZ  := -lz
+LIBM  := -lm
 # Unix
 ifneq (,$(findstring unix,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
@@ -46,7 +45,6 @@ else ifneq (,$(findstring linux-portable,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC -nostdlib
 	LIBM :=
-	LIBZ :=
 	SHARED := -shared -Wl,-version-script=link.T
 # android arm
 else ifneq (,$(findstring android,$(platform)))
@@ -173,6 +171,28 @@ else ifeq ($(platform), psp1)
 	EXTRA_INCLUDES := -I$(shell psp-config --pspsdk-path)/include
 	MSB_FIRST = 1
 
+# Vita
+else ifeq ($(platform), vita)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = arm-vita-eabi-gcc$(EXE_EXT)
+	CXX = arm-vita-eabi-g++$(EXE_EXT)
+	AR = arm-vita-eabi-ar$(EXE_EXT)
+	PLATFORM_DEFINES := -DVITA -DNO_UNALIGNED_ACCESS
+	STATIC_LINKING = 1
+
+# CTR (3DS)
+else ifeq ($(platform), ctr)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
+	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
+	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
+	PLATFORM_DEFINES := -DARM11 -D_3DS -DNO_UNALIGNED_ACCESS
+	PLATFORM_DEFINES += -march=armv6k -mtune=mpcore -mfloat-abi=hard
+	PLATFORM_DEFINES += -Wall -mword-relocations
+	PLATFORM_DEFINES += -fomit-frame-pointer -ffast-math
+	CXXFLAGS += -fno-rtti -fno-exceptions
+	STATIC_LINKING = 1
+
 # Xbox 360
 else ifeq ($(platform), xenon)
 	TARGET := $(TARGET_NAME)_libretro_xenon360.a
@@ -194,6 +214,7 @@ else ifeq ($(platform), ngc)
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	MSB_FIRST = 1
+
 # Nintendo Wii U
 else ifeq ($(platform), wiiu)
        TARGET := $(TARGET_NAME)_libretro_$(platform).a
@@ -206,6 +227,7 @@ else ifeq ($(platform), wiiu)
        PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
        HAVE_COMPAT = 1
        MSB_FIRST = 1
+
 # Nintendo Wii
 else ifeq ($(platform), wii)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
@@ -309,7 +331,7 @@ CFLAGS   += -Wall
 CXXFLAGS += $(fpic) $(DEFINES)
 CXXFLAGS += -Wall
 
-LDFLAGS += $(LIBM) $(LIBZ)
+LDFLAGS += $(LIBM)
 
 ROMS =
 SNAPS =

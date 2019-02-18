@@ -31,23 +31,16 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define LOGI printf
 #endif
 
-//TYPES
-
-#define UINT16 uint16_t
-#define UINT32 uint32_t
-#define uint32 uint32_t
-#define uint8 uint8_t
-
 //SCREEN 16BITS
 //#define M16B
 
 #ifdef M16B
  #define PIXEL_BYTES 1
- #define PIXEL_TYPE UINT16
+ #define PIXEL_TYPE unsigned short
  #define PITCH 2
 #else
  #define PIXEL_BYTES 2
- #define PIXEL_TYPE UINT32
+ #define PIXEL_TYPE unsigned int
  #define PITCH 4
 #endif
 
