@@ -65,7 +65,7 @@ extern PIXEL_TYPE *Retro_Screen;
 #define BIT_SET(var, bit)    var  = 1 << bit
 #define BIT_ADD(var, bit)    var |= 1 << bit
 #define BIT_CLEAR(var, bit)  var &= ~(1 << bit)
-#define BIT_CHECK(var, bit)  var >> bit & 1
+#define BIT_CHECK(var, bit)  ((var >> bit) & 1)
 #define BIT_TOGGLE(var, bit) var ^= 1 << bit
 
 
@@ -77,15 +77,17 @@ extern PIXEL_TYPE *Retro_Screen;
 extern int gui_status;
 
 
-// COMPUTER/EMU STATUS
+// COMPUTER/EMU STATUS - BIT WISE
 #define COMPUTER_OFF     0
 #define COMPUTER_BOOTING 1
-#define COMPUTER_READY   5
+#define COMPUTER_READY   2
+#define COMPUTER_DIRTY   8
 extern int emu_status;
 
 typedef struct {
    int model;
    int ram;
+   int lang;
    uint32_t padcfg[PORTS_NUMBER];
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;

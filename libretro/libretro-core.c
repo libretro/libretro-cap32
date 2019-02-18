@@ -55,7 +55,9 @@ extern int video_set_palette (void);
 extern int InitOSGLU(void);
 extern int  UnInitOSGLU(void);
 extern void emu_reset(void);
+extern void emu_restart(void);
 extern void change_ram(int val);
+extern void change_lang(int val);
 extern int snapshot_save (char *pchFileName);
 extern void play_tape();
 extern void retro_joy0(unsigned char joy0);
@@ -450,6 +452,10 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_scr_intensity",
          "Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
       },
+      {
+         "cap32_lang_layout",
+         "CPC Language; english|french|spanish",
+      },
 
       { NULL, NULL },
    };
@@ -538,11 +544,10 @@ static void update_variables(void)
       else if (strcmp(var.value, "6128+") == 0) val=3;
 
       if (retro_computer_cfg.model != val) {
-         if( emu_status == COMPUTER_READY ) {
+         retro_computer_cfg.model = val;
+         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
             LOGI("REBOOT - CPC MODEL: %u\n", val);
             change_model(val);
-         } else  {
-            retro_computer_cfg.model = val;
          }
       }
    }
@@ -557,11 +562,10 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
       if (retro_computer_cfg.ram != val) {
-         if(emu_status == COMPUTER_READY) {
+         retro_computer_cfg.ram = val;
+         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
             LOGI("REBOOT - CPC RAM: %u\n", val);
             change_ram(val);
-         } else {
-            retro_computer_cfg.ram = val;
          }
       }
    }
@@ -585,16 +589,16 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if(emu_status == COMPUTER_READY){
+      if(BIT_CHECK(emu_status, COMPUTER_READY)) {
          if (strcmp(var.value, "color") == 0){
             CPC.scr_tube = CPC_MONITOR_COLOR;
             video_set_palette();
          }
-   		if (strcmp(var.value, "green") == 0){
+   		else if (strcmp(var.value, "green") == 0){
             CPC.scr_tube = CPC_MONITOR_GREEN;
             video_set_palette();
          }
-         if (strcmp(var.value, "white") == 0){
+         else if (strcmp(var.value, "white") == 0){
             CPC.scr_tube = CPC_MONITOR_WHITE;
             video_set_palette();
          }
@@ -611,12 +615,33 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-      if(emu_status == COMPUTER_READY){
+      if(BIT_CHECK(emu_status, COMPUTER_READY)) {
          CPC.scr_intensity = val;
          video_set_palette();
       }
    }
 
+   var.key = "cap32_lang_layout";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      int val = 0; // DEFAULT ENGLISH
+      if (strcmp(var.value, "french") == 0) val=1;
+      else if (strcmp(var.value, "spanish") == 0) val=2;
+
+      if (retro_computer_cfg.lang != val) {
+         retro_computer_cfg.lang = val;
+         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+            change_lang(val);
+            LOGI("REBOOT - CPC LANG: %u (%x)\n", val, emu_status);
+         }
+      }
+   }
+
+   // check if emulation need a restart (model/lang/... is changed)
+   if(BIT_CHECK(emu_status, COMPUTER_DIRTY))
+      emu_restart();
 }
 
 
@@ -917,6 +942,7 @@ void retro_init(void)
    // prepare shared variables
    retro_computer_cfg.model = -1;
    retro_computer_cfg.ram = -1;
+   retro_computer_cfg.lang = -1;
    retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
 

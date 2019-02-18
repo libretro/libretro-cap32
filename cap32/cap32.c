@@ -351,8 +351,13 @@ typedef enum {
 #include "libretro.h"
 
 #define MAX_ROM_MODS 2
-extern /*static*/ char cpc_keytrans[MAX_ROM_MODS][240];
-#include "rom_mods.c"
+#include "rom/rom_mods.h"
+
+#include "rom/464.h"
+#include "rom/6128.h"
+#include "rom/6128p.h"
+#include "rom/amsdos.h"
+
 
 char chAppPath[_MAX_PATH + 1];
 char chROMSelected[_MAX_PATH + 1];
@@ -2279,30 +2284,29 @@ int tape_insert_voc (char *pchFileName)
 
 int emulator_patch_ROM (void)
 {
-   char chPath[_MAX_PATH + 1];
    uint8_t *pbPtr;
 
-   strncpy(chPath, CPC.rom_path, sizeof(chPath)-2);
-   strcat(chPath, "/");
-   strncat(chPath, chROMFile[CPC.model], sizeof(chPath)-1 - strlen(chPath)); // determine the ROM image name for the selected model
-
-   if(CPC.model <= 2) { // Normal CPC range
-      if ((pfileObject = fopen(chPath, "rb")) != NULL)
-      {
-         /* load CPC OS + Basic */
-         if(!fread(pbROM, 2*16384, 1, pfileObject)) {
-            fclose(pfileObject);
-            return ERR_CPC_ROM_MISSING;
+   // TODO load custom bios
+   switch(CPC.model)
+   {
+      case 0: // 464
+         memcpy(pbROM, OS_464, (32*1024)); // FIXME FOR CPC 464
+         break;
+              // 664
+      case 2: // 6128
+         memcpy(pbROM, OS_6128, (32*1024));
+         memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
+         break;
+      case 3: // 6128+
+         if(cart_name[0] == '\0') {
+            cpr_load(&OS_6128P[0]);
+            if (pbCartridgePages[0] != NULL)
+               pbROMlo = pbCartridgePages[0];
+            LOGI("used internal bios!\n");
+         } else if (pbCartridgeImage != NULL) {
+            LOGI("loaded cart: %s\n", cart_name);
          }
-         pbROMlo = pbROM;
-         fclose(pfileObject);
-      }
-      else
-         return ERR_CPC_ROM_MISSING;
-   } else { // Plus range
-      if (pbCartridgeImage != NULL) {
-         pbROMlo = &pbCartridgeImage[0];
-      }
+         break;
    }
 
    if (CPC.keyboard)
@@ -2316,6 +2320,10 @@ int emulator_patch_ROM (void)
          case 1: // 664
          case 2: // 6128
             pbPtr += 0x1eef; // location of the keyboard translation table
+            break;
+         case 3: // 6128+
+            if(cart_name[0] == '\0')
+               pbPtr += 0x1eef; // Only patch system cartridge
             break;
       }
 
@@ -2411,10 +2419,6 @@ void emulator_reset (bool bolMF2Reset)
       memcpy(pbMF2ROM, pbMF2ROMbackup, 8192); // copy the MF2 ROM to its proper place
 }
 
-#include "rom/6128.h"
-#include "rom/6128p.h"
-#include "rom/amsdos.h"
-
 int emulator_init (void)
 {
    int iErr, iRomNum;
@@ -2426,46 +2430,21 @@ int emulator_init (void)
    (void)iRomNum;
    (void)iErr;
 
+   pbGPBuffer     = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   pbRAM          = (uint8_t*) malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbROM          = (uint8_t*) malloc(32 * 1024 * sizeof(uint8_t));
    pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
-   pbGPBuffer    = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
-   pbRAM         = (uint8_t*) malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
-
-   // TODO load custom bios
-   switch(CPC.model)
-   {
-      case 0: // 464
-         pbROMlo = pbROM = (uint8_t *)&OS[0]; // FIXME FOR CPC 464
-         break;
-      case 1: // 664
-         pbROMlo = pbROM = (uint8_t *)&OS[0]; // FIXME FOR CPC 664
-         break;
-      case 2: // 6128
-         pbROMlo = pbROM = (uint8_t *)&OS[0]; // CPC 6128
-         break;
-      case 3: // 6128+
-         if(cart_name[0] == '\0') {
-            cpr_load(&OS_6128P[0]);
-            //pbROM = pbROMlo;
-            if (pbCartridgePages[0] != NULL)
-               pbROMlo = pbCartridgePages[0];
-
-            printf("used internal bios!\n");
-         } else if (pbCartridgeImage != NULL) {
-            //pbROM = (uint8_t *)&OS[0]; // FIXME ?
-            printf("loaded cart: %s\n", cart_name);
-         }
-         break;
-   }
 
    if (!pbGPBuffer || !pbRAM || !pbRegisterPage)
       return ERR_OUT_OF_MEMORY;
 
+   pbROMlo = pbROM;
    pbROMhi = pbExpansionROM = (uint8_t *)pbROMlo + 16384;
 
    memset(memmap_ROM, 0, sizeof(memmap_ROM[0]) * 256); // clear the expansion ROM map
    ga_init_banking(); // init the CPC memory banking map
 
-   memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
+   emulator_patch_ROM();
 
    CPC.mf2 = 0;
    crtc_init();
@@ -2518,7 +2497,7 @@ int cart_insert (char *pchFileName) {
    sprintf(cart_name,"%s",pchFileName);
 
    /* Restart emulator if initiated */
-   if( emu_status == COMPUTER_READY) {
+   if(BIT_CHECK(emu_status, COMPUTER_READY)) {
       emulator_shutdown();
       emulator_init();
    }
@@ -2868,7 +2847,8 @@ void loadConfiguration (void)
    CPC.auto_pause    = getConfigValueInt(chFileName, "system", "auto_pause", 1) & 1;
    CPC.printer       = getConfigValueInt(chFileName, "system", "printer", 0) & 1;
    CPC.mf2           = getConfigValueInt(chFileName, "system", "mf2", 0) & 1;
-   CPC.keyboard      = getConfigValueInt(chFileName, "system", "keyboard", 0);
+   //CPC.keyboard      = getConfigValueInt(chFileName, "system", "keyboard", 0);
+   CPC.keyboard = retro_computer_cfg.lang;
 
    if (CPC.keyboard > MAX_ROM_MODS)
       CPC.keyboard = 0;
@@ -3122,6 +3102,15 @@ void emu_reset(void)
 	emulator_reset(false);
 }
 
+void emu_restart(void)
+{
+   /* Reconfigure emulator */
+   emulator_shutdown();
+   emulator_init();
+
+   BIT_SET(emu_status, COMPUTER_READY);
+}
+
 void change_model(int val){
 
 	CPC.model=val;
@@ -3129,10 +3118,7 @@ void change_model(int val){
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
-   /* Reconfigure emulator */
-   emulator_shutdown();
-   emulator_init();
-//printf("change model %d ---------------\n",val);
+   BIT_ADD(emu_status, COMPUTER_DIRTY);
 }
 
 void change_ram(int val){
@@ -3142,11 +3128,14 @@ void change_ram(int val){
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
-   /* Reconfigure emulator */
-   emulator_shutdown();
-   emulator_init();
-//printf("change ram %d ---------------\n",val);
+   BIT_ADD(emu_status, COMPUTER_DIRTY);
 }
+
+void change_lang(int val){
+   CPC.keyboard=val;
+   BIT_ADD(emu_status, COMPUTER_DIRTY);
+}
+
 
 void mixsnd(void)
 {
@@ -3482,7 +3471,7 @@ int capmain (int argc, char **argv)
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
 
-   emu_status = COMPUTER_READY; // set computer init as completed
+   BIT_SET(emu_status, COMPUTER_READY); // set computer init as completed
 
    return 0;
 }
