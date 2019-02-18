@@ -185,3 +185,6 @@ Emulated Monitor brightness, default value is 8.
 
 - CPC-PLUS model is in WIP state, do not use yet.
 
+- Android version is not fully tested/optimized.
+
+- We need more Big endian tests.
