@@ -1,9 +1,9 @@
 
-# CAPRICE32 4.2 LIBRETRO 
-	 
+# CAPRICE32 4.2 LIBRETRO
+
 A quick port of caprice32-4.2.0 to LIBRETRO.
-	
-All the credit of the caprice32 Emulator to Ulrich Doewich 
+
+All the credit of the caprice32 Emulator to Ulrich Doewich
 
 You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
@@ -21,7 +21,7 @@ The core work pretty well and give the fantastic ability to use the RetroArch Sh
 
 Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 
-## Usage 
+## Usage
 
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
@@ -32,7 +32,7 @@ Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 JOY CONFIG DEFAULT (JOYSTICK)
 ------------
-JOY BUTTON | CPC 
+JOY BUTTON | CPC
 ------------ | -------------
 B | FIRE1
 Y| SPACE
@@ -157,7 +157,7 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 
 ## Core options
 
-### Autorun - 	disable/enable
+### Autorun - 	enable/disable
 
 If enabled a RUN the first bas/bin found in DSK
 
@@ -173,7 +173,7 @@ Select internal resolution, the 544p option is almost for games that uses mode 2
 
 Select disk/tape model (6128) or just tape model (464), 6128 is the most compatible model to play
 
-### Monitor Type - color/green
+### Monitor Type - color/green/white
 
 Select color monitor or monochrome
 
@@ -181,7 +181,7 @@ Select color monitor or monochrome
 
 Emulated Monitor brightness, default value is 8.
 
-## Known Bugs 
+## Known Bugs
 
 - CPC-PLUS model is in WIP state, do not use yet.
 

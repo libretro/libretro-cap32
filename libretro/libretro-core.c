@@ -417,7 +417,7 @@ void retro_set_environment(retro_environment_t cb)
       },
 	   {
 		   "cap32_autorun",
-		   "Autorun; disabled|enabled" ,
+		   "Autorun; enabled|disabled",
 	   },
       {
          "cap32_resolution",
