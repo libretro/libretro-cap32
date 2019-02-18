@@ -282,8 +282,7 @@ uint32_t freq_table[MAX_FREQ_ENTRIES] = {
    96000
 };
 
-double colours_rgb[32][3];
-double colours_rgb_init[32][3] = {
+double colours_rgb[32][3] = {
    { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 },{ 0.0, 1.0, 0.5 }, { 1.0, 1.0, 0.5 },
    { 0.0, 0.0, 0.5 }, { 1.0, 0.0, 0.5 },{ 0.0, 0.5, 0.5 }, { 1.0, 0.5, 0.5 },
    { 1.0, 0.0, 0.5 }, { 1.0, 1.0, 0.5 },{ 1.0, 1.0, 0.0 }, { 1.0, 1.0, 1.0 },
@@ -294,8 +293,9 @@ double colours_rgb_init[32][3] = {
    { 0.5, 0.0, 0.0 }, { 0.5, 0.0, 1.0 },{ 0.5, 0.5, 0.0 }, { 0.5, 0.5, 1.0 }
 };
 
-double colours_green[32];
-double colours_green_init[32] = {
+// original RGB color to GREEN LUMA converted by Ulrich Doewich
+// unknown formula, check video_get_green to see an approximation.
+double colours_green[32] = {
    0.5647, 0.5647, 0.7529, 0.9412,
    0.1882, 0.3765, 0.4706, 0.6588,
    0.3765, 0.9412, 0.9098, 0.9725,
@@ -306,7 +306,7 @@ double colours_green_init[32] = {
    0.2510, 0.3137, 0.5333, 0.5961
 };
 
-uint32_t colours[32];
+PIXEL_TYPE colours[32];
 
 static uint8_t bit_values[8] = {
    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
@@ -633,7 +633,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                   r2=(colours[GateArray.ink_values[1]]>>16)&0xFF;
                   g2=(colours[GateArray.ink_values[1]]>>8)&0xFF;
                   b2=colours[GateArray.ink_values[1]]&0xFF;
-                  GateArray.palette[18] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
+                  GateArray.palette[33] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
                }
             }
             if (CPC.mf2) { // MF2 enabled?
@@ -2578,52 +2578,82 @@ void audio_shutdown (void) {}
 void audio_pause (void) {}
 void audio_resume (void) {}
 
-#ifdef M16B
-    #define RGB2COLOR(r, g, b) ((((r>>3)<<11) | ((g>>2)<<5) | (b>>3)))
-#else
-    #define RGB2COLOR(r, g, b) (b | ((g << 8) | (r << 16)))
-#endif
+uint32_t video_monitor_colour (double r, double g, double b)
+{
+   uint32_t red = (uint32_t)(r * (CPC.scr_intensity / 10.0) * 255);
+   if (red > 255) /* limit to the maximum */
+      red = 255;
+
+   uint32_t green = (uint32_t)(g * (CPC.scr_intensity / 10.0) * 255);
+   if (green > 255)
+      green = 255;
+
+   uint32_t blue = (uint32_t)(b * (CPC.scr_intensity / 10.0) * 255);
+   if (blue > 255)
+      blue = 255;
+
+   return RGB2COLOR(red, green, blue);
+}
+
+// Convert RGB color to GREEN LUMA
+// check colours_green vs colours_rgb, we could use here a logarithm.
+// https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
+#define G_LUMA_R     0.2427
+#define G_LUMA_G     0.6380
+#define G_LUMA_B     0.1293
+#define G_LUMA_BASE  0.071
+#define G_LUMA_COEF  0.100
+#define G_LUMA_PRIM  0.050
+
+uint32_t video_monitor_green(double r, double g, double b) {
+   double green_luma = ((G_LUMA_R * r) + (G_LUMA_G * g) + (G_LUMA_B * b));
+   green_luma += (G_LUMA_BASE + G_LUMA_PRIM - (G_LUMA_COEF * green_luma));
+
+   uint32_t green = (uint32_t) (green_luma * (CPC.scr_intensity / 10.0) * 255);
+
+   if (green > 255)
+      green = 255;
+
+   return RGB2COLOR(0, green, 0);
+}
+
+// Convert RGB to LUMA
+#define BN_LUMA_R     0.299
+#define BN_LUMA_G     0.587
+#define BN_LUMA_B     0.144
+uint32_t video_monitor_grey(double r, double g, double b) {
+   double grey_luma = ((BN_LUMA_R * r) + (BN_LUMA_G * g) + (BN_LUMA_B * b));
+   uint32_t grey = (uint32_t) (grey_luma * (CPC.scr_intensity / 10.0) * 255);
+
+   if (grey > 255)
+      grey = 255;
+
+   return RGB2COLOR(grey, grey, grey);
+}
+
+void video_update_tube() {
+   switch(CPC.scr_tube) {
+      case CPC_MONITOR_COLOR:
+         CPC.video_monitor = video_monitor_colour;
+         break;
+      case CPC_MONITOR_GREEN:
+         CPC.video_monitor = video_monitor_green;
+         break;
+      case CPC_MONITOR_WHITE:
+         CPC.video_monitor = video_monitor_grey;
+         break;
+   }
+}
 
 int video_set_palette (void)
 {
 
    int n;
+   video_update_tube();
 
-
-   if (!CPC.scr_tube)
+   for (n = 0; n < 32; n++)
    {
-      for (n = 0; n < 32; n++)
-      {
-         uint32_t red, green, blue;
-
-         red = (uint32_t)(colours_rgb[n][0] * (CPC.scr_intensity / 10.0) * 255);
-         if (red > 255) /* limit to the maximum */
-            red = 255;
-
-         green = (uint32_t)(colours_rgb[n][1] * (CPC.scr_intensity / 10.0) * 255);
-         if (green > 255)
-            green = 255;
-
-         blue = (uint32_t)(colours_rgb[n][2] * (CPC.scr_intensity / 10.0) * 255);
-         if (blue > 255)
-            blue = 255;
-
-         colours[n] = (PIXEL_TYPE) RGB2COLOR(red, green, blue);
-
-      }
-   }
-   else
-   {
-      for (n = 0; n < 32; n++)
-      {
-         uint32_t green = (uint32_t)(colours_green[n] * (CPC.scr_intensity / 10.0) * 255);
-
-         if (green > 255)
-            green = 255;
-
-         colours[n] = (PIXEL_TYPE) RGB2COLOR(0, green, 0);
-
-      }
+      colours[n] = (PIXEL_TYPE) CPC.video_monitor(colours_rgb[n][0], colours_rgb[n][1], colours_rgb[n][2]);
    }
 
    for (n = 0; n < 17; n++)
@@ -2691,6 +2721,7 @@ void video_set_style (void)
             CPC.scr_render = (void(*)(void))render16bpp;
          break;
    }
+
 }
 
 int video_init (void)

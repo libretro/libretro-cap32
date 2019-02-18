@@ -53,6 +53,12 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 extern PIXEL_TYPE *Retro_Screen;
 
+#ifdef M16B
+    #define RGB2COLOR(r, g, b) ((((r>>3)<<11) | ((g>>2)<<5) | (b>>3)))
+#else
+    #define RGB2COLOR(r, g, b) (b | ((g << 8) | (r << 16)))
+#endif
+
 #define WINDOW_MAX_SIZE (768*544)
 
 // BIT OPERATIONS - MACROS

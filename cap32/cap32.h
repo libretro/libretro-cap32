@@ -54,6 +54,10 @@
 #define CPC_VISIBLE_SCR_WIDTH 384 // visible width: 4+40+4 * 8
 #define CPC_VISIBLE_SCR_HEIGHT 270
 
+#define CPC_MONITOR_COLOR 0
+#define CPC_MONITOR_GREEN 1
+#define CPC_MONITOR_WHITE 2
+
 #define ICN_DISK_WIDTH 14
 #define ICN_DISK_HEIGHT 16
 #define ICN_TAPE_WIDTH 18
@@ -243,6 +247,7 @@ typedef struct {
    unsigned int snd_buffersize;
    unsigned char *snd_bufferptr;
 
+   unsigned int (*video_monitor)(double r, double g, double b);
 
    union
    {

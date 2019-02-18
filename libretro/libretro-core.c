@@ -444,7 +444,7 @@ void retro_set_environment(retro_environment_t cb)
       #endif
       {
          "cap32_scr_tube",
-         "Monitor Type; color|green",
+         "Monitor Type; color|green|white",
       },
       {
          "cap32_scr_intensity",
@@ -586,10 +586,18 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
 		if(emu_status == COMPUTER_READY){
-      		if (strcmp(var.value, "enabled") == 0){
-         		  CPC.scr_tube=1;video_set_palette();}
-      		if (strcmp(var.value, "disabled") == 0){
-         		 CPC.scr_tube=0;video_set_palette();}
+         if (strcmp(var.value, "color") == 0){
+            CPC.scr_tube = CPC_MONITOR_COLOR;
+            video_set_palette();
+         }
+   		if (strcmp(var.value, "green") == 0){
+            CPC.scr_tube = CPC_MONITOR_GREEN;
+            video_set_palette();
+         }
+         if (strcmp(var.value, "white") == 0){
+            CPC.scr_tube = CPC_MONITOR_WHITE;
+            video_set_palette();
+         }
 		}
    }
 

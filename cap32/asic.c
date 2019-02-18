@@ -47,7 +47,8 @@
 #include "asic.h"
 #include "crtc.h"
 
-extern double colours_rgb[32][3];
+#include "libretro-core.h"
+
 // TODO: remove log
 #ifdef DEBUG_CART
 #define ERR(x) fprintf(stderr, x "\n")
@@ -72,21 +73,13 @@ uint8_t *pbRegisterPage;
 
 t_asic asic;
 double asic_colours[32][3];
-extern double colours_rgb_init[32][3];
 
 void asic_reset(){
-   int i, j;
    memset(&asic, 0, sizeof(asic));
+
    asic.locked = true;
    asic.raster_interrupt = false;
    asic.interrupt_vector = 1;
-
-   for(i = 0; i < 32; i++) {
-      for(j = 0; j < 3; j++) {
-         colours_rgb[i][j] = colours_rgb_init[i][j];
-      }
-   }
-
 }
 
 void asic_poke_lock_sequence(uint8_t val) {
@@ -308,21 +301,17 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
       if ((addr % 2) == 1) {
          double green = (double) (val & 0x0F)/16;
          asic_colours[colour][1] = green;
-         colours_rgb[colour][1] = green; // FIXME borrar
          pbRegisterPage[(addr & 0x3FFF)] = (val & 0x0F);
       } else {
          double red   = (double) ((val & 0xF0) >> 4)/16;
          double blue  = (double) (val & 0x0F)/16;
          asic_colours[colour][0] = red;
          asic_colours[colour][2] = blue;
-         colours_rgb[colour][0] = red; // borrar
-         colours_rgb[colour][2] = blue; // borrar
          pbRegisterPage[(addr & 0x3FFF)] = val;
       }
-      // FIXME
-      video_set_palette();
-      GateArray.ink_values[colour] = colour;
-      GateArray.palette[colour] =colours[colour];
+      GateArray.palette[colour] = CPC.video_monitor( asic_colours[colour][0],
+                                                asic_colours[colour][1],
+                                                asic_colours[colour][2]);
       return false;
    }
    // 0x6440 --- unused
