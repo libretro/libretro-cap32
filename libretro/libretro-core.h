@@ -54,6 +54,8 @@ extern PIXEL_TYPE *Retro_Screen;
 
 #define WINDOW_MAX_SIZE (768*544)
 
+
+
 // BIT OPERATIONS - MACROS
 #define BIT_SET(var, bit)    var  = 1 << bit
 #define BIT_ADD(var, bit)    var |= 1 << bit
@@ -74,7 +76,6 @@ extern int gui_status;
 #define COMPUTER_OFF     0
 #define COMPUTER_BOOTING 1
 #define COMPUTER_READY   2
-#define COMPUTER_DIRTY   8
 extern int emu_status;
 
 typedef struct {
@@ -82,6 +83,7 @@ typedef struct {
    int ram;
    int lang;
    uint32_t padcfg[PORTS_NUMBER];
+   bool is_dirty;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 

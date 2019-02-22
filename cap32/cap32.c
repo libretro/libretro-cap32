@@ -2497,7 +2497,7 @@ int cart_insert (char *pchFileName) {
    sprintf(cart_name,"%s",pchFileName);
 
    /* Restart emulator if initiated */
-   if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+   if(emu_status & COMPUTER_READY) {
       emulator_shutdown();
       emulator_init();
    }
@@ -3108,7 +3108,7 @@ void emu_restart(void)
    emulator_shutdown();
    emulator_init();
 
-   BIT_SET(emu_status, COMPUTER_READY);
+   retro_computer_cfg.is_dirty = false;
 }
 
 void change_model(int val){
@@ -3118,7 +3118,7 @@ void change_model(int val){
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
-   BIT_ADD(emu_status, COMPUTER_DIRTY);
+   retro_computer_cfg.is_dirty = true;
 }
 
 void change_ram(int val){
@@ -3128,12 +3128,12 @@ void change_ram(int val){
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
 
-   BIT_ADD(emu_status, COMPUTER_DIRTY);
+   retro_computer_cfg.is_dirty = true;
 }
 
 void change_lang(int val){
    CPC.keyboard=val;
-   BIT_ADD(emu_status, COMPUTER_DIRTY);
+   retro_computer_cfg.is_dirty = true;
 }
 
 
@@ -3471,7 +3471,7 @@ int capmain (int argc, char **argv)
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
 
-   BIT_SET(emu_status, COMPUTER_READY); // set computer init as completed
+   emu_status = COMPUTER_READY; // set computer init as completed
 
    return 0;
 }

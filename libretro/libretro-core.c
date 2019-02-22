@@ -390,6 +390,9 @@ void retro_set_environment(retro_environment_t cb)
 {
    environ_cb = cb;
 
+   bool allow_no_game = true;
+   cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, &allow_no_game);
+
    static const struct retro_controller_description p1_controllers[] = {
      { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
      { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
@@ -545,7 +548,7 @@ static void update_variables(void)
 
       if (retro_computer_cfg.model != val) {
          retro_computer_cfg.model = val;
-         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+         if(emu_status & COMPUTER_READY) {
             LOGI("REBOOT - CPC MODEL: %u\n", val);
             change_model(val);
          }
@@ -563,7 +566,7 @@ static void update_variables(void)
       val = strtoul(str, NULL, 0);
       if (retro_computer_cfg.ram != val) {
          retro_computer_cfg.ram = val;
-         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+         if(emu_status & COMPUTER_READY) {
             LOGI("REBOOT - CPC RAM: %u\n", val);
             change_ram(val);
          }
@@ -589,7 +592,7 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+      if(emu_status & COMPUTER_READY) {
          if (strcmp(var.value, "color") == 0){
             CPC.scr_tube = CPC_MONITOR_COLOR;
             video_set_palette();
@@ -615,7 +618,7 @@ static void update_variables(void)
       snprintf(str, sizeof(str), "%s", var.value);
       val = strtoul(str, NULL, 0);
 
-      if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+      if(emu_status & COMPUTER_READY) {
          CPC.scr_intensity = val;
          video_set_palette();
       }
@@ -632,7 +635,7 @@ static void update_variables(void)
 
       if (retro_computer_cfg.lang != val) {
          retro_computer_cfg.lang = val;
-         if(BIT_CHECK(emu_status, COMPUTER_READY)) {
+         if(emu_status & COMPUTER_READY) {
             change_lang(val);
             LOGI("REBOOT - CPC LANG: %u (%x)\n", val, emu_status);
          }
@@ -640,7 +643,7 @@ static void update_variables(void)
    }
 
    // check if emulation need a restart (model/lang/... is changed)
-   if(BIT_CHECK(emu_status, COMPUTER_DIRTY))
+   if(retro_computer_cfg.is_dirty)
       emu_restart();
 }
 
@@ -1066,6 +1069,7 @@ void retro_run(void)
    {
 		mfirst++;
 		emu_status = COMPUTER_BOOTING;
+      printf("MEEE INIT!\n");
 
 		Emu_init();
       computer_load_file();
@@ -1088,25 +1092,20 @@ void retro_run(void)
 
 }
 
-bool retro_load_game(const struct retro_game_info *info)
+bool retro_load_game(const struct retro_game_info *game)
 {
-   const char *full_path;
-
-   (void)info;
-
-   if (!info)
-      return false;
-
-   full_path = info->path;
-
-   strcpy(RPATH,full_path);
+   if (game){
+      strcpy(RPATH, (const char *) game->path);
+   } else {
+      RPATH[0]='\0';
+   }
 
    update_variables();
-
-	memset(SNDBUF,0,1024*2*2);
-
+   memset(SNDBUF,0,1024*2*2);
    computer_load_bios();
+
    return true;
+
 }
 
 void retro_unload_game(void){
@@ -1121,9 +1120,6 @@ unsigned retro_get_region(void)
 
 bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num)
 {
-   (void)type;
-   (void)info;
-   (void)num;
    return false;
 }
 
