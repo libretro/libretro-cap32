@@ -1069,7 +1069,6 @@ void retro_run(void)
    {
 		mfirst++;
 		emu_status = COMPUTER_BOOTING;
-      printf("MEEE INIT!\n");
 
 		Emu_init();
       computer_load_file();
