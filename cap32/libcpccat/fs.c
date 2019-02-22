@@ -26,6 +26,7 @@
 #include "cpc_cat.h"
 
 int  cpc_dsk_num_entry = 0;
+int  cpc_dsk_type = 0;
 char cpc_dsk_dirent[CPC_MAX_ENTRY][CPC_NAME_SIZE];
 
 /****** Variables ******/
@@ -64,7 +65,7 @@ static int my_open(const char* name)
    if (gz_format)
    {
       gz_imagefile = gzopen(name, "rb+");
-      if (! gz_imagefile) return -1; 
+      if (! gz_imagefile) return -1;
    }
    else
    {
@@ -102,18 +103,18 @@ static int my_close(void)
 }
 
 static int my_read(uchar* a_ptr, size_t a_size)
-{  
+{
   if (gz_format)
     return gzread( gz_imagefile, a_ptr, a_size);
   return read(imagefile, a_ptr, a_size);
 }
 
-static int my_lseek(long offs, int whence) 
+static int my_lseek(long offs, int whence)
 {
   if (gz_format)
     return gzseek( gz_imagefile, offs, whence);
   return lseek(imagefile, offs, whence);
-} 
+}
 
 
 
@@ -143,7 +144,7 @@ bool tag_ok () {
 /*   ^^^^^^ */
 
   /* KT - 27/04/2000 - Support for Extended disk image */
-  if (strncmp("EXTENDED", (char *)disk_header.tag,8)==0) 
+  if (strncmp("EXTENDED", (char *)disk_header.tag,8)==0)
   {
     image_type = 1;
     return TRUE;
@@ -154,7 +155,7 @@ bool tag_ok () {
     image_type = 0;
     return TRUE;
   }
-  
+
   return FALSE;
 }
 
@@ -253,7 +254,7 @@ void  calc_t_s_h(int blk,int *track, int *sector, int *head)
     {
       /* calc side */
       h = t/dpb->TRKS;
-    
+
       /* odd side */
       if (h & 1)
       {
@@ -267,7 +268,7 @@ void  calc_t_s_h(int blk,int *track, int *sector, int *head)
       }
     }
     break;
-    
+
     /* track 0 side 0, track 0 side 1, track 1 side 0, track 1 side 1... track n side 0, track n side 1*/
     case ORDER_SIDES:
     {
@@ -365,7 +366,7 @@ reserved position
     }
     break;
 
-    case ORDER_EAGLE:  
+    case ORDER_EAGLE:
     {
 
     }
@@ -379,15 +380,15 @@ reserved position
     }
     break;
   }
-#endif  
-  
+#endif
+
   if (trk*dpb->HDS+hd < dpb->OFS) return -1;
   return ((long)sec + hd*dpb->SECS
     + trk*dpb->SECS*dpb->HDS
     - dpb->OFS*dpb->SECS)
     / (dpb->BLS/dpb->BPS);
 }
-  
+
 /* KT - added common free data function */
 void free_image_data(void)
 {
@@ -395,27 +396,27 @@ void free_image_data(void)
   {
     free(blk_alloc);  blk_alloc=NULL;
   }
-  
+
   if (track)
   {
     free(track);    track=NULL;
   }
-  
+
   if (directory)
   {
     free(directory);  directory=(DirEntry*)NULL;
   }
-  
+
   if (block_buffer)
   {
-    free(block_buffer);  block_buffer=(uchar*)NULL;          
+    free(block_buffer);  block_buffer=(uchar*)NULL;
   }
-  
+
   *disk_header.tag = 0;
   dpb = NULL;
 
   my_close();
-  
+
   cur_trk = -1;
   cur_blk = -1;
   directory_dirty = 0;
@@ -423,7 +424,7 @@ void free_image_data(void)
 
 
 
-void abandonimage() 
+void abandonimage()
 {
   free_image_data();
 }
@@ -478,7 +479,7 @@ unsigned long get_track_offset(int track, int side)
     default:
       break;
   }
-  
+
   return 0;
 }
 
@@ -492,11 +493,11 @@ unsigned long get_track_size(int track, int side)
       /* attempt to access a invalid track and side */
       if ((track>=disk_header.nbof_tracks) || (side>=disk_header.nbof_heads))
         return 0;
-  
+
       /* return size of track */
       return disk_header.tracksize;
     }
-    
+
     /* extended disk image */
     case 1:
     {
@@ -523,7 +524,7 @@ int  is_track_header_valid(unsigned char *track)
   if (track_header->SPT>29)
     return 0;
 
-  /* unlikely to have a track where the BPS is 16384 bytes! */ 
+  /* unlikely to have a track where the BPS is 16384 bytes! */
   if (track_header->BPS>6)
     return 0;
 
@@ -553,19 +554,19 @@ int validate_image(void)
         {
           /* formatted track */
           n = my_lseek(track_offset,SEEK_SET);
-          if (n == -1L) 
+          if (n == -1L)
           {
             return 0;
           }
 
           n = my_read(track,track_size);
-          if (n != track_size) 
+          if (n != track_size)
           {
             return 0;
           }
-        
+
           /* seeked to position ok, and read data */
-                          
+
           /* check track header */
           if (!is_track_header_valid(track))
             return 0;
@@ -598,7 +599,7 @@ void malloc_track()
 
     case 1:
     {
-    
+
       int t,h;
 
       for (h=0; h<disk_header.nbof_heads; h++)
@@ -632,7 +633,7 @@ void malloc_track()
   track = (void *)malloc(max_track_size);
 }
 
-int read_track (int hd, int trk) 
+int read_track (int hd, int trk)
 {
 /*  ^^^^^^^^^^ */
 long  n, pos;
@@ -645,12 +646,12 @@ int    track_size;
   //printf("[rt(%d,%d)] ",hd,trk);
 
   track_size = get_track_size(trk,hd);
-  
+
   if (track_size == 0)
     return -1;
-  
+
   pos = get_track_offset(trk, hd);
-    
+
   if (pos==0)
     return -1;
 
@@ -685,7 +686,7 @@ Assumes <sec> without offset. Answer TRUE if the <trk> or <hd> is changed. */
 
   prev_hd = *hd;
   prev_trk = *trk;
-  
+
   switch (dpb->order)
   {
     case ORDER_CYLINDERS:
@@ -723,11 +724,11 @@ Assumes <sec> without offset. Answer TRUE if the <trk> or <hd> is changed. */
     case ORDER_SIDES:
     {
       (*sec)++;
-      if (*sec >= dpb->SECS) 
+      if (*sec >= dpb->SECS)
       {
         *sec -= dpb->SECS;
         (*hd)++;
-        if (*hd >= dpb->HDS) 
+        if (*hd >= dpb->HDS)
         {
           *hd = 0;
           (*trk)++;
@@ -796,7 +797,7 @@ int  get_sector_pos_in_track(int r,int h)
   struct s_info  *sector_info = &track_header->sector[0];
   int i;
   int spt;
-  
+
   /* defines number of sector id's stored */
   spt = track_header->SPT;
 
@@ -834,7 +835,7 @@ int get_sector_data_offset_extended(int pos)
 
     sector_size = sector_info->unused[0] +
           (sector_info->unused[1]<<8);
-  
+
     sector_info++;
     sector_offset += sector_size;
   }
@@ -904,15 +905,15 @@ uchar *sector_ptr;
 
   calc_t_s_h(blk, &trk, &sec, &hd);
 
-  while (filled < dpb->BLS) 
+  while (filled < dpb->BLS)
   {
     int r,h;
 
-    if (read_track(hd,trk)) 
+    if (read_track(hd,trk))
       return NULL;
 
     r = sec;
-    
+
     if (hd==0)
     {
       h = dpb->side0_hd;
@@ -923,7 +924,7 @@ uchar *sector_ptr;
       h = dpb->side1_hd;
       r += dpb->SEC1_side2;
     }
-    
+
     sector_ptr = get_sector_data_ptr(r,h);
 
     if (sector_ptr==NULL)
@@ -931,9 +932,9 @@ uchar *sector_ptr;
       //fprintf(stdout, "Warning: cannot find sector, unable to read data!");
       return NULL;
     }
-    
+
     memcpy(block_buffer+filled, sector_ptr, dpb->BPS);
-        
+
     filled += dpb->BPS;
     next_sector (&hd,&trk,&sec);
   }
@@ -1046,17 +1047,17 @@ struct pair  *map;
 
     /* KT: changed calculation to use extent number, and block size */
     directory[map[0].en].size =
-      ((long)directory[map[j-1].en].extent * EXTENTSIZE) 
+      ((long)directory[map[j-1].en].extent * EXTENTSIZE)
       + (directory[map[j-1].en].rec * RECORDSIZE);
 
-    
+
   } /* for i */
 
   free(map); map=NULL;
 }
 
 
-void get_directory() 
+void get_directory()
 {
 /*   ^^^^^^^^^^^^^ */
 int  i,j,off;
@@ -1068,7 +1069,7 @@ int  mask;
   {
     directory[i].user = 0x0e5;
   }
-  
+
 /* reading the directory data */
   for (i=0;i<=dpb->DRM;i++) {
     buf = read_block((signed)i*32/dpb->BLS);
@@ -1080,9 +1081,9 @@ int  mask;
 /* user, name, ... */
     directory[i].user  = buf[off+0];
     for (j=0;j<8;j++) directory[i].root[j] = (buf[off+j+1] & 0x7F);
-    for (j=0;j<3;j++) directory[i].ext[j]  = (buf[off+j+9] & 0x7F);   
+    for (j=0;j<3;j++) directory[i].ext[j]  = (buf[off+j+9] & 0x7F);
     directory[i].name[0]  = 0;
-          
+
     directory[i].extent  = buf[off+12];
     directory[i].unused[0]  = buf[off+13];
     directory[i].unused[1]  = buf[off+14];
@@ -1112,7 +1113,7 @@ int  mask;
 
   update_directory(0);
   /*for (i=0;i<dpb->DBL;i++) alloc_block(i,0);*/ /* 0 is not correct! */
-        
+
   /* marking all blocks as free */
   for (j=0;j<=dpb->DSM;j++) free_block(j);
 
@@ -1141,14 +1142,14 @@ int  mask;
 
   /* mark blocks used by files as allocated */
   cpc_dsk_num_entry = 0;
-  for (i=0;i<=dpb->DRM;i++) 
+  for (i=0;i<=dpb->DRM;i++)
   {
     if ((directory[i].user!=0xE5) && (directory[i].first)) {
       strncpy((char *)cpc_dsk_dirent[cpc_dsk_num_entry], (char *)directory[i].name, CPC_NAME_SIZE);
       cpc_dsk_num_entry++;
       if (cpc_dsk_num_entry >= CPC_MAX_ENTRY) break;
     }
-    for (j=0;j<BLKNR;j++) 
+    for (j=0;j<BLKNR;j++)
     {
       if (directory[i].user!=0xE5)
       {
@@ -1196,13 +1197,13 @@ Complete the extension parts of <dpb>. <track> must be read in first!
   int sectors_per_dir;
 
   dpb->BLS  = 1 << (dpb->BSH + 7); /* or 2^BSH*128 */
-  
+
   /* KT - already present in format description */
 #if 0
 /* an image must exist, do not call form <format>! */
   dpb->SEC1 = ((struct t_header*)track)->sector[0].sector;
   dpb->SECS = ((struct t_header*)track)->SPT;
-  
+
   /* KT - Removed because they are already specified */
   /* the next two elements should already be set */
   dpb->TRKS = disk_header.nbof_tracks;
@@ -1218,16 +1219,16 @@ Complete the extension parts of <dpb>. <track> must be read in first!
 
   dpb->DSM = (dpb->TRKS*dpb->HDS*dpb->SECS) / (dpb->BLS/dpb->BPS);
 /* subtract reserved tracks */
-  dpb->DSM -= dpb->OFS * dpb->SECS / (dpb->BLS/dpb->BPS); 
+  dpb->DSM -= dpb->OFS * dpb->SECS / (dpb->BLS/dpb->BPS);
   dpb->DSM--;
 #endif
 
   /* KT - Added because it is no longer stored! */
   dpb->SPT = (dpb->SECS*dpb->BPS)/RECORDSIZE;
-  
+
   sectors_per_dir = (((dpb->DRM+1)<<5)+(dpb->BPS-1))/dpb->BPS;
   sectors_per_dir = sectors_per_dir * dpb->BPS;
-  
+
   dpb->CKS = sectors_per_dir/RECORDSIZE;
 
 
@@ -1242,7 +1243,7 @@ Complete the extension parts of <dpb>. <track> must be read in first!
     BLKNR_SIZE = 1;
     BLKNR_MAX = 16;
   }
-  
+
   /* if the extent mask is a real mask, then we can calculate the number of 1 bits in it.
   From this we can calculate the number of extents */
   /* the function will only work if EXM is 1,3,7,15.... i.e. if bit 3 is set, bits 2,1 and 0 must be set */
@@ -1274,7 +1275,7 @@ Complete the extension parts of <dpb>. <track> must be read in first!
       BLKNR = BLKNR_MAX;
     }
   }
-}   
+}
 
 int sector_exists(uchar *track, ushort SEC1)
 {
@@ -1288,6 +1289,7 @@ int sector_exists(uchar *track, ushort SEC1)
   /* check if SEC1 exists in sectors available on track 0 */
   for (i=0; i<spt; i++)
   {
+    //printf("%x == %x\n", sector_info->sector, SEC1);
     if (sector_info->sector == SEC1)
     {
       return 1;
@@ -1317,13 +1319,13 @@ int  select_format(uchar *track)
     /* check if first sector exists in list of sectors in track */
     if (sector_exists(track, cur_entry->dpb.SEC1_side1))
     {
-      /* sector exists */
-      
+      //printf("%d == %d\n", spt, cur_entry->dpb.SECS);
+
       /* correct sectors per track? */
       if (spt == cur_entry->dpb.SECS)
       {
         /* correct number of sides? */
-        if (disk_header.nbof_heads==cur_entry->dpb.HDS) 
+        if (disk_header.nbof_heads==cur_entry->dpb.HDS)
         {
           if (disk_header.nbof_tracks  >=40 /*== cur_entry->dpb.TRKS*/)
           {
@@ -1332,7 +1334,7 @@ int  select_format(uchar *track)
             {
               dpb_entry_found = cur_entry;
             }
-            
+
             //fprintf(stdout, "Found format \"%s\" matching disk image format", cur_entry->ident);
             found_count++;
           }
@@ -1349,7 +1351,7 @@ int  select_format(uchar *track)
   if (dpb_entry_found==NULL)
   {
     /* format not recognised */
-  
+
     /* no format found */
     return -1;
   }
@@ -1369,12 +1371,12 @@ int  select_format(uchar *track)
   return -2;
 }
 
-void 
+void
 initialise(void)
 {
   /* KT - initialise some data */
-  
-  cur_trk = -1;    
+
+  cur_trk = -1;
   cur_hd = -1;
   cur_blk = -1;
   directory_dirty = 0;
@@ -1413,8 +1415,8 @@ int  i;
   FS Maintenance
  *****************/
 
-int 
-open_image(char *name, int auto_detect) 
+int
+open_image(char *name, int auto_detect)
 {
 /*  ^^^^^^^^^^
 alloc track buffer, blk_alloc, buffer, read directory */
@@ -1459,7 +1461,7 @@ int result;
     return -1;
   }
 
-  
+
 
 /* set up varaibles */
   filler = 0xE5;
@@ -1476,7 +1478,7 @@ int result;
   /* auto-detect image format */
   if (auto_detect)
   {
-    
+
     result = select_format(track);
 
     if (result==-2)
@@ -1488,10 +1490,14 @@ int result;
 
     if (result==-1)
     {
-      //fprintf(stdout, disc_format_not_recognised_string);
+      printf("dsk format not recognised heads(%d)\n", disk_header.nbof_heads);
       abandonimage();
       return -1;
     }
+
+    //fprintf(stdout, "DSK_FORMAT: %x\n", dpb->SEC1_side1);
+    cpc_dsk_type = dpb->SEC1_side1;
+
   }
   else
   {
@@ -1530,7 +1536,7 @@ int result;
 
 /* allocate block buffer */
   block_buffer = (uchar*)malloc(dpb->BLS);
-    
+
   if (block_buffer==NULL)
   {
     abandonimage();
@@ -1544,7 +1550,7 @@ int result;
 }
 
 DPB_type system_dpb=
-  {  
+  {
     0x041, /* SEC1 side 1 */
     0x041, /* SEC1 side 2 */
     9,  /* SECS */
@@ -1566,8 +1572,32 @@ DPB_type system_dpb=
     ORDER_SIDES,0,0,5,0,NULL
   };
 
-DPB_type data_dpb = 
-  {  
+DPB_type system_dpb_big=
+ {
+   0x041, /* SEC1 side 1 */
+   0x041, /* SEC1 side 2 */
+   10,  /* SECS */
+   40,  /* TRKS */
+   1,  /* HDS */
+   512,  /* BPS */
+
+   36,  /* SPT */
+   3,  /* BSH */
+   7,  /* BLM */
+   0,  /* EXM */
+   170,  /* DSM */
+   63,  /* DRM */
+   0xC0,  /* AL0 */
+   0x00,  /* AL1 */
+   16,  /* CKS */
+   2,  /* OFS */
+   0,0,0,
+   ORDER_SIDES,0,0,5,0,NULL
+ };
+
+
+DPB_type data_dpb =
+  {
     0x0c1, /* SEC1 side 1 */
     0x0c1, /* SEC1 side 2 */
     9,  /* SECS */
@@ -1589,11 +1619,35 @@ DPB_type data_dpb =
     ORDER_SIDES,0,0,5,0,NULL
   };
 
+
+DPB_type data_dpb_big =
+ {
+   0x0c1, /* SEC1 side 1 */
+   0x0c1, /* SEC1 side 2 */
+   10,  /* SECS */
+   40,  /* TRKS */
+   1,  /* HDS */
+   512,  /* BPS */
+
+   36,  /* SPT */
+   3,  /* BSH */
+   7,  /* BLM */
+   0,  /* EXM */
+   179,  /* DSM */
+   63,  /* DRM */
+   0xC0,  /* AL0 */
+   0x00,  /* AL1 */
+   16,  /* CKS */
+   0,  /* OFS */
+   0,0,0,
+   ORDER_SIDES,0,0,5,0,NULL
+ };
+
 char *upper(char *s)  {
 /*    ^^^^^ */
 char  *p=s;
 
-  while (*s) 
+  while (*s)
   {
     *s = toupper(*s);
     s++;
@@ -1703,10 +1757,13 @@ static int loc_initialized = 0;
   /* data */
   //dpb_list_add_item(&dpb_list,"Data Format", "data", &data_dpb);
   dpb_list_add_item(&dpb_list,"data", "data", &data_dpb);
-  
+  // fix big data format (ex: Prehistorik II)
+  dpb_list_add_item(&dpb_list,"data_b", "data_b", &data_dpb_big);
+
   /* system */
   //dpb_list_add_item(&dpb_list,"System Format", "system", &system_dpb);
   dpb_list_add_item(&dpb_list,"system", "system", &system_dpb);
+  dpb_list_add_item(&dpb_list,"system_b", "system_b", &system_dpb_big);
 
   loc_initialized = 1;
 }
@@ -1728,4 +1785,3 @@ cpc_dsk_dir(char *filename)
 #endif
   return error;
 }
-

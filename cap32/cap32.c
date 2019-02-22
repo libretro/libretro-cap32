@@ -3184,25 +3184,33 @@ int cpc_dsk_system = 0;
 int
 cap32_disk_dir(char *FileName)
 {
-  cpc_dsk_system = 0;
-  int error = cpc_dsk_dir(FileName);
-  if (! error) {
-    if (cpc_dsk_num_entry > 20) {
-      int index;
-      for (index = 0; index < cpc_dsk_num_entry; index++) {
-        int cpos = 0;
-        for (cpos = 0; cpc_dsk_dirent[index][cpos]; cpos++) {
-          /* High number of files with no printable chars ? might be CPM */
-          if (cpc_dsk_dirent[index][cpos] < 32) {
-            cpc_dsk_system = 1;
-            cpc_dsk_num_entry = 0;
-            break;
-          }
-        }
+   int error = cpc_dsk_dir(FileName);
+   if (! error) {
+      cpc_dsk_system = (cpc_dsk_type == DSK_TYPE_SYSTEM);
+      printf("INFO-DSK: num: %d sys(%d)\n", cpc_dsk_num_entry, cpc_dsk_system);
+      if (cpc_dsk_num_entry > 20) {
+         int index;
+         for (index = 0; index < cpc_dsk_num_entry; index++) {
+            int cpos = 0;
+            printf("INFO: DIR-INIT: i(%d) p(%d) = %x\n", index, cpos, cpc_dsk_dirent[index][cpos]);
+            for (cpos = 0; cpc_dsk_dirent[index][cpos]; cpos++) {
+               /* with no printable chars in first ? might be CPM */
+               if (cpc_dsk_dirent[index][cpos] < 32) {
+                  if(!index) {
+                     cpc_dsk_num_entry = 0;
+                  } else {
+                     // some filenames are loaded used it! -- fixed cracked custom DSKs
+                     cpc_dsk_num_entry = index;
+                  }
+                  printf("DSK_LOAD INFO-SYS: dsk: i(%d) p(%d) = %d \n", index, cpos, cpc_dsk_dirent[index][cpos]);
+                  break;
+               }
+            }
+         }
+      } else {
       }
-    }
-  }
-  return error;
+   }
+   return error;
 }
 
 int retro_disk_auto()
@@ -3247,8 +3255,8 @@ int retro_disk_auto()
       if (cpc_dsk_system) {
         strcpy(Buffer, "|CPM");
       } else {
+         strcpy(Buffer, "CAT");
 			printf("autoload not found\n");
-			return -1;
       }
 
     } else {
@@ -3281,7 +3289,9 @@ int attach_disk(char *arv, int drive)
 		if((result = dsk_load( arv, &driveA, 'A')) == 0)
 		{
 			sprintf(DISKA_NAME,"%s",arv);
-			cap32_disk_dir(arv);
+			result = cap32_disk_dir(arv);
+         if(result)
+            printf("error dsk: %d\n", result);
 		}
 	} else {
 		if((result = dsk_load( arv, &driveB, 'B')) == 0)

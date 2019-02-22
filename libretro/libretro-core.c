@@ -648,17 +648,15 @@ static void update_variables(void)
 }
 
 
-void Emu_init(){
-
+void Emu_init()
+{
+   emu_status = COMPUTER_BOOTING;
    pre_main(RPATH);
-   update_variables();
-
 }
 
-void Emu_uninit(){
-
+void Emu_uninit()
+{
 	//quit_cap32_emu();
-
    texture_uninit();
 }
 
@@ -672,8 +670,8 @@ void retro_shutdown_core(void)
    environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
 }
 
-void retro_reset(void){
-
+void retro_reset(void)
+{
 	emu_reset();
 }
 
@@ -858,8 +856,14 @@ void computer_load_file() {
    if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
       if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
       {
-         tape_insert ((char *)RPATH);
-         kbd_buf_feed("|tape\nrun\"\n^");
+         int error = tape_insert ((char *)RPATH);
+         if (!error) {
+            kbd_buf_feed("|tape\nrun\"\n^");
+            LOGI("Tape inserted: %s\n", (char *)RPATH);
+         } else {
+            LOGI("Tape Error (%d): %s\n", error, (char *)RPATH);
+         }
+
          return;
 
       }
@@ -949,23 +953,26 @@ void retro_init(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
 
-	update_variables();
+   update_variables();
 
-    // save screen values from user variables
-    retro_scr_w = retrow;
-    retro_scr_h = retroh;
-    gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
+   // save screen values from user variables
+   retro_scr_w = retrow;
+   retro_scr_h = retroh;
+   gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
 
-    if(retrow==384)
-       retro_scr_style = 3;
-    else if(retrow==768)
-       retro_scr_style = 4;
+   if(retrow==384)
+      retro_scr_style = 3;
+   else if(retrow==768)
+      retro_scr_style = 4;
 
-    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
+
+   fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
          retrow, retroh, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
 
-    // init screen once
-    app_init(retrow, retroh);
+   // init screen once
+   app_init(retrow, retroh);
+
+   Emu_init();
 
 }
 
@@ -1059,22 +1066,10 @@ void retro_blit()
 
 void retro_run(void)
 {
-   static int mfirst=1;
    bool updated = false;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
-
-   if(mfirst==1)
-   {
-		mfirst++;
-		emu_status = COMPUTER_BOOTING;
-
-		Emu_init();
-      computer_load_file();
-
-		return;
-   }
 
    if(pauseg==0)
    {
@@ -1101,14 +1096,16 @@ bool retro_load_game(const struct retro_game_info *game)
 
    update_variables();
    memset(SNDBUF,0,1024*2*2);
+
    computer_load_bios();
+   computer_load_file();
 
    return true;
 
 }
 
-void retro_unload_game(void){
-
+void retro_unload_game(void)
+{
    pauseg=-1;
 }
 
