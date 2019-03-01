@@ -477,6 +477,7 @@ typedef struct {
 // cap32.cpp
 void emulator_reset(bool bolMF2Reset);
 int video_set_palette (void);
+void video_set_palette_antialias (void);
 
 // fdc.c
 #ifdef __cplusplus

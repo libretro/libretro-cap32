@@ -35,6 +35,7 @@ SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_files.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
 SOURCES_C += $(CORE_DIR)/libretro/retro_events.c
+SOURCES_C += $(CORE_DIR)/libretro/retro_snd.c
 
 SOURCES_C += \
       $(DEPS)/zlib/adler32.c \

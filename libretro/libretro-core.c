@@ -1,6 +1,7 @@
 #include "libretro.h"
 #include "libretro-core.h"
 #include "retro_events.h"
+#include "retro_snd.h"
 
 //CORE VAR
 #ifdef _WIN32
@@ -100,6 +101,7 @@ int gui_status = GUI_DISABLED;
 #include "cap32.h"
 //#include "z80.h"
 extern t_CPC CPC;
+extern uint8_t *pbSndBuffer;
 //CAP32 DEF END
 
 extern void update_input(void);
@@ -118,7 +120,7 @@ char retro_system_data_directory[512];
 /*static*/ retro_input_poll_t input_poll_cb;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
-static retro_audio_sample_batch_t audio_batch_cb;
+/*static*/ retro_audio_sample_batch_t audio_batch_cb;
 /*static*/ retro_environment_t environ_cb;
 
 // allowed file types
@@ -974,6 +976,9 @@ void retro_init(void)
 
    Emu_init();
 
+   if(!init_retro_snd((int16_t*) pbSndBuffer))
+      LOGI("AUDIO FORMAT is not supported.\n");
+
 }
 
 extern void main_exit();
@@ -986,11 +991,10 @@ void retro_deinit(void)
    UnInitOSGLU();
 
    // Clean the m3u storage
-	if(dc)
-	{
-		dc_free(dc);
-	}
+   if(dc)
+      dc_free(dc);
 
+   free_retro_snd();
    LOGI("Retro DeInit\n");
 }
 

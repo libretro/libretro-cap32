@@ -182,6 +182,8 @@ long GetTicks(void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
+#include "retro_snd.h"
+
 extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char RPATH[512];
 extern int SND;
@@ -630,15 +632,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                GateArray.palette[GateArray.pen] =colours[colour];
                // mode 2 - 'anti-aliasing' colour
                if (GateArray.pen < 2) {
-                  //FIXME RETRO
-                  unsigned char r,g,b,r2,g2,b2;
-                  r=(colours[GateArray.ink_values[0]]>>16)&0xFF;
-                  g=(colours[GateArray.ink_values[0]]>>8)&0xFF;
-                  b=colours[GateArray.ink_values[0]]&0xFF;
-                  r2=(colours[GateArray.ink_values[1]]>>16)&0xFF;
-                  g2=(colours[GateArray.ink_values[1]]>>8)&0xFF;
-                  b2=colours[GateArray.ink_values[1]]&0xFF;
-                  GateArray.palette[33] = (b+b2)>>1 | ((g+g2)<< 7) | ((r+r2) << 15);
+                  video_set_palette_antialias();
                }
             }
             if (CPC.mf2) { // MF2 enabled?
@@ -967,6 +961,10 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
       FDC.motor = val & 0x01;
+      if(FDC.motor)
+         retro_snd_cmd(SND_FDCMOTOR, ST_LOOP);
+      else
+         retro_snd_cmd(SND_FDCMOTOR, ST_OFF);
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
       #endif
@@ -2624,6 +2622,21 @@ void video_update_tube() {
    }
 }
 
+/**
+ * generate antialias values using 32/16bits macros
+ *
+ * RGB[10] 00CE60 || CC CC 00
+ * 00CE60 (10)    || C8 CC 00
+ */
+void video_set_palette_antialias (void)
+{
+   uint8_t r2,g2,b2;
+   r2=RGB2RED(colours[GateArray.ink_values[0]]) + RGB2RED(colours[GateArray.ink_values[1]]);
+   g2=RGB2GREEN(colours[GateArray.ink_values[0]]) + RGB2GREEN(colours[GateArray.ink_values[1]]);
+   b2=RGB2BLUE(colours[GateArray.ink_values[0]]) + RGB2BLUE(colours[GateArray.ink_values[1]]);
+   GateArray.palette[33] = (PIXEL_TYPE) RGB2COLOR(r2/2, g2/2, b2/2);
+}
+
 int video_set_palette (void)
 {
 
@@ -3144,6 +3157,8 @@ void mixsnd(void)
 
    if(SND != 1)
       return;
+
+   retro_snd_mixer();
 
    p = (int16_t*)pbSndBuffer;
 

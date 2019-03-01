@@ -34,7 +34,7 @@
    Jan 12, 2003 - 18:49 fdc_drvstat now reports an error condition when accessing side 2 on a one sided disk
    Jan 21, 2003 - 18:13 mod to fdc_drvstat was incorrect: drive falls back to 1st side on a single head drive
    Jan 25, 2003 - 15:57 data transfers can now time out and will be reported via OVERRUN condition
-   Feb 05, 2003 - 19:42 changed the OVERRUN_TIMEOUT to 26µs as per NEC's documentation
+   Feb 05, 2003 - 19:42 changed the OVERRUN_TIMEOUT to 26Âµs as per NEC's documentation
    Feb 08, 2003 - 16:26 added a delay to fdc_read_status in execution phase: FDC first indicates busy before
                         starting data transfer ("Last Mission" loads)
    Feb 10, 2003 - 21:45 fixed cmd_read: multi-sector reads end on the first sector that is found to have the
@@ -52,6 +52,8 @@
 
 #include "cap32.h"
 #include "z80.h"
+
+#include "retro_snd.h"
 
 extern t_CPC CPC;
 extern t_FDC FDC;
@@ -742,6 +744,7 @@ void fdc_drvstat(void)
 
 void fdc_recalib(void)
 {
+   retro_snd_cmd(SND_FDCSEEK, ST_ON);
    FDC.command[CMD_C] = 0; // seek to track 0
    fdc_seek();
 }
@@ -885,6 +888,7 @@ void fdc_write(void)
 
 void fdc_read(void)
 {
+   retro_snd_cmd(SND_FDCREAD, ST_ON);
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
