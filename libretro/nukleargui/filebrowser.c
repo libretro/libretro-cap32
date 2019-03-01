@@ -159,16 +159,21 @@ file_browser_init(struct file_browser *browser)
     memset(browser, 0, sizeof(*browser));
 
     {
-
+//FIXME
 #ifdef __CELLOS_LV2__
-        strcpy(browser->home, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
-        strcpy(browser->directory, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
-        strcpy(browser->desktop, "/dev_hdd0/game/SSNE10000/USRDIR/cores/system");
+      const char *home = "/dev_hdd0/game/SSNE10000/USRDIR/cores/system/";
+#elif defined(VITA)
+      const char *home = getenv("HOME");
+      if (!home) home = "ux0:/";
+#elif defined(GEKKO)
+      const char *home = "sd:/";
+#elif defined(_3DS)
+      const char *home = "sdmc:/";
 #else
-        /* load files and sub-directory list */
-        const char *home = getenv("HOME");
+      /* load files and sub-directory list */
+      const char *home = getenv("HOME");
 #ifdef _WIN32
-        if (!home) home = getenv("USERPROFILE");
+      if (!home) home = getenv("USERPROFILE");
 #else
         if (!home) home = getpwuid(getuid())->pw_dir;
         {
@@ -206,7 +211,7 @@ file_browser_free(struct file_browser *browser)
 
 void filebrowser_init()
 {
-   
+
     file_browser_init(&browser);
 }
 
@@ -216,4 +221,3 @@ void filebrowser_free()
     file_browser_free(&browser);
 
 }
-

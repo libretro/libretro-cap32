@@ -57,12 +57,17 @@ typedef struct {
    bool ready_to_play;
 } retro_guisnd_t;
 
-
 static int16_t* snd_buffer;
 
+#ifndef MSB_FIRST
 #include "snd/motor.h"
 #include "snd/seek_drive.h"
 #include "snd/read_drive.h"
+#else
+#include "snd/motor_be.h"
+#include "snd/seek_drive_be.h"
+#include "snd/read_drive_be.h"
+#endif
 
 retro_guisnd_t sounds[SND_LAST];
 
