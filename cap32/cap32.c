@@ -3144,6 +3144,14 @@ void change_ram(int val){
    retro_computer_cfg.is_dirty = true;
 }
 
+uint8_t* get_ram_ptr() {
+	return pbRAM;
+}
+
+size_t get_ram_size() {
+	return CPC.ram_size * 1024;
+}
+
 void change_lang(int val){
    CPC.keyboard=val;
    retro_computer_cfg.is_dirty = true;

@@ -86,7 +86,7 @@ extern int emu_status;
 
 typedef struct {
    int model;
-   int ram;
+   int ram; /*request only! beware: 6128 enforces minimum!*/
    int lang;
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
