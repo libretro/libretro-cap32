@@ -461,6 +461,10 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_lang_layout",
          "CPC Language; english|french|spanish",
       },
+      {
+         "cap32_drive_sounds",
+         "Drive Sounds; disabled|enabled",
+      },
 
       { NULL, NULL },
    };
@@ -642,6 +646,17 @@ static void update_variables(void)
             LOGI("REBOOT - CPC LANG: %u (%x)\n", val, emu_status);
          }
       }
+   }
+
+   var.key = "cap32_drive_sounds";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "enabled") == 0)
+         retro_snd_enable(1);
+      else if (strcmp(var.value, "disabled") == 0)
+         retro_snd_enable(0);
    }
 
    // check if emulation need a restart (model/lang/... is changed)

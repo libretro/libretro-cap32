@@ -71,6 +71,8 @@ static int16_t* snd_buffer;
 
 retro_guisnd_t sounds[SND_LAST];
 
+static int snd_enabled = 0;
+
 
 /**
  * sound_free:
@@ -187,23 +189,34 @@ static void mix_audio(retro_guisnd_t* snd)
       snd->sample_pos = 0;
    }
 
-
-   // prepare loop vars
-   int16_t* samples = snd_buffer;
-   int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (BYTESPERSAMPLE * snd->sample_pos));
-   unsigned i = BUFSIZE;
-
-   while (i--)
+   /*only mix if we're enabled, otherwise mute*/
+   if (snd_enabled)
    {
-      *samples += *rawsamples16;
-      *(samples + 1) += *rawsamples16;
+      // prepare loop vars
+      int16_t* samples = snd_buffer;
+      int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (BYTESPERSAMPLE * snd->sample_pos));
+      unsigned i = BUFSIZE;
 
-      // prepare next loop
-      rawsamples16++;
-      samples += 2;
+      while (i--)
+      {
+         *samples += *rawsamples16;
+         *(samples + 1) += *rawsamples16;
+
+         // prepare next loop
+         rawsamples16++;
+         samples += 2;
+      }
    }
 
    snd->sample_pos     += BUFSIZE;
+}
+
+/**
+ * retro_snd_enable:
+ * enable or mute mechanical sound effects
+ **/
+void retro_snd_enable(int enable) {
+   snd_enabled = enable;
 }
 
 

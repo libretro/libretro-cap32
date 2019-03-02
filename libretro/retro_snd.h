@@ -43,6 +43,7 @@ typedef enum
 bool init_retro_snd(int16_t* pbuffer);
 void free_retro_snd();
 
+void retro_snd_enable(int enable);
 void retro_snd_cmd(int snd_type, audio_status_t new_status);
 void retro_snd_mixer();
 
