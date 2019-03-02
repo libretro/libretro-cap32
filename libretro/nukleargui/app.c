@@ -28,6 +28,8 @@ extern retro_input_state_t input_state_cb;
 
 extern char RPATH[512];
 
+extern int gui_shortcuts;
+
 //EMU FLAGS
 int showkeyb=-1;
 int SHIFTON=-1;
@@ -296,6 +298,9 @@ int Core_PollEvent()
    } else {
       ev_vkeyboard();
    }
+   
+   if ( gui_shortcuts == 0 )
+      return 1;
 
    // --- Keyboard code --
    // TODO: clean and change to callback
@@ -321,7 +326,7 @@ int Core_PollEvent()
       kbt[i]=0;
       pauseg=1;
       save_bkg();
-      printf("enter gui!\n");
+      /*printf("enter gui!\n");*/
    }
 
 

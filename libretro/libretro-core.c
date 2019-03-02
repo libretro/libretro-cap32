@@ -96,6 +96,7 @@ int autorun=0;
 
 int emu_status = COMPUTER_OFF;
 int gui_status = GUI_DISABLED;
+int gui_shortcuts = 0;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
@@ -461,6 +462,10 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_lang_layout",
          "CPC Language; english|french|spanish",
       },
+      {
+         "cap32_gui_shortcuts",
+         "GUI Shortcuts (F9/F10); enabled|disabled",
+      },
 
       { NULL, NULL },
    };
@@ -642,6 +647,17 @@ static void update_variables(void)
             LOGI("REBOOT - CPC LANG: %u (%x)\n", val, emu_status);
          }
       }
+   }
+
+   var.key = "cap32_gui_shortcuts";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "enabled") == 0)
+         gui_shortcuts = 1;
+      else if (strcmp(var.value, "disabled") == 0)
+         gui_shortcuts = 0;
    }
 
    // check if emulation need a restart (model/lang/... is changed)
