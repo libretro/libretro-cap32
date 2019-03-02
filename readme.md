@@ -87,7 +87,18 @@ R | L
 L2 | R
 R2 | U
 
-If you press [SELECT] you could make a combo with other buttons:
+JOY CONFIG SIMPLE (JOYSTICK)
+------------
+JOY BUTTON | CPC
+------------ | -------------
+DPAD-UP | JOY-UP
+DPAD-DOWN | JOY-DOWN
+DPAD-LEFT | JOY-LEFT
+DPAD-RIGHT | JOY-RIGHT
+B | FIRE1
+A | FIRE2
+
+If you press [SELECT] you could make a combo with other buttons (unless using SIMPLE config):
 
 JOY BUTTON | ON CPC WRITES
 ------------ | -------------
@@ -161,7 +172,7 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 
 If enabled a RUN the first bas/bin found in DSK
 
-### User 1/2 Amstrad Joystick Config - joystick, qaop or incentive
+### User 1/2 Amstrad Joystick Config - joystick, qaop, incentive or simple
 
 Select Joy/Overlay configuration
 

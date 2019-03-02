@@ -48,13 +48,14 @@ const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 // --- events code
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
-#define MAX_PADCFG 3
+#define MAX_PADCFG 4
 
 static uint8_t keyboard_translation[MAX_KEYSYMS];
 unsigned int last_input[PORTS_NUMBER] = {0,0};
 uint32_t padnum = 0;
 
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
+   /*profile: Joystick*/
    {
    CPC_KEY_JOY_FIRE2,   // B
    CPC_KEY_SPACE,       // Y
@@ -72,6 +73,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_CONTROL,     // L2
    CPC_KEY_COPY,        // R2
    },
+   /*profile: QAOP*/
    {
    CPC_KEY_F1,          // B
    CPC_KEY_F2,          // Y
@@ -89,6 +91,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_CONTROL,     // L2
    CPC_KEY_COPY,        // R2
    },
+   /*profile: Incentive*/
    {
    CPC_KEY_SPACE,       // B
    CPC_KEY_W,           // Y
@@ -105,6 +108,24 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
+   },
+   /*profile: Simple*/
+   {
+   CPC_KEY_JOY_FIRE1,   // B
+   CPC_KEY_NULL,        // Y
+   CPC_KEY_NULL,        // SELECT
+   CPC_KEY_NULL,        // START
+   CPC_KEY_JOY_UP,      // DUP
+   CPC_KEY_JOY_DOWN,    // DDOWN
+   CPC_KEY_JOY_LEFT,    // DLEFT
+   CPC_KEY_JOY_RIGHT,   // DRIGHT
+   CPC_KEY_JOY_FIRE2,   // A
+   CPC_KEY_NULL,        // X
+   //---------------------
+   CPC_KEY_NULL,        // L
+   CPC_KEY_NULL,        // R
+   CPC_KEY_NULL,        // L2
+   CPC_KEY_NULL,        // R2
    }
 };
 
@@ -207,9 +228,11 @@ static void ev_special_combos()
  **/
 static void ev_process_joy(int playerID){
 
-   if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
-      ev_special_combos();
-      return;
+   if( retro_computer_cfg.padcfg[playerID]!=3/*simple*/) {
+      if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
+         ev_special_combos();
+         return;
+      }
    }
 
    uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]];
