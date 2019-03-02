@@ -1010,7 +1010,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
    {
       amstrad_devices[ port ] = device;
 
-      printf(" (%d)=%d \n",port,device);
+      /*printf(" (%d)=%d \n",port,device);*/
    }
 }
 
