@@ -1,7 +1,4 @@
-
-# CAPRICE32 4.2 LIBRETRO
-
-A quick port of caprice32-4.2.0 to LIBRETRO.
+# CAPRICE32 4.3+ LIBRETRO
 
 All the credit of the caprice32 Emulator to Ulrich Doewich
 
