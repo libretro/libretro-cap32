@@ -868,6 +868,9 @@ void computer_load_file() {
             LOGI("Tape Error (%d): %s\n", error, (char *)RPATH);
          }
 
+         // Prepare SNA
+         sprintf(RPATH,"%s%d.SNA",RPATH,0);
+
          return;
 
       }
