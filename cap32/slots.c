@@ -1,6 +1,6 @@
 /* Caprice32 - Amstrad CPC Emulator
    (c) Copyright 1997-2004 Ulrich Doewich
-   (c) Copyright 2004-2005 David Skywalker
+   (c) Copyright 2004-2016 David Skywalker
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
