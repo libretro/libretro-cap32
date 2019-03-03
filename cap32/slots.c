@@ -54,16 +54,36 @@ extern FILE *pfileObject;
 
 uint8_t *pbTapeImage = NULL;
 uint8_t *pbTapeImageEnd = NULL;
+uint8_t *pbSnaImage = NULL;
 
 
 /**
- * snapshot_load_buffer:
+ * file utils
+ */
+int file_size (int file_num)
+{
+   struct stat s;
+
+   if (!fstat(file_num, &s)) {
+      return s.st_size;
+   } else {
+      return 0;
+   }
+}
+
+
+/**
+ * SNA handlers
+ */
+
+/**
+ * snapshot_load_mem:
  * @pBuffer: snapshot buffer
  * @bSize: snapshot memory size
  *
  * return 0 when is loaded successfully
  */
-int snapshot_load_mem(uint8_t * sna_buffer, uint32_t buffer_size) {
+int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    uint8_t val;
    int n;
    reg_pair port;
@@ -247,214 +267,21 @@ int snapshot_load_mem(uint8_t * sna_buffer, uint32_t buffer_size) {
    return 0; // dump ok!
 }
 
-
-int snapshot_load (char *pchFileName)
-{
-   int n;
-   uint32_t dwSnapSize, dwModel, dwFlags;
-   uint8_t val;
-   reg_pair port;
-   t_SNA_header sh;
-
-   memset(&sh, 0, sizeof(sh));
-   if ((pfileObject = fopen(pchFileName, "rb")) != NULL)
-   {
-      if(!fread(&sh, sizeof(sh), 1, pfileObject)) { // read snapshot header
-         fclose(pfileObject);
-         return ERR_SNA_INVALID;
-      }
-      if (memcmp(sh.id, "MV - SNA", 8) != 0) { // valid SNApshot image?
-         fclose(pfileObject);
-         return ERR_SNA_INVALID;
-      }
-      dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
-      dwSnapSize &= ~0x3f; // limit to multiples of 64
-      if (!dwSnapSize) {
-         fclose(pfileObject);
-         return ERR_SNA_SIZE;
-      }
-      if (dwSnapSize > CPC.ram_size) { // memory dump size differs from current RAM size?
-         uint8_t *pbTemp;
-
-         pbTemp = (uint8_t*) malloc(dwSnapSize*1024 * sizeof(uint8_t));
-         if (pbTemp) {
-            free(pbRAM);
-            CPC.ram_size = dwSnapSize;
-            pbRAM = pbTemp;
-         } else {
-            fclose(pfileObject);
-            return ERR_OUT_OF_MEMORY;
-         }
-      }
-      emulator_reset(false);
-      n = fread(pbRAM, dwSnapSize*1024, 1, pfileObject); // read memory dump into CPC RAM
-      fclose(pfileObject);
-      if (!n) {
-         emulator_reset(false);
-         return ERR_SNA_INVALID;
-      }
-
-      // Z80
-      _A = sh.AF[1];
-      _F = sh.AF[0];
-      _B = sh.BC[1];
-      _C = sh.BC[0];
-      _D = sh.DE[1];
-      _E = sh.DE[0];
-      _H = sh.HL[1];
-      _L = sh.HL[0];
-      _R = sh.R & 0x7f;
-      _Rb7 = sh.R & 0x80; // bit 7 of R
-      _I = sh.I;
-      if (sh.IFF0)
-         _IFF1 = Pflag;
-      if (sh.IFF1)
-         _IFF2 = Pflag;
-      _IXh = sh.IX[1];
-      _IXl = sh.IX[0];
-      _IYh = sh.IY[1];
-      _IYl = sh.IY[0];
-      z80.SP.b.h = sh.SP[1];
-      z80.SP.b.l = sh.SP[0];
-      z80.PC.b.h = sh.PC[1];
-      z80.PC.b.l = sh.PC[0];
-      _IM = sh.IM; // interrupt mode
-      z80.AFx.b.h = sh.AFx[1];
-      z80.AFx.b.l = sh.AFx[0];
-      z80.BCx.b.h = sh.BCx[1];
-      z80.BCx.b.l = sh.BCx[0];
-      z80.DEx.b.h = sh.DEx[1];
-      z80.DEx.b.l = sh.DEx[0];
-      z80.HLx.b.h = sh.HLx[1];
-      z80.HLx.b.l = sh.HLx[0];
-      // Gate Array
-      port.b.h = 0x7f;
-      for (n = 0; n < 17; n++) { // loop for all colours + border
-         GateArray.pen = n;
-         val = sh.ga_ink_values[n]; // GA palette entry
-         z80_OUT_handler(port, val | (1<<6));
-      }
-      val = sh.ga_pen; // GA pen
-      z80_OUT_handler(port, (val & 0x3f));
-      val = sh.ga_ROM_config; // GA ROM configuration
-      z80_OUT_handler(port, (val & 0x3f) | (2<<6));
-      val = sh.ga_RAM_config; // GA RAM configuration
-      z80_OUT_handler(port, (val & 0x3f) | (3<<6));
-      // CRTC
-      port.b.h = 0xbd;
-      for (n = 0; n < 18; n++) { // loop for all CRTC registers
-         val = sh.crtc_registers[n];
-         CRTC.reg_select = n;
-         z80_OUT_handler(port, val);
-      }
-      port.b.h = 0xbc;
-      val = sh.crtc_reg_select; // CRTC register select
-      z80_OUT_handler(port, val);
-      // ROM select
-      port.b.h = 0xdf;
-      val = sh.upper_ROM; // upper ROM number
-      z80_OUT_handler(port, val);
-      // PPI
-      port.b.h = 0xf4; // port A
-      z80_OUT_handler(port, sh.ppi_A);
-      port.b.h = 0xf5; // port B
-      z80_OUT_handler(port, sh.ppi_B);
-      port.b.h = 0xf6; // port C
-      z80_OUT_handler(port, sh.ppi_C);
-      port.b.h = 0xf7; // control
-      z80_OUT_handler(port, sh.ppi_control);
-      // PSG
-      PSG.control = PPI.portC;
-      PSG.reg_select = sh.psg_reg_select;
-      for (n = 0; n < 16; n++) { // loop for all PSG registers
-         SetAYRegister(n, sh.psg_registers[n]);
-      }
-
-      if (sh.version > 1)
-      { // does the snapshot have version 2 data?
-         dwModel = sh.cpc_model; // determine the model it was saved for
-         if (dwModel != CPC.model) { // different from what we're currently running?
-            if (dwModel > 3) { // not one of the known models?
-               emulator_reset(false);
-               return ERR_SNA_CPC_TYPE;
-            }
-               CPC.model = dwModel;
-               emulator_select_ROM();
-         }
-      }
-
-      if (sh.version > 2)
-      { // does the snapshot have version 3 data?
-         FDC.motor = sh.fdc_motor;
-         driveA.current_track = sh.drvA_current_track;
-         driveB.current_track = sh.drvB_current_track;
-         CPC.printer_port = sh.printer_data ^ 0x80; // invert bit 7 again
-         PSG.AmplitudeEnv = sh.psg_env_step << 1; // multiply by 2 to bring it into the 0 - 30 range
-         PSG.FirstPeriod = false;
-         if (sh.psg_env_direction == 0x01) { // up
-            switch (PSG.RegisterAY.EnvType)
-            {
-               case 4:
-               case 5:
-               case 6:
-               case 7:
-               case 13:
-               case 14:
-               case 15:
-                  PSG.FirstPeriod = true;
-                  break;
-            }
-         } else if (sh.psg_env_direction == 0xff) { // down
-            switch (PSG.RegisterAY.EnvType)
-            {
-               case 0:
-               case 1:
-               case 2:
-               case 3:
-               case 9:
-               case 10:
-               case 11:
-                  PSG.FirstPeriod = true;
-                  break;
-            }
-         }
-         CRTC.addr = sh.crtc_addr[0] + (sh.crtc_addr[1] * 256);
-         VDU.scanline = sh.crtc_scanline[0] + (sh.crtc_scanline[1] * 256);
-         if (VDU.scanline > MaxVSync) {
-            VDU.scanline = MaxVSync; // limit to max value
-         }
-         CRTC.char_count = sh.crtc_char_count[0];
-         CRTC.line_count = sh.crtc_line_count & 127;
-         CRTC.raster_count = sh.crtc_raster_count & 31;
-         CRTC.hsw_count = sh.crtc_hsw_count & 15;
-         CRTC.vsw_count = sh.crtc_vsw_count & 15;
-         dwFlags = sh.crtc_flags[0] + (sh.crtc_flags[1] * 256);
-         CRTC.flag_invsync = dwFlags & 1 ? 1 : 0; // vsync active?
-         if (dwFlags & 2) { // hsync active?
-            flags1.inHSYNC = 0xff;
-            CRTC.flag_hadhsync = 1;
-            if ((CRTC.hsw_count >= 3) && (CRTC.hsw_count < 7)) {
-               CRTC.flag_inmonhsync = 1;
-            }
-         }
-         CRTC.flag_invta = dwFlags & 0x80 ? 1 : 0; // in vertical total adjust?
-         GateArray.hs_count = sh.ga_int_delay & 3;
-         GateArray.sl_count = sh.ga_sl_count;
-         z80.int_pending = sh.z80_int_pending;
-      }
-   }
-   else
-      return ERR_FILE_NOT_FOUND;
-
-   return 0;
-}
-
-
-int snapshot_save (char *pchFileName)
+/**
+ * snapshot_save_mem:
+ * @pBuffer: snapshot buffer ready to use, is modified.
+ * @bSize: allocated buffer size
+ *
+ * return 0 when is saved successfully
+ */
+int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
 {
    t_SNA_header sh;
    int n;
    uint32_t dwFlags;
+
+   if(buffer_size < sizeof(sh) + (CPC.ram_size * 1024))
+      return ERR_OUT_OF_MEMORY;
 
    memset(&sh, 0, sizeof(sh));
 
@@ -613,12 +440,59 @@ int snapshot_save (char *pchFileName)
    sh.ga_sl_count = GateArray.sl_count;
    sh.z80_int_pending = z80.int_pending;
 
-   if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
-      if (fwrite(&sh, sizeof(sh), 1, pfileObject) != 1) { // write snapshot header
+   memcpy(sna_buffer, &sh, sizeof(sh));
+   memcpy(sna_buffer + sizeof(sh), pbRAM, CPC.ram_size*1024);
+
+   return 0;
+
+}
+
+
+int snapshot_load (char *pchFileName)
+{
+   uint32_t size;
+
+   if ((pfileObject = fopen(pchFileName, "rb")) != NULL)
+   {
+      size = file_size(fileno(pfileObject));
+      if (size <= sizeof(t_SNA_header))
+      { // the sna image should have at least the header...
          fclose(pfileObject);
-         return ERR_SNA_WRITE;
+         return ERR_SNA_INVALID;
       }
-      if (fwrite(pbRAM, CPC.ram_size*1024, 1, pfileObject) != 1) { // write memory contents to snapshot file
+
+      pbSnaImage = (uint8_t *)malloc(size);
+
+      if(!fread(pbSnaImage, size, 1, pfileObject)) { // read snapshot
+         fclose(pfileObject);
+         return ERR_SNA_INVALID;
+      }
+      return snapshot_load_mem(pbSnaImage, size);
+   }
+
+   return ERR_FILE_NOT_FOUND;
+}
+
+
+int snapshot_save (char *pchFileName)
+{
+   int error;
+   uint32_t dwSnapSize;
+
+   dwSnapSize = sizeof(t_SNA_header) + (CPC.ram_size * 1024);
+   pbSnaImage = (uint8_t*) malloc(dwSnapSize);
+   if(!pbSnaImage)
+      return ERR_OUT_OF_MEMORY;
+
+   error = snapshot_save_mem(pbSnaImage, dwSnapSize);
+   if(error) {
+      free(pbSnaImage);
+      pbSnaImage = NULL;
+      return error;
+   }
+
+   if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
+      if (fwrite(pbSnaImage, dwSnapSize, 1, pfileObject) != 1) { // write snapshot header
          fclose(pfileObject);
          return ERR_SNA_WRITE;
       }
@@ -962,19 +836,6 @@ void play_tape(void)
 		}
 	}
 }
-
-
-int file_size (int file_num)
-{
-   struct stat s;
-
-   if (!fstat(file_num, &s)) {
-      return s.st_size;
-   } else {
-      return 0;
-   }
-}
-
 
 int tape_insert (char *pchFileName)
 {
