@@ -207,6 +207,10 @@ static void ev_special_combos()
  **/
 static void ev_process_joy(int playerID){
 
+   /*disabled?*/
+   if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
+      return;
+
    if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
       ev_special_combos();
       return;
