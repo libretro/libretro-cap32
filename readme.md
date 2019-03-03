@@ -187,4 +187,4 @@ Emulated Monitor brightness, default value is 8.
 
 - Android version is not fully tested/optimized.
 
-- We need more Big endian tests.
+- Old3DS need some optimizations (~18fps).
