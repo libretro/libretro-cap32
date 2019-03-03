@@ -462,6 +462,9 @@ typedef struct {
    unsigned int dwOffset;
 } t_zip_info;
 
+#define MAX_DISK_FORMAT 8
+#define DEFAULT_DISK_FORMAT 0
+#define FIRST_CUSTOM_DISK_FORMAT 2
 typedef struct {
    unsigned char label[40]; // label to display in options dialog
    unsigned int tracks; // number of tracks
@@ -478,6 +481,7 @@ typedef struct {
 void emulator_reset(bool bolMF2Reset);
 int video_set_palette (void);
 void video_set_palette_antialias (void);
+int emulator_select_ROM (void);
 
 // fdc.c
 #ifdef __cplusplus

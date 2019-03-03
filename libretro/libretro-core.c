@@ -14,7 +14,6 @@ char RETRO_DIR[512];
 
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
-char TAPE_NAME[512]="\0";
 char cart_name[512]="\0";
 
 //TIME
@@ -876,8 +875,13 @@ void computer_load_file() {
    if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
       if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
       {
-         snapshot_load (RPATH);
-         sprintf(RPATH,"%s",RPATH);
+         int error = snapshot_load (RPATH);
+         if (!error) {
+            LOGI("SNA loaded: %s\n", (char *)RPATH);
+         } else {
+            LOGI("SNA Error (%d): %s", error, (char *)RPATH);
+         }
+
          return;
       }
 

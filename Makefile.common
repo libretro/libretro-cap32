@@ -18,6 +18,7 @@ SOURCES_C := \
 				 $(GUI)/app.c
 
 SOURCES_C += $(CORE_DIR)/cap32/cap32.c
+SOURCES_C += $(CORE_DIR)/cap32/slots.c
 SOURCES_C += $(CORE_DIR)/cap32/crtc.c
 SOURCES_C += $(CORE_DIR)/cap32/fdc.c
 ifeq ($(MSB_FIRST), 1)
