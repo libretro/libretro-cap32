@@ -100,6 +100,7 @@ int gui_status = GUI_DISABLED;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
+#include "slots.h"
 //#include "z80.h"
 extern t_CPC CPC;
 extern uint8_t *pbSndBuffer;
@@ -1131,17 +1132,25 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-   return 0;
+   int dwSnapSize = sizeof(t_SNA_header);
+   dwSnapSize += CPC.ram_size * 1024;
+   return dwSnapSize;
 }
 
-bool retro_serialize(void *data_, size_t size)
+bool retro_serialize(void *data, size_t size)
 {
+   int error;
+   error = snapshot_save_mem((uint8_t *) data, size);
+   if(!error)
+      return true;
+
+   LOGI("SNA-serialized: error %d\n", error);
    return false;
 }
 
-bool retro_unserialize(const void *data_, size_t size)
+bool retro_unserialize(const void *data, size_t size)
 {
-   return false;
+   return !snapshot_load_mem((uint8_t *) data, size);
 }
 
 void *retro_get_memory_data(unsigned id)
