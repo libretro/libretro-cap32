@@ -58,6 +58,8 @@ extern int  UnInitOSGLU(void);
 extern void emu_reset(void);
 extern void emu_restart(void);
 extern void change_ram(int val);
+extern uint8_t* get_ram_ptr();
+extern size_t get_ram_size();
 extern void change_lang(int val);
 extern int snapshot_save (char *pchFileName);
 extern void play_tape();
@@ -1140,13 +1142,29 @@ bool retro_unserialize(const void *data_, size_t size)
 
 void *retro_get_memory_data(unsigned id)
 {
-   (void)id;
+   switch ( id & RETRO_MEMORY_MASK )
+   {
+
+   case RETRO_MEMORY_SYSTEM_RAM:
+      return get_ram_ptr();
+
+   }
+
+   /* not supported */
    return NULL;
 }
 
 size_t retro_get_memory_size(unsigned id)
 {
-   (void)id;
+   switch ( id & RETRO_MEMORY_MASK )
+   {
+
+   case RETRO_MEMORY_SYSTEM_RAM:
+      return get_ram_size();
+
+   }
+
+   /* not supported */
    return 0;
 }
 
