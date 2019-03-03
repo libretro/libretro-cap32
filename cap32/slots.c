@@ -280,7 +280,7 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
    int n;
    uint32_t dwFlags;
 
-   if(buffer_size < sizeof(sh) + (CPC.ram_size * 1024))
+   if(buffer_size < sizeof(sh) + get_ram_size())
       return ERR_OUT_OF_MEMORY;
 
    memset(&sh, 0, sizeof(sh));
@@ -479,7 +479,7 @@ int snapshot_save (char *pchFileName)
    int error;
    uint32_t dwSnapSize;
 
-   dwSnapSize = sizeof(t_SNA_header) + (CPC.ram_size * 1024);
+   dwSnapSize = sizeof(t_SNA_header) + get_ram_size();
    pbSnaImage = (uint8_t*) malloc(dwSnapSize);
    if(!pbSnaImage)
       return ERR_OUT_OF_MEMORY;

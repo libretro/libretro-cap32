@@ -1122,7 +1122,7 @@ void retro_unload_game(void)
 
 unsigned retro_get_region(void)
 {
-   return RETRO_REGION_NTSC;
+   return RETRO_REGION_PAL;
 }
 
 bool retro_load_game_special(unsigned type, const struct retro_game_info *info, size_t num)
@@ -1133,7 +1133,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 size_t retro_serialize_size(void)
 {
    int dwSnapSize = sizeof(t_SNA_header);
-   dwSnapSize += CPC.ram_size * 1024;
+   dwSnapSize += get_ram_size();
    return dwSnapSize;
 }
 
@@ -1157,10 +1157,8 @@ void *retro_get_memory_data(unsigned id)
 {
    switch ( id & RETRO_MEMORY_MASK )
    {
-
-   case RETRO_MEMORY_SYSTEM_RAM:
-      return get_ram_ptr();
-
+      case RETRO_MEMORY_SYSTEM_RAM:
+         return get_ram_ptr();
    }
 
    /* not supported */
@@ -1171,10 +1169,8 @@ size_t retro_get_memory_size(unsigned id)
 {
    switch ( id & RETRO_MEMORY_MASK )
    {
-
-   case RETRO_MEMORY_SYSTEM_RAM:
-      return get_ram_size();
-
+      case RETRO_MEMORY_SYSTEM_RAM:
+         return get_ram_size();
    }
 
    /* not supported */

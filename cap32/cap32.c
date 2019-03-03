@@ -1991,7 +1991,7 @@ uint8_t* get_ram_ptr() {
 	return pbRAM;
 }
 
-size_t get_ram_size() {
+size_t get_ram_size(void) {
 	return CPC.ram_size * 1024;
 }
 
