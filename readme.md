@@ -9,7 +9,7 @@ You can download the caprice32 original source code here :
 	http://sourceforge.net/projects/caprice32/
 
 
-6128.h & amsdos.h (and psg for ps3 ) files taken from wiituka (author:dskywalk)
+This core also use some code from wiituka/pituka (c) 2016-2019 David Colmenero
 http://code.google.com/p/wiituka/
 
 CPC464+/CPC6128+/GX4000 - ATM as **Work in Progress** (c) 2016-2019 Colin Pitrat
