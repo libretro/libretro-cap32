@@ -40,7 +40,7 @@ typedef enum
    ST_LOOP
 } audio_status_t;
 
-bool init_retro_snd(int16_t* pbuffer);
+bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size);
 void free_retro_snd();
 
 void retro_snd_cmd(int snd_type, audio_status_t new_status);

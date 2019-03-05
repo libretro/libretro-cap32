@@ -44,8 +44,6 @@ int SND=1;
 int vkey_pressed;
 unsigned char MXjoy[2]; // joy
 char LCONTENT[512];
-char Core_Key_Sate[512];
-char Core_old_Key_Sate[512];
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -94,7 +92,7 @@ int app_init(int width, int height)
     screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);
     #endif
 
-    Retro_Screen=(PIXEL_TYPE *)screen_surface->pixels;
+    video_buffer=(PIXEL_TYPE *)screen_surface->pixels;
 
     RSDL_font = (nk_retro_Font*)calloc(1, sizeof(nk_retro_Font));
     RSDL_font->width = 4;
@@ -113,9 +111,6 @@ int app_init(int width, int height)
 
     filebrowser_init();
     sprintf(LCONTENT,"%s\0",RPATH);
-
-	memset(Core_Key_Sate,0,512);
-	memset(Core_old_Key_Sate ,0, sizeof(Core_old_Key_Sate));
 
     printf("Init nuklear %ux%u\n", width, height);
 

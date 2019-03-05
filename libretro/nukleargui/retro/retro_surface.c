@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _3DS
+void* linearMemAlign(size_t size, size_t alignment);
+void linearFree(void* mem);
+#endif
+
 static const char *cross[] = {
   "X                               ",
   "XX                              ",
@@ -37,7 +42,7 @@ void DrawPointBmp(unsigned int *buffer,int x, int y, unsigned int color,int rwid
 
    idx=x+y*rwidth;
    if(idx>=0 && idx<rwidth*rheight)
-   	buffer[idx]=color;	
+   	buffer[idx]=color;
 }
 
 void draw_cross(RSDL_Surface *surface,int x,int y) {
@@ -58,7 +63,7 @@ void draw_cross(RSDL_Surface *surface,int x,int y) {
 
 			if(cross[j-y][idx]=='.')DrawPointBmp(surface->pixels,i,j,col,w,h);
 			else if(cross[j-y][idx]=='X')DrawPointBmp(surface->pixels,i,j,0,w,h);
-			idx++;			
+			idx++;
 		}
 	}
 }
@@ -145,24 +150,30 @@ void RSDL_GetClipRect(RSDL_Surface *surface, RSDL_Rect *rect)
 
 
 void Retro_FreeSurface(RSDL_Surface *surf )
-{   
+{
    if (!surf)
       return;
 
    printf("free surf format palette color\n");
 
-   if(surf->format->palette->colors)	
+   if(surf->format->palette->colors)
       free(surf->format->palette->colors);
 
    printf("free surf format palette \n");
-   if(surf->format->palette)	
+   if(surf->format->palette)
       free(surf->format->palette);
    printf("free surf format  \n");
-   if(surf->format)	
+   if(surf->format)
       free(surf->format);
-   printf("free surf pixel  \n"); 
+   printf("free surf pixel  \n");
+
+   #ifdef _3DS
    if(surf->pixels)
-      free(surf->pixels);       
+      linearFree(surf->pixels);
+   #else
+   if(surf->pixels)
+      free(surf->pixels);
+   #endif
 }
 
 
@@ -213,7 +224,7 @@ printf("create surface XR8G8B8 libretro\n");
    bitmp->format->Bshift=0;
    bitmp->format->Ashift=24;
 
-   bitmp->format->Rmask=0x00ff0000;   
+   bitmp->format->Rmask=0x00ff0000;
    bitmp->format->Gmask=0x0000ff00;
    bitmp->format->Bmask=0x000000ff;
    bitmp->format->Amask=0xff000000;
@@ -228,7 +239,7 @@ printf("create surface XR8G8B8 libretro\n");
    bitmp->format->Gmask=0x0000ff00;
    bitmp->format->Bmask=0x000000ff;
    bitmp->format->Amask=0xff000000;
-*/   
+*/
 
    bitmp->format->colorkey=0;
    bitmp->format->alpha=255;//0;
@@ -238,10 +249,15 @@ printf("create surface XR8G8B8 libretro\n");
    bitmp->w=w;
    bitmp->h=h;
    bitmp->pitch=w*4;
-   bitmp->pixels=malloc(sizeof(unsigned char)*h*w*4);//  (unsigned char *)&Retro_Screen[0];
+
+   #ifdef _3DS
+   bitmp->pixels=linearMemAlign(sizeof(unsigned char)*h*w*4, 0x80);
+   #else
+   bitmp->pixels=malloc(sizeof(unsigned char)*h*w*4);
+   #endif
    if (!bitmp->pixels) {
-	    printf("failed alloc pixels\n");	
-            Retro_FreeSurface(bitmp);            
+	    printf("failed alloc pixels\n");
+            Retro_FreeSurface(bitmp);
             return NULL;
    }
    memset(bitmp->pixels,0, h*w*4);
@@ -318,7 +334,7 @@ printf("create surface RGB565 libretro\n");
    bitmp->format->Gmask=0x0000ff00;
    bitmp->format->Bmask=0x000000ff;
    bitmp->format->Amask=0xff000000;
-*/   
+*/
 
    bitmp->format->colorkey=0;
    bitmp->format->alpha=255;//0;
@@ -328,10 +344,14 @@ printf("create surface RGB565 libretro\n");
    bitmp->w=w;
    bitmp->h=h;
    bitmp->pitch=w*2;
-   bitmp->pixels=malloc(sizeof(unsigned char)*h*w*2);//  (unsigned char *)&Retro_Screen[0];
+   #ifdef _3DS
+   bitmp->pixels=linearMemAlign(sizeof(unsigned char)*h*w*2, 0x80);
+   #else
+   bitmp->pixels=malloc(sizeof(unsigned char)*h*w*2);
+   #endif
    if (!bitmp->pixels) {
-	    printf("failed alloc pixels\n");	
-            Retro_FreeSurface(bitmp);            
+	    printf("failed alloc pixels\n");
+            Retro_FreeSurface(bitmp);
             return NULL;
    }
    memset(bitmp->pixels,0, h*w*2);
@@ -361,12 +381,12 @@ void Retro_Draw_string(RSDL_Surface *surface, signed short int x, signed short i
     	int xrepeat, yrepeat;
 #ifdef M16B
     	signed short int ypixel;
-   	unsigned short *yptr; 
+   	unsigned short *yptr;
 
 	unsigned short*mbuffer=(unsigned short*)surface->pixels;
 #else
     	signed  int ypixel;
-   	unsigned  *yptr; 
+   	unsigned  *yptr;
 
 	unsigned *mbuffer=(unsigned*)surface->pixels;
 #endif
@@ -389,22 +409,22 @@ void Retro_Draw_string(RSDL_Surface *surface, signed short int x, signed short i
 	x2 = x + charWidthLocal;
 	if (x2<left) {
 		return;
-	} 
+	}
 	right = surface->clip_rect.x + surface->clip_rect.w - 1;
 	x1 = x;
 	if (x1>right) {
 		return;
-	} 
+	}
 	top = surface->clip_rect.y;
 	y2 = y + charHeightLocal;
 	if (y2<top) {
 		return;
-	} 
+	}
 	bottom = surface->clip_rect.y + surface->clip_rect.h - 1;
 	y1 = y;
 	if (y1>bottom) {
 		return;
-	} 
+	}
 
 
     	if(string==NULL)return;
@@ -414,7 +434,7 @@ void Retro_Draw_string(RSDL_Surface *surface, signed short int x, signed short i
 	int surfw=strlen * 7 * xscale;
 	int surfh=8 * yscale;
 
-#ifdef M16B	
+#ifdef M16B
         linesurf =(unsigned char *)malloc(sizeof(unsigned short)*surfw*surfh );
     	yptr = (unsigned short *)&linesurf[0];
 
@@ -432,17 +452,17 @@ void Retro_Draw_string(RSDL_Surface *surface, signed short int x, signed short i
 
             		b = font_array[(string[col]^0x80)*8 + ypixel];
 
-            		for(bit=0; bit<7; bit++, yptr++) {              
+            		for(bit=0; bit<7; bit++, yptr++) {
 				*yptr = (b & (1<<(7-bit))) ? fg : bg;
                 		for(xrepeat = 1; xrepeat < xscale; xrepeat++, yptr++)
                     			yptr[1] = *yptr;
                         }
         	}
 
-        	for(yrepeat = 1; yrepeat < yscale; yrepeat++) 
+        	for(yrepeat = 1; yrepeat < yscale; yrepeat++)
             		for(xrepeat = 0; xrepeat<surfw; xrepeat++, yptr++)
                 		*yptr = yptr[-surfw];
-           
+
     	}
 
 #ifdef M16B
@@ -451,7 +471,7 @@ void Retro_Draw_string(RSDL_Surface *surface, signed short int x, signed short i
     	yptr = (unsigned *)&linesurf[0];
 #endif
 
-    	for(yrepeat = y; yrepeat < y+ surfh; yrepeat++) 
+    	for(yrepeat = y; yrepeat < y+ surfh; yrepeat++)
         	for(xrepeat = x; xrepeat< x+surfw; xrepeat++,yptr++)
              		if(*yptr!=0 && (xrepeat+yrepeat*VIRTUAL_WIDTH) < surface->w*surface->h )mbuffer[xrepeat+yrepeat*VIRTUAL_WIDTH] = *yptr;
 
@@ -474,16 +494,16 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 
 #ifdef M16B
     	signed short int ypixel;
-   	unsigned short *yptr; 
+   	unsigned short *yptr;
 
 	unsigned short*mbuffer=(unsigned short*)surface->pixels;
 #else
     	signed  int ypixel;
-   	unsigned  *yptr; 
+   	unsigned  *yptr;
 
 	unsigned *mbuffer=(unsigned*)surface->pixels;
 #endif
- //  	unsigned  *yptr; 
+ //  	unsigned  *yptr;
 
 //	unsigned *mbuffer=(unsigned*)surface->pixels;
 
@@ -504,22 +524,22 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 	x2 = x + charWidthLocal;
 	if (x2<left) {
 		return;
-	} 
+	}
 	right = surface->clip_rect.x + surface->clip_rect.w - 1;
 	x1 = x;
 	if (x1>right) {
 		return;
-	} 
+	}
 	top = surface->clip_rect.y;
 	y2 = y + charHeightLocal;
 	if (y2<top) {
 		return;
-	} 
+	}
 	bottom = surface->clip_rect.y + surface->clip_rect.h - 1;
 	y1 = y;
 	if (y1>bottom) {
 		return;
-	} 
+	}
 
 
         strlen = 1;
@@ -527,7 +547,7 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 	int surfw=strlen * charWidthLocal;
 	int surfh=charHeightLocal;
 
-#ifdef M16B	
+#ifdef M16B
         linesurf =(unsigned char *)malloc(sizeof(unsigned short)*surfw*surfh );
     	yptr = (unsigned short *)&linesurf[0];
 
@@ -546,17 +566,17 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 
             		b = font_array[(string^0x80)*8 + ypixel];
 
-            		for(bit=0; bit<7; bit++, yptr++) {              
+            		for(bit=0; bit<7; bit++, yptr++) {
 				*yptr = (b & (1<<(7-bit))) ? fg : bg;
                 		for(xrepeat = 1; xrepeat < xscale; xrepeat++, yptr++)
                     			yptr[1] = *yptr;
                         }
         	//}
 
-        	for(yrepeat = 1; yrepeat < yscale; yrepeat++) 
+        	for(yrepeat = 1; yrepeat < yscale; yrepeat++)
             		for(xrepeat = 0; xrepeat<surfw; xrepeat++, yptr++)
                 		*yptr = yptr[-surfw];
-           
+
     	}
 
 
@@ -567,7 +587,7 @@ void Retro_Draw_char(RSDL_Surface *surface, signed short int x, signed short int
 #endif
 //    	yptr = (unsigned *)&linesurf[0];
 
-    	for(yrepeat = y; yrepeat < y+ surfh; yrepeat++) 
+    	for(yrepeat = y; yrepeat < y+ surfh; yrepeat++)
         	for(xrepeat = x; xrepeat< x+surfw; xrepeat++,yptr++)
              		if(*yptr!=0 && (xrepeat+yrepeat*VIRTUAL_WIDTH) < surface->w*surface->h )mbuffer[xrepeat+yrepeat*VIRTUAL_WIDTH] = *yptr;
 
@@ -604,8 +624,8 @@ void print(RSDL_Surface *buffer,int x, int y, unsigned    couleur,unsigned char 
    unsigned char *chr = font35[c];
 
     for (j=0; j<CHAR_WIDTH; j++) {
- 	 for (i=0; i<CHAR_HEIGHT; i++) { 
-            if (chr[j] & (1<<i)) 
+ 	 for (i=0; i<CHAR_HEIGHT; i++) {
+            if (chr[j] & (1<<i))
 	    {
 		int idx=x+j+((y+i)*w);
    		mbuffer[idx]=couleur;
@@ -614,4 +634,3 @@ void print(RSDL_Surface *buffer,int x, int y, unsigned    couleur,unsigned char 
     }
 
 }
-

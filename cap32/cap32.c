@@ -173,21 +173,21 @@
 /* forward declarations - some libretro port callbacks */
 void retro_loop(void);
 void doCleanUp (void);
-void theloop(void);
+int theloop(void);
 int capmain (int argc, char **argv);
-void retro_audio_cb( short l, short r);
+void retro_audio_mix();
 void mixsnd (void);
-void theloop(void);
 long GetTicks(void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
 #include "retro_snd.h"
+#include "retro_utils.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char RPATH[512];
-extern int SND;
 extern int autorun;
+extern int SND;
 extern bool kbd_runcmd;
 int autoboot_delay=0;
 
@@ -1272,11 +1272,11 @@ int emulator_init (void)
    (void)iErr;
 
    pbGPBuffer     = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
-   pbRAM          = (uint8_t*) malloc(CPC.ram_size * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
-   pbROM          = (uint8_t*) malloc(32 * 1024 * sizeof(uint8_t));
+   pbRAM          = (uint8_t*) retro_malloc(get_ram_size() * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbROM          = (uint8_t*) retro_malloc(32 * 1024 * sizeof(uint8_t));
    pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
 
-   if (!pbGPBuffer || !pbRAM || !pbRegisterPage)
+   if (!pbGPBuffer || !pbRAM || !pbROM || !pbRegisterPage)
       return ERR_OUT_OF_MEMORY;
 
    pbROMlo = pbROM;
@@ -1298,10 +1298,12 @@ int emulator_init (void)
 
 void emulator_shutdown (void)
 {
+
    int iRomNum;
 
    if(pbRegisterPage)
       free(pbRegisterPage);
+   pbRegisterPage = NULL;
 
    if (pbMF2ROMbackup)
       free(pbMF2ROMbackup);
@@ -1315,10 +1317,17 @@ void emulator_shutdown (void)
          free(memmap_ROM[iRomNum]); // if so, release the associated memory
    }
 
+   pbROMlo = pbROMhi = pbExpansionROM = NULL;
+   if (pbROM)
+      retro_free(pbROM);
    if (pbRAM)
-      free(pbRAM);
+      retro_free(pbRAM);
    if (pbGPBuffer)
       free(pbGPBuffer);
+
+   pbROM = NULL;
+   pbRAM = NULL;
+   pbGPBuffer = NULL;
 }
 
 int cart_insert (char *pchFileName) {
@@ -1380,8 +1389,11 @@ int audio_init (void)
    if (!CPC.snd_enabled)
       return 0;
 
-   CPC.snd_buffersize = 2*2*882;//audio_spec->size; // size is samples * channels * bytes per sample (1 or 2)
-   pbSndBuffer        = (uint8_t *)malloc(CPC.snd_buffersize); // allocate the sound data buffer
+   CPC.snd_buffersize = retro_getAudioBuffer();
+   pbSndBuffer        = (uint8_t*) retro_malloc(CPC.snd_buffersize); // allocate the sound data buffer
+   if(!pbSndBuffer)
+      return ERR_OUT_OF_MEMORY;
+
    pbSndBufferEnd     = pbSndBuffer + CPC.snd_buffersize;
    memset(pbSndBuffer, 0, CPC.snd_buffersize);
    CPC.snd_bufferptr  = pbSndBuffer; // init write cursor
@@ -1394,7 +1406,14 @@ int audio_init (void)
    return 0;
 }
 
-void audio_shutdown (void) {}
+void audio_shutdown (void)
+{
+   if(pbSndBuffer)
+      retro_free(pbSndBuffer);
+   CPC.snd_bufferptr = NULL;
+   pbSndBuffer = NULL;
+
+}
 void audio_pause (void) {}
 void audio_resume (void) {}
 
@@ -1570,12 +1589,11 @@ int video_init (void)
 
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
-   CPC.scr_pos       = CPC.scr_base = (uint32_t *)&bmp[0];
+   CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
    CPC.scr_line_offs = ((CPC.scr_bps * (CPC.scr_style - 2)) // because is double height
                          / (2 / PIXEL_BYTES) ) ;
 
    video_set_style();
-   memset(bmp, 0, sizeof(bmp));
 
    return 0;
 }
@@ -2003,18 +2021,10 @@ void change_lang(int val){
 
 void mixsnd(void)
 {
-   int x;
-   int16_t *p = NULL;
-
    if(SND != 1)
       return;
 
-   retro_snd_mixer();
-
-   p = (int16_t*)pbSndBuffer;
-
-   for(x = 0; x < 882 * 2; x += 2)
-      retro_audio_cb(p[x],p[x+1]);
+   retro_audio_mix();
 }
 
 
@@ -2230,25 +2240,19 @@ void check_kbd_command()
 
 }
 
-int RLOOP=1;
-
 void retro_loop(void)
 {
-
-	while(RLOOP==1)
-		theloop();
-	RLOOP=1;
-
+	while(theloop());
 	check_kbd_command();
 //printf("auto:%d run:%d cmd:%d\n",autoboot_delay,autorun,kbd_runcmd);
 }
 
-void theloop(void)
+int theloop(void)
 {
 
      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
    {
-      int iTicksAdj = 0; // no adjustment necessary by default
+      //int iTicksAdj = 0; // no adjustment necessary by default
 
       if (CPC.snd_enabled)
       {
@@ -2257,20 +2261,21 @@ void theloop(void)
             dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
          else
             dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-
+#if 0
          if (dwSndDist < dwSndMinSafeDist)
             iTicksAdj = -5; // speed emulation up to compensate
          else if (dwSndDist > dwSndMaxSafeDist)
             iTicksAdj = 5; // slow emulation down to compensate
+#endif
       }
 
    }
 
    uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
    if (VDU.scrln > 0)
-      CPC.scr_base = (uint32_t *)&bmp[0] + (VDU.scrln * CPC.scr_line_offs); // determine current position
+      CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
    else
-      CPC.scr_base = (uint32_t *)&bmp[0]; // reset to surface start
+      CPC.scr_base = retro_getScreenPtr(); // reset to surface start
 
    CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
@@ -2280,11 +2285,12 @@ void theloop(void)
    {
       /* emulation finished rendering a complete frame? */
       dwFrameCount++;
-      RLOOP=0; /* exit retro_loop for retro_run */
+      return 0; /* exit retro_loop for retro_run */
    }
    else if (iExitCondition == EC_SOUND_BUFFER)
       mixsnd();
 
+   return 1;
 }
 
 int capmain (int argc, char **argv)

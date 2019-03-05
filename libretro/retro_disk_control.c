@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 
+/* Copyright (C) 2018
  *
  * Permission is hereby granted, free of charge,
  * to any person obtaining a copy of this software and associated documentation files (the "Software"),
@@ -18,17 +18,11 @@
 
 #include "retro_disk_control.h"
 #include "retro_strings.h"
-#include "retro_files.h"
+#include "retro_utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/*#include <sys/types.h> 
-#include <sys/stat.h> 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>*/
 
 #define COMMENT "#"
 #define M3U_SPECIAL_COMMAND "#COMMAND:"
@@ -38,19 +32,19 @@ char* dirname_int(const char* filename)
 {
 	if (filename == NULL)
 		return NULL;
-	
+
 	char* right;
 	int len = strlen(filename);
-	
-	if ((right = strrchr(filename, RETRO_PATH_SEPARATOR[0])) != NULL)
+
+	if ((right = strrchr((char*) filename, RETRO_PATH_SEPARATOR[0])) != NULL)
 		return strleft(filename, len - strlen(right));
-	
+
 #ifdef _WIN32
 	// Alternative search for windows beceause it also support the UNIX seperator
 	if ((right = strrchr(filename, RETRO_PATH_SEPARATOR_ALT[0])) != NULL)
 		return strleft(filename, len - strlen(right));
 #endif
-	
+
 	// Not found
 	return NULL;
 }
@@ -61,16 +55,16 @@ char* m3u_search_file(const char* basedir, const char* dskName)
 	if (file_exists(dskName))
 	{
 		// Copy and return
-		char* result = calloc(strlen(dskName) + 1, sizeof(char));
+		char* result = (char*) calloc(strlen(dskName) + 1, sizeof(char));
 		strcpy(result, dskName);
 		return result;
 	}
-	
+
 	// If basedir was provided
 	if(basedir != NULL)
 	{
 		// Join basedir and dskName
-		char* dskPath = calloc(RETRO_PATH_MAX, sizeof(char));
+		char* dskPath = (char*) calloc(RETRO_PATH_MAX, sizeof(char));
 		path_join(dskPath, basedir, dskName);
 
 		// Verify if this item is a relative filename (append it to the m3u path)
@@ -81,7 +75,7 @@ char* m3u_search_file(const char* basedir, const char* dskName)
 		}
 		free(dskPath);
 	}
-	
+
 	// File not found
 	return NULL;
 }
@@ -93,7 +87,7 @@ void dc_reset(dc_storage* dc)
 	// Verify
 	if(dc == NULL)
 		return;
-	
+
 	// Clean the command
 	if(dc->command)
 	{
@@ -118,8 +112,8 @@ dc_storage* dc_create(void)
 
 	// Initialize the struct
 	dc_storage* dc = NULL;
-	
-	if((dc = malloc(sizeof(dc_storage))) != NULL)
+
+	if((dc = (dc_storage*) malloc(sizeof(dc_storage))) != NULL)
 	{
 		dc->count = 0;
 		dc->index = -1;
@@ -130,7 +124,7 @@ dc_storage* dc_create(void)
 			dc->files[i] = NULL;
 		}
 	}
-	
+
 	return dc;
 }
 
@@ -151,7 +145,7 @@ bool dc_add_file_int(dc_storage* dc, char* filename)
 		dc->files[dc->count-1] = filename;
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -165,7 +159,7 @@ bool dc_add_file(dc_storage* dc, const char* filename)
 		return false;
 
 	// Copy and return
-	char* filename_int = calloc(strlen(filename) + 1, sizeof(char));
+	char* filename_int = (char*) calloc(strlen(filename) + 1, sizeof(char));
 	strcpy(filename_int, filename);
 	return dc_add_file_int(dc, filename_int);
 }
@@ -175,7 +169,7 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
 	// Verify
 	if(dc == NULL)
 		return;
-	
+
 	if(m3u_file == NULL)
 		return;
 
@@ -187,16 +181,16 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
 
 	// Reset
 	dc_reset(dc);
-	
+
 	// Get the m3u base dir for resolving relative path
 	char* basedir = dirname_int(m3u_file);
-	
+
 	// Read the lines while there is line to read and we have enough space
 	char buffer[2048];
 	while ((dc->count <= DC_MAX_SIZE) && (fgets(buffer, sizeof(buffer), fp) != NULL))
 	{
 		char* string = trimwhitespace(buffer);
-		
+
 		// If it's a m3u special key or a file
 		if (strstartswith(string, M3U_SPECIAL_COMMAND))
 		{
@@ -214,12 +208,12 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
 
 		}
 	}
-	
+
 	// If basedir was provided
 	if(basedir != NULL)
 		free(basedir);
 
-	// Close the file 
+	// Close the file
 	fclose(fp);
 }
 

@@ -22,6 +22,13 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 544
 
+//AUDIO
+#define AUDIO_BYTES 2
+#define AUDIO_CHANNELS 2
+#define AUDIO_RATE 50
+#define AUDIO_SAMPLE_SIZE 44100
+#define AUDIO_BUFSIZE (AUDIO_SAMPLE_SIZE / AUDIO_RATE)
+
 //LOG
 #if  defined(__ANDROID__) || defined(ANDROID)
 #include <android/log.h>
@@ -44,7 +51,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
  #define PITCH 4
 #endif
 
-extern PIXEL_TYPE *Retro_Screen;
+extern PIXEL_TYPE *video_buffer;
 
 #ifdef M16B
     #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
@@ -130,5 +137,7 @@ void retro_message(const char *text);
 extern int retro_getStyle();
 extern int retro_getGfxBpp();
 extern int retro_getGfxBps();
+extern int retro_getAudioBuffer();
+extern uint32_t * retro_getScreenPtr();
 
 #endif

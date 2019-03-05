@@ -638,7 +638,7 @@ nk_retro_handle_event(int *evt,int poll)
 
    int16_t mouse_x=0,mouse_y=0;
 
-   Process_key();
+   //Process_key();
 
    int i=2;//TOGGLE: real mouse/ joypad emulate mouse
    if ( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i) && mbt[i]==0 )

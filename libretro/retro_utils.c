@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 
+/* Copyright (C) 2018
  *
  * Permission is hereby granted, free of charge,
  * to any person obtaining a copy of this software and associated documentation files (the "Software"),
@@ -16,24 +16,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef RETRO_FILES_H__
-#define RETRO_FILES_H__
+#include <sys/stat.h>
+#include <string.h>
+#include <stdlib.h>
+#include "retro_utils.h"
 
-#include <stdbool.h>
+// Verify if file exists
+bool file_exists(const char *filename)
+{
+   struct stat buf;
+   if (stat(filename, &buf) == 0 &&
+      (buf.st_mode & (S_IRUSR|S_IWUSR)) && !(buf.st_mode & S_IFDIR))
+   {
+      /* file points to user readable regular file */
+      return true;
+   }
+   return false;
+}
 
-//*****************************************************************************
-// File helpers functions
-#define RETRO_PATH_MAX 512
+void path_join(char* out, const char* basedir, const char* filename)
+{
+   snprintf(out, RETRO_PATH_MAX, "%s%s%s", basedir, RETRO_PATH_SEPARATOR, filename);
+}
 
-#ifdef _WIN32
-#define RETRO_PATH_SEPARATOR   		"\\"
-// Windows also support the unix path separator
-#define RETRO_PATH_SEPARATOR_ALT   	"/"
-#else
-#define RETRO_PATH_SEPARATOR   		"/"
+
+/**
+ * D_Skywalk: Imported from my 3DS pituka implementation
+ *            http://david.dantoine.org/proyecto/26/
+ */
+
+#ifdef _3DS
+void* linearMemAlign(size_t size, size_t alignment);
+void linearFree(void* mem);
 #endif
 
-void path_join(char* out, const char* basedir, const char* filename);
-bool file_exists(const char *filename);
+void *retro_malloc(size_t size) {
+   #ifdef _3DS
+   return linearMemAlign(size, 0x80);
+   #else
+   return malloc(size);
+   #endif
+}
 
-#endif
+void retro_free(void * mem) {
+   #ifdef _3DS
+   linearFree(mem);
+   #else
+   free(mem);
+   #endif
+}

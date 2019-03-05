@@ -1,6 +1,7 @@
 #include "libretro.h"
 #include "libretro-core.h"
 #include "retro_events.h"
+#include "retro_utils.h"
 #include "retro_snd.h"
 
 //CORE VAR
@@ -68,13 +69,12 @@ extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
-PIXEL_TYPE *Retro_Screen;
+PIXEL_TYPE *video_buffer;
 uint32_t save_Screen[WINDOW_MAX_SIZE];
 uint32_t bmp[WINDOW_MAX_SIZE];
 
-//SOUND
-short signed int SNDBUF[1024*2];
-int snd_sampler = 44100 / 50;
+int32_t* audio_buffer = NULL;
+int audio_buffer_size = 0;
 
 //PATH
 char RPATH[512];
@@ -107,8 +107,6 @@ extern uint8_t *pbSndBuffer;
 //CAP32 DEF END
 
 extern void update_input(void);
-extern void texture_init(void);
-extern void texture_uninit(void);
 extern void Emu_init();
 extern void Emu_uninit();
 extern void input_gui(void);
@@ -157,8 +155,20 @@ int retro_getGfxBps(){
     return retro_scr_w;
 }
 
+int retro_getAudioBuffer(){
+   if(audio_buffer_size)
+      return audio_buffer_size;
+
+   int sample_size = AUDIO_BUFSIZE * AUDIO_CHANNELS * AUDIO_BYTES;
+   audio_buffer_size = 1;
+
+   while (audio_buffer_size < sample_size)
+      audio_buffer_size <<= 1;
+   return audio_buffer_size; // return the closest match as 2^n
+}
+
 uint32_t * retro_getScreenPtr(){
-    return (uint32_t *)&bmp[0];
+    return video_buffer;
 }
 
 #include <ctype.h>
@@ -354,26 +364,18 @@ void enter_options(void) {}
 
 void save_bkg()
 {
-	memcpy(save_Screen,Retro_Screen,gfx_buffer_size);
+	memcpy(save_Screen,video_buffer,gfx_buffer_size);
 }
 
 void restore_bgk()
 {
-	memcpy(Retro_Screen,save_Screen,gfx_buffer_size);
-}
-
-void texture_uninit(void)
-{
-}
-
-void texture_init(void)
-{
+	memcpy(video_buffer,save_Screen,gfx_buffer_size);
 }
 
 void Screen_SetFullUpdate(int scr)
 {
    if(scr==0 ||scr>1)
-      memset(&Retro_Screen, 0, gfx_buffer_size);
+      memset(&video_buffer, 0, gfx_buffer_size);
    if(scr>0)
       memset(&bmp,0, gfx_buffer_size);
 }
@@ -654,14 +656,22 @@ static void update_variables(void)
 
 void Emu_init()
 {
+   audio_buffer = (int32_t*) retro_malloc(retro_getAudioBuffer());
+   if(!audio_buffer){
+      LOGI("emu init - audio error: when allocation mem...\n");
+      return;
+   }
    emu_status = COMPUTER_BOOTING;
    pre_main(RPATH);
 }
 
 void Emu_uninit()
 {
+   if(audio_buffer)
+      retro_free(audio_buffer);
+
+   audio_buffer = NULL;
 	//quit_cap32_emu();
-   texture_uninit();
 }
 
 void retro_shutdown_core(void)
@@ -670,7 +680,6 @@ void retro_shutdown_core(void)
 
 	//quit_cap32_emu();
 
-   texture_uninit();
    environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
 }
 
@@ -986,7 +995,7 @@ void retro_init(void)
 
    Emu_init();
 
-   if(!init_retro_snd((int16_t*) pbSndBuffer))
+   if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
       LOGI("AUDIO FORMAT is not supported.\n");
 
 }
@@ -994,6 +1003,7 @@ void retro_init(void)
 extern void main_exit();
 void retro_deinit(void)
 {
+   free_retro_snd();
    app_free();
 
    Emu_uninit();
@@ -1004,7 +1014,6 @@ void retro_deinit(void)
    if(dc)
       dc_free(dc);
 
-   free_retro_snd();
    LOGI("Retro DeInit\n");
 }
 
@@ -1063,19 +1072,11 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
-void retro_audio_cb( short l, short r)
+void retro_audio_mix()
 {
-	audio_cb(l,r);
-}
-
-void retro_audiocb(signed short int *sound_buffer,int sndbufsize){
-   int x;
-   if(pauseg==0)for(x=0;x<sndbufsize;x++)audio_cb(sound_buffer[x],sound_buffer[x]);
-}
-
-void retro_blit()
-{
-   memcpy(Retro_Screen,bmp,gfx_buffer_size);
+   retro_snd_mixer();
+   memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
+   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
 }
 
 void retro_run(void)
@@ -1088,7 +1089,6 @@ void retro_run(void)
    if(pauseg==0)
    {
       retro_loop();
-	   retro_blit();
 	   Core_PollEvent();
 
 	   if(showkeyb==1)
@@ -1096,7 +1096,7 @@ void retro_run(void)
    }
    else if (pauseg==1)app_render(1);
 
-   video_cb(Retro_Screen,retro_scr_w,retro_scr_h,retro_scr_w<<PIXEL_BYTES);
+   video_cb(video_buffer,retro_scr_w,retro_scr_h,retro_scr_w<<PIXEL_BYTES);
 
 }
 
@@ -1109,8 +1109,6 @@ bool retro_load_game(const struct retro_game_info *game)
    }
 
    update_variables();
-   memset(SNDBUF,0,1024*2*2);
-
    computer_load_bios();
    computer_load_file();
 

@@ -23,8 +23,6 @@
 
 #include "retro_snd.h"
 
-#define BUFSIZE 44100 / 50
-#define BYTESPERSAMPLE 2
 #define AMP_MUL 64
 
 typedef struct {
@@ -58,6 +56,7 @@ typedef struct {
 } retro_guisnd_t;
 
 static int16_t* snd_buffer;
+static int snd_buffer_size;
 
 #ifndef MSB_FIRST
 #include "snd/motor.h"
@@ -109,7 +108,7 @@ bool sound_load(retro_guisnd_t* snd, const void* buffer, const int buffer_size) 
 
    //LOGI(" | sizeChunk: %d | channels: %d | BPS: %d\n", snd->head.Subchunk2Size, snd->head.NumChannels, snd->head.BitsPerSample);
 
-   snd->samples_tot      = snd->head.Subchunk2Size / BYTESPERSAMPLE;
+   snd->samples_tot      = snd->head.Subchunk2Size / AUDIO_BYTES;
    snd->rawsamples       = malloc(snd->head.Subchunk2Size);
    if(!snd->rawsamples)
       return false;
@@ -131,7 +130,7 @@ bool sound_load(retro_guisnd_t* snd, const void* buffer, const int buffer_size) 
  * load internal sounds and prepare mixer to be used
  * return false if cannot allocate memory or invalid wav file is used.
  */
-bool init_retro_snd(int16_t* pbuffer){
+bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size){
    memset(sounds, 0, sizeof(sounds));
 
    if(!sound_load(&sounds[SND_FDCMOTOR], motor, motor_size))
@@ -141,8 +140,8 @@ bool init_retro_snd(int16_t* pbuffer){
    if(!sound_load(&sounds[SND_FDCSEEK], seek_drive, seek_size))
       return false;
 
-   snd_buffer = pbuffer;
-
+   snd_buffer = ptr_buffer;
+   snd_buffer_size = audio_buffer_size/AUDIO_BYTES/AUDIO_CHANNELS;
    return true;
 }
 
@@ -155,6 +154,8 @@ void free_retro_snd(){
    sound_free(&sounds[SND_FDCMOTOR]);
    sound_free(&sounds[SND_FDCREAD]);
    sound_free(&sounds[SND_FDCSEEK]);
+   snd_buffer = NULL;
+   snd_buffer_size = 0;
 }
 
 
@@ -173,12 +174,12 @@ void sound_stop(retro_guisnd_t* snd) {
  * mix_audio:
  * @snd: sample struct to mix in emulator buffer
  *
- * this is a very simple mixer loop that just send a full BUFSIZE
+ * this is a very simple mixer loop that just send a full snd_buffer_size
  * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
  */
 static void mix_audio(retro_guisnd_t* snd)
 {
-   if (snd->sample_pos + BUFSIZE > snd->samples_tot) {
+   if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
       // exits if no loop sound...
       if(snd->state == ST_ON) {
          sound_stop(snd);
@@ -190,8 +191,8 @@ static void mix_audio(retro_guisnd_t* snd)
 
    // prepare loop vars
    int16_t* samples = snd_buffer;
-   int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (BYTESPERSAMPLE * snd->sample_pos));
-   unsigned i = BUFSIZE;
+   int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (AUDIO_BYTES * snd->sample_pos));
+   unsigned i = snd_buffer_size;
 
    while (i--)
    {
@@ -203,7 +204,7 @@ static void mix_audio(retro_guisnd_t* snd)
       samples += 2;
    }
 
-   snd->sample_pos     += BUFSIZE;
+   snd->sample_pos     += snd_buffer_size;
 }
 
 
