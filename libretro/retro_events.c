@@ -41,9 +41,15 @@ extern retro_environment_t environ_cb;
 
 extern int showkeyb;
 extern void kbd_buf_feed(char *s);
+extern void save_bkg();
+extern void play_tape();
+extern void stop_tape(void);
+extern void Tape_Rewind(void);
 
 extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+
+static uint32_t combo_last_event = 0;
 
 // --- events code
 #define MAX_KEYSYMS 324
@@ -108,6 +114,31 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    }
 };
 
+// ---------------------------------------------
+
+#define MAX_JOY_EVENT 9
+const retro_combo_event_t events_combo[MAX_JOY_EVENT] =
+{
+   { RETRO_DEVICE_ID_JOYPAD_B,
+      { EVENT_WRITE, "CAT\n", NULL } },
+   { RETRO_DEVICE_ID_JOYPAD_Y,
+      { EVENT_WRITE, "|CPM\n", NULL } },
+   { RETRO_DEVICE_ID_JOYPAD_A,
+      { EVENT_WRITE, "RUN\"DISK\nRUN\"DISC\n", NULL } },
+   { RETRO_DEVICE_ID_JOYPAD_X,
+      { EVENT_WRITE, "|TAPE\nRUN\"\n^" } },
+   { RETRO_DEVICE_ID_JOYPAD_START,
+      { EVENT_VKEYB, "VKEYB\n", NULL } },
+   { RETRO_DEVICE_ID_JOYPAD_UP,
+      { EVENT_WRITE, "1\nY\n", "PRESSED => 1/Y" } },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN,
+      { EVENT_WRITE, "2\nN\n", "PRESSED => 2/N" } },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT,
+      { EVENT_WRITE, "4\nS\n", "PRESSED => 4/S" } },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT,
+      { EVENT_WRITE, "3\nJ\n", "PRESSED => 3/J" } },
+};
+
 /**
  * press_emulated_key:
  * using CPC keyboard matrix sets as pressed
@@ -138,65 +169,90 @@ static uint8_t get_cpckey (unsigned int keysym)
 }
 
 /**
- * ev_special_combos:
+ * ev_cursorjoy:
+ * activate: if TRUE emulation on cursors is activated
+ *            if FALSE emulation is disabled and cursors works normally
+ *
+ * Changes keyboard table to bind CPC joystick on cursors
+ **/
+void ev_cursorjoy() {
+   static bool activate = false;
+   activate ^= 1;
+   if(activate) {
+      keyboard_translation[RETROK_RCTRL] = CPC_KEY_JOY_FIRE1;
+      keyboard_translation[RETROK_RSHIFT] = CPC_KEY_JOY_FIRE2;
+      keyboard_translation[RETROK_UP] = CPC_KEY_JOY_UP;
+      keyboard_translation[RETROK_DOWN] = CPC_KEY_JOY_DOWN;
+      keyboard_translation[RETROK_LEFT] = CPC_KEY_JOY_LEFT;
+      keyboard_translation[RETROK_RIGHT] = CPC_KEY_JOY_RIGHT;
+   } else {
+      keyboard_translation[RETROK_RCTRL] = CPC_KEY_CONTROL;
+      keyboard_translation[RETROK_RSHIFT] = CPC_KEY_SHIFT;
+      keyboard_translation[RETROK_UP] = CPC_KEY_CURSOR_UP;
+      keyboard_translation[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
+      keyboard_translation[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
+      keyboard_translation[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
+   }
+}
+
+/**
+ * do_action:
+ * @return: the retro_events_action_type.
+ * generates event actions
+ **/
+static unsigned do_action(const retro_action_t* action)
+{
+   switch(action->type) {
+      case EVENT_WRITE:
+         kbd_buf_feed((char*) action->kbd_buf);
+         break;
+      case EVENT_VKEYB:
+         showkeyb=-showkeyb;
+         //memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix
+         break;
+      case EVENT_GUI:
+         pauseg=1;
+         save_bkg();
+         break;
+      case EVENT_TAPE_ON:
+         play_tape();
+         break;
+      case EVENT_TAPE_OFF:
+         stop_tape();
+         break;
+      case EVENT_TAPE_REWIND:
+         Tape_Rewind();
+         break;
+      case EVENT_CURSOR_JOY:
+         ev_cursorjoy();
+         break;
+   }
+
+   if(action->message)
+      retro_message(action->message);
+
+   return action->type;
+}
+
+/**
+ * ev_events_joy:
  * generate the SELECT + JOYPAD_x result in screen/emulation
  *
  * TODO: add an help-screen in emulation screen?
  **/
-static void ev_special_combos()
+static void ev_events_joy()
 {
-   static uint32_t last_event = 0;
-   uint32_t pressed = 0;
-
-   if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_B);
-      if(pressed != last_event)
-            kbd_buf_feed("CAT\n");
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_Y);
-      if(pressed != last_event)
-            kbd_buf_feed("|CPM\n");
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_A);
-      if(pressed != last_event)
-           kbd_buf_feed("RUN\"DISK\nRUN\"DISC\n");
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_X);
-      if(pressed != last_event)
-           kbd_buf_feed("|TAPE\nRUN\"\n^");
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_START);
-      if(pressed != last_event) {
-            showkeyb=-showkeyb;
-            memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix
-      }
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_UP);
-      if(pressed != last_event){
-           kbd_buf_feed("1\nY\n");
-           retro_message("PRESSED => 1/Y");
-        }
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_DOWN);
-      if(pressed != last_event) {
-           kbd_buf_feed("2\nN\n");
-           retro_message("PRESSED => 2/N");
-        }
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_LEFT);
-      if(pressed != last_event){
-         kbd_buf_feed("4\nS\n");
-         retro_message("PRESSED => 4/S");
-      }
-   } else if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT)) {
-      BIT_SET(pressed, RETRO_DEVICE_ID_JOYPAD_RIGHT);
-      if(pressed != last_event){
-         kbd_buf_feed("3\nJ\n");
-         retro_message("PRESSED => 3/J");
+   static unsigned event_last = EVENT_NULL;
+   unsigned n;
+   for(n = 0; n < MAX_JOY_EVENT; n++) {
+      if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, events_combo[n].id)){
+         if(!event_last){
+            event_last = do_action(&events_combo[n].action);
+         }
+         return;
       }
    }
-
-   last_event = pressed;
+   event_last = EVENT_NULL;
 }
 
 /**
@@ -207,14 +263,9 @@ static void ev_special_combos()
  **/
 static void ev_process_joy(int playerID){
 
-   /*disabled?*/
+   // is disabled?
    if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
       return;
-
-   if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
-      ev_special_combos();
-      return;
-   }
 
    uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]];
 
@@ -242,39 +293,94 @@ void ev_joysticks() {
    if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD)
          return;
 
-   ev_process_joy(ID_PLAYER1);
+   if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
+      ev_events_joy();
+   } else {
+      ev_process_joy(ID_PLAYER1);
+   }
+
    ev_process_joy(ID_PLAYER2);
 }
 
 /**
- * ev_gui_keyboard:
- * GUI_MENU / GUI_VIRTUAL_KEYBOARD
- * WIP: preliminar code - just remove GUI_VIRTUAL_KEYBOARD atm
+ * ev_joy_vkeyboard:
+ * joystick logic in GUI_MENU / GUI_VIRTUAL_KEYBOARD
+ * WIP: VERY preliminar code - just remove GUI_VIRTUAL_KEYBOARD atm
  **/
-void ev_vkeyboard(){
-   static uint32_t last_event = 0;
+void ev_joy_vkeyboard(){
    uint32_t pressed = 0;
-
    if ( (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT))
         && (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START)) ) {
       BIT_SET(pressed, 3);
-      if(pressed != last_event) {
+      if(pressed != combo_last_event) {
          showkeyb=-showkeyb;
-         last_event = pressed;
+         combo_last_event = pressed;
       }
    } else {
-      last_event = 0;
+      combo_last_event = 0;
    }
 }
 
-void ev_key(int key, bool pressed) {
+//-----------------------------------------------------
+
+#define MAX_KEY_EVENT 6
+const retro_combo_event_t keyb_events[MAX_KEY_EVENT] =
+{
+   { RETROK_F9,
+      { EVENT_VKEYB, "VKEYB", NULL } },
+   { RETROK_F10,
+      { EVENT_GUI, "GUI", NULL} },
+   { RETROK_HOME,
+      { EVENT_TAPE_ON, "PLAY TAPE", "TAPE => PLAY PRESSED" } },
+   { RETROK_END,
+      { EVENT_TAPE_OFF, "STOP TAPE", "TAPE => STOP PRESSED" } },
+   { RETROK_PAGEUP,
+      { EVENT_TAPE_REWIND, "REW TAPE", "TAPE => REWIND PRESSED" } },
+   { RETROK_INSERT,
+      { EVENT_CURSOR_JOY, "SWITCH CURSOR", "SWITCHED CURSOR/JOY" } },
+};
+
+/**
+ * ev_events_key:
+ * @keycode: bind code
+ * @down: is key pressed?
+ *
+ * check special keyboard events and generates his event/actions
+ **/
+static void ev_events_key(unsigned keycode, bool down)
+{
+   static unsigned event_last = 0;
+   int n;
+
+   if(!down)
+   {
+      event_last = EVENT_NULL;
+      return;
+   }
+
+   for(n = 0; n < MAX_KEY_EVENT; n++) {
+      if (keyb_events[n].id == keycode){
+         if(!event_last)
+            event_last = do_action(&keyb_events[n].action);
+         return;
+      }
+   }
+}
+
+/**
+ * ev_key:
+ * emulator keyboard handler
+ **/
+static bool ev_key(int key, bool pressed) {
    uint8_t cpc_key = get_cpckey(key);
    if (cpc_key != CPC_KEY_NULL) {
       if (pressed)
          press_emulated_key(cpc_key);
       else
          release_emulated_key(cpc_key);
+      return true;
    }
+   return false;
 }
 
 /**
@@ -288,32 +394,10 @@ static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_
    //printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
    //       down ? "yes" : "no", keycode, character, mod);
 
-   ev_key(keycode, down);
+   if(ev_key(keycode, down))
+      return;
 
-}
-
-/**
- * ev_cursorjoy:
- * @activate: if TRUE emulation on cursors is activated
- *            if FALSE emulation is disabled and cursors works normally
- *
- * Changes keyboard table to bind CPC joystick on cursors
- * TODO: activate using GUI
- **/
-void ev_cursorjoy(bool activate) {
-   if(activate) {
-      keyboard_translation[RETROK_LCTRL] = CPC_KEY_JOY_FIRE1;
-      keyboard_translation[RETROK_UP] = CPC_KEY_JOY_UP;
-      keyboard_translation[RETROK_DOWN] = CPC_KEY_JOY_DOWN;
-   	keyboard_translation[RETROK_LEFT] = CPC_KEY_JOY_LEFT;
-   	keyboard_translation[RETROK_RIGHT] = CPC_KEY_JOY_RIGHT;
-   } else {
-      keyboard_translation[RETROK_LCTRL] = CPC_KEY_NULL;
-      keyboard_translation[RETROK_UP] = CPC_KEY_CURSOR_UP;
-   	keyboard_translation[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
-   	keyboard_translation[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
-   	keyboard_translation[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
-   }
+   ev_events_key(keycode, down);
 }
 
 /**

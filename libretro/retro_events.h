@@ -116,9 +116,34 @@ enum emu_key_id {
    CPC_KEY_NULL                   = 0xFF
 };
 
+
+enum retro_events_action_type
+{
+   EVENT_NULL = 0,
+   EVENT_WRITE,
+   EVENT_VKEYB,
+   EVENT_GUI,
+   EVENT_TAPE_ON,
+   EVENT_TAPE_OFF,
+   EVENT_TAPE_REWIND,
+   EVENT_CURSOR_JOY,
+};
+
+
+typedef struct {
+   unsigned type;
+   const char * kbd_buf;
+   const char * message;
+} retro_action_t;
+
+typedef struct {
+   unsigned id;
+   retro_action_t action;
+} retro_combo_event_t;
+
+
 void ev_joysticks();
 void ev_vkeyboard();
-void ev_cursorjoy(bool activate);
 void ev_init();
 
 #endif
