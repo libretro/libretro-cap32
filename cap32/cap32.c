@@ -2331,7 +2331,7 @@ int capmain (int argc, char **argv)
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
 
-   dwTicksOffset     = (int)(20.0 / (double)((CPC.speed * 25) / 100.0));
+   dwTicksOffset     = (int)(FRAME_PERIOD_MS / (double)(CPC.speed/CPC_BASE_FREQUENCY_MHZ));
    dwTicksTarget     = GetTicks();
    dwTicksTargetFPS  = dwTicksTarget;
    dwTicksTarget    += dwTicksOffset;
