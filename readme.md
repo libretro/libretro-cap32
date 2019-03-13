@@ -22,8 +22,7 @@ Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
-(Detailed usage at libretro docs)[https://docs.libretro.com/library/caprice32/]
-
+Detailed usage at libretro docs: https://docs.libretro.com/library/caprice32/
 
 ### Keyboard emulated layout
 ![imagen](https://user-images.githubusercontent.com/560310/52812237-4c4fbd80-3097-11e9-8537-88f62e8ba5e8.png)
@@ -76,7 +75,7 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 ```
 
 
-## Known Bugs
+# Known Bugs
 
 - CPC-PLUS model is in WIP state, do not use yet.
 
