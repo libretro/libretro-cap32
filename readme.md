@@ -22,7 +22,12 @@ Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 ### Keyboard emulated layout
-![imagen](https://user-images.githubusercontent.com/560310/52812237-4c4fbd80-3097-11e9-8537-88f62e8ba5e8.png)
+#### English layout
+![keyb_en](https://user-images.githubusercontent.com/560310/54316312-abdeb180-45e0-11e9-9063-faf78fec9d6d.png)
+#### Spanish layout
+![keyb_es](https://user-images.githubusercontent.com/560310/54316295-9ff2ef80-45e0-11e9-9ae4-a2e3fb064600.png)
+#### French layout
+![keyb_fr](https://user-images.githubusercontent.com/560310/54316280-97021e00-45e0-11e9-91b5-da73a87534d6.png)
 
 
 ### Keyboard Custom Binds
