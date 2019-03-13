@@ -593,7 +593,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                   pbDataPtr += dwSectorSize;
                   pbPtr += 8;
                }
-               if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
+               if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
                   iRetCode = ERR_DSK_INVALID;
                   goto exit;
                }
@@ -652,7 +652,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                         pbDataPtr += dwSectorSize;
                         pbPtr += 8;
                      }
-                     if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
+                     if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
                         iRetCode = ERR_DSK_INVALID;
                         goto exit;
                      }

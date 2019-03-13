@@ -1,4 +1,4 @@
-# CAPRICE32 4.4+ LIBRETRO
+# CAPRICE32 4.5+ LIBRETRO
 
 All the credit of the caprice32 Emulator to Ulrich Doewich
 
