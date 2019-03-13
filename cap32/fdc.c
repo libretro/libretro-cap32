@@ -172,7 +172,12 @@ void sector_set_sizes(t_sector * sector, unsigned int size, unsigned int total_s
 {
    sector->size = size;
    sector->total_size = total_size;
-   sector->weak_versions = total_size / size;
+
+   if (sector->size > 0 && sector->size <= sector->total_size)
+      sector->weak_versions = sector->total_size / sector->size;
+   else
+      sector->weak_versions = 1;
+   sector->weak_read_version = 0;
 }
 
 unsigned char* sector_get_read_data(t_sector * sector)
