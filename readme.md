@@ -35,9 +35,11 @@ Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ to customize your retropa
 
 Detailed usage at libretro docs: https://docs.libretro.com/library/caprice32/
 
-## New Features
+## Features not covered in docs
 
- * New model added 6128+
+ * New Model: [cap32_model] (6128|464|6128+)
+
+Choose which Amstrad CPC model to emulate, currently added 6128+
 
 ## M3U and Disk control
 
