@@ -2,15 +2,14 @@
 
 All the credit of the caprice32 Emulator to Ulrich Doewich
 
-You can download the caprice32 original source code here :
-	http://sourceforge.net/projects/caprice32/
+You can download the caprice32 original source code [here](http://sourceforge.net/projects/caprice32/)
 
 
-This core also use some code from wiituka/pituka (c) 2004-2016 David Colmenero
-http://code.google.com/p/wiituka/
+This core also use some code from [wiituka/pituka](http://code.google.com/p/wiituka/) (c) 2004-2016 David Colmenero
 
-CPC464+/CPC6128+/GX4000 - ATM as **Work in Progress** (c) 2016-2019 Colin Pitrat
-https://github.com/ColinPitrat/caprice32
+
+CPC464+/CPC6128+/GX4000 (c) 2016-2019 Colin Pitrat : https://github.com/ColinPitrat/caprice32
+
 
 And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
@@ -23,6 +22,10 @@ Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 Detailed usage at libretro docs: https://docs.libretro.com/library/caprice32/
+
+### New Features
+
+ * New model added 6128+
 
 ### Keyboard emulated layout
 ![imagen](https://user-images.githubusercontent.com/560310/52812237-4c4fbd80-3097-11e9-8537-88f62e8ba5e8.png)
@@ -77,7 +80,7 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 
 # Known Bugs
 
-- CPC-PLUS model is in WIP state, do not use yet.
+- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59)
 
 - Android version is not fully tested/optimized.
 
