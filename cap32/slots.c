@@ -22,6 +22,7 @@
  *            http://david.dantoine.org/proyecto/26/
  */
 
+#include "cap32.h"
 #include "slots.h"
 #include "crtc.h"
 #include "tape.h"
@@ -587,7 +588,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
                   memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
                   memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
-                  drive->track[track][side].sector[sector].size = dwSectorSize;
+                  sector_set_sizes(&drive->track[track][side].sector[sector], dwSectorSize, dwSectorSize); // weak sectors support
                   drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
                   pbDataPtr += dwSectorSize;
                   pbPtr += 8;
@@ -644,8 +645,9 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                      for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
                         memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
                         memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
+                        uint32_t dwRealSize = 0x80 << *(pbPtr + 0x1b);
                         dwSectorSize = *(pbPtr + 0x1e) + (*(pbPtr + 0x1f) << 8); // sector size in bytes
-                        drive->track[track][side].sector[sector].size = dwSectorSize;
+                        sector_set_sizes(&drive->track[track][side].sector[sector], dwRealSize, dwSectorSize); // weak sectors support
                         drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
                         pbDataPtr += dwSectorSize;
                         pbPtr += 8;
@@ -721,8 +723,8 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
                for (sector = 0; sector < th.sectors; sector++) {
                   memcpy(&th.sector[sector][0], drive->track[track][side].sector[sector].CHRN, 4); // copy CHRN
                   memcpy(&th.sector[sector][4], drive->track[track][side].sector[sector].flags, 2); // copy ST1 & ST2
-                  th.sector[sector][6] = drive->track[track][side].sector[sector].size & 0xff;
-                  th.sector[sector][7] = (drive->track[track][side].sector[sector].size >> 8) & 0xff; // sector size in bytes
+                  th.sector[sector][6] = drive->track[track][side].sector[sector].total_size & 0xff;
+                  th.sector[sector][7] = (drive->track[track][side].sector[sector].total_size >> 8) & 0xff; // sector size in bytes
                }
 
                if (!fwrite(&th, sizeof(th), 1, pfileObject)) { // write track header
@@ -800,7 +802,7 @@ int dsk_format (t_drive *drive, int iFormat)
             // loop for all sectors
             CHRN[2] = disk_format[iFormat].sector_ids[side][sector];
             memcpy(drive->track[track][side].sector[sector].CHRN, CHRN, 4); // copy CHRN
-            drive->track[track][side].sector[sector].size = dwSectorSize;
+            sector_set_sizes(&drive->track[track][side].sector[sector], dwSectorSize, dwSectorSize);
             drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
             pbDataPtr += dwSectorSize;
          }

@@ -1040,7 +1040,7 @@ void retro_get_system_info(struct retro_system_info *info)
    #ifndef GIT_VERSION
    #define GIT_VERSION ""
    #endif
-   info->library_version  = "4.2" GIT_VERSION;
+   info->library_version  = "4.4" GIT_VERSION;
    info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;

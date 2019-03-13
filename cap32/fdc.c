@@ -168,6 +168,18 @@ uint32_t read_status_delay = 0;
    FDC.result[RES_N] = FDC.command[CMD_N];
 
 
+void sector_set_sizes(t_sector * sector, unsigned int size, unsigned int total_size)
+{
+   sector->size = size;
+   sector->total_size = total_size;
+   sector->weak_versions = total_size / size;
+}
+
+unsigned char* sector_get_read_data(t_sector * sector)
+{
+   sector->weak_read_version = (sector->weak_read_version + 1) % sector->weak_versions;
+   return &sector->data[sector->weak_read_version * sector->size];
+}
 
 void check_unit(void)
 {
@@ -321,7 +333,7 @@ loop:
             sector_size = 128 << FDC.command[CMD_N]; // determine number of bytes from N value
          }
          FDC.buffer_count = sector_size; // init number of bytes to transfer
-         FDC.buffer_ptr = sector->data; // pointer to sector data
+         FDC.buffer_ptr = sector_get_read_data(sector); // pointer to sector data (weak sector support)
          FDC.buffer_endptr = active_track->data + active_track->size; // pointer beyond end of track data
          FDC.timeout = INITIAL_TIMEOUT;
          read_status_delay = 1;
@@ -359,7 +371,7 @@ static INLINE void cmd_readtrk(void)
       sector_size = 128 << FDC.command[CMD_N]; // determine number of bytes from N value
    }
    FDC.buffer_count = sector_size; // init number of bytes to transfer
-   FDC.buffer_ptr = sector->data; // pointer to sector data
+   FDC.buffer_ptr = sector_get_read_data(sector); // pointer to sector data (weak sector support)
    FDC.buffer_endptr = active_track->data + active_track->size; // pointer beyond end of track data
    FDC.timeout = INITIAL_TIMEOUT;
    read_status_delay = 1;
@@ -395,7 +407,7 @@ loop:
          }
          sector_size = 128 << FDC.command[CMD_N]; // determine number of bytes from N value
          FDC.buffer_count = sector_size; // init number of bytes to transfer
-         FDC.buffer_ptr = sector->data; // pointer to sector data
+         FDC.buffer_ptr = sector_get_read_data(sector); // pointer to sector data (weak sector support)
          FDC.buffer_endptr = active_track->data + active_track->size; // pointer beyond end of track data
          FDC.flags &= ~SCANFAILED_flag; // reset scan failed flag
          FDC.result[RES_ST2] |= 0x08; // assume data matches: set Scan Equal Hit

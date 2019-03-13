@@ -431,8 +431,13 @@ typedef struct {
 typedef struct {
    unsigned char CHRN[4]; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions
-   unsigned int size; // sector size in bytes
    unsigned char *data; // pointer to sector data
+   unsigned int size; // sector size in bytes
+
+   // weak sector support
+   unsigned int weak_versions; // number of versions of this sector (should be 1 except for weak/random sectors)
+   unsigned int weak_read_version; // version of the sector to return when reading
+   unsigned int total_size; // total data size in bytes
 } t_sector;
 
 typedef struct {
@@ -490,6 +495,9 @@ size_t get_ram_size(void);
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+unsigned char* sector_get_read_data(t_sector * sector);
+void sector_set_sizes(t_sector * sector, unsigned int size, unsigned int total_size);
 
 void fdc_write_data(unsigned char val);
 unsigned char fdc_read_status(void);

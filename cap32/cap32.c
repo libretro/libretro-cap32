@@ -488,7 +488,7 @@ void ga_memory_manager (void)
          membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
    }
-   if (CPC.model >= 3 && GateArray.registerPageOn) {
+   if (CPC.model > 2 && GateArray.registerPageOn) {
       membank_read[1] = pbRegisterPage;
       membank_write[1] = pbRegisterPage;
    }
@@ -636,7 +636,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             }
             break;
          case 2: // set mode
-            if (!asic.locked && (val & 0x20) && CPC.model > 2) {
+            if (!asic.locked && (val & 0x20)) {
                // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
@@ -669,20 +669,15 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             }
             break;
          case 3: // set memory configuration
-            if (asic.locked) {
-               #ifdef DEBUG_GA
-               if (dwDebugFlag) {
-                  fprintf(pfoDebug, "mem 0x%02x\r\n", val);
-               }
-               #endif
-               GateArray.RAM_config = val;
-               ga_memory_manager();
-               if (CPC.mf2) { // MF2 enabled?
-                  *(pbMF2ROM + 0x03fff) = val;
-               }
-            } else {
-               // 6128+ memory mapping register
-               printf("Memory mapping register (RAM)\n");
+            #ifdef DEBUG_GA
+            if (dwDebugFlag) {
+               fprintf(pfoDebug, "mem 0x%02x\r\n", val);
+            }
+            #endif
+            GateArray.RAM_config = val;
+            ga_memory_manager();
+            if (CPC.mf2) { // MF2 enabled?
+               *(pbMF2ROM + 0x03fff) = val;
             }
             break;
       }
@@ -693,7 +688,9 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       uint8_t crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
          // 6128+: this is where we should detect the ASIC (un)locking sequence
-         asic_poke_lock_sequence(val);
+         if (CPC.model > 2) {
+            asic_poke_lock_sequence(val);
+         }
          CRTC.reg_select = val;
          if (CPC.mf2) { // MF2 enabled?
             *(pbMF2ROM + 0x03cff) = val;

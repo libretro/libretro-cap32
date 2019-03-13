@@ -42,6 +42,7 @@ typedef struct {
 
 typedef struct {
    bool locked;
+   int lockSeqPos;
 
    bool extend_border;
    int hscroll;

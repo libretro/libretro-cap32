@@ -22,12 +22,13 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 544
 
+
 //AUDIO
+#define FRAME_PERIOD_MS        20.0 // check cap32.h
 #define AUDIO_BYTES 2
 #define AUDIO_CHANNELS 2
-#define AUDIO_RATE 50
 #define AUDIO_SAMPLE_SIZE 44100
-#define AUDIO_BUFSIZE (AUDIO_SAMPLE_SIZE / AUDIO_RATE)
+#define AUDIO_BUFSIZE (AUDIO_SAMPLE_SIZE * FRAME_PERIOD_MS / 1000)
 
 //LOG
 #if  defined(__ANDROID__) || defined(ANDROID)
