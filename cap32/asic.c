@@ -50,7 +50,7 @@
 #include "libretro-core.h"
 
 // TODO: remove log
-#ifdef DEBUG_CART
+#ifdef DEBUG_ASIC
 #define ERR(x) fprintf(stderr, x "\n")
 #define LOG(x, val) printf(x "\n", val)
 #else
@@ -239,18 +239,19 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
          color += 16;
       asic.sprites[id][x][y] = color;
       //LOG("Received sprite %u data", id);
+   } else if (addr >= 0x5000 && addr < 0x6000) {
+      // 0x5000 --- unused
+      return true;
    }
-   // 0x5000 --- unused
-   // ASIC -- sprite operation, from 6000h to 6080h
    else if (addr >= 0x6000 && addr < 0x6080) {
-      // 6000h 	2 	N 	R/W 	X0 	Sprite 0 X position
-      // 6002h 	2 	N 	R/W 	Y0 	Sprite 0 Y position
-      // 6004h 	1 	Y 	W 	M0 	Sprite 0 magnification
-      // 6005/6/7 					(unused)
-      // 6008h 	2 	N 	R/W 	X0 	Sprite 0 X position
-      // 600Ah 	2 	N 	R/W 	Y0 	Sprite 0 Y position
-      // 600Ch 	1 	Y 	W 	M0 	Sprite 0 magnification
-      // 600D/E/F 	3 	  	  	  	(unused)
+      // 6000h    2  N  R/W   X0    Sprite 0 X position
+      // 6002h    2  N  R/W   Y0    Sprite 0 Y position
+      // 6004h    1  Y  W     M0    Sprite 0 magnification
+      // 6005/6/7 3                 Sprite 0 magnification
+      // 6008h    2  N  R/W   X0    Sprite 0 X position
+      // 600Ah    2  N  R/W   Y0    Sprite 0 Y position
+      // 600Ch    1  Y  W     M0    Sprite 0 magnification
+      // 600D/E/F 3                 Sprite 0 magnification
       // ...
       int id = ((addr - 0x6000) >> 3);
       int type = (addr & 0x7);
@@ -277,13 +278,13 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 4: // Magnification | if val == 0 -- sprite dissabled
+         case 5: // Magnification - http://cpctech.cpc-live.com/docs/cpcplus.html
+         case 6: // Magnification
+         case 7: // Magnification
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
             asic.sprites_mag_y[id] = decode_magnification(val);
             // Write-only: does not affect pbRegisterPage
             return false;
-         default:
-            // ignore sprite operation of unsupported ASIC types: 5/6/7 or d/e/f
-            return true;
       }
    }
    // 0x6080 --- unused
