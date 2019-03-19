@@ -240,6 +240,17 @@ else ifeq ($(platform), wii)
 	HAVE_COMPAT = 1
 	MSB_FIRST = 1
 
+# Nintendo Switch (libnx)
+else ifeq ($(platform), libnx)
+	include $(DEVKITPRO)/libnx/switch_rules
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CFLAGS += -O3 -fomit-frame-pointer -ffast-math -I$(DEVKITPRO)/libnx/include/ -fPIE -Wl,--allow-multiple-definition
+	CFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs
+	CFLAGS += -D__SWITCH__ -DHAVE_LIBNX -DHAVE_GETPWUID=0 -DHAVE_GETCWD=1
+	CFLAGS += -march=armv8-a -mtune=cortex-a57 -mtp=soft -ffast-math -mcpu=cortex-a57+crc+fp+simd -ffunction-sections
+	CFLAGS += -Ifrontend/switch -ftree-vectorize
+	STATIC_LINKING = 1
+
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so

@@ -169,6 +169,8 @@ file_browser_init(struct file_browser *browser)
       const char *home = "sd:/";
 #elif defined(_3DS)
       const char *home = "sdmc:/";
+#elif defined(__SWITCH__)
+      const char *home = "/";
 #else
       /* load files and sub-directory list */
       const char *home = getenv("HOME");
