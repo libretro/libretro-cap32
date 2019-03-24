@@ -22,6 +22,7 @@
 #include "cap32.h"
 
 #define ASIC_SPRITES 16
+#define ASIC_SPRITE_SIZE 16
 #define NB_DMA_CHANNELS 3
 
 typedef struct {
@@ -47,7 +48,7 @@ typedef struct {
    bool extend_border;
    int hscroll;
    int vscroll;
-   uint8_t sprites[ASIC_SPRITES][16][16];
+   uint8_t sprites[ASIC_SPRITES][ASIC_SPRITE_SIZE][ASIC_SPRITE_SIZE];
    int16_t sprites_x[ASIC_SPRITES];
    int16_t sprites_y[ASIC_SPRITES];
    int16_t sprites_mag_x[ASIC_SPRITES];
@@ -57,6 +58,7 @@ typedef struct {
 
    bool raster_interrupt;
    uint8_t interrupt_vector;
+   int irq_cause;
 } t_asic;
 
 extern t_asic asic;

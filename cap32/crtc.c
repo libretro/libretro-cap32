@@ -938,6 +938,7 @@ void prerender_normal_plus(void)
       *(RendPos + 3) = *(ModeMap + ((*(bVidMem + 1)) * 2) + 1);
    }
 
+   // TODO: optimize
    uint16_t i, offset = 0;
    for(i = 0; i < 4; i++) {
       uint8_t c1 = get_sprite_asic(offset++);

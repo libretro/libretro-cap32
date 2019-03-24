@@ -80,6 +80,7 @@ void asic_reset(){
    asic.locked = true;
    asic.raster_interrupt = false;
    asic.interrupt_vector = 1;
+   asic.irq_cause = 0x06;
 }
 
 void asic_poke_lock_sequence(uint8_t val) {
@@ -137,88 +138,117 @@ static INLINE uint16_t decode_magnification(uint8_t val) {
 //  - INT generates an interruption for chX by setting chX.interrupt to true (code for CPU to detect it must also be done !)
 //  - STOP set chX.enabled to false ? (still increment address for when processing will restart)
 //  The last 4 can be OR-ed to be combined
-void asic_dma_cycle() {
-   int c;
-   // The two first bits of the address give the page to read from
-   uint8_t dcsr = 0;
-   bool dcsr_changed = false;
-   for(c = 0; c < NB_DMA_CHANNELS; c++) {
-      t_DMA_channel *channel = &asic.dma.ch[c];
-      if(!channel->enabled) continue;
-      if(channel->pause_ticks > 0) { // PAUSE on-going
-         if(channel->tick_cycles < channel->prescaler) {
-           channel->tick_cycles++;
-           continue;
-         }
-         channel->tick_cycles = 0;
-         channel->pause_ticks--;
-         continue;
-      }
-      uint16_t bank = ((channel->source_address & 0xC000) >> 14);
-      uint16_t addr = (channel->source_address & 0x3FFF);
-      uint16_t instruction = 0;
-      instruction |= membank_config[GateArray.RAM_config & 7][bank][addr];
-      instruction |= membank_config[GateArray.RAM_config & 7][bank][addr+1] << 8;
-      //LOG_DEBUG("DMA [" << c << "] instruction " << std::hex << instruction << " from " << channel.source_address << std::dec);
-      uint16_t opcode = ((instruction & 0x7000) >> 12);
-      if (opcode == 0) { // LOAD
-         int reg = ((instruction & 0x0F00) >> 8);
-         uint8_t val = (instruction & 0x00FF);
-         SetAYRegister(reg, val);
-         //LOG_DEBUG("DMA [" << c << "] load " << std::hex << static_cast<int>(val) << " in register " << R << std::dec);
-      }
-      else {
-         if (opcode & 0x01) { // PAUSE
-            channel->pause_ticks = (instruction) & 0x0FFF;
-            channel->tick_cycles = 0;
-            //LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.tick_cycles) << " cycles");
-         }
-         if (opcode & 0x02) { // REPEAT
-            channel->loops = (instruction) & 0x0FFF;
-            channel->loop_address = channel->source_address;
-            //LOG_DEBUG("DMA [" << c << "] repeat " << channel.loops);
-         }
-         if (opcode & 0x04) { // NOP, LOOP, INT, STOP
-            if(instruction & 0x0001) { // LOOP
-               if(channel->loops > 0) {
-                  channel->source_address = channel->loop_address;
-                  //LOG_DEBUG("DMA [" << c << "] loop");
-               }
-            }
-            if(instruction & 0x0010) { // INT
-               channel->interrupt = true;
-               //LOG_DEBUG("DMA [" << c << "] interrupt");
-            }
-            if(instruction & 0x0020) { // STOP
-               channel->enabled = false;
-               //LOG_DEBUG("DMA [" << c << "] stop");
-            }
-         }
-      }
-      channel->source_address += 2;
-      // TODO: cleaner way to modify back the register value here ...
-      addr = 0x6C00 + (c << 2);
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t) (channel->source_address & 0xFF);
-      addr++;
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t)((channel->source_address & 0xFF00) >> 8);
-      /* Useless ?
-      addr++;
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel->prescaler;
-      */
-      if (channel->enabled) {
-         dcsr |= (0x1 << c);
-         dcsr_changed = true;
-      }
-      if (channel->interrupt) {
-         dcsr |= (0x40 >> c);
-         dcsr_changed = true;
-      }
+void asic_dma_channel(int c)
+{
+   t_DMA_channel *channel = &asic.dma.ch[c];
 
-      // TODO: ... and here
-      // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong !)
-      if (dcsr_changed) {
-         addr = 0x6C0F;
-         *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
+   if(channel->pause_ticks > 0) { // PAUSE on-going
+      if(channel->tick_cycles < channel->prescaler) {
+        channel->tick_cycles++;
+        return;
+      }
+      channel->tick_cycles = 0;
+      channel->pause_ticks--;
+      return;
+   }
+
+   if( channel->source_address & 0x01)
+		channel->source_address++;  // align address
+
+   uint16_t bank = ((channel->source_address & 0xC000) >> 14);
+   uint16_t addr = (channel->source_address & 0x3FFF);
+   uint16_t instruction = 0;
+
+   instruction |= membank_config[GateArray.RAM_config & 7][bank][addr];
+   instruction |= membank_config[GateArray.RAM_config & 7][bank][addr+1] << 8;
+   //LOG_DEBUG("DMA [" << c << "] instruction " << std::hex << instruction << " from " << channel.source_address << std::dec);
+
+   switch (instruction & 0xf000)
+   {
+      case 0x0000: // LOAD PSG Register
+         SetAYRegister(((instruction & 0x0F00) >> 8), // reg
+                        (instruction & 0x00FF) );     // val
+         //LOG_DEBUG("DMA [" << c << "] load " << std::hex << static_cast<int>(val) << " in register " << R << std::dec);
+         break;
+      case 0x1000: // PAUSE for X HSYNCs
+         channel->pause_ticks = (instruction & 0x0FFF);
+         channel->tick_cycles = 0;
+         //LOG_DEBUG("DMA [" << c << "] pause " << channel.pause_ticks << "*" << static_cast<int>(channel.tick_cycles) << " cycles");
+         break;
+      case 0x2000: // REPEAT loop
+         channel->loops = (instruction) & 0x0FFF;
+         channel->loop_address = channel->source_address;
+         //LOG_DEBUG("DMA [" << c << "] repeat " << channel.loops);
+         break;
+      case 0x4000: // NOP, LOOP, INT, STOP
+         if(instruction & 0x0001) // LOOP
+         {
+            if(channel->loops > 0)
+            {
+               channel->source_address = channel->loop_address;
+               //LOG_DEBUG("DMA [" << c << "] loop");
+               channel->loops--;
+            }
+         }
+         if(instruction & 0x0010) // INT
+         {
+            channel->interrupt = true;
+            //LOG_DEBUG("DMA [" << c << "] interrupt");
+         }
+         if(instruction & 0x0020) // STOP
+         {
+            channel->enabled = false;
+            //LOG_DEBUG("DMA [" << c << "] stop");
+         }
+         break;
+      //default:
+      //   printf("DMA: Unknown DMA instruction - %04x - at address &%04x\n", instruction, channel->source_address);
+   }
+   channel->source_address += 2;
+}
+
+// TODO: cleaner way to modify back the register value here ...
+void asic_dma_mem(int c)
+{
+   uint8_t dcsr = 0;
+   uint16_t addr;
+   bool dcsr_changed = false;
+
+   t_DMA_channel *channel = &asic.dma.ch[c];
+
+   addr = 0x6C00 + (c << 2);
+   *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t) (channel->source_address & 0xFF);
+   addr++;
+   *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t)((channel->source_address & 0xFF00) >> 8);
+   addr++;
+   *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel->prescaler;
+
+   if (channel->enabled) {
+      dcsr |= (0x1 << c);
+      dcsr_changed = true;
+   }
+   if (channel->interrupt) {
+      dcsr |= (0x40 >> c);
+      dcsr_changed = true;
+   }
+
+   // TODO: ... and here
+   // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong !)
+   if (dcsr_changed) {
+      addr = 0x6C0F;
+      *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
+   }
+}
+
+void asic_dma_cycle()
+{
+   int c;
+   for(c = 0; c < NB_DMA_CHANNELS; c++)
+   {
+      if (asic.dma.ch[c].enabled)
+      {
+         asic_dma_channel(c);
+         asic_dma_mem(c);
       }
    }
 }
