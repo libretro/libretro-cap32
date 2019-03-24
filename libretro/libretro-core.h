@@ -139,6 +139,6 @@ extern int retro_getStyle();
 extern int retro_getGfxBpp();
 extern int retro_getGfxBps();
 extern int retro_getAudioBuffer();
-extern PIXEL_TYPE * retro_getScreenPtr();
+extern unsigned int * retro_getScreenPtr();
 
 #endif

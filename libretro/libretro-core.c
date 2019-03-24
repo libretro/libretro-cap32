@@ -167,8 +167,8 @@ int retro_getAudioBuffer(){
    return audio_buffer_size; // return the closest match as 2^n
 }
 
-PIXEL_TYPE * retro_getScreenPtr(){
-    return video_buffer;
+unsigned int * retro_getScreenPtr(){
+    return (unsigned int *) video_buffer;
 }
 
 #include <ctype.h>

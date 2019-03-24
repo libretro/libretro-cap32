@@ -32,7 +32,7 @@
 //#define DEBUG 1
 //#define DEBUG_CRTC
 //#define DEBUG_CART
-#define DEBUG_ASIC
+//#define DEBUG_ASIC
 //#define DEBUG_FDC
 //#define DEBUG_GA
 //#define DEBUG_NO_VIDEO

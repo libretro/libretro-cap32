@@ -1414,7 +1414,7 @@ void audio_shutdown (void)
 void audio_pause (void) {}
 void audio_resume (void) {}
 
-uint32_t video_monitor_colour (double r, double g, double b)
+unsigned int video_monitor_colour (double r, double g, double b)
 {
    uint32_t red = (uint32_t)(r * (CPC.scr_intensity / 10.0) * 255);
    if (red > 255) /* limit to the maximum */
@@ -1441,7 +1441,7 @@ uint32_t video_monitor_colour (double r, double g, double b)
 #define G_LUMA_COEF  0.100
 #define G_LUMA_PRIM  0.050
 
-uint32_t video_monitor_green(double r, double g, double b) {
+unsigned int video_monitor_green(double r, double g, double b) {
    double green_luma = ((G_LUMA_R * r) + (G_LUMA_G * g) + (G_LUMA_B * b));
    green_luma += (G_LUMA_BASE + G_LUMA_PRIM - (G_LUMA_COEF * green_luma));
 
@@ -1457,7 +1457,7 @@ uint32_t video_monitor_green(double r, double g, double b) {
 #define BN_LUMA_R     0.299
 #define BN_LUMA_G     0.587
 #define BN_LUMA_B     0.144
-uint32_t video_monitor_grey(double r, double g, double b) {
+unsigned int video_monitor_grey(double r, double g, double b) {
    double grey_luma = ((BN_LUMA_R * r) + (BN_LUMA_G * g) + (BN_LUMA_B * b));
    uint32_t grey = (uint32_t) (grey_luma * (CPC.scr_intensity / 10.0) * 255);
 
@@ -1531,7 +1531,7 @@ void video_set_style (void)
       dwXScale = 2;
       dwYScale = 2;
    }
-   printf("model:%u, style: %u, dwScale: %ux%u, offset: %u\n", CPC.model, CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
+   //printf("model:%u, style: %u, dwScale: %ux%u, offset: %u\n", CPC.model, CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
 
    switch (dwXScale)
    {
