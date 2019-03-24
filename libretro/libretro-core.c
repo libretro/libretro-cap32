@@ -167,7 +167,7 @@ int retro_getAudioBuffer(){
    return audio_buffer_size; // return the closest match as 2^n
 }
 
-uint32_t * retro_getScreenPtr(){
+PIXEL_TYPE * retro_getScreenPtr(){
     return video_buffer;
 }
 

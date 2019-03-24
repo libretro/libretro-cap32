@@ -143,7 +143,7 @@ typedef struct {
 
 
 void ev_joysticks();
-void ev_vkeyboard();
+void ev_joy_vkeyboard();
 void ev_init();
 
 #endif
