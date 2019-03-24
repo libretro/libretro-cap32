@@ -59,6 +59,7 @@ typedef struct {
    bool raster_interrupt;
    uint8_t interrupt_vector;
    int irq_cause;
+   int irq_vector;
 } t_asic;
 
 extern t_asic asic;
@@ -68,5 +69,6 @@ void asic_reset();
 void asic_poke_lock_sequence(uint8_t val);
 void asic_dma_cycle();
 bool asic_register_page_write(uint16_t addr, uint8_t val);
+void asic_int(uint8_t val);
 
 #endif

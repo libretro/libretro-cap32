@@ -65,6 +65,8 @@ extern t_GateArray GateArray;
 extern t_CRTC CRTC;
 extern t_CPC CPC;
 extern t_PSG PSG;
+extern t_z80regs z80;
+
 extern uint32_t dwXScale;
 extern uint8_t *membank_config[8][4];
 extern uint8_t *membank_write[4];
@@ -124,6 +126,13 @@ static INLINE uint16_t decode_magnification(uint8_t val) {
    uint8_t mag = (val & 0x3);
    if (mag == 3) mag = 4;
    return mag;
+}
+
+
+// z80 interrupts (mode 0/2) - mode 1 ign
+void asic_int(uint8_t mode)
+{
+   printf("asic int %u\n", mode);
 }
 
 // Use the DMA info to feed PSG from RAM:
@@ -192,6 +201,7 @@ void asic_dma_channel(int c)
          }
          if(instruction & 0x0010) // INT
          {
+            asic.irq_cause = c * 2;
             channel->interrupt = true;
             //LOG_DEBUG("DMA [" << c << "] interrupt");
          }
@@ -259,6 +269,7 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
    if (addr < 0x4000 || addr > 0x7FFF)
       return true;
 
+   //printf("Received write at %x - val: %u\n", addr, (int) val);
    // TODO:double check the writes (more cases with mirroring / write only ?)
    if (addr >= 0x4000 && addr < 0x5000) {
       int id = ((addr & 0xF00) >> 8);
@@ -355,11 +366,19 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
             update_skew(); // update CRTC
             break;
          case 0x6805:
-            // TODO: Write this part !!! (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
-            LOG("Received interrupt vector: %u", (int) val);
+            // TODO: Write this part - Pang (IM 2)
+            // (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
+            asic.irq_vector = (val & 0xf8) + (asic.irq_cause);
+            if(val & 0x01) // asic dma_clear
+            {
+               for (int c = 0; c < NB_DMA_CHANNELS; c++)
+                  asic.dma.ch[c].enabled = 0;
+            }
+            //printf("Received interrupt vector write %02x, data = &%02x\n", asic.irq_vector, (int) val);
       }
    }
    // 0x6806 --- unused
+   // 0x6807 --- unused
    else if (addr >= 0x6808 && addr < 0x6810) {
       LOG("Received analog input stuff %x", addr);
    }
@@ -397,7 +416,12 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
    // 0x6C0F --- DMA control/status register (DCSR)
    else if(addr == 0x6C0F) {
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
-         asic.dma.ch[c].enabled = (val & (0x1 << c));
+         if(val & (0x1 << c)) {
+            asic.irq_cause = 0x06;
+            asic.dma.ch[c].enabled = 1;
+         } else {
+            asic.dma.ch[c].enabled = 0;
+         }
       }
    } else {
       //printf("Received unused write at %x - val: %u\n", addr, (int) val);
