@@ -32,7 +32,7 @@
 //#define DEBUG 1
 //#define DEBUG_CRTC
 //#define DEBUG_CART
-//#define DEBUG_ASIC
+#define DEBUG_ASIC
 //#define DEBUG_FDC
 //#define DEBUG_GA
 //#define DEBUG_NO_VIDEO
@@ -382,19 +382,16 @@ typedef struct
 {
    union
    {
-#ifdef MSB_FIRST
       struct
       {
+         #ifdef MSB_FIRST
          unsigned int high;
          unsigned int low;
-      };
-#else
-      struct
-      {
+         #else
          unsigned int low;
          unsigned int high;
+         #endif
       };
-#endif
       int64_t both;
    } cycle_count;
 
@@ -404,13 +401,61 @@ typedef struct
    union {
       unsigned char Index[16];
       struct {
-         unsigned char TonALo, TonAHi;
-         unsigned char TonBLo, TonBHi;
-         unsigned char TonCLo, TonCHi;
+         union {
+            struct
+            {
+               #ifdef MSB_FIRST
+               uint8_t Hi;
+               uint8_t Lo;
+               #else
+               uint8_t Lo;
+               uint8_t Hi;
+               #endif
+            };
+            uint16_t both;
+         } ToneA;
+         union {
+            struct
+            {
+               #ifdef MSB_FIRST
+               uint8_t Hi;
+               uint8_t Lo;
+               #else
+               uint8_t Lo;
+               uint8_t Hi;
+               #endif
+            };
+            uint16_t both;
+         } ToneB;
+         union {
+            struct
+            {
+               #ifdef MSB_FIRST
+               uint8_t Hi;
+               uint8_t Lo;
+               #else
+               uint8_t Lo;
+               uint8_t Hi;
+               #endif
+            };
+            uint16_t both;
+         } ToneC;
          unsigned char Noise;
          unsigned char Mixer;
          unsigned char AmplitudeA, AmplitudeB, AmplitudeC;
-         unsigned char EnvelopeLo, EnvelopeHi;
+         union {
+            struct
+            {
+               #ifdef MSB_FIRST
+               uint8_t Hi;
+               uint8_t Lo;
+               #else
+               uint8_t Lo;
+               uint8_t Hi;
+               #endif
+            };
+            uint16_t both;
+         } Envelope;
          unsigned char EnvType;
          unsigned char PortA;
          unsigned char PortB;

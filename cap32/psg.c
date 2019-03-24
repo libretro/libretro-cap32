@@ -81,7 +81,6 @@ union {
       uint32_t Hi;
    };
 #endif
-
    int64_t Re;
 } LoopCount;
 int64_t LoopCountInit;
@@ -376,27 +375,38 @@ void SetAYRegister(int Num, uint8_t Value)
 static INLINE void Synthesizer_Logic_Q(void)
 {
    Ton_Counter_A.Hi++;
-   if (Ton_Counter_A.Hi >= *(uint16_t *)&PSG.RegisterAY.TonALo)
+#ifdef MSB_FIRST_PSG
+   if (Ton_Counter_A.Hi >= ((uint16_t) (PSG.RegisterAY.TonALo + (PSG.RegisterAY.TonAHi<<8))))
+#else
+   if (Ton_Counter_A.Hi >= PSG.RegisterAY.ToneA.both)
+#endif
    {
       Ton_Counter_A.Hi = 0;
       Ton_A ^= 1;
    }
 
    Ton_Counter_B.Hi++;
-
-   if (Ton_Counter_B.Hi >= *(uint16_t *)&PSG.RegisterAY.TonBLo)
+#ifdef MSB_FIRST_PSG
+   if (Ton_Counter_B.Hi >= ((uint16_t) (PSG.RegisterAY.TonBLo + (PSG.RegisterAY.TonBHi<<8))))
+#else
+   if (Ton_Counter_B.Hi >= PSG.RegisterAY.ToneB.both)
+#endif
    {
       Ton_Counter_B.Hi = 0;
       Ton_B ^= 1;
    }
 
    Ton_Counter_C.Hi++;
-
-   if (Ton_Counter_C.Hi >= *(uint16_t *)&PSG.RegisterAY.TonCLo)
+#ifdef MSB_FIRST_PSG
+   if (Ton_Counter_C.Hi >= ((uint16_t) (PSG.RegisterAY.TonCLo + (PSG.RegisterAY.TonCHi<<8))))
+#else
+   if (Ton_Counter_C.Hi >= PSG.RegisterAY.ToneC.both)
+#endif
    {
       Ton_Counter_C.Hi = 0;
       Ton_C ^= 1;
    }
+
    Noise_Counter.Hi++;
    if ((!(Noise_Counter.Hi & 1)) && (Noise_Counter.Hi >= (PSG.RegisterAY.Noise << 1)))
    {
@@ -407,7 +417,11 @@ static INLINE void Synthesizer_Logic_Q(void)
    if (!Envelope_Counter.Hi)
       Case_EnvType();
    Envelope_Counter.Hi++;
-   if (Envelope_Counter.Hi >= *(uint16_t *)&PSG.RegisterAY.EnvelopeLo)
+#ifdef MSB_FIRST_PSG
+   if (Envelope_Counter.Hi >= ((uint16_t) (PSG.RegisterAY.EnvelopeLo + (PSG.RegisterAY.EnvelopeHi<<8))))
+#else
+   if (Envelope_Counter.Hi >= PSG.RegisterAY.Envelope.both)
+#endif
       Envelope_Counter.Hi = 0;
 }
 
@@ -422,7 +436,11 @@ static INLINE void Synthesizer_Mixer_Q(void)
    LevR = LevL;
    if (Ton_EnA)
    {
-      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4))
+#ifdef MSB_FIRST_PSG
+      if ((!Envelope_EnA) || (((uint16_t) (PSG.RegisterAY.TonALo + (PSG.RegisterAY.TonAHi<<8))) > 4))
+#else
+      if ((!Envelope_EnA) || ( PSG.RegisterAY.ToneA.both > 4))
+#endif
          k = Ton_A;
       else
          k = 1;
@@ -449,7 +467,11 @@ static INLINE void Synthesizer_Mixer_Q(void)
 
    if (Ton_EnB)
    {
-      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4))
+#ifdef MSB_FIRST_PSG
+      if ((!Envelope_EnB) || (((uint16_t) (PSG.RegisterAY.TonBLo + (PSG.RegisterAY.TonBHi<<8))) > 4))
+#else
+      if ((!Envelope_EnB) || ( PSG.RegisterAY.ToneB.both > 4))
+#endif
          k = Ton_B;
       else
          k = 1;
@@ -476,7 +498,11 @@ static INLINE void Synthesizer_Mixer_Q(void)
 
    if (Ton_EnC)
    {
-      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4))
+#ifdef MSB_FIRST_PSG
+      if ((!Envelope_EnC) || (((uint16_t) (PSG.RegisterAY.TonCLo + (PSG.RegisterAY.TonCHi<<8))) > 4))
+#else
+      if ((!Envelope_EnC) || ( PSG.RegisterAY.ToneC.both > 4))
+#endif
          k = Ton_C;
       else
          k = 1;
@@ -515,25 +541,18 @@ void Synthesizer_Stereo16(void)
       Synthesizer_Mixer_Q();
       Tick_Counter++;
       LoopCount.Hi--;
-   } 
+   }
    LoopCount.Re += LoopCountInit;
-   reg_pair val;  
+   reg_pair val;
 
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
 
-#ifdef MSB_FIRST
-   /* FIXME - sound issues */
-   *(uint16_t *)CPC.snd_bufferptr     = Right_Chan / Tick_Counter;
-   *(uint16_t *)(CPC.snd_bufferptr+2) = Left_Chan / Tick_Counter;
-#else
    *(uint32_t *)CPC.snd_bufferptr = val.d; // write to mixing buffer
-#endif
 
    CPC.snd_bufferptr += 4;
    Left_Chan          = 0;
-   Right_Chan         = Left_Chan;
-
+   Right_Chan         = 0;
    if (CPC.snd_bufferptr >= pbSndBufferEnd)
    {
       CPC.snd_bufferptr = pbSndBuffer;
@@ -581,7 +600,7 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnA)
    {
-      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4))
+      if ((!Envelope_EnA) || ( PSG.RegisterAY.ToneA.both > 4))
          k = Ton_A;
       else
          k = 1;
@@ -602,7 +621,7 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnB)
    {
-      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4))
+      if ((!Envelope_EnB) || ( PSG.RegisterAY.ToneB.both > 4))
          k = Ton_B;
       else
          k = 1;
@@ -623,7 +642,7 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnC)
    {
-      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4))
+      if ((!Envelope_EnC) || ( PSG.RegisterAY.ToneC.both > 4))
          k = Ton_C;
       else
          k = 1;
