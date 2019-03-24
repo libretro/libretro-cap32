@@ -401,61 +401,13 @@ typedef struct
    union {
       unsigned char Index[16];
       struct {
-         union {
-            struct
-            {
-               #ifdef MSB_FIRST
-               uint8_t Hi;
-               uint8_t Lo;
-               #else
-               uint8_t Lo;
-               uint8_t Hi;
-               #endif
-            };
-            uint16_t both;
-         } ToneA;
-         union {
-            struct
-            {
-               #ifdef MSB_FIRST
-               uint8_t Hi;
-               uint8_t Lo;
-               #else
-               uint8_t Lo;
-               uint8_t Hi;
-               #endif
-            };
-            uint16_t both;
-         } ToneB;
-         union {
-            struct
-            {
-               #ifdef MSB_FIRST
-               uint8_t Hi;
-               uint8_t Lo;
-               #else
-               uint8_t Lo;
-               uint8_t Hi;
-               #endif
-            };
-            uint16_t both;
-         } ToneC;
+         unsigned char TonALo, TonAHi;
+         unsigned char TonBLo, TonBHi;
+         unsigned char TonCLo, TonCHi;
          unsigned char Noise;
          unsigned char Mixer;
          unsigned char AmplitudeA, AmplitudeB, AmplitudeC;
-         union {
-            struct
-            {
-               #ifdef MSB_FIRST
-               uint8_t Hi;
-               uint8_t Lo;
-               #else
-               uint8_t Lo;
-               uint8_t Hi;
-               #endif
-            };
-            uint16_t both;
-         } Envelope;
+         unsigned char EnvelopeLo, EnvelopeHi;
          unsigned char EnvType;
          unsigned char PortA;
          unsigned char PortB;
