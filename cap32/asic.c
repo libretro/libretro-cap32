@@ -238,7 +238,7 @@ void asic_dma_mem(int c)
 }
 
 // z80 interrupts (mode 0/2) - mode 1 ign
-// TODO: make a better implementation, just a first step
+// TODO: make a better implementation, just a first step - http://cpctech.cpc-live.com/docs/ints.html
 uint8_t asic_int()
 {
    LOG("asic int - mode 2 cause: %02x", asic.irq_cause);
@@ -307,7 +307,7 @@ bool asic_register_page_read(uint16_t addr, uint8_t* val) {
           *val &= 0x0F;
    }
    // misc registers
-   else if (addr >= 0x06800 && addr < 0x06807) {
+   else if (addr >= 0x06800 && addr <= 0x06807) {
       *val = 0x0B0 + (addr & 0x1); // random - invalid data area
    }
    // analog input stuff
@@ -319,7 +319,7 @@ bool asic_register_page_read(uint16_t addr, uint8_t* val) {
       *val = 0x00;
    }
    // DMA channels and interrupt control
-   else if (addr >= 0x6C00 && addr < 0x06C0F) {
+   else if (addr >= 0x6C00 && addr <= 0x06C0F) {
       *val = asic.dma.dcsr;
    } else {
       *val = asic_ram[addr - ASIC_RAM_INIT];
