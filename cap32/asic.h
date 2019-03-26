@@ -23,7 +23,10 @@
 
 #define ASIC_SPRITES 16
 #define ASIC_SPRITE_SIZE 16
+#define ASIC_LOCK_SIZE 15
 #define NB_DMA_CHANNELS 3
+#define ASIC_RAM_INIT 0x4000
+#define ASIC_RAM_END 0x7FFF
 
 typedef struct {
    uint32_t source_address;
@@ -39,12 +42,16 @@ typedef struct {
 
 typedef struct {
    t_DMA_channel ch[NB_DMA_CHANNELS];
+   uint8_t dcsr;
+   uint8_t clear;
 } t_dma;
 
 typedef struct {
    bool locked;
-   int lockSeqPos;
+   int lock_seq_pos;
+   int lock_prev_data;
 
+   uint8_t rmr2;
    bool extend_border;
    int hscroll;
    int vscroll;
@@ -68,7 +75,8 @@ extern uint8_t *pbRegisterPage;
 void asic_reset();
 void asic_poke_lock_sequence(uint8_t val);
 void asic_dma_cycle();
+bool asic_register_page_read(uint16_t addr, uint8_t* val);
 bool asic_register_page_write(uint16_t addr, uint8_t val);
-void asic_int(uint8_t val);
+uint8_t asic_int();
 
 #endif

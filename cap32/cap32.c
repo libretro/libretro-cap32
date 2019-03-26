@@ -637,14 +637,14 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             break;
          case 2: // set mode
             if (!asic.locked && (val & 0x20)) {
-               // 6128+ RMR2 register
+               asic.rmr2 = val; // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
-                  //printf("Register page on\n");
+                  //printf("Register page on (%x)\n", val);
                   GateArray.registerPageOn = true;
                   membank = 0;
                } else {
-                  //printf("Register page off\n");
+                  //printf("Register page off (%x)\n", val);
                   GateArray.registerPageOn = false;
                }
                GateArray.lower_ROM_bank = membank;

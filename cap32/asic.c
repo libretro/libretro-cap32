@@ -73,66 +73,52 @@ extern uint8_t *membank_write[4];
 
 uint8_t *pbRegisterPage;
 
+uint8_t asic_ram[16384]; // asic full ram
 t_asic asic;
 double asic_colours[32][3];
+const uint8_t asic_lock_data[ASIC_LOCK_SIZE] = { 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd, 0xee };
 
 void asic_reset(){
    memset(&asic, 0, sizeof(asic));
 
    asic.locked = true;
    asic.raster_interrupt = false;
-   asic.interrupt_vector = 1;
+   asic.interrupt_vector = 0x01; // // interrupt vector bit 0 is always 1 on startup.
    asic.irq_cause = 0x06;
+   asic.dma.clear = 1;
+   memset(asic_ram, 0, 16384);
 }
 
 void asic_poke_lock_sequence(uint8_t val) {
-   static const uint8_t lockSeq[] = { 0x00, 0x00, 0xff, 0x77, 0xb3, 0x51, 0xa8, 0xd4, 0x62, 0x39, 0x9c, 0x46, 0x2b, 0x15, 0x8a, 0xcd };
-   static const int lockSeqLength = sizeof(lockSeq)/sizeof(lockSeq[0]);
-   // Lock sequence can only start after a non zero value
-   if (asic.lockSeqPos == 0) {
-      if (val > 0) {
-         asic.lockSeqPos = 1;
+   if(val == 0 && asic.lock_prev_data != 0) {
+      asic.lock_seq_pos = 0;
+   }
+
+   if(val == asic_lock_data[asic.lock_seq_pos]) {
+      asic.lock_seq_pos++;
+      if (asic.lock_seq_pos == (ASIC_LOCK_SIZE - 1) && !asic.locked ) {
+         LOG("ASIC locked at %u", asic.lock_seq_pos);
+         asic.locked = true;
+      }
+      if (asic.lock_seq_pos >= ASIC_LOCK_SIZE) {
+         LOG("ASIC unlocked!! (%u)", asic.lock_seq_pos);
+         asic.locked = false;
       }
    } else {
-      if(asic.lockSeqPos < lockSeqLength) {
-         if (val == lockSeq[asic.lockSeqPos]) {
-            asic.lockSeqPos++;
-         } else {
-            asic.lockSeqPos++;
-            // If the lock sequence is matched except for the last byte, it means lock
-            if (asic.lockSeqPos == lockSeqLength) {
-               LOG("ASIC locked: %u", asic.lockSeqPos);
-               asic.locked = true;
-            }
-            if (val == 0) {
-               asic.lockSeqPos = 2;
-            } else {
-               // We had a non 0, we're now waiting for 0
-               asic.lockSeqPos = 1;
-            }
-         }
-      } else {
-         // Full sequence matched and an additional value was written, it means unlock
-         if (asic.lockSeqPos == lockSeqLength) {
-            LOG("ASIC unlocked!! (%u)", asic.lockSeqPos);
-            asic.locked = false;
-            asic.lockSeqPos = (val == 0) ? -1 : 0;
-         }
+      // ASIC last byte can be any value
+      if (asic.lock_seq_pos == (ASIC_LOCK_SIZE - 1)) {
+         asic.lock_seq_pos++;
+         LOG("ASIC unlocked at %u", asic.lock_seq_pos);
+         asic.locked = false;
       }
    }
+   asic.lock_prev_data = val;
 }
 
 static INLINE uint16_t decode_magnification(uint8_t val) {
    uint8_t mag = (val & 0x3);
    if (mag == 3) mag = 4;
    return mag;
-}
-
-
-// z80 interrupts (mode 0/2) - mode 1 ign
-void asic_int(uint8_t mode)
-{
-   printf("asic int %u\n", mode);
 }
 
 // Use the DMA info to feed PSG from RAM:
@@ -203,6 +189,7 @@ void asic_dma_channel(int c)
          {
             asic.irq_cause = c * 2;
             channel->interrupt = true;
+            asic.dma.dcsr |= (0x40 >> c); // Control and Status register
             //LOG_DEBUG("DMA [" << c << "] interrupt");
          }
          if(instruction & 0x0020) // STOP
@@ -217,7 +204,7 @@ void asic_dma_channel(int c)
    channel->source_address += 2;
 }
 
-// TODO: cleaner way to modify back the register value here ...
+// TODO: remove
 void asic_dma_mem(int c)
 {
    uint8_t dcsr = 0;
@@ -250,6 +237,26 @@ void asic_dma_mem(int c)
    }
 }
 
+// z80 interrupts (mode 0/2) - mode 1 ign
+// TODO: make a better implementation, just a first step
+uint8_t asic_int()
+{
+   LOG("asic int - mode 2 cause: %02x", asic.irq_cause);
+   if( asic.irq_cause != 0x06 && asic.dma.clear & 0x1 ) {
+      LOG("IRQ: Not cleared, IRQ was called by DMA [%i]", asic.irq_cause);
+		asic.dma.dcsr &= ~0x80;  // not a raster interrupt, so this bit is reset
+      return (asic.irq_vector & 0xf8) | asic.irq_cause;
+   }
+   CRTC.hsw_count &= 0x1F;
+   if(asic.irq_cause == 0x06)  // bit 7 is set "if last interrupt acknowledge cycle was caused by a raster interrupt"
+      asic.dma.dcsr |= 0x80;
+   else {
+      asic.dma.dcsr &= ~0x80;
+      asic.dma.dcsr &= (0x40 >> asic.irq_cause/2);
+   }
+   return (asic.irq_vector & 0xf8) | asic.irq_cause;
+}
+
 void asic_dma_cycle()
 {
    int c;
@@ -258,19 +265,78 @@ void asic_dma_cycle()
       if (asic.dma.ch[c].enabled)
       {
          asic_dma_channel(c);
-         asic_dma_mem(c);
+         //asic_dma_mem(c);
       }
    }
+}
+
+// Return true if byte should be read in memory - Run RAM test of testplus.cpr when touching this
+// ASIC register page, from 4000h to 7FFFh is used - http://www.cpctech.org.uk/docs.html
+bool asic_register_page_read(uint16_t addr, uint8_t* val) {
+   if (addr < ASIC_RAM_INIT || addr > ASIC_RAM_END)
+      return true;
+
+   // sprite data at ASIC_RAM_INIT
+   if (addr >= 0x4000 && addr < 0x5000) {
+      *val = asic_ram[addr - ASIC_RAM_INIT] & 0x0F;
+   }
+   // sprite position and magnification information
+   else if (addr >= 0x6000 && addr < 0x6080) {
+      *val = asic_ram[addr - ASIC_RAM_INIT];
+      switch (addr & 0x03) {
+         case 0x03:
+            if ((*val & 0x01) == 0x01) {
+               *val = 0x0ff;
+            } else {
+               *val &= 0x01;
+            }
+            break;
+         case 0x01:
+            if ((*val & 0x03) == 0x03) {
+               *val = 0x0ff;
+            } else {
+               *val &= 0x03;
+            }
+            break;
+      }
+   }
+   // palette data
+   else if (addr >= 0x6400 && addr < 0x6440) {
+      *val = asic_ram[addr - ASIC_RAM_INIT];
+      if (addr & 0x01)
+          *val &= 0x0F;
+   }
+   // misc registers
+   else if (addr >= 0x06800 && addr < 0x06807) {
+      *val = 0x0B0 + (addr & 0x1); // random - invalid data area
+   }
+   // analog input stuff
+   else if (addr >= 0x6808 && addr <= 0x680C) {
+      *val = 0x3F;
+   } else if (addr == 0x680E) {
+      *val = 0x3F;
+   } else if (addr == 0x680D || addr == 0x680F) {
+      *val = 0x00;
+   }
+   // DMA channels and interrupt control
+   else if (addr >= 0x6C00 && addr < 0x06C0F) {
+      *val = asic.dma.dcsr;
+   } else {
+      *val = asic_ram[addr - ASIC_RAM_INIT];
+   }
+   //printf("Received read at %x (%x) - val: %02x\n", addr, addr - ASIC_RAM_INIT, *val);
+   return false;
 }
 
 // Return true if byte should be written in memory
 // ASIC register page, from 4000h to 7FFFh is used
 bool asic_register_page_write(uint16_t addr, uint8_t val) {
-   if (addr < 0x4000 || addr > 0x7FFF)
+   if (addr < ASIC_RAM_INIT || addr > ASIC_RAM_END)
       return true;
 
-   //printf("Received write at %x - val: %u\n", addr, (int) val);
+   //printf("Received write at %x - val: %u\n", addr, val);
    // TODO:double check the writes (more cases with mirroring / write only ?)
+   asic_ram[addr - ASIC_RAM_INIT] = val; // force write values in asic ram - help to test/debug
    if (addr >= 0x4000 && addr < 0x5000) {
       int id = ((addr & 0xF00) >> 8);
       int y = ((addr & 0xF0) >> 4);
@@ -282,7 +348,6 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
       //LOG("Received sprite %u data", id);
    } else if (addr >= 0x5000 && addr < 0x6000) {
       // 0x5000 --- unused
-      return true;
    }
    else if (addr >= 0x6000 && addr < 0x6080) {
       // 6000h    2  N  R/W   X0    Sprite 0 X position
@@ -325,7 +390,6 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
             asic.sprites_mag_x[id] = decode_magnification(val >> 2);
             asic.sprites_mag_y[id] = decode_magnification(val);
             // Write-only: does not affect pbRegisterPage
-            return false;
       }
    }
    // 0x6080 --- unused
@@ -347,7 +411,6 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
       GateArray.palette[colour] = CPC.video_monitor( asic_colours[colour][0],
                                                 asic_colours[colour][1],
                                                 asic_colours[colour][2]);
-      return false;
    }
    // 0x6440 --- unused
    // ASIC - Programmable raster, from 6800h to 6806h
@@ -368,13 +431,10 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
          case 0x6805:
             // TODO: Write this part - Pang (IM 2)
             // (Interrupt service part from http://www.cpcwiki.eu/index.php/Arnold_V_Specs_Revised)
+            asic.interrupt_vector = val;
             asic.irq_vector = (val & 0xf8) + (asic.irq_cause);
-            if(val & 0x01) // asic dma_clear
-            {
-               for (int c = 0; c < NB_DMA_CHANNELS; c++)
-                  asic.dma.ch[c].enabled = 0;
-            }
-            //printf("Received interrupt vector write %02x, data = &%02x\n", asic.irq_vector, (int) val);
+            asic.dma.clear = val & 0x01;
+            LOG("Received interrupt vector write - data = &%02x", asic.interrupt_vector);
       }
    }
    // 0x6806 --- unused
@@ -414,17 +474,36 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
       }
    }
    // 0x6C0F --- DMA control/status register (DCSR)
+   //  bit 7 - raster interrupt
+   //  bit 6 - DMA channel 0 interrupt
+   //  bit 5 - DMA channel 1 interrupt
+   //  bit 4 - DMA channel 2 interrupt
+   //  bit 3 - unused (write 0)
+   //  bit 2 - DMA channel 2 enable
+   //  bit 1 - DMA channel 1 enable
+   //  bit 0 - DMA channel 0 enable
    else if(addr == 0x6C0F) {
+      // DMA channel X enable
       for (int c = 0; c < NB_DMA_CHANNELS; c++) {
          if(val & (0x1 << c)) {
-            asic.irq_cause = 0x06;
             asic.dma.ch[c].enabled = 1;
          } else {
             asic.dma.ch[c].enabled = 0;
          }
       }
+      // DMA channel X interrupt
+      for (int c = 0; c < NB_DMA_CHANNELS; c++) {
+         if(val & (0x1 << (c + 0x4))) {
+            asic.irq_cause = 0x06;
+            asic_ram[addr - ASIC_RAM_INIT] &= ~(0x1 << (c + 0x4));
+            asic.dma.ch[c].interrupt = false;
+            LOG("  DMA %u IRQ acknowledge", c);
+         }
+      }
+      asic.dma.dcsr = (asic.dma.dcsr & 0xf8) | (val & 0x07);
+      //LOG("Received 0x6C0F val: %x", (int) val);
    } else {
       //printf("Received unused write at %x - val: %u\n", addr, (int) val);
    }
-   return true;
+   return false;
 }

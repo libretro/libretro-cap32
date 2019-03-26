@@ -359,6 +359,11 @@ extern uint8_t *membank_read[4], *membank_write[4];
 
 static INLINE uint8_t read_mem(uint16_t addr)
 {
+   if (GateArray.registerPageOn) {
+      uint8_t value;
+      if(!asic_register_page_read(addr, &value))
+         return value;
+   }
    return (*(membank_read[addr >> 14] + (addr & 0x3fff))); // returns a byte from a 16KB memory bank
 }
 
@@ -371,7 +376,11 @@ static INLINE void write_mem(uint16_t addr, uint8_t val)
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
 
-
+static INLINE uint8_t read_ptr(){
+   if(!asic.locked)
+      return asic_int();
+   return 0xFF;
+}
 
 #define z80_wait_states \
 { \
@@ -953,7 +962,7 @@ static INLINE uint8_t SRL(uint8_t val) {
          } \
          write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
          write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
-         addr.b.l = 0xff; /* assemble pointer */ \
+         addr.b.l = read_ptr(); /* assemble pointer */ \
          addr.b.h = _I; \
          z80.PC.b.l = read_mem(addr.w.l); /* retrieve low byte of vector */ \
          z80.PC.b.h = read_mem(addr.w.l+1); /* retrieve high byte of vector */ \
