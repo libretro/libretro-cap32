@@ -40,6 +40,8 @@ extern retro_input_state_t input_state_cb;
 extern retro_environment_t environ_cb;
 
 extern int showkeyb;
+extern bool kbd_runcmd;
+
 extern void kbd_buf_feed(char *s);
 extern void save_bkg();
 extern void play_tape();
@@ -387,12 +389,16 @@ static bool ev_key(int key, bool pressed) {
  * keyboard_cb:
  * Is called by main retro_callback when user press/release a key
  * just convert this event to an emulated event
+ * BUG: generates ghosting release events when "amstrad keyboard" is selected on controls
  **/
 static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
 {
 
    //printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
    //       down ? "yes" : "no", keycode, character, mod);
+
+   if(kbd_runcmd) // FIXME -- send bug to libretro
+      return;
 
    if(ev_key(keycode, down))
       return;
