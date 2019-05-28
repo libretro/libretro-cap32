@@ -242,9 +242,7 @@ extern t_new_dt new_dt;
 uint32_t dwSndMinSafeDist=0, dwSndMaxSafeDist=2*2*882;
 
 uint32_t dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
-uint32_t dwFPS, dwFrameCount;
 uint32_t dwXScale, dwYScale;
-uint32_t dwSndBufferCopied;
 
 uint32_t dwBreakPoint, dwTrace, dwMF2ExitAddr;
 uint32_t dwMF2Flags = 0;
@@ -1526,7 +1524,7 @@ void video_set_style (void)
       dwYScale = 1;
 
    }
-   else                    //768x544
+   else                    //768x272
    {
       dwXScale = 2;
       dwYScale = 1;
