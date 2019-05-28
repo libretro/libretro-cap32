@@ -296,7 +296,7 @@ int kbd_layout[KBD_MAX_ENTRIES][2] = {
     { CPC_QUOTE,      '\'' },
     { CPC_RBRACKET,   ']' },
     { CPC_RCBRACE,    '}' },
-    { CPC_RETURN,     '\n'  }, 
+    { CPC_RETURN,     '\n'  },
     { CPC_RIGHTPAREN, ')' },
     { CPC_RSHIFT,     -30  },
     { CPC_SEMICOLON,  ';' },
@@ -482,8 +482,8 @@ int kbd_layout[KBD_MAX_ENTRIES][2] = {
        0xff,                   // CAP32_SAVE,
        0xff,                   // CAP32_RESET,
        0xff,                   // CAP32_AUTOFIRE
-       0xff,                   // CAP32_INCFIRE 
-       0xff,                   // CAP32_DECFIRE 
+       0xff,                   // CAP32_INCFIRE
+       0xff,                   // CAP32_DECFIRE
        0xff                    // CAP32_SCREEN
   };
 
@@ -514,6 +514,11 @@ void kbd_buf_feed(char *s) {
 	kbd_feedbuf_pos=0;
 	kbd_runcmd=true;
 	//printf("cmd:%s\n",s);
+}
+
+void kbd_buf_clean(){
+   kbd_runcmd=false;
+   memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix));
 }
 
 void kbd_buf_update() {
@@ -552,7 +557,10 @@ void kbd_buf_update() {
 		old=0;
 		kbd_feedbuf_pos++;
 	}
-	else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')kbd_runcmd=false;
+	else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')
+   {
+      kbd_buf_clean();
+   }
 
 }
 
@@ -579,4 +587,3 @@ void vkbd_key(int key,int pressed){
 	}
 
 }
-
