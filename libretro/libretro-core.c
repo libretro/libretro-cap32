@@ -80,13 +80,14 @@ int audio_buffer_size = 0;
 char RPATH[512];
 int pauseg=0; //enter_gui
 
-extern int app_init(int width, int height);
+extern int app_init(void);
 extern int app_free(void);
 extern int app_render(int poll);
 
-int retrow=0;
-int retroh=0;
-int retro_scr_style=3, retro_scr_w=0, retro_scr_h=0;
+extern void app_screen_init(int width, int height);
+extern void app_screen_free(void);
+
+int retro_scr_style=0, retro_scr_w=0, retro_scr_h=0;
 int gfx_buffer_size=0;
 
 #include "vkbd.i"
@@ -431,15 +432,6 @@ void retro_set_environment(retro_environment_t cb)
 		   "Autorun; enabled|disabled",
 	   },
       {
-         "cap32_resolution",
-         #ifdef ANDROID
-         // TODO: removed on android, need debug crash on hires is selected (issue #48)
-         "Internal resolution; 384x272",
-         #else
-         "Internal resolution; 384x272|768x544",
-         #endif
-      },
-      {
          "cap32_model",
          "Model; 6128|464|6128+",
       },
@@ -448,6 +440,15 @@ void retro_set_environment(retro_environment_t cb)
          "Ram size; 128|64|192|512|576",
       },
       #if 0
+      {
+         "cap32_resolution",
+         #ifdef ANDROID
+         // TODO: removed on android, need debug crash on hires is selected (issue #48)
+         "Internal resolution; 384x272",
+         #else
+         "Internal resolution; 384x272|768x272",
+         #endif
+      },
       {
          "cap32_statusbar", // unused - but i try to implement in a future
          "Status Bar; disabled|enabled",
@@ -500,12 +501,12 @@ static int controller_port_variable(unsigned port, struct retro_variable *var)
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, var) && var->value)
    {
       if(strcmp(var->value, "qaop") == 0)
-         return 1;
+         return PADCFG_QAOP;
       if(strcmp(var->value, "incentive") == 0)
-         return 2;
+         return PADCFG_INCENTIVE;
    }
 
-   return 0;
+   return PADCFG_JOYSTICK;
 }
 
 static void update_variables(void)
@@ -523,23 +524,6 @@ static void update_variables(void)
    {
       if (strcmp(var.value, "enabled") == 0)
          autorun = 1;
-   }
-
-   var.key = "cap32_resolution";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      char *pch;
-      char str[100];
-      snprintf(str, sizeof(str), "%s", var.value);
-
-      pch = strtok(str, "x");
-      if (pch)
-         retrow = strtoul(pch, NULL, 0);
-      pch = strtok(NULL, "x");
-      if (pch)
-         retroh = strtoul(pch, NULL, 0);
    }
 
    var.key = "cap32_model";
@@ -963,6 +947,7 @@ void retro_init(void)
 
    // events initialize - joy and keyboard
    ev_init();
+   app_init();
 
 	// Disk control interface
 	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
@@ -976,22 +961,20 @@ void retro_init(void)
 
    update_variables();
 
-   // save screen values from user variables
-   retro_scr_w = retrow;
-   retro_scr_h = retroh;
+   #ifdef LOWRES_3DS
+   retro_scr_w = 384;
+   retro_scr_style = 3;
+   #else
+   retro_scr_w = 768;
+   retro_scr_style = 4;
+   #endif
+   retro_scr_h = 272;
    gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
 
-   if(retrow==384)
-      retro_scr_style = 3;
-   else if(retrow==768)
-      retro_scr_style = 4;
-
+   app_screen_init(retro_scr_w, retro_scr_h);
 
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
-         retrow, retroh, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
-
-   // init screen once
-   app_init(retrow, retroh);
+         retro_scr_w, retro_scr_h, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
 
    Emu_init();
 
@@ -1005,6 +988,7 @@ void retro_deinit(void)
 {
    free_retro_snd();
    app_free();
+   app_screen_free();
 
    Emu_uninit();
 
@@ -1049,11 +1033,14 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   struct retro_game_geometry geom = { retro_scr_w, retro_scr_h, TEX_MAX_WIDTH, TEX_MAX_HEIGHT, 24.0 / 17.0 };
-   struct retro_system_timing timing = { 50.0, 44100.0 };
+   info->geometry.base_width = 384;
+   info->geometry.base_height = 272;
+   info->geometry.max_width = TEX_MAX_WIDTH;
+   info->geometry.max_height = TEX_MAX_HEIGHT;
+   info->geometry.aspect_ratio = 24.0 / 17.0;
 
-   info->geometry = geom;
-   info->timing   = timing;
+   info->timing.fps = 50.0;
+   info->timing.sample_rate = 44100.0;
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -1095,7 +1082,7 @@ void retro_run(void)
    }
    else if (pauseg==1)app_render(1);
 
-   video_cb(video_buffer,retro_scr_w,retro_scr_h,retro_scr_w<<PIXEL_BYTES);
+   video_cb(video_buffer, retro_scr_w, retro_scr_h, retro_scr_w << PIXEL_BYTES);
 
 }
 

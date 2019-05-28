@@ -17,10 +17,16 @@
 #define ID_PLAYER1 0
 #define ID_PLAYER2 1
 
+#define PADCFG_JOYSTICK 0
+#define PADCFG_QAOP 1
+#define PADCFG_INCENTIVE 2
+
+
 extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define TEX_MAX_WIDTH 768
-#define TEX_MAX_HEIGHT 544
+#define TEX_MAX_HEIGHT 272
+//#define LOWRES_3DS 1
 
 
 //AUDIO
@@ -66,7 +72,7 @@ extern PIXEL_TYPE *video_buffer;
     #define RGB2BLUE(colour)      (colour & 0xFF)
 #endif
 
-#define WINDOW_MAX_SIZE (768*544)
+#define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 
 
 

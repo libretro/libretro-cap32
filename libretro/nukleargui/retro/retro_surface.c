@@ -154,18 +154,18 @@ void Retro_FreeSurface(RSDL_Surface *surf )
    if (!surf)
       return;
 
-   printf("free surf format palette color\n");
+   //printf("free surf format palette color\n");
 
    if(surf->format->palette->colors)
       free(surf->format->palette->colors);
 
-   printf("free surf format palette \n");
+   //printf("free surf format palette \n");
    if(surf->format->palette)
       free(surf->format->palette);
-   printf("free surf format  \n");
+   //printf("free surf format  \n");
    if(surf->format)
       free(surf->format);
-   printf("free surf pixel  \n");
+   //printf("free surf pixel  \n");
 
    #ifdef _3DS
    if(surf->pixels)
@@ -179,7 +179,7 @@ void Retro_FreeSurface(RSDL_Surface *surf )
 
 RSDL_Surface *Retro_CreateRGBSurface32( int w,int h, int d, int rm,int rg,int rb,int ra)
 {
-   printf("s(%d,%d,%d) (%x,%x,%x,%x)\n",w,h,d,rm,rg,rb,ra);
+   //printf("s(%d,%d,%d) (%x,%x,%x,%x)\n",w,h,d,rm,rg,rb,ra);
 
    RSDL_Surface *bitmp;
 
@@ -274,7 +274,7 @@ printf("create surface XR8G8B8 libretro\n");
 
 RSDL_Surface *Retro_CreateRGBSurface16( int w,int h, int d, int rm,int rg,int rb,int ra)
 {
-   printf("s(%d,%d,%d) (%x,%x,%x,%x)\n",w,h,d,rm,rg,rb,ra);
+   //printf("s(%d,%d,%d) (%x,%x,%x,%x)\n",w,h,d,rm,rg,rb,ra);
 
    RSDL_Surface *bitmp;
 

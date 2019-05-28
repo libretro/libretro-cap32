@@ -1529,7 +1529,7 @@ void video_set_style (void)
    else                    //768x544
    {
       dwXScale = 2;
-      dwYScale = 2;
+      dwYScale = 1;
    }
    //printf("model:%u, style: %u, dwScale: %ux%u, offset: %u\n", CPC.model, CPC.scr_style, dwXScale, dwYScale, CPC.scr_line_offs);
 
@@ -1587,10 +1587,11 @@ int video_init (void)
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
-   CPC.scr_line_offs = ((CPC.scr_bps * (CPC.scr_style - 2)) // because is double height
-                         / (2 / PIXEL_BYTES) ) ;
 
    video_set_style();
+
+   CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
+                     / (2 / PIXEL_BYTES) ) ;
 
    return 0;
 }
@@ -2281,7 +2282,6 @@ int theloop(void)
    if (iExitCondition == EC_FRAME_COMPLETE)
    {
       /* emulation finished rendering a complete frame? */
-      dwFrameCount++;
       return 0; /* exit retro_loop for retro_run */
    }
    else if (iExitCondition == EC_SOUND_BUFFER)

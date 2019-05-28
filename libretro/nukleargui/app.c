@@ -84,35 +84,45 @@ static nk_retro_Font *RSDL_font;
 /* Forward declarations */
 void app_vkb_handle();
 
-int app_init(int width, int height)
+void app_screen_init(int width, int height)
 {
-    #ifdef M16B
-    screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
-    #else
-    screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);
-    #endif
+   #ifdef M16B
+   screen_surface=Retro_CreateRGBSurface16(width,height,16,0,0,0,0);
+   #else
+   screen_surface=Retro_CreateRGBSurface32(width,height,32,0,0,0,0);
+   #endif
 
-    video_buffer=(PIXEL_TYPE *)screen_surface->pixels;
+   video_buffer=(PIXEL_TYPE *)screen_surface->pixels;
 
+   /* GUI */
+   ctx = nk_retro_init(RSDL_font,screen_surface,width,height);
+
+   /* style.c */
+   /* THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK */
+   set_style(ctx, THEME_DARK);
+
+   //printf("Init nuklear %ux%u\n", width, height);
+}
+
+void app_screen_free()
+{
+   Retro_FreeSurface(screen_surface);
+   if (screen_surface)
+      free(screen_surface);
+   screen_surface = NULL;
+}
+
+int app_init()
+{
     RSDL_font = (nk_retro_Font*)calloc(1, sizeof(nk_retro_Font));
     RSDL_font->width = 4;
     RSDL_font->height = 7;
     if (!RSDL_font)
         return -1;
 
-    /* GUI */
-    ctx = nk_retro_init(RSDL_font,screen_surface,width,height);
-
-    /* style.c */
-    /* THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK */
-    set_style(ctx, THEME_DARK);
-
     /* icons */
-
     filebrowser_init();
     sprintf(LCONTENT,"%s\0",RPATH);
-
-    printf("Init nuklear %ux%u\n", width, height);
 
  return 0;
 }
@@ -125,11 +135,6 @@ int app_free()
    RSDL_font = NULL;
    filebrowser_free();
    nk_retro_shutdown();
-
-   Retro_FreeSurface(screen_surface);
-   if (screen_surface)
-      free(screen_surface);
-   screen_surface = NULL;
 
    return 0;
 }
