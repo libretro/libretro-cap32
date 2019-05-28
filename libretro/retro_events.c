@@ -65,20 +65,20 @@ uint32_t padnum = 0;
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    {
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_SPACE,       // Y
+   CPC_KEY_NULL,        // Y
    CPC_KEY_NULL,        // SELECT
-   CPC_KEY_J,           // START
+   CPC_KEY_NULL,        // START
    CPC_KEY_JOY_UP,      // DUP
    CPC_KEY_JOY_DOWN,    // DDOWN
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_S,           // X
+   CPC_KEY_NULL,        // X
    //---------------------
-   CPC_KEY_RETURN,      // L
-   CPC_KEY_SHIFT,       // R
-   CPC_KEY_CONTROL,     // L2
-   CPC_KEY_COPY,        // R2
+   CPC_KEY_NULL,        // L
+   CPC_KEY_NULL,        // R
+   CPC_KEY_NULL,        // L2
+   CPC_KEY_NULL,        // R2
    },
    {
    CPC_KEY_F1,          // B
@@ -113,7 +113,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
-   }
+   },
 };
 
 // ---------------------------------------------
@@ -292,7 +292,9 @@ static void ev_process_joy(int playerID){
  **/
 void ev_joysticks() {
    // exit on controllers config to RETRO_DEVICE_AMSTRAD_KEYBOARD
-   if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD)
+   // but allows legacy keyboard-remap + joystick-simple combo, issue #63
+   if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD &&
+      retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_JOYSTICK)
          return;
 
    if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
