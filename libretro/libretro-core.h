@@ -26,7 +26,8 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 272
-//#define LOWRES_3DS 1
+//#define LOWRES 1
+#define LOWRES_STR " HI"
 
 
 //AUDIO

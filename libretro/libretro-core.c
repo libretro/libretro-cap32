@@ -961,7 +961,7 @@ void retro_init(void)
 
    update_variables();
 
-   #ifdef LOWRES_3DS
+   #ifdef LOWRES
    retro_scr_w = 384;
    retro_scr_style = 3;
    #else
@@ -1021,10 +1021,13 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
+   #ifdef LOWRES
+   #define LOWRES_STR " LO"
+   #endif
    #ifndef GIT_VERSION
    #define GIT_VERSION ""
    #endif
-   info->library_version  = "4.5" GIT_VERSION;
+   info->library_version  = "4.5" GIT_VERSION LOWRES_STR;
    info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;
