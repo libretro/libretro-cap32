@@ -186,7 +186,7 @@ else ifeq ($(platform), ctr)
 	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DARM11 -D_3DS -DNO_UNALIGNED_ACCESS -DM16B
+	PLATFORM_DEFINES := -DARM11 -D_3DS -DNO_UNALIGNED_ACCESS -DM16B -DLOWRES
 	PLATFORM_DEFINES += -march=armv6k -mtune=mpcore -mfloat-abi=hard
 	PLATFORM_DEFINES += -Wall -mword-relocations
 	PLATFORM_DEFINES += -fomit-frame-pointer -ffast-math
