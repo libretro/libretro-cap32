@@ -292,9 +292,9 @@ else ifeq ($(platform), wincross64)
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
-	CC = gcc
-	CC_AS = gcc
-	CXX = g++
+	CC ?= gcc
+	CC_AS ?= gcc
+	CXX ?= g++
 	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=link.T
 	LIBS += -lshlwapi
 	HAVE_WIN32_MSX_MANAGER = 1
