@@ -31,15 +31,20 @@ Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 
 ### Keyboard Custom Binds
-Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ to customize your retropad keys per game.
+Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ and **User 1/2 config different than joystick** to map your retropad keys per game/rom.
 
-Detailed usage at libretro docs: https://docs.libretro.com/library/caprice32/
+Caprice brings some default keymaps confings, these configs are detailed at libretro docs: https://docs.libretro.com/library/caprice32/
 
 ## Features not covered in docs
 
  * New Model: [cap32_model] (6128|464|6128+)
 
 Choose which Amstrad CPC model to emulate, currently added 6128+
+
+ * New Combo Key: [cap32_combokey] (select|y|b|disabled)
+
+Choose which combo key do you want use and it's ignored from user keymap, if you disabled it, you can remap all joypad buttons.
+
 
 ## M3U and Disk control
 
