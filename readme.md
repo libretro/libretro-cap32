@@ -43,7 +43,7 @@ Choose which Amstrad CPC model to emulate, currently added 6128+
 
  * New Combo Key: [cap32_combokey] (select | y | b | disabled)
 
-Choose which combo key do you want use and it's ignored from user keymap, if you disabled it, you can remap all joypad buttons.
+Choose which combo key do you want use and it's ignored from user keymap. If you set as disabled, all joypad buttons are available for your game remaps.
 
 
 ## M3U and Disk control
