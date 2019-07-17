@@ -27,7 +27,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 272
 //#define LOWRES 1
-#define LOWRES_STR " HI"
+#define SCREENMODE_STR " HI"
 
 
 //AUDIO
@@ -103,6 +103,7 @@ typedef struct {
    int model;
    int ram; /*request only! beware: 6128 enforces minimum!*/
    int lang;
+   uint32_t combokey;
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
 } computer_cfg_t;

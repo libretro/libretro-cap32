@@ -51,8 +51,6 @@ extern void Tape_Rewind(void);
 extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
-static uint32_t combo_last_event = 0;
-
 // --- events code
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
@@ -119,11 +117,11 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
 // ---------------------------------------------
 
 #define MAX_JOY_EVENT 9
-const retro_combo_event_t events_combo[MAX_JOY_EVENT] =
+static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
 {
-   { RETRO_DEVICE_ID_JOYPAD_B,
+   { RETRO_DEVICE_ID_JOYPAD_B,            // if you change this position, update JOY_EVENT_ID_B
       { EVENT_WRITE, "CAT\n", NULL } },
-   { RETRO_DEVICE_ID_JOYPAD_Y,
+   { RETRO_DEVICE_ID_JOYPAD_Y,            // if you change this position, update JOY_EVENT_ID_Y
       { EVENT_WRITE, "|CPM\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_A,
       { EVENT_WRITE, "RUN\"DISK\nRUN\"DISC\n", NULL } },
@@ -242,19 +240,29 @@ static unsigned do_action(const retro_action_t* action)
  *
  * TODO: add an help-screen in emulation screen?
  **/
-static void ev_events_joy()
+static bool ev_events_joy()
 {
-   static unsigned event_last = EVENT_NULL;
+   static unsigned event = EVENT_NULL;
    unsigned n;
+
+   if(!input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, retro_computer_cfg.combokey))
+   {
+      if(event)
+      {
+         event = EVENT_NULL;
+         return true;
+      }
+      return false;
+   }
+
    for(n = 0; n < MAX_JOY_EVENT; n++) {
       if (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, events_combo[n].id)){
-         if(!event_last){
-            event_last = do_action(&events_combo[n].action);
+         if(event == EVENT_NULL){
+            event = do_action(&events_combo[n].action);
          }
-         return;
       }
    }
-   event_last = EVENT_NULL;
+   return true;
 }
 
 /**
@@ -297,11 +305,8 @@ void ev_joysticks() {
       retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_JOYSTICK)
          return;
 
-   if( input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT)) {
-      ev_events_joy();
-   } else {
+   if(!ev_events_joy())
       ev_process_joy(ID_PLAYER1);
-   }
 
    ev_process_joy(ID_PLAYER2);
 }
@@ -309,20 +314,10 @@ void ev_joysticks() {
 /**
  * ev_joy_vkeyboard:
  * joystick logic in GUI_MENU / GUI_VIRTUAL_KEYBOARD
- * WIP: VERY preliminar code - just remove GUI_VIRTUAL_KEYBOARD atm
+ * WIP: VERY preliminar code
  **/
 void ev_joy_vkeyboard(){
-   uint32_t pressed = 0;
-   if ( (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT))
-        && (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START)) ) {
-      BIT_SET(pressed, 3);
-      if(pressed != combo_last_event) {
-         showkeyb=-showkeyb;
-         combo_last_event = pressed;
-      }
-   } else {
-      combo_last_event = 0;
-   }
+   ev_events_joy();
 }
 
 //-----------------------------------------------------
@@ -553,4 +548,19 @@ void ev_init(){
 
    struct retro_keyboard_callback cb = { keyboard_cb };
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
+
+}
+
+void ev_combo_set(unsigned btn)
+{
+   retro_computer_cfg.combokey = btn;
+
+   if (retro_computer_cfg.combokey == RETRO_DEVICE_ID_JOYPAD_Y)
+   {
+      events_combo[JOY_EVENT_ID_Y].id = RETRO_DEVICE_ID_JOYPAD_SELECT;
+   }
+   else if (retro_computer_cfg.combokey == RETRO_DEVICE_ID_JOYPAD_B)
+   {
+      events_combo[JOY_EVENT_ID_B].id = RETRO_DEVICE_ID_JOYPAD_SELECT;
+   }
 }

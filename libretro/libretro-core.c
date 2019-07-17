@@ -427,10 +427,14 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_retrojoy1",
          "User 2 Amstrad Joystick Config; joystick|qaop|incentive|legacy",
       },
-	   {
-		   "cap32_autorun",
-		   "Autorun; enabled|disabled",
-	   },
+      {
+         "cap32_combokey",
+         "Combo Key; select|y|b",
+      },
+      {
+         "cap32_autorun",
+         "Autorun; enabled|disabled",
+      },
       {
          "cap32_model",
          "Model; 6128|464|6128+",
@@ -525,6 +529,20 @@ static void update_variables(void)
       if (strcmp(var.value, "enabled") == 0)
          autorun = 1;
    }
+
+   var.key = "cap32_combokey";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "b") == 0)
+         ev_combo_set(RETRO_DEVICE_ID_JOYPAD_B);
+      else if (strcmp(var.value, "y") == 0)
+         ev_combo_set(RETRO_DEVICE_ID_JOYPAD_Y);
+      else
+         ev_combo_set(RETRO_DEVICE_ID_JOYPAD_SELECT);
+   }
+
 
    var.key = "cap32_model";
    var.value = NULL;
@@ -1022,12 +1040,12 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
    #ifdef LOWRES
-   #define LOWRES_STR " LO"
+   #define SCREENMODE_STR " LO"
    #endif
    #ifndef GIT_VERSION
    #define GIT_VERSION ""
    #endif
-   info->library_version  = "4.5" GIT_VERSION LOWRES_STR;
+   info->library_version  = "4.5" GIT_VERSION SCREENMODE_STR;
    info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;

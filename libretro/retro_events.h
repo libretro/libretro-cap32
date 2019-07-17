@@ -141,9 +141,12 @@ typedef struct {
    retro_action_t action;
 } retro_combo_event_t;
 
+#define JOY_EVENT_ID_B 0
+#define JOY_EVENT_ID_Y 1
 
 void ev_joysticks();
 void ev_joy_vkeyboard();
+void ev_combo_set(unsigned btn);
 void ev_init();
 
 #endif
