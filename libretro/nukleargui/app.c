@@ -294,7 +294,7 @@ void Core_PollEvent()
    if(showkeyb < 0) {
       ev_joysticks();
    } else {
-      ev_joy_vkeyboard();
+      ev_events();
    }
 
 }

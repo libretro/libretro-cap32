@@ -429,7 +429,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_combokey",
-         "Combo Key; select|y|b",
+         "Combo Key; select|y|b|disabled",
       },
       {
          "cap32_autorun",
@@ -539,7 +539,7 @@ static void update_variables(void)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_B);
       else if (strcmp(var.value, "y") == 0)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_Y);
-      else
+      else if (strcmp(var.value, "select") == 0)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_SELECT);
    }
 
