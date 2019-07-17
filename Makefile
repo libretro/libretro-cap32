@@ -221,7 +221,7 @@ else ifeq ($(platform), wiiu)
        CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
        CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
        AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-       COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1
+       COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1
        COMMONFLAGS += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
        STATIC_LINKING = 1
        PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
