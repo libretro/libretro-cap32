@@ -235,7 +235,7 @@ else ifeq ($(platform), wii)
 	CC_AS = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES += -DGEKKO -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float
+	PLATFORM_DEFINES += -DGEKKO -DHW_RVL -DLOWRES -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	MSB_FIRST = 1
