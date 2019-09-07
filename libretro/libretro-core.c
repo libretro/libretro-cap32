@@ -421,11 +421,11 @@ void retro_set_environment(retro_environment_t cb)
    struct retro_variable variables[] = {
       {
          "cap32_retrojoy0",
-         "User 1 Amstrad Joystick Config; joystick|qaop|incentive|legacy",
+         "User 1 Amstrad Joystick Config; joystick|qaop|incentive",
       },
       {
          "cap32_retrojoy1",
-         "User 2 Amstrad Joystick Config; joystick|qaop|incentive|legacy",
+         "User 2 Amstrad Joystick Config; joystick|qaop|incentive",
       },
       {
          "cap32_combokey",

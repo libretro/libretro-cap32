@@ -61,24 +61,24 @@ unsigned int last_input[PORTS_NUMBER] = {0,0};
 uint32_t padnum = 0;
 
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
-   {
+   { // JOYSTICK CFG
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_NULL,        // Y
+   CPC_KEY_SPACE,       // Y
    CPC_KEY_NULL,        // SELECT
-   CPC_KEY_NULL,        // START
+   CPC_KEY_J,           // START
    CPC_KEY_JOY_UP,      // DUP
    CPC_KEY_JOY_DOWN,    // DDOWN
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_NULL,        // X
+   CPC_KEY_S,           // X
    //---------------------
-   CPC_KEY_NULL,        // L
-   CPC_KEY_NULL,        // R
+   CPC_KEY_CONTROL,     // L
+   CPC_KEY_INTRO,       // R
    CPC_KEY_NULL,        // L2
-   CPC_KEY_NULL,        // R2
+   CPC_KEY_COPY,        // R2
    },
-   {
+   { // KEYBOARD CFG ( QAOP )
    CPC_KEY_F1,          // B
    CPC_KEY_F2,          // Y
    CPC_KEY_NULL,        // SELECT
@@ -90,12 +90,12 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_SPACE,       // A
    CPC_KEY_H,           // X
    //---------------------
-   CPC_KEY_RETURN,      // L
-   CPC_KEY_SHIFT,       // R
-   CPC_KEY_CONTROL,     // L2
+   CPC_KEY_CONTROL,     // L
+   CPC_KEY_INTRO,       // R
+   CPC_KEY_NULL,        // L2
    CPC_KEY_COPY,        // R2
    },
-   {
+   { // KEYBOARD CFG ( INCENTIVE )
    CPC_KEY_SPACE,       // B
    CPC_KEY_W,           // Y
    CPC_KEY_NULL,        // SELECT
@@ -111,7 +111,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
-   },
+   }
 };
 
 // ---------------------------------------------
