@@ -310,6 +310,9 @@ static void ev_process_joy(int playerID){
  * function to unify event code, call joy events and get user pad data
  **/
 void ev_joysticks() {
+   // you cannot use key-remap on player two, force read it
+   ev_process_joy(ID_PLAYER2);
+
    // exit on controllers config to RETRO_DEVICE_AMSTRAD_KEYBOARD
    // but allows legacy keyboard-remap + joystick-simple combo, issue #63
    if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD &&
@@ -318,8 +321,6 @@ void ev_joysticks() {
 
    if(!ev_events())
       ev_process_joy(ID_PLAYER1);
-
-   ev_process_joy(ID_PLAYER2);
 }
 
 //-----------------------------------------------------
