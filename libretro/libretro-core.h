@@ -20,7 +20,7 @@
 #define PADCFG_JOYSTICK 0
 #define PADCFG_QAOP 1
 #define PADCFG_INCENTIVE 2
-
+#define PADCFG_JOYSTICK_2 3
 
 extern unsigned amstrad_devices[ PORTS_NUMBER ];
 

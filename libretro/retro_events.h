@@ -77,6 +77,7 @@ enum emu_key_id {
    CPC_KEY_N                      = 0x56,
    CPC_KEY_SPACE                  = 0x57,
    /* line 6, bit 0..bit 7 */ //48=
+   /* Joystick 2 using Y-CABLE */
    CPC_KEY_6                      = 0x60,
    CPC_KEY_5                      = 0x61,
    CPC_KEY_R                      = 0x62,
@@ -112,6 +113,14 @@ enum emu_key_id {
    CPC_KEY_JOY_FIRE2              = 0x95,
    CPC_KEY_SPARE                  = 0x96,
    CPC_KEY_DEL                    = 0x97,
+   /* Joystick 2 using Y-CABLE */
+   CPC_KEY_JOY2_UP                = 0x60,
+   CPC_KEY_JOY2_DOWN              = 0x61,
+   CPC_KEY_JOY2_LEFT              = 0x62,
+   CPC_KEY_JOY2_RIGHT             = 0x63,
+   CPC_KEY_JOY2_FIRE1             = 0x64,
+   CPC_KEY_JOY2_FIRE2             = 0x65,
+   CPC_KEY_JOY2_FIRE3             = 0x66, // just DIY JOYSTICK
    /* no key press */
    CPC_KEY_NULL                   = 0xFF
 };

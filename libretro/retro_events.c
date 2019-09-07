@@ -54,7 +54,7 @@ const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 // --- events code
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
-#define MAX_PADCFG 3
+#define MAX_PADCFG 4
 
 static uint8_t keyboard_translation[MAX_KEYSYMS];
 unsigned int last_input[PORTS_NUMBER] = {0,0};
@@ -75,7 +75,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R
-   CPC_KEY_NULL,        // L2
+   CPC_KEY_9,           // L2
    CPC_KEY_COPY,        // R2
    },
    { // KEYBOARD CFG ( QAOP )
@@ -92,7 +92,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R
-   CPC_KEY_NULL,        // L2
+   CPC_KEY_8,           // L2
    CPC_KEY_COPY,        // R2
    },
    { // KEYBOARD CFG ( INCENTIVE )
@@ -111,7 +111,24 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
-   }
+   },
+   { // JOYSTICK PLAYER 2 CFG
+   CPC_KEY_JOY2_FIRE2,  // B
+   CPC_KEY_SPACE,       // Y
+   CPC_KEY_NULL,        // SELECT
+   CPC_KEY_NULL,        // START
+   CPC_KEY_JOY2_UP,     // DUP
+   CPC_KEY_JOY2_DOWN,   // DDOWN
+   CPC_KEY_JOY2_LEFT,   // DLEFT
+   CPC_KEY_JOY2_RIGHT,  // DRIGHT
+   CPC_KEY_JOY2_FIRE1,  // A
+   CPC_KEY_NULL,        // X
+   //---------------------
+   CPC_KEY_NULL,        // L
+   CPC_KEY_NULL,        // R
+   CPC_KEY_NULL,        // L2
+   CPC_KEY_NULL,        // R2
+   },
 };
 
 // ---------------------------------------------
