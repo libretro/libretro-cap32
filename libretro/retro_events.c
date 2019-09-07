@@ -63,42 +63,42 @@ uint32_t padnum = 0;
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    { // JOYSTICK CFG
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_SPACE,       // Y
+   CPC_KEY_NULL,        // Y
    CPC_KEY_NULL,        // SELECT
-   CPC_KEY_J,           // START
+   CPC_KEY_NULL,        // START
    CPC_KEY_JOY_UP,      // DUP
    CPC_KEY_JOY_DOWN,    // DDOWN
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_S,           // X
+   CPC_KEY_NULL,        // X
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R
-   CPC_KEY_9,           // L2
-   CPC_KEY_COPY,        // R2
+   CPC_KEY_F1,          // L2
+   CPC_KEY_F2,          // R2
    },
    { // KEYBOARD CFG ( QAOP )
-   CPC_KEY_F1,          // B
-   CPC_KEY_F2,          // Y
-   CPC_KEY_NULL,        // SELECT
+   CPC_KEY_B,           // B
+   CPC_KEY_Y,           // Y
+   CPC_KEY_S,           // SELECT
    CPC_KEY_K,           // START
    CPC_KEY_Q,           // DUP
    CPC_KEY_A,           // DDOWN
    CPC_KEY_O,           // DLEFT
    CPC_KEY_P,           // DRIGHT
    CPC_KEY_SPACE,       // A
-   CPC_KEY_H,           // X
+   CPC_KEY_N,           // X
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R
-   CPC_KEY_8,           // L2
-   CPC_KEY_COPY,        // R2
+   CPC_KEY_F1,          // L2
+   CPC_KEY_F2,          // R2
    },
    { // KEYBOARD CFG ( INCENTIVE )
    CPC_KEY_SPACE,       // B
    CPC_KEY_W,           // Y
-   CPC_KEY_NULL,        // SELECT
+   CPC_KEY_S,           // SELECT
    CPC_KEY_F,           // START
    CPC_KEY_CURSOR_UP,   // DUP
    CPC_KEY_CURSOR_DOWN, // DDOWN
@@ -115,14 +115,14 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    { // JOYSTICK PLAYER 2 CFG
    CPC_KEY_JOY2_FIRE2,  // B
    CPC_KEY_SPACE,       // Y
-   CPC_KEY_NULL,        // SELECT
-   CPC_KEY_NULL,        // START
+   CPC_KEY_S,           // SELECT
+   CPC_KEY_J,           // START
    CPC_KEY_JOY2_UP,     // DUP
    CPC_KEY_JOY2_DOWN,   // DDOWN
    CPC_KEY_JOY2_LEFT,   // DLEFT
    CPC_KEY_JOY2_RIGHT,  // DRIGHT
    CPC_KEY_JOY2_FIRE1,  // A
-   CPC_KEY_NULL,        // X
+   CPC_KEY_X,           // X
    //---------------------
    CPC_KEY_NULL,        // L
    CPC_KEY_NULL,        // R
