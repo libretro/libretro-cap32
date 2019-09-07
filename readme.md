@@ -45,6 +45,54 @@ Choose which Amstrad CPC model to emulate, currently added 6128+
 
 Choose which combo key do you want use and it's ignored from user keymap. If you set as disabled, all joypad buttons are available for your game remaps.
 
+ * New QAOP MAP: 
+```
+   CPC_KEY_SPACE,       // BUTTON A
+   CPC_KEY_B,           // BUTTON B
+   CPC_KEY_N,           // BUTTON X
+   CPC_KEY_Y,           // BUTTON Y
+   CPC_KEY_S,           // SELECT
+   CPC_KEY_K,           // START
+   CPC_KEY_Q,           // PAD UP
+   CPC_KEY_A,           // PAD DOWN
+   CPC_KEY_O,           // PAD LEFT
+   CPC_KEY_P,           // PAD RIGHT
+```
+
+* Simplified JOYSTICK MAP: BUTTON Y, X, SELECT, START - not binded to any key to allow you customize on CONTROLS menu.
+```
+   CPC_KEY_JOY_FIRE1,   // BUTTON A
+   CPC_KEY_JOY_FIRE2,   // BUTTON B
+   UNUSED,              // BUTTON X
+   UNUSED,              // BUTTON Y
+   UNUSED,              // SELECT
+   UNUSED,              // START
+   CPC_KEY_JOY_UP,      // PAD UP
+   CPC_KEY_JOY_DOWN,    // PAD DOWN
+   CPC_KEY_JOY_LEFT,    // PAD LEFT
+   CPC_KEY_JOY_RIGHT,   // PAD RIGHT
+```
+ * New joystick on port_2: 
+```
+   CPC_KEY_JOY2_FIRE1,  // BUTTON A
+   CPC_KEY_JOY2_FIRE2,  // BUTTON B
+   CPC_KEY_X,           // BUTTON X
+   CPC_KEY_SPACE,       // BUTTON Y
+   CPC_KEY_S,           // SELECT
+   CPC_KEY_J,           // START
+   CPC_KEY_JOY2_UP,     // PAD UP
+   CPC_KEY_JOY2_DOWN,   // PAD DOWN
+   CPC_KEY_JOY2_LEFT,   // PAD LEFT
+   CPC_KEY_JOY2_RIGHT,  // PAD RIGHT
+```
+
+ * L/R L2/R2 changed to allow more combos:
+```
+   CPC_KEY_CONTROL,     // BUTTON L
+   CPC_KEY_INTRO,       // BUTTON R
+   CPC_KEY_F1,          // L2
+   CPC_KEY_F2,          // R2
+```
 
 ## M3U and Disk control
 
