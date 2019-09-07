@@ -59,7 +59,7 @@ Choose which combo key do you want use and it's ignored from user keymap. If you
    CPC_KEY_P,           // PAD RIGHT
 ```
 
-* Simplified JOYSTICK MAP: BUTTON Y, X, SELECT, START - not binded to any key to allow you customize on CONTROLS menu.
+* Simplified JOYSTICK MAP: BUTTON Y, X, SELECT, START - not binded to any key to allow customize on CONTROLS menu.
 ```
    CPC_KEY_JOY_FIRE1,   // BUTTON A
    CPC_KEY_JOY_FIRE2,   // BUTTON B
