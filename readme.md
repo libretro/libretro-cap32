@@ -45,7 +45,9 @@ Choose which Amstrad CPC model to emulate, currently added 6128+
 
 Choose which combo key do you want use and it's ignored from user keymap. If you set as disabled, all joypad buttons are available for your game remaps.
 
- * New QAOP MAP: 
+### New Remaps
+
+ * QAOP MAP changed to: 
 ```
    CPC_KEY_SPACE,       // BUTTON A
    CPC_KEY_B,           // BUTTON B
