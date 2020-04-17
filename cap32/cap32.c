@@ -177,7 +177,6 @@ int theloop(void);
 int capmain (int argc, char **argv);
 void retro_audio_mix();
 void mixsnd (void);
-long GetTicks(void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
@@ -241,7 +240,7 @@ extern t_new_dt new_dt;
 //video_plugin* vid_plugin;
 uint32_t dwSndMinSafeDist=0, dwSndMaxSafeDist=2*2*882;
 
-uint32_t dwTicks, dwTicksOffset, dwTicksTarget, dwTicksTargetFPS;
+uint32_t dwTicks, dwTicksOffset;
 uint32_t dwXScale, dwYScale;
 
 uint32_t dwBreakPoint, dwTrace, dwMF2ExitAddr;
@@ -2327,9 +2326,6 @@ int capmain (int argc, char **argv)
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
 
    dwTicksOffset     = (int)(FRAME_PERIOD_MS / (double)(CPC.speed/CPC_BASE_FREQUENCY_MHZ));
-   dwTicksTarget     = GetTicks();
-   dwTicksTargetFPS  = dwTicksTarget;
-   dwTicksTarget    += dwTicksOffset;
 
    iExitCondition    = EC_FRAME_COMPLETE;
    bolDone           = false;
