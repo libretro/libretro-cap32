@@ -164,7 +164,7 @@
 
 #include <zlib.h>
 
-#ifdef __CELLOS_LV2__
+#if defined (__CELLOS_LV2__) && !defined(__PSL1GHT__)
 #define tmpnam(a)
 #endif
 
