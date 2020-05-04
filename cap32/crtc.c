@@ -797,11 +797,7 @@ void frame_finished(void)
 
 void prerender_border(void)
 {
-   register uint32_t dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-  *(RendPos + 2) = dwVal;
-   *(RendPos + 3) = dwVal;
+   memset(RendPos, 0x10, sizeof(*RendPos) * 4);
    RendPos += 4;
 }
 
@@ -809,9 +805,7 @@ void prerender_border(void)
 
 void prerender_border_half(void)
 {
-   register uint32_t dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
+   memset(RendPos, 0x10, sizeof(*RendPos) * 2);
    RendPos += 2;
 }
 
