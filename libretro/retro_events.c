@@ -59,6 +59,7 @@ const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 static uint8_t keyboard_translation[MAX_KEYSYMS];
 unsigned int last_input[PORTS_NUMBER] = {0,0};
 uint32_t padnum = 0;
+bool (*ev_events)(void);
 
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    { // JOYSTICK CFG
