@@ -38,7 +38,6 @@ retro_log_printf_t log_cb;
 computer_cfg_t retro_computer_cfg;
 
 extern int showkeyb;
-extern int Core_PollEvent(void);
 
 extern int retro_disk_auto();
 extern void change_model(int val);
