@@ -158,4 +158,6 @@ extern bool (*ev_events)(void);
 void ev_combo_set(unsigned btn);
 void ev_init();
 
+void Core_PollEvent(void);
+
 #endif
