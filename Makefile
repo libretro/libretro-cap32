@@ -128,7 +128,8 @@ else ifeq ($(platform), qnx)
 	CC_AS = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
 	AR = QCC -Vgcc_ntoarmv7le
-	PLATFORM_DEFINES := -D__BLACKBERRY_QNX__ -fexceptions -marm -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=softfp
+	PLATFORM_DEFINES := -fexceptions -marm -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=softfp
+	CFLAGS += -std=c99 -D_POSIX_C_SOURCE
 
 # PS3
 else ifeq ($(platform), ps3)
