@@ -328,11 +328,13 @@ ifeq ($(DEBUG), 1)
 	CXXFLAGS += -O0 -g
 else ifeq ($(platform), emscripten)
 	CFLAGS += -O2
-	CXXFLAGS += -O2 -fno-exceptions -fno-rtti -DHAVE_STDINT_H
+	CXXFLAGS += -O2
 else
 	CFLAGS += -O3
-	CXXFLAGS += -O3 -fno-exceptions -fno-rtti -DHAVE_STDINT_H
+	CXXFLAGS += -O3
 endif
+
+CXXFLAGS += -fno-exceptions -fno-rtti -DHAVE_STDINT_H
 
 ifeq ($(LOG_PERFORMANCE), 1)
 	CFLAGS += -DLOG_PERFORMANCE
