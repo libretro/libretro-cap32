@@ -141,7 +141,6 @@ else ifeq ($(platform), ps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__ -Iutils/zlib
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # sncps3
 else ifeq ($(platform), sncps3)
@@ -153,7 +152,6 @@ else ifeq ($(platform), sncps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Lightweight PS3 Homebrew SDK
 else ifeq ($(platform), psl1ght)
@@ -165,7 +163,6 @@ else ifeq ($(platform), psl1ght)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__ -D__PSL1GHT__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # PSP
 else ifeq ($(platform), psp1)
@@ -180,7 +177,6 @@ else ifeq ($(platform), psp1)
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	EXTRA_INCLUDES := -I$(shell psp-config --pspsdk-path)/include
-	MSB_FIRST = 1
 
 # Vita
 else ifeq ($(platform), vita)
@@ -224,7 +220,6 @@ else ifeq ($(platform), ngc)
 	PLATFORM_DEFINES += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Nintendo Wii U
 else ifeq ($(platform), wiiu)
@@ -237,7 +232,6 @@ else ifeq ($(platform), wiiu)
        STATIC_LINKING = 1
        PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
        HAVE_COMPAT = 1
-       MSB_FIRST = 1
 
 # Nintendo Wii
 else ifeq ($(platform), wii)
@@ -249,7 +243,6 @@ else ifeq ($(platform), wii)
 	PLATFORM_DEFINES += -DGEKKO -DHW_RVL -DLOWRES -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
@@ -317,10 +310,6 @@ CAP32_DIR := $(CORE_DIR)/cap32
 
 ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
-endif
-
-ifeq ($(MSB_FIRST), 1)
-	PLATFORM_DEFINES += -DMSB_FIRST
 endif
 
 ifeq ($(DEBUG), 1)

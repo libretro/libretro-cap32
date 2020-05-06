@@ -37,6 +37,7 @@
 */
 
 #include <math.h>
+#include <retro_endianness.h>
 
 #include "cap32.h"
 #include "crtc.h"
@@ -516,18 +517,10 @@ void update_skew(void)
       CRTC.hstart++;
 }
 
-#ifdef MSB_FIRST
 static INLINE unsigned Swap32(unsigned x)
 {
-   unsigned result = ((x << 24)|((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00)| (x >> 24));
-   return result;
+   return retro_le_to_cpu32(x);
 }
-#else
-static INLINE unsigned Swap32(unsigned x)
-{
-   return x;
-}
-#endif
 
 static INLINE void change_mode(void)
 {

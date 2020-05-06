@@ -43,6 +43,7 @@
 */
 
 #include <math.h>
+#include <retro_endianness.h>
 
 #include "cap32.h"
 #include "z80.h"
