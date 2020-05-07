@@ -27,6 +27,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <retro_endianness.h>
+
 //RETRO HACK
 //TODO ENDIANNESS
 //#define DEBUG 1

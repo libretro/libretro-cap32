@@ -20,6 +20,7 @@
 
 #include <libretro.h>
 #include <libretro-core.h>
+#include <retro_endianness.h>
 
 #include "retro_snd.h"
 
