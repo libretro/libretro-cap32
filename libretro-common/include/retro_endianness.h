@@ -31,38 +31,47 @@
 #define SWAP16 _byteswap_ushort
 #define SWAP32 _byteswap_ulong
 #else
-#define SWAP16(x) ((uint16_t)(                  \
-         (((uint16_t)(x) & 0x00ff) << 8)      | \
-         (((uint16_t)(x) & 0xff00) >> 8)        \
-          ))
-#define SWAP32(x) ((uint32_t)(           \
-         (((uint32_t)(x) & 0x000000ff) << 24) | \
-         (((uint32_t)(x) & 0x0000ff00) <<  8) | \
-         (((uint32_t)(x) & 0x00ff0000) >>  8) | \
-         (((uint32_t)(x) & 0xff000000) >> 24)   \
-         ))
+static INLINE uint16_t SWAP16(uint16_t x)
+{
+  return ((x & 0x00ff) << 8) |
+         ((x & 0xff00) >> 8);
+}
+
+static INLINE uint32_t SWAP32(uint32_t x)
+{
+  return ((x & 0x000000ff) << 24) |
+         ((x & 0x0000ff00) <<  8) |
+         ((x & 0x00ff0000) >>  8) |
+         ((x & 0xff000000) >> 24);
+}
+
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER <= 1200
-#define SWAP64(val)                                             \
-	((((uint64_t)(val) & 0x00000000000000ff) << 56)      \
-	 | (((uint64_t)(val) & 0x000000000000ff00) << 40)    \
-	 | (((uint64_t)(val) & 0x0000000000ff0000) << 24)    \
-	 | (((uint64_t)(val) & 0x00000000ff000000) << 8)     \
-	 | (((uint64_t)(val) & 0x000000ff00000000) >> 8)     \
-	 | (((uint64_t)(val) & 0x0000ff0000000000) >> 24)    \
-	 | (((uint64_t)(val) & 0x00ff000000000000) >> 40)    \
-	 | (((uint64_t)(val) & 0xff00000000000000) >> 56))
+static INLINE uint64_t SWAP64(uint64_t val)
+{
+  return
+      ((val & 0x00000000000000ff) << 56)
+    | ((val & 0x000000000000ff00) << 40)
+    | ((val & 0x0000000000ff0000) << 24)
+    | ((val & 0x00000000ff000000) << 8)
+    | ((val & 0x000000ff00000000) >> 8)
+    | ((val & 0x0000ff0000000000) >> 24)
+    | ((val & 0x00ff000000000000) >> 40)
+    | ((val & 0xff00000000000000) >> 56);
+}
 #else
-#define SWAP64(val)                                             \
-	((((uint64_t)(val) & 0x00000000000000ffULL) << 56)      \
-	 | (((uint64_t)(val) & 0x000000000000ff00ULL) << 40)    \
-	 | (((uint64_t)(val) & 0x0000000000ff0000ULL) << 24)    \
-	 | (((uint64_t)(val) & 0x00000000ff000000ULL) << 8)     \
-	 | (((uint64_t)(val) & 0x000000ff00000000ULL) >> 8)     \
-	 | (((uint64_t)(val) & 0x0000ff0000000000ULL) >> 24)    \
-	 | (((uint64_t)(val) & 0x00ff000000000000ULL) >> 40)    \
-	 | (((uint64_t)(val) & 0xff00000000000000ULL) >> 56))
+static INLINE uint64_t SWAP64(uint64_t val)
+{
+  return   ((val & 0x00000000000000ffULL) << 56)
+	 | ((val & 0x000000000000ff00ULL) << 40)
+	 | ((val & 0x0000000000ff0000ULL) << 24)
+	 | ((val & 0x00000000ff000000ULL) << 8)
+	 | ((val & 0x000000ff00000000ULL) >> 8)
+	 | ((val & 0x0000ff0000000000ULL) >> 24)
+	 | ((val & 0x00ff000000000000ULL) >> 40)
+         | ((val & 0xff00000000000000ULL) >> 56);
+}
 #endif
 
 
@@ -73,30 +82,26 @@
 #endif
 
 #ifdef _MSC_VER
-#  include <winsock2.h>
-#  include <sys/param.h>
+#include <winsock2.h>
 #endif
 
-#if defined (BYTE_ORDER) && defined (BIG_ENDIAN) && defined (LITTLE_ENDIAN)
-#  if BYTE_ORDER == BIG_ENDIAN
-#    define MSB_FIRST 1
-#  elif BYTE_ORDER == LITTLE_ENDIAN
-#    define LSB_FIRST 1
-#  else
-#    error "Invalid endianness macros"
-#  endif
-#elif defined (__BYTE_ORDER__) && defined (__ORDER_BIG_ENDIAN__) && defined (__ORDER_LITTLE_ENDIAN__)
-#  if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#    define MSB_FIRST 1
-#  elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#    define LSB_FIRST 1
-#  else
-#    error "Invalid endianness macros"
-#  endif
-#elif defined (__i386__) || defined(__x86_64__)
-#  define LSB_FIRST 1
+#ifdef _MSC_VER
+#if _M_IX86 || _M_AMD64 || _M_ARM || _M_ARM64
+#define LSB_FIRST 1
+#elif _M_PPC
+#define MSB_FIRST 1
 #else
-#  error "Unknown platform"
+/* MSVC can run on _M_ALPHA and _M_IA64 too, but they're both bi-endian; need to find what mode MSVC runs them at */
+#error "unknown platform, can't determine endianness"
+#endif
+#else
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define MSB_FIRST 1
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LSB_FIRST 1
+#else
+#error "Invalid endianness macros"
+#endif
 #endif
 
 #if defined(MSB_FIRST) && defined(LSB_FIRST)
@@ -110,9 +115,13 @@
 #ifdef MSB_FIRST
 #  define RETRO_IS_BIG_ENDIAN 1
 #  define RETRO_IS_LITTLE_ENDIAN 0
+/* For compatibility */
+#  define WORDS_BIGENDIAN 1
 #else
 #  define RETRO_IS_BIG_ENDIAN 0
 #  define RETRO_IS_LITTLE_ENDIAN 1
+/* For compatibility */
+#  undef WORDS_BIGENDIAN
 #endif
 
 
@@ -381,7 +390,7 @@ static INLINE uint32_t load32be(const uint32_t *addr)
 #define retro_be_to_cpu64(val) swap_if_little64(val)
 
 #ifdef  __GNUC__
-/* This attribute means that the same memory may be refferred through
+/* This attribute means that the same memory may be referred through
    pointers to different size of the object (aliasing). E.g. that u8 *
    and u32 * may actually be pointing to the same object.  */
 #define MAY_ALIAS  __attribute__((__may_alias__))
