@@ -17,16 +17,22 @@
  */
 
 #include <sys/stat.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "retro_utils.h"
 
 // Verify if file exists
 bool file_exists(const char *filename)
 {
    struct stat buf;
+#ifdef VITA
+	if (path_is_valid(filename) && !path_is_directory(filename))
+#else
    if (stat(filename, &buf) == 0 &&
       (buf.st_mode & (S_IRUSR|S_IWUSR)) && !(buf.st_mode & S_IFDIR))
+#endif
    {
       /* file points to user readable regular file */
       return true;
@@ -39,6 +45,17 @@ void path_join(char* out, const char* basedir, const char* filename)
    snprintf(out, RETRO_PATH_MAX, "%s%s%s", basedir, RETRO_PATH_SEPARATOR, filename);
 }
 
+char* path_join_dup(const char* basedir, const char* filename)
+{
+   size_t dirlen = strlen(basedir);
+   size_t seplen = strlen(RETRO_PATH_SEPARATOR);
+   size_t filelen = strlen(filename);
+   char* result = (char*)malloc(dirlen + seplen + filelen + 1);
+   strcpy(result, basedir);
+   strcpy(result + dirlen, RETRO_PATH_SEPARATOR);
+   strcpy(result + dirlen + seplen, filename);
+   return result;
+}
 
 /**
  * D_Skywalk: Imported from my 3DS pituka implementation

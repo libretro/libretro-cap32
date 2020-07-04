@@ -25,12 +25,22 @@
 // Disk control structure and functions
 #define DC_MAX_SIZE 20
 
+enum dc_image_type {
+   DC_IMAGE_TYPE_NONE = 0,
+   DC_IMAGE_TYPE_FLOPPY,
+   DC_IMAGE_TYPE_TAPE,
+   DC_IMAGE_TYPE_UNKNOWN
+};
+
 struct dc_storage{
-	char* command;
-	char* files[DC_MAX_SIZE];
-	unsigned count;
-	int index;
-	bool eject_state;
+   char* command;
+   char* files[DC_MAX_SIZE];
+   char* names[DC_MAX_SIZE];
+   enum dc_image_type types[DC_MAX_SIZE];
+   unsigned unit;
+   unsigned count;
+   int index;
+   bool eject_state;
 };
 
 typedef struct dc_storage dc_storage;
@@ -38,5 +48,9 @@ dc_storage* dc_create(void);
 void dc_parse_m3u(dc_storage* dc, const char* m3u_file);
 bool dc_add_file(dc_storage* dc, const char* filename);
 void dc_free(dc_storage* dc);
+void dc_reset(dc_storage* dc);
+bool dc_replace_file(dc_storage* dc, int index, const char* filename);
+bool dc_remove_file(dc_storage* dc, int index);
+enum dc_image_type dc_get_image_type(const char* filename);
 
 #endif

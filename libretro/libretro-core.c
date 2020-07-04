@@ -684,22 +684,83 @@ void retro_reset(void)
 //*****************************************************************************
 //*****************************************************************************
 // Disk control
-static bool disk_set_eject_state(bool ejected)
+
+static int get_image_unit()
+{
+   int unit = dc->unit;
+   if (dc->index < dc->count)
+   {
+      if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_TAPE)
+         dc->unit = DC_IMAGE_TYPE_TAPE;
+      else if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_FLOPPY)
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+      else
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+   }
+   else
+      unit = DC_IMAGE_TYPE_FLOPPY;
+
+   return unit;
+}
+
+static void retro_insert_image()
+{
+   if(dc->unit == DC_IMAGE_TYPE_TAPE)
+   {
+      int error = tape_insert ((char *) dc->files[dc->index]);
+      if (!error)
+      {
+         kbd_buf_feed("|TAPE\nRUN\"\n^");
+         LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
+      }
+      else
+      {
+         LOGI("Tape Error (%d): %s\n", error, dc->files[dc->index]);
+      }
+   }
+   else
+   {
+      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      attach_disk((char *)dc->files[dc->index],0);
+   }
+}
+
+static bool retro_set_eject_state(bool ejected)
 {
    if (dc)
    {
-      dc->eject_state = ejected;
+      int unit = get_image_unit();
 
-      if(dc->eject_state)
-         detach_disk(0);
-      else
-         attach_disk((char *)dc->files[dc->index],0);
+      if (dc->eject_state == ejected)
+         return true;
+      
+      if (ejected && dc->index <= dc->count && dc->files[dc->index] != NULL)
+      {
+         if (unit == DC_IMAGE_TYPE_TAPE)
+         {
+            tape_eject();
+            LOGI("Tape (%d/%d) ejected %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+         }
+         else
+         {
+            detach_disk(0);
+            LOGI("Disk (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+         }
+      }
+      else if (!ejected && dc->index < dc->count && dc->files[dc->index] != NULL)
+      {
+         retro_insert_image();
+      }
+
+      dc->eject_state = ejected;
+      return true;
    }
 
-   return true;
+   return false;
 }
 
-static bool disk_get_eject_state(void)
+/* Gets current eject state. The initial state is 'not ejected'. */
+static bool retro_get_eject_state(void)
 {
    if (dc)
       return dc->eject_state;
@@ -707,7 +768,7 @@ static bool disk_get_eject_state(void)
    return true;
 }
 
-static unsigned disk_get_image_index(void)
+static unsigned retro_get_image_index(void)
 {
    if (dc)
       return dc->index;
@@ -715,20 +776,25 @@ static unsigned disk_get_image_index(void)
    return 0;
 }
 
-static bool disk_set_image_index(unsigned index)
+/* Sets image index. Can only be called when disk is ejected.
+ * The implementation supports setting "no disk" by using an
+ * index >= get_num_images().
+ */
+static bool retro_set_image_index(unsigned index)
 {
-   // Insert disk
+   // Insert image
    if (dc)
    {
-      // Same disk...
-      // This can mess things in the emu
-      if(index == dc->index)
-         return true;
-
-      if ((index < dc->count) && (dc->files[index]))
+      if (index <= dc->count)
       {
          dc->index = index;
-         log_cb(RETRO_LOG_INFO, "Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+
+         if ((index < dc->count) && (dc->files[index]))
+         {
+            int unit = get_image_unit();
+            LOGI("Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
+         }
+
          return true;
       }
    }
@@ -736,7 +802,7 @@ static bool disk_set_image_index(unsigned index)
    return false;
 }
 
-static unsigned disk_get_num_images(void)
+static unsigned retro_get_num_images(void)
 {
    if (dc)
       return dc->count;
@@ -744,28 +810,120 @@ static unsigned disk_get_num_images(void)
    return 0;
 }
 
-static bool disk_replace_image_index(unsigned index, const struct retro_game_info *info)
+/* Replaces the disk image associated with index.
+ * Arguments to pass in info have same requirements as retro_load_game().
+ * Virtual disk tray must be ejected when calling this.
+ *
+ * Replacing a disk image with info = NULL will remove the disk image
+ * from the internal list.
+ * As a result, calls to get_image_index() can change.
+ *
+ * E.g. replace_image_index(1, NULL), and previous get_image_index()
+ * returned 4 before.
+ * Index 1 will be removed, and the new index is 3.
+ */
+static bool retro_replace_image_index(unsigned index, const struct retro_game_info *info)
 {
-   // Not implemented
-   // No many infos on this in the libretro doc...
+if (dc)
+    {
+        if (info != NULL)
+        {
+            //dc_replace_file(dc, index, info->path);
+            LOGI("Unimplemented disk_control_replace (%d): %s\n", index, dc->files[dc->index]);
+            return false;
+        }
+        else
+        {
+            dc_remove_file(dc, index);
+        }
+        return true;
+    }
+
+    return false;	
+    
+}
+
+/* Adds a new valid index (get_num_images()) to the internal disk list.
+ * This will increment subsequent return values from get_num_images() by 1.
+ * This image index cannot be used until a disk image has been set
+ * with replace_image_index. */
+static bool retro_add_image_index(void)
+{
+   if (dc)
+   {
+      if (dc->count <= DC_MAX_SIZE)
+      {
+         dc->files[dc->count] = NULL;
+         dc->names[dc->count] = NULL;
+         dc->count++;
+         return true;
+      }
+   }
+
    return false;
 }
 
-static bool disk_add_image_index(void)
+static bool retro_get_image_path(unsigned index, char *path, size_t len)
 {
-   // Not implemented
-   // No many infos on this in the libretro doc...
+   if (len < 1)
+      return false;
+
+   if (dc)
+   {
+      if (index < dc->count)
+      {
+         if (!string_is_empty(dc->files[index]))
+         {
+            strlcpy(path, dc->files[index], len);
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+static bool retro_get_image_label(unsigned index, char *label, size_t len)
+{
+   if (len < 1)
+      return false;
+
+   if (dc)
+   {
+      if (index < dc->count)
+      {
+         if (!string_is_empty(dc->names[index]))
+         {
+            strlcpy(label, dc->names[index], len);
+            return true;
+         }
+      }
+   }
+
    return false;
 }
 
 static struct retro_disk_control_callback disk_interface = {
-   disk_set_eject_state,
-   disk_get_eject_state,
-   disk_get_image_index,
-   disk_set_image_index,
-   disk_get_num_images,
-   disk_replace_image_index,
-   disk_add_image_index,
+   retro_set_eject_state,
+   retro_get_eject_state,
+   retro_get_image_index,
+   retro_set_image_index,
+   retro_get_num_images,
+   retro_replace_image_index,
+   retro_add_image_index,
+};
+
+static struct retro_disk_control_ext_callback diskControlExt = {
+   retro_set_eject_state,
+   retro_get_eject_state,
+   retro_get_image_index,
+   retro_set_image_index,
+   retro_get_num_images,
+   retro_replace_image_index,
+   retro_add_image_index,
+   NULL, // set_initial_image
+   retro_get_image_path,
+   retro_get_image_label,
 };
 
 //*****************************************************************************
@@ -809,11 +967,10 @@ void computer_load_file() {
             log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
          }
 
-         // Init first disk
-         dc->index = 0;
+         // Init first image
          dc->eject_state = false;
-         LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-         attach_disk((char *)dc->files[dc->index],0);
+         dc->index = 0;
+         retro_insert_image();
 
          // If command was specified
          if(dc->command)
@@ -825,7 +982,7 @@ void computer_load_file() {
             kbd_buf_feed(command);
             free(command);
          }
-         else
+         else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
          {
             // Autoplay
             retro_disk_auto();
@@ -959,7 +1116,11 @@ void retro_init(void)
    app_init();
 
    // Disk control interface
-   environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
+   unsigned dci_version = 0;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_DISK_CONTROL_INTERFACE_VERSION, &dci_version) && (dci_version >= 1))
+      environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE, &diskControlExt);
+   else
+      environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
 
    // prepare shared variables
    retro_computer_cfg.model = -1;

@@ -35,6 +35,7 @@
 #endif
 
 void path_join(char* out, const char* basedir, const char* filename);
+char* path_join_dup(const char* basedir, const char* filename);
 bool file_exists(const char *filename);
 
 void *retro_malloc(size_t size);

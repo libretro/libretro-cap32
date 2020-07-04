@@ -6,8 +6,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <stdbool.h>
+
+#include "string/stdstring.h"
+#include "file/file_path.h"
 
 // DEVICE AMSTRAD
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
