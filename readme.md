@@ -96,9 +96,9 @@ Choose which combo key do you want use and it's ignored from user keymap. If you
    CPC_KEY_F2,          // R2
 ```
 
-## M3U and Disk control
+## M3U and Disk/Tape control
 
-When you have a multi disk game, you can use a m3u file to specify each disk of the game and change them from the RetroArch Disk control interface.
+When you have a multi game image, you can use a m3u file to specify each disk or tape of the game and change them from the RetroArch Disk control interface.
 
 A M3U file is a simple text file with one disk per line (see https://en.wikipedia.org/wiki/M3U).
 
