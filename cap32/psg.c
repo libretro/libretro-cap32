@@ -43,6 +43,7 @@
 */
 
 #include <math.h>
+#include <retro_endianness.h>
 
 #include "cap32.h"
 #include "z80.h"
@@ -601,7 +602,8 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnA)
    {
-      if ((!Envelope_EnA) || (*(uint16_t *)&PSG.RegisterAY.TonALo > 4))
+      if ((!Envelope_EnA) || (PSG.RegisterAY.TonALo > 4 ||
+			      PSG.RegisterAY.TonAHi > 0))
          k = Ton_A;
       else
          k = 1;
@@ -622,7 +624,8 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnB)
    {
-      if ((!Envelope_EnB) || (*(uint16_t *)&PSG.RegisterAY.TonBLo > 4))
+      if ((!Envelope_EnB) || (PSG.RegisterAY.TonBLo > 4 ||
+			      PSG.RegisterAY.TonBHi > 0))
          k = Ton_B;
       else
          k = 1;
@@ -643,7 +646,8 @@ static INLINE void Synthesizer_Mixer_Q_Mono(void)
 
    if (Ton_EnC)
    {
-      if ((!Envelope_EnC) || (*(uint16_t *)&PSG.RegisterAY.TonCLo > 4))
+      if ((!Envelope_EnC) || (PSG.RegisterAY.TonCLo > 4 ||
+			      PSG.RegisterAY.TonCHi > 0))
          k = Ton_C;
       else
          k = 1;

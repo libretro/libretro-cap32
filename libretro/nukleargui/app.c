@@ -21,8 +21,6 @@ extern void play_tape();
 extern void Screen_SetFullUpdate(int scr);
 extern void vkbd_key(int key,int pressed);
 
-extern long GetTicks(void);
-
 extern retro_input_poll_t input_poll_cb;
 extern retro_input_state_t input_state_cb;
 

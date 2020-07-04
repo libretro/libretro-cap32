@@ -154,8 +154,10 @@ typedef struct {
 #define JOY_EVENT_ID_Y 1
 
 void ev_joysticks();
-bool (*ev_events)(void);
+extern bool (*ev_events)(void);
 void ev_combo_set(unsigned btn);
 void ev_init();
+
+void Core_PollEvent(void);
 
 #endif

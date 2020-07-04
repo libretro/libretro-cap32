@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <retro_endianness.h>
 
 /* The number of elements in a table */
 #define RSDL_TABLESIZE(table)	(sizeof(table)/sizeof(table[0]))

@@ -128,7 +128,8 @@ else ifeq ($(platform), qnx)
 	CC_AS = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
 	AR = QCC -Vgcc_ntoarmv7le
-	PLATFORM_DEFINES := -D__BLACKBERRY_QNX__ -fexceptions -marm -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=softfp
+	PLATFORM_DEFINES := -fexceptions -marm -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=softfp
+	CFLAGS += -std=c99 -D_POSIX_C_SOURCE
 
 # PS3
 else ifeq ($(platform), ps3)
@@ -140,7 +141,6 @@ else ifeq ($(platform), ps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__ -Iutils/zlib
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # sncps3
 else ifeq ($(platform), sncps3)
@@ -152,7 +152,6 @@ else ifeq ($(platform), sncps3)
 	PLATFORM_DEFINES := -D__CELLOS_LV2__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Lightweight PS3 Homebrew SDK
 else ifeq ($(platform), psl1ght)
@@ -161,10 +160,9 @@ else ifeq ($(platform), psl1ght)
 	CC_AS = $(PS3DEV)/ppu/bin/ppu-gcc$(EXE_EXT)
 	CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
 	AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -D__CELLOS_LV2__
+	PLATFORM_DEFINES := -D__CELLOS_LV2__ -D__PSL1GHT__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # PSP
 else ifeq ($(platform), psp1)
@@ -179,7 +177,6 @@ else ifeq ($(platform), psp1)
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 	EXTRA_INCLUDES := -I$(shell psp-config --pspsdk-path)/include
-	MSB_FIRST = 1
 
 # Vita
 else ifeq ($(platform), vita)
@@ -223,7 +220,6 @@ else ifeq ($(platform), ngc)
 	PLATFORM_DEFINES += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Nintendo Wii U
 else ifeq ($(platform), wiiu)
@@ -231,12 +227,10 @@ else ifeq ($(platform), wiiu)
        CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
        CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
        AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-       COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -DWORDS_BIGENDIAN=1
-       COMMONFLAGS += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
+       COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float
        STATIC_LINKING = 1
        PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
        HAVE_COMPAT = 1
-       MSB_FIRST = 1
 
 # Nintendo Wii
 else ifeq ($(platform), wii)
@@ -248,7 +242,6 @@ else ifeq ($(platform), wii)
 	PLATFORM_DEFINES += -DGEKKO -DHW_RVL -DLOWRES -mrvl -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
-	MSB_FIRST = 1
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
@@ -318,20 +311,18 @@ ifeq ($(HAVE_COMPAT), 1)
 	PLATFORM_DEFINES += -DHAVE_COMPAT
 endif
 
-ifeq ($(MSB_FIRST), 1)
-	PLATFORM_DEFINES += -DMSB_FIRST
-endif
-
 ifeq ($(DEBUG), 1)
 	CFLAGS += -O0 -g
 	CXXFLAGS += -O0 -g
 else ifeq ($(platform), emscripten)
 	CFLAGS += -O2
-	CXXFLAGS += -O2 -fno-exceptions -fno-rtti -DHAVE_STDINT_H
+	CXXFLAGS += -O2
 else
 	CFLAGS += -O3
-	CXXFLAGS += -O3 -fno-exceptions -fno-rtti -DHAVE_STDINT_H
+	CXXFLAGS += -O3
 endif
+
+CXXFLAGS += -fno-exceptions -fno-rtti -DHAVE_STDINT_H
 
 ifeq ($(LOG_PERFORMANCE), 1)
 	CFLAGS += -DLOG_PERFORMANCE

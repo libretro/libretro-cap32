@@ -20,6 +20,7 @@
 #define Z80_H
 
 #include <stdint.h>
+#include <retro_endianness.h>
 
 #ifdef __cplusplus 
 extern "C" {

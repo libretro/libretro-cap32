@@ -37,6 +37,7 @@
 */
 
 #include <math.h>
+#include <retro_endianness.h>
 
 #include "cap32.h"
 #include "crtc.h"
@@ -516,19 +517,6 @@ void update_skew(void)
       CRTC.hstart++;
 }
 
-#ifdef MSB_FIRST
-static INLINE unsigned Swap32(unsigned x)
-{
-   unsigned result = ((x << 24)|((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00)| (x >> 24));
-   return result;
-}
-#else
-static INLINE unsigned Swap32(unsigned x)
-{
-   return x;
-}
-#endif
-
 static INLINE void change_mode(void)
 {
    if (CRTC.flag_hadhsync) { // have we had an HSYNC on this scan line?
@@ -797,11 +785,7 @@ void frame_finished(void)
 
 void prerender_border(void)
 {
-   register uint32_t dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
-  *(RendPos + 2) = dwVal;
-   *(RendPos + 3) = dwVal;
+   memset(RendPos, 0x10, sizeof(*RendPos) * 4);
    RendPos += 4;
 }
 
@@ -809,9 +793,7 @@ void prerender_border(void)
 
 void prerender_border_half(void)
 {
-   register uint32_t dwVal = 0x10101010;
-   *RendPos = dwVal;
-   *(RendPos + 1) = dwVal;
+   memset(RendPos, 0x10, sizeof(*RendPos) * 2);
    RendPos += 2;
 }
 
@@ -884,6 +866,7 @@ void prerender_normal(void)
  * uses PrData as temp buffer
  *
  * TODO: need a BIG ENDIAN version
+ * TODO: need alignment-safe version
  *
  * b(0x01000000, 0x00000001, 0x00010100, shift:0)=[0x00010100]
  * b(0x01000000, 0x00000001, 0x00010100, shift:1)=[0x01010000]
@@ -945,6 +928,20 @@ void prerender_normal_plus(void)
       uint8_t c2 = get_sprite_asic(offset++);
       uint8_t c3 = get_sprite_asic(offset++);
       uint8_t c4 = get_sprite_asic(offset++);
+#if RETRO_IS_BIG_ENDIAN
+      if (c1) {
+         *RendPos = ((*RendPos) & 0x00FFFFFF) | (c1 << 24);
+      }
+      if (c2) {
+         *RendPos = ((*RendPos) & 0xFF00FFFF) | (c2 << 16);
+      }
+      if (c3) {
+         *RendPos = ((*RendPos) & 0xFFFF00FF) | (c3 << 8);
+      }
+      if (c4) {
+         *RendPos = ((*RendPos) & 0xFFFFFF00) | c4;
+      }
+#else
       if (c4) {
          *RendPos = ((*RendPos) & 0x00FFFFFF) | (c4 << 24);
       }
@@ -957,6 +954,7 @@ void prerender_normal_plus(void)
       if (c1) {
          *RendPos = ((*RendPos) & 0xFFFFFF00) | c1;
       }
+#endif
       RendPos++;
    }
 }
@@ -985,15 +983,11 @@ void prerender_normal_half_plus(void)
       PrData[4] = PrData[2] = *(ModeMap + *bVidMem );
       PrData[5] = *(ModeMap + *(bVidMem + 1) );
       *(RendPos) = shift_scroll_pixel(2, byteShift);
-      *(RendPos) = Swap32(shift_scroll_pixel(2, byteShift));
       *(RendPos + 1) = shift_scroll_pixel(5, byteShift);
-      *(RendPos + 1) = Swap32(shift_scroll_pixel(5, byteShift));
    }
    else {
       *RendPos = *(ModeMap + (*bVidMem));
-      *RendPos = Swap32(*RendPos);
       *(RendPos + 1) = *(ModeMap + (*(bVidMem + 1)) );
-      *(RendPos + 1) = Swap32(*(RendPos + 1));
    }
 
    uint16_t i, offset = 0;
@@ -1002,6 +996,20 @@ void prerender_normal_half_plus(void)
       uint8_t c2 = get_sprite_asic(offset++);
       uint8_t c3 = get_sprite_asic(offset++);
       uint8_t c4 = get_sprite_asic(offset++);
+#if RETRO_IS_BIG_ENDIAN
+      if (c1) {
+         *RendPos = ((*RendPos) & 0x00FFFFFF) | (c1 << 24);
+      }
+      if (c2) {
+         *RendPos = ((*RendPos) & 0xFF00FFFF) | (c2 << 16);
+      }
+      if (c3) {
+         *RendPos = ((*RendPos) & 0xFFFF00FF) | (c3 << 8);
+      }
+      if (c4) {
+         *RendPos = ((*RendPos) & 0xFFFFFF00) | c4;
+      }
+#else
       if (c4) {
          *RendPos = ((*RendPos) & 0x00FFFFFF) | (c4 << 24);
       }
@@ -1014,6 +1022,7 @@ void prerender_normal_half_plus(void)
       if (c1) {
          *RendPos = ((*RendPos) & 0xFFFFFF00) | c1;
       }
+#endif
       RendPos++;
    }
 }
@@ -1022,10 +1031,8 @@ void prerender_normal_half(void)
 {
    uint8_t bVidMem = *(pbRAM + CRTC.next_address);
    *RendPos = *(ModeMap + bVidMem);
-   *RendPos = Swap32(*RendPos);
    bVidMem = *(pbRAM + CRTC.next_address+1);
    *(RendPos + 1) = *(ModeMap + bVidMem);
-   *(RendPos + 1) = Swap32(*(RendPos + 1));
    RendPos += 2;
 }
 
@@ -1373,6 +1380,26 @@ void crtc_cycle(int repeat_count)
 void crtc_init(void)
 {
    unsigned l;
+
+#if RETRO_IS_BIG_ENDIAN
+   static int byte_swapped = 0;
+   if (!byte_swapped) {
+     int j;
+     byte_swapped = 1;
+     for (j = 0; j < 0x200; j++) {
+	 M0Map[j] = retro_cpu_to_le32(M0Map[j]);
+	 M1Map[j] = retro_cpu_to_le32(M1Map[j]);
+	 M2Map[j] = retro_cpu_to_le32(M2Map[j]);
+	 M3Map[j] = retro_cpu_to_le32(M3Map[j]);
+     }
+     for (j = 0; j < 0x100; j++) {
+	 M0hMap[j] = retro_cpu_to_le32(M0hMap[j]);
+	 M1hMap[j] = retro_cpu_to_le32(M1hMap[j]);
+	 M2hMap[j] = retro_cpu_to_le32(M2hMap[j]);
+	 M3hMap[j] = retro_cpu_to_le32(M3hMap[j]);
+     }
+   }
+#endif
 
    if (dwXScale == 1)
    {

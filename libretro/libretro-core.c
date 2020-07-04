@@ -18,7 +18,7 @@ char DISKB_NAME[512]="\0";
 char cart_name[512]="\0";
 
 //TIME
-#ifdef __CELLOS_LV2__
+#if defined (__CELLOS_LV2__) && !defined(__PSL1GHT__)
 #include "sys/sys_time.h"
 #include "sys/timer.h"
 #define usleep  sys_timer_usleep
@@ -38,7 +38,6 @@ retro_log_printf_t log_cb;
 computer_cfg_t retro_computer_cfg;
 
 extern int showkeyb;
-extern int Core_PollEvent(void);
 
 extern int retro_disk_auto();
 extern void change_model(int val);
@@ -296,38 +295,6 @@ void parse_cmdline(const char *argv)
             continue; /* either still IN_WORD or we handled the end above */
       }
    }
-}
-
-long GetTicks(void)
-{ // in MSec
-#ifndef _ANDROID_
-
-#ifdef __CELLOS_LV2__
-
-   //#warning "GetTick PS3\n"
-
-   unsigned long	ticks_micro;
-   uint64_t secs;
-   uint64_t nsecs;
-
-   sys_time_get_current_time(&secs, &nsecs);
-   ticks_micro =  secs * 1000000UL + (nsecs / 1000);
-
-   return ticks_micro;///1000;
-#else
-   struct timeval tv;
-   gettimeofday (&tv, NULL);
-   return (tv.tv_sec*1000000 + tv.tv_usec);///1000;
-
-#endif
-
-#else
-
-   struct timespec now;
-   clock_gettime(CLOCK_MONOTONIC, &now);
-   return (now.tv_sec*1000000 + now.tv_nsec/1000);///1000;
-#endif
-
 }
 
 int HandleExtension(char *path,char *ext)
