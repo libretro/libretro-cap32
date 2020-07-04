@@ -241,15 +241,15 @@ int pre_main(const char *argv)
 
 void parse_cmdline(const char *argv)
 {
-	char *p,*p2,*start_of_word;
-	int c,c2;
-	static char buffer[512*4];
-	enum states { DULL, IN_WORD, IN_STRING } state = DULL;
+   char *p,*p2,*start_of_word;
+   int c,c2;
+   static char buffer[512*4];
+   enum states { DULL, IN_WORD, IN_STRING } state = DULL;
 
-	strcpy(buffer,argv);
-	strcat(buffer," \0");
+   strcpy(buffer,argv);
+   strcat(buffer," \0");
 
-	for (p = buffer; *p != '\0'; p++)
+   for (p = buffer; *p != '\0'; p++)
    {
       c = (unsigned char) *p; /* convert to unsigned char for is* functions */
       switch (state)
@@ -332,12 +332,12 @@ void enter_options(void) {}
 
 void save_bkg()
 {
-	memcpy(save_Screen,video_buffer,gfx_buffer_size);
+   memcpy(save_Screen,video_buffer,gfx_buffer_size);
 }
 
 void restore_bgk()
 {
-	memcpy(video_buffer,save_Screen,gfx_buffer_size);
+   memcpy(video_buffer,save_Screen,gfx_buffer_size);
 }
 
 void Screen_SetFullUpdate(int scr)
@@ -368,19 +368,21 @@ void retro_set_environment(retro_environment_t cb)
    cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, &allow_no_game);
 
    static const struct retro_controller_description p1_controllers[] = {
-     { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-     { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+      { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+      { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+      { "None", RETRO_DEVICE_NONE },
    };
    static const struct retro_controller_description p2_controllers[] = {
-     { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-     { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+      { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+      { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+      { "None", RETRO_DEVICE_NONE },
    };
 
 
    static const struct retro_controller_info ports[] = {
-     { p1_controllers, 2  }, // port 1
-     { p2_controllers, 2  }, // port 2
-     { NULL, 0 }
+      { p1_controllers, 2  }, // port 1
+      { p2_controllers, 2  }, // port 2
+      { NULL, 0 }
    };
 
    environ_cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
@@ -408,7 +410,15 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_ram",
-         "Ram size; 128|64|192|512|576",
+         "Advanced > Ram size; 128|64|192|512|576",
+      },
+      {
+         "cap32_advanced_green_phosphor",
+         "Advanced > Green Phosphor blueish; 15|20|30|5|10",
+      },
+      {
+         "cap32_scr_intensity",
+         "Advanced > Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
       },
       #if 0
       {
@@ -428,10 +438,6 @@ void retro_set_environment(retro_environment_t cb)
       {
          "cap32_scr_tube",
          "Monitor Type; color|green|white",
-      },
-      {
-         "cap32_scr_intensity",
-         "Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
       },
       {
          "cap32_lang_layout",
@@ -456,20 +462,20 @@ void retro_set_environment(retro_environment_t cb)
  **/
 static int controller_port_variable(unsigned port, struct retro_variable *var)
 {
-	if ((!environ_cb) || port >= PORTS_NUMBER)
-		return 0;
+   if ((!environ_cb) || port >= PORTS_NUMBER)
+      return 0;
 
-	var->value = NULL;
-	switch (port) {
-   	case ID_PLAYER1:
-   		var->key = "cap32_retrojoy0";
-   		break;
-   	case ID_PLAYER2:
-   		var->key = "cap32_retrojoy1";
-   		break;
-   	}
+   var->value = NULL;
+   switch (port) {
+      case ID_PLAYER1:
+         var->key = "cap32_retrojoy0";
+         break;
+      case ID_PLAYER2:
+         var->key = "cap32_retrojoy1";
+         break;
+      }
 
-	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, var) && var->value)
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, var) && var->value)
    {
       if(strcmp(var->value, "qaop") == 0)
          return PADCFG_QAOP;
@@ -555,10 +561,10 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-		if (strcmp(var.value, "enabled") == 0)
+      if (strcmp(var.value, "enabled") == 0)
          BIT_ADD(gui_status, GUI_STATUSBAR);
 
-		if (strcmp(var.value, "disabled") == 0)
+      if (strcmp(var.value, "disabled") == 0)
          BIT_CLEAR(gui_status, GUI_STATUSBAR);
 
          //TODO: call update status
@@ -574,7 +580,7 @@ static void update_variables(void)
             CPC.scr_tube = CPC_MONITOR_COLOR;
             video_set_palette();
          }
-   		else if (strcmp(var.value, "green") == 0){
+      else if (strcmp(var.value, "green") == 0){
             CPC.scr_tube = CPC_MONITOR_GREEN;
             video_set_palette();
          }
@@ -582,7 +588,23 @@ static void update_variables(void)
             CPC.scr_tube = CPC_MONITOR_WHITE;
             video_set_palette();
          }
-		}
+      }
+   }
+
+   var.key = "cap32_advanced_green_phosphor";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      char str[100];
+      int val;
+      snprintf(str, sizeof(str), "%s", var.value);
+      val = strtoul(str, NULL, 0);
+
+      if(emu_status & COMPUTER_READY) {
+         CPC.scr_phosphor_intensity = val;
+         video_set_palette();
+      }
    }
 
    var.key = "cap32_scr_intensity";
@@ -642,21 +664,21 @@ void Emu_uninit()
       retro_free(audio_buffer);
 
    audio_buffer = NULL;
-	//quit_cap32_emu();
+   //quit_cap32_emu();
 }
 
 void retro_shutdown_core(void)
 {
    LOGI("SHUTDOWN\n");
 
-	//quit_cap32_emu();
+   //quit_cap32_emu();
 
    environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
 }
 
 void retro_reset(void)
 {
-	emu_reset();
+   emu_reset();
 }
 
 //*****************************************************************************
@@ -664,76 +686,76 @@ void retro_reset(void)
 // Disk control
 static bool disk_set_eject_state(bool ejected)
 {
-	if (dc)
-	{
-		dc->eject_state = ejected;
+   if (dc)
+   {
+      dc->eject_state = ejected;
 
-		if(dc->eject_state)
-			detach_disk(0);
-		else
-			attach_disk((char *)dc->files[dc->index],0);
-	}
+      if(dc->eject_state)
+         detach_disk(0);
+      else
+         attach_disk((char *)dc->files[dc->index],0);
+   }
 
-	return true;
+   return true;
 }
 
 static bool disk_get_eject_state(void)
 {
-	if (dc)
-		return dc->eject_state;
+   if (dc)
+      return dc->eject_state;
 
-	return true;
+   return true;
 }
 
 static unsigned disk_get_image_index(void)
 {
-	if (dc)
-		return dc->index;
+   if (dc)
+      return dc->index;
 
-	return 0;
+   return 0;
 }
 
 static bool disk_set_image_index(unsigned index)
 {
-	// Insert disk
-	if (dc)
-	{
-		// Same disk...
-		// This can mess things in the emu
-		if(index == dc->index)
-			return true;
+   // Insert disk
+   if (dc)
+   {
+      // Same disk...
+      // This can mess things in the emu
+      if(index == dc->index)
+         return true;
 
-		if ((index < dc->count) && (dc->files[index]))
-		{
-			dc->index = index;
-			log_cb(RETRO_LOG_INFO, "Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-			return true;
-		}
-	}
+      if ((index < dc->count) && (dc->files[index]))
+      {
+         dc->index = index;
+         log_cb(RETRO_LOG_INFO, "Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+         return true;
+      }
+   }
 
-	return false;
+   return false;
 }
 
 static unsigned disk_get_num_images(void)
 {
-	if (dc)
-		return dc->count;
+   if (dc)
+      return dc->count;
 
-	return 0;
+   return 0;
 }
 
 static bool disk_replace_image_index(unsigned index, const struct retro_game_info *info)
 {
-	// Not implemented
-	// No many infos on this in the libretro doc...
-	return false;
+   // Not implemented
+   // No many infos on this in the libretro doc...
+   return false;
 }
 
 static bool disk_add_image_index(void)
 {
-	// Not implemented
-	// No many infos on this in the libretro doc...
-	return false;
+   // Not implemented
+   // No many infos on this in the libretro doc...
+   return false;
 }
 
 static struct retro_disk_control_callback disk_interface = {
@@ -877,11 +899,11 @@ void retro_init(void)
    const char *system_dir = NULL;
    dc = dc_create();
 
-	// Init log
-	if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
-		log_cb = log.log;
-	else
-		log_cb = fallback_log;
+   // Init log
+   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
+      log_cb = log.log;
+   else
+      log_cb = fallback_log;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
@@ -920,9 +942,9 @@ void retro_init(void)
    LOGI("Retro CONTENT_DIRECTORY %s\n",retro_content_directory);
 
 #ifndef M16B
-    	enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
+       enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
 #else
-    	enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+       enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 #endif
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
@@ -936,8 +958,8 @@ void retro_init(void)
    ev_init();
    app_init();
 
-	// Disk control interface
-	environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
+   // Disk control interface
+   environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
 
    // prepare shared variables
    retro_computer_cfg.model = -1;
@@ -1065,9 +1087,9 @@ void retro_run(void)
    if(pauseg==0)
    {
       retro_loop();
-	   Core_PollEvent();
+      Core_PollEvent();
 
-	   if(showkeyb==1)
+      if(showkeyb==1)
          app_render(0);
    }
    else if (pauseg==1)app_render(1);

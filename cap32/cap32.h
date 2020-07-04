@@ -229,6 +229,7 @@ typedef struct {
    unsigned int scr_fps;
    unsigned int scr_tube;
    unsigned int scr_intensity;
+   unsigned int scr_phosphor_intensity;
    unsigned int scr_remanency;
    unsigned int scr_window;
    unsigned int scr_bpp;

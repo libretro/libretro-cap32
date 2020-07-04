@@ -1447,7 +1447,10 @@ unsigned int video_monitor_green(double r, double g, double b) {
    if (green > 255)
       green = 255;
 
-   return RGB2COLOR(0, green, 0);
+   // to represent real phosphor screens we add some blue color to green conversion
+   uint32_t blue = (uint32_t) green * (CPC.scr_phosphor_intensity / 100.0);
+
+   return RGB2COLOR(0, green, blue);
 }
 
 // Convert RGB to LUMA
