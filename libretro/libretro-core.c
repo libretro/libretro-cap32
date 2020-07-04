@@ -864,7 +864,7 @@ void computer_load_file() {
       {
          int error = tape_insert ((char *)RPATH);
          if (!error) {
-            kbd_buf_feed("|tape\nrun\"\n^");
+            kbd_buf_feed("|TAPE\nRUN\"\n^");
             LOGI("Tape inserted: %s\n", (char *)RPATH);
          } else {
             LOGI("Tape Error (%d): %s\n", error, (char *)RPATH);

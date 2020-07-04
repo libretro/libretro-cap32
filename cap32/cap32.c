@@ -192,6 +192,7 @@ int autoboot_delay=0;
 
 extern void kbd_buf_feed(char *s);
 extern void kbd_buf_update();
+extern void kbd_update_table(int lang);
 
 extern char DISKA_NAME[512];
 extern char DISKB_NAME[512];
@@ -1721,6 +1722,7 @@ void loadConfiguration (void)
    CPC.mf2           = getConfigValueInt(chFileName, "system", "mf2", 0) & 1;
    //CPC.keyboard      = getConfigValueInt(chFileName, "system", "keyboard", 0);
    CPC.keyboard = retro_computer_cfg.lang;
+   kbd_update_table(retro_computer_cfg.lang);
 
    if (CPC.keyboard > MAX_ROM_MODS)
       CPC.keyboard = 0;
@@ -2013,6 +2015,7 @@ size_t get_ram_size(void) {
 
 void change_lang(int val){
    CPC.keyboard=val;
+   kbd_update_table(val);
    retro_computer_cfg.is_dirty = true;
 }
 

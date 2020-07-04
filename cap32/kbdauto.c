@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define KDB_AZERTY 1
 #define KBD_MAX_ENTRIES 143
 
 #define MOD_CPC_SHIFT   (0x01 << 8)
@@ -487,7 +488,6 @@ int kbd_layout[KBD_MAX_ENTRIES][2] = {
        0xff                    // CAP32_SCREEN
   };
 
-
 int cpc_get_key_from_ascii(char ascii)
 {
   int index;
@@ -500,6 +500,7 @@ int cpc_get_key_from_ascii(char ascii)
 char kbd_feedbuf[255];
 int kbd_feedbuf_pos;
 bool kbd_runcmd=false;
+int kbd_mode = 0;
 
 extern void play_tape();
 
@@ -587,3 +588,58 @@ void vkbd_key(int key,int pressed){
 	}
 
 }
+
+void kbd_update_table(int lang) {
+   switch (lang)
+   {
+      case KDB_AZERTY:
+         kbd_layout[CPC_A][1] = 'Q';
+         kbd_layout[CPC_Q][1] = 'A';
+         kbd_layout[CPC_W][1] = 'Z';
+         kbd_layout[CPC_Z][1] = 'W';
+         kbd_layout[CPC_M][1] = '*';
+         kbd_layout[CPC_ASTERISK][1] = 'M';
+         kbd_layout[CPC_HASH][1] = '"';
+         kbd_layout[CPC_DBLQUOTE][1] = '#';
+         cpc_kbd[CPC_0] = 0x40 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_1] = 0x80 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_2] = 0x81 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_3] = 0x71 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_4] = 0x70 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_5] = 0x61 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_6] = 0x60 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_7] = 0x51 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_8] = 0x50 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_9] = 0x41 | MOD_CPC_SHIFT;
+         cpc_kbd[CPC_HASH] = 0x71; // CPC_DBLQUOTE
+         kbd_mode = KDB_AZERTY;
+         break;
+
+      default:
+         if (kbd_mode != KDB_AZERTY)
+            return;
+
+         kbd_layout[CPC_A][1] = 'A';
+         kbd_layout[CPC_Q][1] = 'Q';
+         kbd_layout[CPC_W][1] = 'W';
+         kbd_layout[CPC_Z][1] = 'Z';
+         kbd_layout[CPC_M][1] = 'M';
+         kbd_layout[CPC_ASTERISK][1] = '*';
+         kbd_layout[CPC_HASH][1] = '#';
+         kbd_layout[CPC_DBLQUOTE][1] = '"';
+         cpc_kbd[CPC_0] = 0x40;
+         cpc_kbd[CPC_1] = 0x80;
+         cpc_kbd[CPC_2] = 0x81;
+         cpc_kbd[CPC_3] = 0x71;
+         cpc_kbd[CPC_4] = 0x70;
+         cpc_kbd[CPC_5] = 0x61;
+         cpc_kbd[CPC_6] = 0x60;
+         cpc_kbd[CPC_7] = 0x51;
+         cpc_kbd[CPC_8] = 0x50;
+         cpc_kbd[CPC_9] = 0x41;
+         cpc_kbd[CPC_HASH] = 0x71 | MOD_CPC_SHIFT;
+         kbd_mode = 0;
+         break;
+   }
+}
+
