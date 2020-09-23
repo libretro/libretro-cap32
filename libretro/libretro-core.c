@@ -1,5 +1,8 @@
 #include "libretro.h"
 #include "libretro-core.h"
+#include "string/stdstring.h"
+#include "file/file_path.h"
+
 #include "retro_events.h"
 #include "retro_utils.h"
 #include "retro_snd.h"
