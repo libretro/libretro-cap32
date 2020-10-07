@@ -17,24 +17,23 @@ SOURCES_C := \
 				 $(CORE_DIR)/libretro/libretro-core.c \
 				 $(GUI)/retro/SDL_gfxPrimitives.c \
 				 $(GUI)/retro/retro_surface.c  \
-				 $(GUI)/app.c
-
-SOURCES_C += $(CORE_DIR)/cap32/cap32.c
-SOURCES_C += $(CORE_DIR)/cap32/slots.c
-SOURCES_C += $(CORE_DIR)/cap32/crtc.c
-SOURCES_C += $(CORE_DIR)/cap32/fdc.c
-SOURCES_C += $(CORE_DIR)/cap32/psg.c
-SOURCES_C += $(CORE_DIR)/cap32/tape.c
-SOURCES_C += $(CORE_DIR)/cap32/cart.c
-SOURCES_C += $(CORE_DIR)/cap32/asic.c
-SOURCES_C += $(CORE_DIR)/cap32/z80.c
-SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
-SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_utils.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_events.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_snd.c
+				 $(GUI)/app.c \
+				 $(CORE_DIR)/cap32/cap32.c \
+				 $(CORE_DIR)/cap32/slots.c \
+				 $(CORE_DIR)/cap32/crtc.c \
+				 $(CORE_DIR)/cap32/fdc.c \
+				 $(CORE_DIR)/cap32/psg.c \
+				 $(CORE_DIR)/cap32/tape.c \
+				 $(CORE_DIR)/cap32/cart.c \
+				 $(CORE_DIR)/cap32/asic.c \
+				 $(CORE_DIR)/cap32/z80.c \
+				 $(CORE_DIR)/cap32/libcpccat/fs.c \
+				 $(CORE_DIR)/cap32/kbdauto.c \
+				 $(CORE_DIR)/libretro/retro_strings.c \
+				 $(CORE_DIR)/libretro/retro_utils.c \
+				 $(CORE_DIR)/libretro/retro_disk_control.c \
+				 $(CORE_DIR)/libretro/retro_events.c \
+				 $(CORE_DIR)/libretro/retro_snd.c
 
 SOURCES_C += \
       $(DEPS)/zlib/adler32.c \
