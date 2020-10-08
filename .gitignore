@@ -3,3 +3,8 @@
 *.dll
 *.a
 *.gch
+*.orig
+*.rej
+*.log
+# editors
+.vscode
