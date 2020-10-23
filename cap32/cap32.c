@@ -162,12 +162,6 @@
    May 29, 2004 - 18:09 reintroduced tape_eject, tape_insert and tape_insert_voc; added sound support via the native SDL audio routines
 */
 
-#include <zlib.h>
-
-#if defined (__CELLOS_LV2__) && !defined(__PSL1GHT__)
-#define tmpnam(a)
-#endif
-
 #define AUTODELAY 50
 
 /* forward declarations - some libretro port callbacks */
@@ -1057,65 +1051,6 @@ int zip_dir (t_zip_info *zi)
 
    zi->iFiles = iFileCount;
    return 0; // operation completed successfully
-}
-
-int zip_extract (char *pchZipFile, char *pchFileName, uint32_t dwOffset)
-{
-   int iStatus, iCount;
-   uint32_t dwSize;
-   uint8_t *pbInputBuffer, *pbOutputBuffer;
-   FILE *pfileOut, *pfileIn;
-   z_stream z;
-
-   tmpnam(pchFileName); // generate a unique (temporary) file name for the decompression process
-
-   if (!(pfileOut = fopen(pchFileName, "wb")))
-      return ERR_FILE_UNZIP_FAILED; // couldn't create output file
-
-   pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
-   if(!fread(pbGPBuffer, 30, 1, pfileIn)) { // read local header
-      fclose(pfileIn);
-      fclose(pfileOut);
-      return ERR_FILE_UNZIP_FAILED;
-   }
-   dwSize = *(uint32_t *)(pbGPBuffer + 18); // length of compressed data
-   dwOffset += 30 + *(uint16_t *)(pbGPBuffer + 26) + *(uint16_t *)(pbGPBuffer + 28);
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
-
-   pbInputBuffer = pbGPBuffer; // space for compressed data chunck
-   pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
-   z.zalloc = (alloc_func)0;
-   z.zfree = (free_func)0;
-   z.opaque = (voidpf)0;
-   iStatus = inflateInit2(&z, -MAX_WBITS); // init zlib stream (no header)
-   do {
-      z.next_in = pbInputBuffer;
-      if (dwSize > 16384) { // limit input size to max 16K or remaining bytes
-         z.avail_in = 16384;
-      } else {
-         z.avail_in = dwSize;
-      }
-      z.avail_in = fread(pbInputBuffer, 1, z.avail_in, pfileIn); // load compressed data chunck from ZIP file
-      while ((z.avail_in) && (iStatus == Z_OK)) { // loop until all data has been processed
-         z.next_out = pbOutputBuffer;
-         z.avail_out = 16384;
-         iStatus = inflate(&z, Z_NO_FLUSH); // decompress data
-         iCount = 16384 - z.avail_out;
-         if (iCount) { // save data to file if output buffer is full
-            fwrite(pbOutputBuffer, 1, iCount, pfileOut);
-         }
-      }
-      dwSize -= 16384; // advance to next chunck
-   } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
-   if (iStatus != Z_STREAM_END) {
-      return ERR_FILE_UNZIP_FAILED; // abort on error
-   }
-   iStatus = inflateEnd(&z); // clean up
-   fclose(pfileIn);
-   fclose(pfileOut);
-
-   return 0; // data was successfully decompressed
 }
 
 int emulator_select_ROM (void)

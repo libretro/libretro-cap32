@@ -1,4 +1,3 @@
-GUI = $(CORE_DIR)/libretro/nukleargui
 DEPS = $(CORE_DIR)/utils
 LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro-common
 
@@ -7,48 +6,44 @@ INCFLAGS := \
 	-I$(CORE_DIR)/cap32 \
 	-I$(CORE_DIR)/cap32/libcpccat \
 	-I$(CORE_DIR)/libretro  \
-   -I$(LIBRETRO_COMM_DIR)/include \
-	-I$(GUI) \
-	-I$(GUI)/nuklear \
-	-I$(GUI)/retro \
-   -I$(DEPS)/zlib
+	-I$(CORE_DIR)/libretro/microui \
+	-I$(LIBRETRO_COMM_DIR)/include \
+	-I$(DEPS)/zlib
 
 SOURCES_C := \
-				 $(CORE_DIR)/libretro/libretro-core.c \
-				 $(GUI)/retro/SDL_gfxPrimitives.c \
-				 $(GUI)/retro/retro_surface.c  \
-				 $(GUI)/app.c
-
-SOURCES_C += $(CORE_DIR)/cap32/cap32.c
-SOURCES_C += $(CORE_DIR)/cap32/slots.c
-SOURCES_C += $(CORE_DIR)/cap32/crtc.c
-SOURCES_C += $(CORE_DIR)/cap32/fdc.c
-SOURCES_C += $(CORE_DIR)/cap32/psg.c
-SOURCES_C += $(CORE_DIR)/cap32/tape.c
-SOURCES_C += $(CORE_DIR)/cap32/cart.c
-SOURCES_C += $(CORE_DIR)/cap32/asic.c
-SOURCES_C += $(CORE_DIR)/cap32/z80.c
-SOURCES_C += $(CORE_DIR)/cap32/libcpccat/fs.c
-SOURCES_C += $(CORE_DIR)/cap32/kbdauto.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_strings.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_utils.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_disk_control.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_events.c
-SOURCES_C += $(CORE_DIR)/libretro/retro_snd.c
+	$(CORE_DIR)/libretro/libretro-core.c \
+	$(CORE_DIR)/cap32/cap32.c \
+	$(CORE_DIR)/cap32/slots.c \
+	$(CORE_DIR)/cap32/crtc.c \
+	$(CORE_DIR)/cap32/fdc.c \
+	$(CORE_DIR)/cap32/psg.c \
+	$(CORE_DIR)/cap32/tape.c \
+	$(CORE_DIR)/cap32/cart.c \
+	$(CORE_DIR)/cap32/asic.c \
+	$(CORE_DIR)/cap32/z80.c \
+	$(CORE_DIR)/cap32/libcpccat/fs.c \
+	$(CORE_DIR)/cap32/kbdauto.c \
+	$(CORE_DIR)/libretro/microui/microui.c \
+	$(CORE_DIR)/libretro/retro_strings.c \
+	$(CORE_DIR)/libretro/retro_utils.c \
+	$(CORE_DIR)/libretro/retro_disk_control.c \
+	$(CORE_DIR)/libretro/retro_events.c \
+	$(CORE_DIR)/libretro/retro_snd.c \
+	$(CORE_DIR)/libretro/retro_graph.c
 
 SOURCES_C += \
-      $(DEPS)/zlib/adler32.c \
-      $(DEPS)/zlib/inflate.c \
-      $(DEPS)/zlib/inffast.c \
-      $(DEPS)/zlib/inftrees.c \
-      $(DEPS)/zlib/zutil.c \
-      $(DEPS)/zlib/gzread.c \
-      $(DEPS)/zlib/gzwrite.c \
-      $(DEPS)/zlib/gzclose.c \
-      $(DEPS)/zlib/gzlib.c \
-      $(DEPS)/zlib/trees.c \
-      $(DEPS)/zlib/crc32.c \
-      $(DEPS)/zlib/deflate.c
+	$(DEPS)/zlib/adler32.c \
+	$(DEPS)/zlib/inflate.c \
+	$(DEPS)/zlib/inffast.c \
+	$(DEPS)/zlib/inftrees.c \
+	$(DEPS)/zlib/zutil.c \
+	$(DEPS)/zlib/gzread.c \
+	$(DEPS)/zlib/gzwrite.c \
+	$(DEPS)/zlib/gzclose.c \
+	$(DEPS)/zlib/gzlib.c \
+	$(DEPS)/zlib/trees.c \
+	$(DEPS)/zlib/crc32.c \
+	$(DEPS)/zlib/deflate.c
 
 ifneq ($(STATIC_LINKING), 1)
 SOURCES_C += \

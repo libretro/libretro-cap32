@@ -26,8 +26,6 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH 768
 #define TEX_MAX_HEIGHT 272
 //#define LOWRES 1
-#define SCREENMODE_STR " HI"
-
 
 //AUDIO
 #define FRAME_PERIOD_MS        20.0 // check cap32.h
@@ -58,8 +56,6 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
  #define PITCH 4
 #endif
 
-extern PIXEL_TYPE *video_buffer;
-
 #ifdef M16B
     #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
     #define RGB2RED(colour)       (((colour>>11)<<3) & 0xFF)
@@ -74,6 +70,14 @@ extern PIXEL_TYPE *video_buffer;
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 
+#define EMULATION_SCREEN_HEIGHT TEX_MAX_HEIGHT
+#ifdef LOWRES
+#define SCREENMODE_STR " LO"
+#define EMULATION_SCREEN_WIDTH 384
+#else
+#define SCREENMODE_STR " HI"
+#define EMULATION_SCREEN_WIDTH 768
+#endif
 
 
 // BIT OPERATIONS - MACROS

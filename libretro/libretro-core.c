@@ -1,3 +1,4 @@
+#include "microui.h"
 #include "libretro.h"
 #include "libretro-core.h"
 #include "string/stdstring.h"
@@ -6,6 +7,7 @@
 #include "retro_events.h"
 #include "retro_utils.h"
 #include "retro_snd.h"
+#include "retro_graph.h"
 
 //CORE VAR
 #ifdef _WIN32
@@ -40,8 +42,6 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 
-extern int showkeyb;
-
 extern int retro_disk_auto();
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
@@ -71,32 +71,27 @@ extern void retro_key_up(int key);
 extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
-PIXEL_TYPE *video_buffer;
+PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
+PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
 uint32_t save_Screen[WINDOW_MAX_SIZE];
-uint32_t bmp[WINDOW_MAX_SIZE];
+mu_Context *ctx;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
 
 //PATH
 char RPATH[512];
-int pauseg=0; //enter_gui
 
-extern int app_init(void);
-extern int app_free(void);
-extern int app_render(int poll);
+int pauseg = 0; //enter_gui
+int showkeyb = 0;
+int autorun = 0;
+int SND=1;
+int SHIFTON=-1;
 
-extern void app_screen_init(int width, int height);
-extern void app_screen_free(void);
-
-int retro_scr_style=0, retro_scr_w=0, retro_scr_h=0;
-int gfx_buffer_size=0;
-
-#include "vkbd.i"
+int retro_scr_style = 0;
+int gfx_buffer_size = 0;
 
 unsigned amstrad_devices[ 2 ];
-
-int autorun=0;
 
 int emu_status = COMPUTER_OFF;
 int gui_status = GUI_DISABLED;
@@ -154,8 +149,8 @@ int retro_getGfxBpp(){
 }
 
 int retro_getGfxBps(){
-    LOGI("getBPS: %u\n", retro_scr_w);
-    return retro_scr_w;
+    LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
+    return EMULATION_SCREEN_WIDTH;
 }
 
 int retro_getAudioBuffer(){
@@ -332,24 +327,6 @@ void enter_options(void) {}
 #endif
 
 #endif
-
-void save_bkg()
-{
-   memcpy(save_Screen,video_buffer,gfx_buffer_size);
-}
-
-void restore_bgk()
-{
-   memcpy(video_buffer,save_Screen,gfx_buffer_size);
-}
-
-void Screen_SetFullUpdate(int scr)
-{
-   if(scr==0 ||scr>1)
-      memset(&video_buffer, 0, gfx_buffer_size);
-   if(scr>0)
-      memset(&bmp,0, gfx_buffer_size);
-}
 
 void retro_message(const char *text) {
    struct retro_message msg;
@@ -1053,6 +1030,15 @@ void computer_load_file() {
 
 }
 
+static int text_width(mu_Font font, const char *text, int len) {
+  if (len == -1) { len = strlen(text); }
+  return len * 16;
+}
+
+static int text_height(mu_Font font) {
+  return 16;
+}
+
 void retro_init(void)
 {
    struct retro_log_callback log;
@@ -1116,7 +1102,6 @@ void retro_init(void)
 
    // events initialize - joy and keyboard
    ev_init();
-   app_init();
 
    // Disk control interface
    unsigned dci_version = 0;
@@ -1135,19 +1120,22 @@ void retro_init(void)
    update_variables();
 
    #ifdef LOWRES
-   retro_scr_w = 384;
    retro_scr_style = 3;
    #else
-   retro_scr_w = 768;
    retro_scr_style = 4;
    #endif
-   retro_scr_h = 272;
-   gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
+   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * PITCH;
 
-   app_screen_init(retro_scr_w, retro_scr_h);
+   ctx = malloc(sizeof(mu_Context));
+   mu_init(ctx);
+   ctx->text_width = text_width;
+   ctx->text_height = text_height;
 
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
-         retro_scr_w, retro_scr_h, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+         EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+
+   memset(video_buffer, 0, gfx_buffer_size);
+   //memset(bmp, 0, WINDOW_MAX_SIZE); // buffer gui
 
    Emu_init();
 
@@ -1160,12 +1148,10 @@ extern void main_exit();
 void retro_deinit(void)
 {
    free_retro_snd();
-   app_free();
-   app_screen_free();
-
    Emu_uninit();
 
    UnInitOSGLU();
+   mu_end(ctx);
 
    // Clean the m3u storage
    if(dc)
@@ -1194,9 +1180,6 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
-   #ifdef LOWRES
-   #define SCREENMODE_STR " LO"
-   #endif
    #ifndef GIT_VERSION
    #define GIT_VERSION ""
    #endif
@@ -1241,6 +1224,19 @@ void retro_audio_mix()
    audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
 }
 
+void retro_PollEvent()
+{
+   input_poll_cb(); // retroarch get keys
+
+   // --- Player 1/2 Joystick code
+   if(showkeyb < 0) {
+      ev_joysticks();
+   } else {
+      ev_events();
+   }
+
+}
+
 void retro_run(void)
 {
    bool updated = false;
@@ -1248,18 +1244,13 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       update_variables();
 
-   if(pauseg==0)
-   {
-      retro_loop();
-      Core_PollEvent();
+   retro_loop();
+   retro_PollEvent();
 
-      if(showkeyb==1)
-         app_render(0);
-   }
-   else if (pauseg==1)app_render(1);
-
-   video_cb(video_buffer, retro_scr_w, retro_scr_h, retro_scr_w << PIXEL_BYTES);
-
+   // FIXME GRAPH TESTS
+   DrawLine(video_buffer, 10, 10, 80, 0);
+   DrawRect(video_buffer, 10, 10, EMULATION_SCREEN_WIDTH - 10, 50, 0xffffff00);
+   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << PIXEL_BYTES);
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -1347,4 +1338,21 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
    (void)index;
    (void)enabled;
    (void)code;
+}
+
+// unused funcs
+void save_bkg()
+{
+   memcpy(save_Screen,video_buffer,gfx_buffer_size);
+}
+void restore_bgk()
+{
+   memcpy(video_buffer,save_Screen,gfx_buffer_size);
+}
+void Screen_SetFullUpdate(int scr)
+{
+   if(scr==0 ||scr>1)
+      memset(&video_buffer, 0, gfx_buffer_size);
+   if(scr>0)
+      memset(&bmp,0, gfx_buffer_size);
 }

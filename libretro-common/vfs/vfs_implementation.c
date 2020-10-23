@@ -288,6 +288,8 @@ libretro_vfs_implementation_file *retro_vfs_file_open_impl(
    libretro_vfs_implementation_file *stream = (libretro_vfs_implementation_file*)
       calloc(1, sizeof(*stream));
 
+   (void) path_len;
+
 #ifdef VFS_FRONTEND
    const char                 *dumb_prefix  = "vfsonly://";
    size_t                   dumb_prefix_siz = strlen(dumb_prefix);

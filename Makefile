@@ -360,7 +360,8 @@ INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
+	@echo $@
+	@$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
 
 %.o: %.S
 	$(CC_AS) -c -o $@ $< $(CFLAGS) $(INCDIRS)
@@ -385,7 +386,7 @@ $(TARGET): $(HEADERS) $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
-	$(CC) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+	@$(CC) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
 clean-objs:
