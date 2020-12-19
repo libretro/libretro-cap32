@@ -53,11 +53,6 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 
-#ifndef __CELLOS_LV2__
-/* Define to 1 if you have the `getcwd' function. */
-#define HAVE_GETCWD 1
-#endif
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 

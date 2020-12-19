@@ -30,7 +30,7 @@ static struct file_browser browser;
 #include <unistd.h>
 #endif
 
-#if !defined(_WIN32) && !defined(__CELLOS_LV2__)
+#if !defined(_WIN32)
 # include <pwd.h>
 #endif
 
@@ -160,9 +160,7 @@ file_browser_init(struct file_browser *browser)
 
     {
 //FIXME
-#ifdef __CELLOS_LV2__
-      const char *home = "/dev_hdd0/game/SSNE10000/USRDIR/cores/system/";
-#elif defined(VITA)
+#if defined(VITA)
       const char *home = getenv("HOME");
       if (!home) home = "ux0:/";
 #elif defined(GEKKO)
