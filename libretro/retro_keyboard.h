@@ -16,32 +16,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef RETRO_KEYBOARD_H__
+#define RETRO_KEYBOARD_H__
+
 #include <stdint.h>
+#include <stdbool.h>
 
-#include <libretro.h>
-#include <libretro-core.h>
+//*****************************************************************************
+// helpers functions
 
-// FIXME PIXEL_BYTES
+void keyboard_init();
+void keyboard_mouse_click(bool clicked);
 
-void DrawLine(unsigned int * buffer, int x, int y, int width, unsigned int color)
-{
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
-   while (width--) {
-      *(buffer++) = color;
-   }
-}
-
-void DrawRect(unsigned int * buffer, int x, int y, int width, int height, unsigned int color)
-{
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
-   while (height--)
-   {
-      int loop_width = width;
-      while (loop_width--) {
-         *(buffer++) = color;
-      }
-      buffer += EMULATION_SCREEN_WIDTH - width;
-   }
-}
+#endif

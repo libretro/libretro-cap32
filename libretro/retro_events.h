@@ -138,7 +138,6 @@ enum retro_events_action_type
    EVENT_CURSOR_JOY,
 };
 
-
 typedef struct {
    unsigned type;
    const char * kbd_buf;
@@ -150,14 +149,35 @@ typedef struct {
    retro_action_t action;
 } retro_combo_event_t;
 
+enum retro_cursor_status
+{
+   CURSOR_NONE = 0,
+   CURSOR_CLICKED = 1,
+   CURSOR_MOTION = 2,
+   CURSOR_CLICKED_JOY = 4,
+};
+
+typedef struct {
+   int x, raw_x;
+   int y, raw_y;
+   int click;
+   int click_joy;
+   unsigned status;
+} retro_mouse_t;
+
 #define JOY_EVENT_ID_B 0
 #define JOY_EVENT_ID_Y 1
 
-void ev_joysticks();
-extern bool (*ev_events)(void);
+void ev_press_key(unsigned char cpc_key);
+void ev_release_key(unsigned char cpc_key);
+
+extern bool (*process_events)(void);
+
 void ev_combo_set(unsigned btn);
 void ev_init();
 
 void Core_PollEvent(void);
+
+void ev_process_cursor();
 
 #endif

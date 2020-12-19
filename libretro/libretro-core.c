@@ -7,7 +7,11 @@
 #include "retro_events.h"
 #include "retro_utils.h"
 #include "retro_snd.h"
-#include "retro_graph.h"
+#include "retro_render.h"
+#include "retro_ui.h"
+
+#include "gfx/software.h"
+#include "assets/ui.h"
 
 //CORE VAR
 #ifdef _WIN32
@@ -74,7 +78,6 @@ extern void Screen_SetFullUpdate(int scr);
 PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
 PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
 uint32_t save_Screen[WINDOW_MAX_SIZE];
-mu_Context *ctx;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -82,8 +85,8 @@ int audio_buffer_size = 0;
 //PATH
 char RPATH[512];
 
-int pauseg = 0; //enter_gui
-int showkeyb = 0;
+// almost deprecated
+int pauseg = 0; 
 int autorun = 0;
 int SND=1;
 int SHIFTON=-1;
@@ -94,7 +97,6 @@ int gfx_buffer_size = 0;
 unsigned amstrad_devices[ 2 ];
 
 int emu_status = COMPUTER_OFF;
-int gui_status = GUI_DISABLED;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
@@ -120,6 +122,14 @@ static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 /*static*/ retro_audio_sample_batch_t audio_batch_cb;
 /*static*/ retro_environment_t environ_cb;
+/*static*/ retro_mouse_t mouse =
+{
+   EMULATION_SCREEN_WIDTH/2,
+   EMULATION_SCREEN_WIDTH/2,
+   EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
+   EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
+   0, 0, 0
+};
 
 // allowed file types
 #define CDT_FILE_EXT "cdt"
@@ -410,11 +420,11 @@ void retro_set_environment(retro_environment_t cb)
          "Internal resolution; 384x272|768x272",
          #endif
       },
-      {
-         "cap32_statusbar", // unused - but i try to implement in a future
-         "Status Bar; disabled|enabled",
-      },
       #endif
+      {
+         "cap32_statusbar",
+         "Status Bar; onloading|enabled|disabled",
+      },
       {
          "cap32_scr_tube",
          "Monitor Type; color|green|white",
@@ -541,13 +551,24 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "enabled") == 0)
-         BIT_ADD(gui_status, GUI_STATUSBAR);
-
-      if (strcmp(var.value, "disabled") == 0)
-         BIT_CLEAR(gui_status, GUI_STATUSBAR);
-
-         //TODO: call update status
+      if (strcmp(var.value, "onloading") == 0)
+      {
+         if (retro_computer_cfg.statusbar != STATUSBAR_HIDE)
+         {
+            retro_computer_cfg.statusbar = STATUSBAR_HIDE;
+            retro_show_statusbar();
+         }
+      }
+      else if (strcmp(var.value, "enabled") == 0)
+      {
+         retro_computer_cfg.statusbar = STATUSBAR_SHOW;
+         retro_show_statusbar();
+      }
+      else if (strcmp(var.value, "disabled") == 0)
+      {
+         retro_computer_cfg.statusbar = STATUSBAR_OFF;
+         retro_ui_set_status(UI_STATUSBAR, false);
+      }
    }
 
    var.key = "cap32_scr_tube";
@@ -623,7 +644,10 @@ static void update_variables(void)
 
    // check if emulation need a restart (model/lang/... is changed)
    if(retro_computer_cfg.is_dirty)
+   {
       emu_restart();
+      retro_ui_update_text();
+   }
 }
 
 
@@ -1030,13 +1054,9 @@ void computer_load_file() {
 
 }
 
-static int text_width(mu_Font font, const char *text, int len) {
-  if (len == -1) { len = strlen(text); }
-  return len * 16;
-}
-
-static int text_height(mu_Font font) {
-  return 16;
+void load_ui(void)
+{
+   
 }
 
 void retro_init(void)
@@ -1116,6 +1136,7 @@ void retro_init(void)
    retro_computer_cfg.lang = -1;
    retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
+   retro_computer_cfg.statusbar = STATUSBAR_HIDE;
 
    update_variables();
 
@@ -1126,16 +1147,13 @@ void retro_init(void)
    #endif
    gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * PITCH;
 
-   ctx = malloc(sizeof(mu_Context));
-   mu_init(ctx);
-   ctx->text_width = text_width;
-   ctx->text_height = text_height;
-
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
          EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
 
    memset(video_buffer, 0, gfx_buffer_size);
-   //memset(bmp, 0, WINDOW_MAX_SIZE); // buffer gui
+   memset(bmp, 0, WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE)); // buffer UI
+
+   retro_ui_init();
 
    Emu_init();
 
@@ -1149,9 +1167,9 @@ void retro_deinit(void)
 {
    free_retro_snd();
    Emu_uninit();
+   retro_ui_free();
 
    UnInitOSGLU();
-   mu_end(ctx);
 
    // Clean the m3u storage
    if(dc)
@@ -1192,8 +1210,8 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width = 384;
-   info->geometry.base_height = 272;
+   info->geometry.base_width = CPC_SCREEN_WIDTH;
+   info->geometry.base_height = CPC_SCREEN_HEIGHT;
    info->geometry.max_width = TEX_MAX_WIDTH;
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
@@ -1227,14 +1245,7 @@ void retro_audio_mix()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
-
-   // --- Player 1/2 Joystick code
-   if(showkeyb < 0) {
-      ev_joysticks();
-   } else {
-      ev_events();
-   }
-
+   process_events();
 }
 
 void retro_run(void)
@@ -1245,11 +1256,10 @@ void retro_run(void)
       update_variables();
 
    retro_loop();
-   retro_PollEvent();
 
-   // FIXME GRAPH TESTS
-   DrawLine(video_buffer, 10, 10, 80, 0);
-   DrawRect(video_buffer, 10, 10, EMULATION_SCREEN_WIDTH - 10, 50, 0xffffff00);
+   retro_PollEvent();
+   retro_ui_process();
+
    video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << PIXEL_BYTES);
 }
 

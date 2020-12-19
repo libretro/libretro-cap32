@@ -23,9 +23,12 @@
 
 extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
-#define TEX_MAX_WIDTH 768
-#define TEX_MAX_HEIGHT 272
-//#define LOWRES 1
+#define CPC_SCREEN_WIDTH 384
+#define CPC_SCREEN_HEIGHT 272
+
+#define TEX_MAX_WIDTH CPC_SCREEN_WIDTH * 2
+#define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT
+#define LOWRES 1
 
 //AUDIO
 #define FRAME_PERIOD_MS        20.0 // check cap32.h
@@ -47,36 +50,47 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define M16B
 
 #ifdef M16B
- #define PIXEL_BYTES 1
- #define PIXEL_TYPE unsigned short
- #define PITCH 2
+   #define PIXEL_RAW_DENSITY 2
+   #define PIXEL_BYTES 1
+   #define PIXEL_TYPE unsigned short
+   #define PITCH 2
 #else
- #define PIXEL_BYTES 2
- #define PIXEL_TYPE unsigned int
- #define PITCH 4
+   #define PIXEL_RAW_DENSITY 1
+   #define PIXEL_BYTES 2
+   #define PIXEL_TYPE unsigned int
+   #define PITCH 4
 #endif
 
 #ifdef M16B
-    #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
-    #define RGB2RED(colour)       (((colour>>11)<<3) & 0xFF)
-    #define RGB2GREEN(colour)     (((colour>>5)<<2) & 0xFF)
-    #define RGB2BLUE(colour)      ((colour<<3) & 0xFF)
+   #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
+   #define RGB2RED(colour)       (((colour>>11)<<3) & 0xFF)
+   #define RGB2GREEN(colour)     (((colour>>5)<<2) & 0xFF)
+   #define RGB2BLUE(colour)      ((colour<<3) & 0xFF)
+   #define CURSOR_COLOR          0xCE79
 #else
-    #define RGB2COLOR(r, g, b)    (b | ((g << 8) | (r << 16)))
-    #define RGB2RED(colour)       ((colour>>16) & 0xFF)
-    #define RGB2GREEN(colour)     ((colour>>8) & 0xFF)
-    #define RGB2BLUE(colour)      (colour & 0xFF)
+   #define RGB2COLOR(r, g, b)    (b | ((g << 8) | (r << 16)))
+   #define RGB2RED(colour)       ((colour>>16) & 0xFF)
+   #define RGB2GREEN(colour)     ((colour>>8) & 0xFF)
+   #define RGB2BLUE(colour)      (colour & 0xFF)
+   #define CURSOR_COLOR          0xCCCCCC
 #endif
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 
-#define EMULATION_SCREEN_HEIGHT TEX_MAX_HEIGHT
 #ifdef LOWRES
 #define SCREENMODE_STR " LO"
-#define EMULATION_SCREEN_WIDTH 384
+#define EMULATION_SCALE 1
+#define EMULATION_SCREEN_WIDTH CPC_SCREEN_WIDTH
+#define EMULATION_SCREEN_HEIGHT CPC_SCREEN_HEIGHT
+#define CURSOR_MOVEMENT_X 2
+#define CURSOR_MOVEMENT_Y 2
 #else
 #define SCREENMODE_STR " HI"
-#define EMULATION_SCREEN_WIDTH 768
+#define EMULATION_SCALE 2
+#define EMULATION_SCREEN_WIDTH CPC_SCREEN_WIDTH * 2
+#define EMULATION_SCREEN_HEIGHT CPC_SCREEN_HEIGHT
+#define CURSOR_MOVEMENT_X 4
+#define CURSOR_MOVEMENT_Y 2
 #endif
 
 
@@ -87,26 +101,22 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define BIT_CHECK(var, bit)  ((var >> bit) & 1)
 #define BIT_TOGGLE(var, bit) var ^= 1 << bit
 
-
-// RETROGUI STATUS - BIT WISE
-#define GUI_DISABLED     0
-#define GUI_KEYBOARD     1
-#define GUI_MENU         2
-#define GUI_STATUSBAR    4
-extern int gui_status;
-
-
-// COMPUTER/EMU STATUS - BIT WISE
+// COMPUTER/EMU STATUS
 #define COMPUTER_OFF     0
 #define COMPUTER_BOOTING 1
 #define COMPUTER_READY   2
 extern int emu_status;
+
+#define STATUSBAR_HIDE    0
+#define STATUSBAR_SHOW    1
+#define STATUSBAR_OFF     2
 
 typedef struct {
    int model;
    int ram; /*request only! beware: 6128 enforces minimum!*/
    int lang;
    uint32_t combokey;
+   uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
 } computer_cfg_t;
@@ -140,8 +150,6 @@ typedef struct{
      unsigned char r,g,b;
 } retro_pal;
 
-//VARIABLES
-extern int pauseg;
 
 void retro_message(const char *text);
 

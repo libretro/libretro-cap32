@@ -24,12 +24,17 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/libcpccat/fs.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
 	$(CORE_DIR)/libretro/microui/microui.c \
+	$(CORE_DIR)/libretro/gfx/software.c \
+	$(CORE_DIR)/libretro/assets/ui_keyboard.c \
+	$(CORE_DIR)/libretro/assets/font.c \
 	$(CORE_DIR)/libretro/retro_strings.c \
 	$(CORE_DIR)/libretro/retro_utils.c \
 	$(CORE_DIR)/libretro/retro_disk_control.c \
 	$(CORE_DIR)/libretro/retro_events.c \
 	$(CORE_DIR)/libretro/retro_snd.c \
-	$(CORE_DIR)/libretro/retro_graph.c
+	$(CORE_DIR)/libretro/retro_render.c \
+	$(CORE_DIR)/libretro/retro_ui.c \
+	$(CORE_DIR)/libretro/retro_keyboard.c
 
 SOURCES_C += \
 	$(DEPS)/zlib/adler32.c \

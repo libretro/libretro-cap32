@@ -16,8 +16,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef RETRO_GRAPH_H__
-#define RETRO_GRAPH_H__
+#ifndef GFX_SOFTWARE_H__
+#define GFX_SOFTWARE_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -25,7 +25,12 @@
 //*****************************************************************************
 // Graph helpers functions
 
-void DrawLine(unsigned int * buffer, int x, int y, int width, unsigned int color);
-void DrawRect(unsigned int * buffer, int x, int y, int width, int height, unsigned int color);
-
+void draw_line(PIXEL_TYPE * buffer, int x, int y, int width, PIXEL_TYPE color);
+void draw_rect(PIXEL_TYPE * buffer, int x, int y, int width, int height, PIXEL_TYPE color);
+void draw_text(PIXEL_TYPE * buffer, int x, int y, const char * text, PIXEL_TYPE color);
+void draw_char(PIXEL_TYPE * buffer, int x, int y, char chr_idx, PIXEL_TYPE color);
+void draw_image(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, int width, int height);
+void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
+void convert_image(PIXEL_TYPE * buffer, const unsigned int * img, unsigned int size);
+PIXEL_TYPE convert_color (unsigned int color);
 #endif

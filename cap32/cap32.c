@@ -175,6 +175,7 @@ int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
 #include "retro_snd.h"
+#include "retro_ui.h"
 #include "retro_utils.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
@@ -945,10 +946,12 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
       FDC.motor = val & 0x01;
-      if(FDC.motor)
+      if(FDC.motor) {
          retro_snd_cmd(SND_FDCMOTOR, ST_LOOP);
-      else
+         retro_show_statusbar();
+      } else {
          retro_snd_cmd(SND_FDCMOTOR, ST_OFF);
+      }
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
       #endif

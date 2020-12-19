@@ -8,3 +8,4 @@
 *.log
 # editors
 .vscode
+.venv
