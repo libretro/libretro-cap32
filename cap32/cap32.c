@@ -162,8 +162,6 @@
    May 29, 2004 - 18:09 reintroduced tape_eject, tape_insert and tape_insert_voc; added sound support via the native SDL audio routines
 */
 
-#define AUTODELAY 50
-
 /* forward declarations - some libretro port callbacks */
 void retro_loop(void);
 void doCleanUp (void);
@@ -186,7 +184,6 @@ extern bool kbd_runcmd;
 int autoboot_delay=0;
 
 extern void kbd_buf_feed(char *s);
-extern void kbd_buf_update();
 extern void kbd_update_table(int lang);
 
 extern char DISKA_NAME[512];
@@ -2152,83 +2149,40 @@ int loadadsk (char *arv,int drive)
    return 0;
 }
 
-void check_kbd_command()
-{
-
-   	if (autoboot_delay<AUTODELAY)
-    	autoboot_delay++;
-   	else if (autoboot_delay==AUTODELAY)
-   	{
-   		if (!autorun)
-   			kbd_runcmd=false;
-
-     		autoboot_delay++;
-   	}
-
-	if(kbd_runcmd==true && autoboot_delay>AUTODELAY){
-
-	  	static int pair=-1;
-
-      		pair=-pair;
-      		if(pair==1)
-      	   		return;
-
-		kbd_buf_update();
-
-	}
-
-}
-
 void retro_loop(void)
 {
-	while(theloop());
-	check_kbd_command();
-//printf("auto:%d run:%d cmd:%d\n",autoboot_delay,autorun,kbd_runcmd);
-}
-
-int theloop(void)
-{
-
-     if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
+	while(1)
    {
-      //int iTicksAdj = 0; // no adjustment necessary by default
-
-      if (CPC.snd_enabled)
+      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
       {
-
-         if (pbSndStream < CPC.snd_bufferptr)
-            dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-         else
-            dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-#if 0
-         if (dwSndDist < dwSndMinSafeDist)
-            iTicksAdj = -5; // speed emulation up to compensate
-         else if (dwSndDist > dwSndMaxSafeDist)
-            iTicksAdj = 5; // slow emulation down to compensate
-#endif
+         if (CPC.snd_enabled)
+         {
+            if (pbSndStream < CPC.snd_bufferptr)
+               dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
+            else
+               dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
+         }
       }
 
+      uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+      if (VDU.scrln > 0)
+         CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
+      else
+         CPC.scr_base = retro_getScreenPtr(); // reset to surface start
+
+      CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
+
+      iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+      if (iExitCondition == EC_FRAME_COMPLETE)
+      {
+         /* emulation finished rendering a complete frame? */
+         break; /* exit retro_loop for retro_run */
+      }
+      else if (iExitCondition == EC_SOUND_BUFFER)
+      {
+         mixsnd();
+      }
    }
-
-   uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
-   if (VDU.scrln > 0)
-      CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
-   else
-      CPC.scr_base = retro_getScreenPtr(); // reset to surface start
-
-   CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
-
-   iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-
-   if (iExitCondition == EC_FRAME_COMPLETE)
-   {
-      /* emulation finished rendering a complete frame? */
-      return 0; /* exit retro_loop for retro_run */
-   }
-   else if (iExitCondition == EC_SOUND_BUFFER)
-      mixsnd();
-
-   return 1;
 }
 
 int capmain (int argc, char **argv)

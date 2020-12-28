@@ -138,6 +138,14 @@ enum retro_events_action_type
    EVENT_CURSOR_JOY,
 };
 
+enum retro_event_call_type
+{
+   EV_NONE = 0,
+   EV_JOY  = 1,
+   EV_KBD  = 2,
+   EV_AUTO = 3,
+};
+
 typedef struct {
    unsigned type;
    const char * kbd_buf;
@@ -151,9 +159,9 @@ typedef struct {
 
 enum retro_cursor_status
 {
-   CURSOR_NONE = 0,
-   CURSOR_CLICKED = 1,
-   CURSOR_MOTION = 2,
+   CURSOR_NONE        = 0,
+   CURSOR_CLICKED     = 1,
+   CURSOR_MOTION      = 2,
    CURSOR_CLICKED_JOY = 4,
 };
 
@@ -174,6 +182,7 @@ void ev_release_key(unsigned char cpc_key);
 extern bool (*process_events)(void);
 
 void ev_combo_set(unsigned btn);
+void ev_set(int type);
 void ev_init();
 
 void Core_PollEvent(void);

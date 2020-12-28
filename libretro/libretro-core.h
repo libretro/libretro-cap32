@@ -76,6 +76,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #endif
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
+#define EMULATION_INIT_AUTORUNDELAY 50
 
 #ifdef LOWRES
 #define SCREENMODE_STR " LO"
@@ -119,21 +120,9 @@ typedef struct {
    uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
+   bool floppy_snd;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
-
-//VKBD
-#define NPLGN 12
-#define NLIGN 5
-#define NLETT 5
-
-typedef struct {
-	char norml[NLETT];
-	char shift[NLETT];
-	int val;
-} Mvk;
-
-extern Mvk MVk[NPLGN*NLIGN*2];
 
 //STRUCTURES
 typedef struct{

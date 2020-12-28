@@ -55,7 +55,6 @@ extern int tape_insert (char *pchFileName);
 extern int cart_insert (char *pchFileName);
 extern void enter_gui(void);
 extern void kbd_buf_feed(char *s);
-extern void kbd_buf_update();
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
@@ -426,6 +425,10 @@ void retro_set_environment(retro_environment_t cb)
          "Status Bar; onloading|enabled|disabled",
       },
       {
+         "cap32_floppy_sound",
+         "Floppy Sound; enabled|disabled",
+      },
+      {
          "cap32_scr_tube",
          "Monitor Type; color|green|white",
       },
@@ -491,8 +494,10 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "enabled") == 0)
-         autorun = 1;
+      if (strcmp(var.value, "disabled") == 0)
+         ev_set(EV_JOY);
+      else
+         ev_set(EV_AUTO);
    }
 
    var.key = "cap32_combokey";
@@ -544,6 +549,17 @@ static void update_variables(void)
             change_ram(val);
          }
       }
+   }
+
+   var.key = "cap32_floppy_sound";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "disabled") == 0)
+          retro_computer_cfg.floppy_snd = 0;
+      else
+         retro_computer_cfg.floppy_snd = 1;
    }
 
    var.key = "cap32_statusbar";
@@ -1237,7 +1253,8 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_audio_mix()
 {
-   retro_snd_mixer();
+   if(retro_computer_cfg.floppy_snd)
+      retro_snd_mixer();
    memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
    audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
 }

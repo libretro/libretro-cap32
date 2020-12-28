@@ -44,6 +44,7 @@ extern retro_mouse_t mouse;
 extern bool kbd_runcmd;
 
 extern void kbd_buf_feed(char *s);
+extern bool kbd_buf_update();
 extern void save_bkg();
 extern void play_tape();
 extern void stop_tape(void);
@@ -65,12 +66,6 @@ bool (*ev_events)(void);
 bool (*process_events)(void);
 unsigned char (*process_ev_key)(int key, bool pressed);
 
-enum retro_event_call
-{
-   EV_NONE = 0,
-   EV_JOY  = 1,
-   EV_KBD  = 2
-};
 int event_call = EV_JOY;
 void ev_toggle_call();
 
@@ -340,7 +335,8 @@ static void _process_joy(int playerID){
  * ev_joysticks:
  * function to unify event code, call joy events and get user pad data
  **/
-bool ev_joysticks() {
+bool ev_joysticks()
+{
    // you cannot use key-remap on player two, force read it
    _process_joy(ID_PLAYER2);
 
@@ -352,6 +348,28 @@ bool ev_joysticks() {
 
    if(!ev_events())
       _process_joy(ID_PLAYER1);
+
+   return true;
+}
+
+bool ev_autorun()
+{
+   static int delay = EMULATION_INIT_AUTORUNDELAY;
+   static int wait_computer = 1;
+
+   if(delay)
+   {
+      delay --;
+      return false;
+   }
+   
+   // wait one loop for the key be pressed
+   wait_computer ^= 1;
+   if(wait_computer)
+      return false;
+
+   if(kbd_buf_update())
+      ev_set(EV_JOY);
 
    return true;
 }
@@ -405,9 +423,8 @@ static void ev_events_key(unsigned keycode, bool down)
 
 
 /**
- * _ev_key:
+ * process_ev_key:
  * emulator keyboard handler
- * BUG: ra call keyboard_cb incorrectly with release events
  **/
 unsigned char _ev_key(int key, bool pressed) {
    uint8_t cpc_key = get_cpckey(key);
@@ -423,7 +440,8 @@ unsigned char _ev_key(int key, bool pressed) {
 
 /**
  * _ev_key_null:
- * FIXME: to try to avoid ghosting bug we set ev_key as null on KoS.
+ * Here we to try to avoid ghosting bug on old retroarch versions
+ * issue: https://github.com/libretro/RetroArch/issues/8838
  **/
 unsigned char _ev_key_null(int key, bool pressed) {
    return CPC_KEY_NULL;
@@ -433,15 +451,11 @@ unsigned char _ev_key_null(int key, bool pressed) {
  * keyboard_cb:
  * Is called by main retro_callback when user press/release a key
  * just convert this event to an emulated event
- * BUG: generates ghosting release events when "amstrad keyboard" is selected on controls
  **/
 static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
 {
    //printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
    //       down ? "yes" : "no", keycode, character, mod);
-
-   if(kbd_runcmd) // FIXME -- send bug to libretro
-      return;
 
    if(process_ev_key(keycode, down) != CPC_KEY_NULL)
       return;
@@ -597,21 +611,39 @@ void ev_init(){
 
    ev_events = _events_null;
    process_events = ev_joysticks;
-   process_ev_key = _ev_key;
+   process_ev_key = _ev_key_null;
+}
+
+void ev_set(int type)
+{
+   switch (type)
+   {
+      case EV_AUTO:
+         process_ev_key = _ev_key_null;
+         process_events = ev_autorun;
+         break;
+      
+      case EV_JOY:
+         process_ev_key = _ev_key;
+         process_events = ev_joysticks;
+         break;
+
+      case EV_KBD:
+         process_ev_key = _ev_key_null;
+         process_events = *ev_events;
+         break;
+   }
+
+   //printf("[CPC] [EV] type %u\n", type);
+   event_call = type;
 }
 
 void ev_toggle_call()
 {
    if (event_call == EV_JOY)
-   {
-      process_ev_key = _ev_key_null;
-      process_events = *ev_events;
-      event_call = EV_KBD;
-   } else {
-      process_ev_key = _ev_key;
-      process_events = ev_joysticks;
-      event_call = EV_JOY;
-   }
+      ev_set(EV_KBD);
+   else
+      ev_set(EV_JOY);
 }
 
 void ev_combo_set(unsigned btn)
@@ -718,15 +750,14 @@ void ev_mouse_motion_absolute()
    mouse.status |= CURSOR_MOTION;
 }
 
-bool ev_cursor_click(unsigned int device, unsigned int event, int * ref_ptr, int value)
+void ev_cursor_click(unsigned int device, unsigned int event, int * ref_ptr, int value)
 {
    int clicked = input_state_cb(0, device, 0, event);
    if (clicked == *ref_ptr)
-      return false;
+      return;
 
    *ref_ptr = clicked;
    mouse.status |= value;
-   return true;
 }
 
 void ev_joy_motion()
@@ -769,7 +800,6 @@ void ev_joy_motion()
    {
       mouse.status |= CURSOR_MOTION;
    }
-
 }
 
 void ev_process_cursor()
