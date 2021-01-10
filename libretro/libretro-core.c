@@ -13,15 +13,6 @@
 #include "gfx/software.h"
 #include "assets/ui.h"
 
-//CORE VAR
-#ifdef _WIN32
-char slash = '\\';
-#else
-char slash = '/';
-#endif
-
-char RETRO_DIR[512];
-
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
 char cart_name[512]="\0";
@@ -80,9 +71,6 @@ uint32_t save_Screen[WINDOW_MAX_SIZE];
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
 
-//PATH
-char RPATH[512];
-
 // almost deprecated
 int pauseg = 0; 
 int autorun = 0;
@@ -113,6 +101,8 @@ const char *retro_save_directory;
 const char *retro_system_directory;
 const char *retro_content_directory;
 char retro_system_data_directory[512];
+char retro_system_bios_directory[512];
+char retro_content_filepath[512];
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -204,6 +194,7 @@ void Add_Option(const char* option)
    sprintf(XARGV[PARAMCOUNT++],"%s",option);
 }
 
+// TODO: clean this...
 int pre_main(const char *argv)
 {
    int i;
@@ -218,13 +209,12 @@ int pre_main(const char *argv)
 
 
    if(Only1Arg)
-   {  Add_Option("x64");
+   {
+      Add_Option("x64");
+      if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), "crt", 3))
+         Add_Option("-cartcrt");
 
-      if (strlen(RPATH) >= strlen("crt"))
-         if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("crt")], "crt"))
-            Add_Option("-cartcrt");
-
-      Add_Option(RPATH/*ARGUV[0]*/);
+      Add_Option(retro_content_filepath);
    }
    else
    { // Pass all cmdline args
@@ -674,7 +664,7 @@ void Emu_init()
       return;
    }
    emu_status = COMPUTER_BOOTING;
-   pre_main(RPATH);
+   pre_main(retro_content_filepath);
 }
 
 void Emu_uninit()
@@ -957,121 +947,96 @@ void computer_load_bios() {
    // TODO add load customs bios
 
    // cart is like a system bios
-   if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
-      {
-         int result = cart_insert(RPATH);
-         if(result != 0) {
-            retro_message("Error Loading Cart...");
-         } else {
-            sprintf(RPATH,"%s",RPATH);
-         }
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CPR_FILE_EXT, 3))
+   {
+      int result = cart_insert(retro_content_filepath);
+      if(result != 0) {
+         retro_message("Error Loading Cart...");
       }
+   }
 }
 
 // load content
 void computer_load_file() {
    int i;
-   // If it's a m3u file
-   if (strlen(RPATH) >= strlen(M3U_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(M3U_FILE_EXT)], M3U_FILE_EXT))
-      {
-         // Parse the m3u file
-         dc_parse_m3u(dc, RPATH);
-
-         // Some debugging
-         log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
-         for(i = 0; i < dc->count; i++)
-         {
-            log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
-         }
-
-         // Init first image
-         dc->eject_state = false;
-         dc->index = 0;
-         retro_insert_image();
-
-         // If command was specified
-         if(dc->command)
-         {
-            // Execute the command
-            log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
-            char* command = calloc(strlen(dc->command) + 1, sizeof(char));
-            sprintf(command, "%s\n", dc->command);
-            kbd_buf_feed(command);
-            free(command);
-         }
-         else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
-         {
-            // Autoplay
-            retro_disk_auto();
-         }
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-      }
-
-   // If it's a disk
-   if (strlen(RPATH) >= strlen(DSK_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(DSK_FILE_EXT)], DSK_FILE_EXT))
-      {
-         // Add the file to disk control context
-         // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
-         dc_add_file(dc, RPATH);
-
-         // Init first disk
-         dc->index = 0;
-         dc->eject_state = false;
-         LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-         attach_disk((char *)dc->files[dc->index],0);
-         retro_disk_auto();
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-      }
-
-   // If it's a tape
-   if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
-      {
-         int error = tape_insert ((char *)RPATH);
-         if (!error) {
-            kbd_buf_feed("|TAPE\nRUN\"\n^");
-            LOGI("Tape inserted: %s\n", (char *)RPATH);
-         } else {
-            LOGI("Tape Error (%d): %s\n", error, (char *)RPATH);
-         }
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-
-      }
 
    // If it's a snapshot
-   if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
-      {
-         int error = snapshot_load (RPATH);
-         if (!error) {
-            LOGI("SNA loaded: %s\n", (char *)RPATH);
-         } else {
-            LOGI("SNA Error (%d): %s", error, (char *)RPATH);
-         }
-
-         return;
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), SNA_FILE_EXT, 3))
+   {
+      int error = snapshot_load (retro_content_filepath);
+      if (!error) {
+         LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
+      } else {
+         LOGI("SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
-}
+      return;
+   }
 
-void load_ui(void)
-{
-   
+   // If it's a m3u file
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), M3U_FILE_EXT, 3))
+   {
+      // Parse the m3u file
+      dc_parse_m3u(dc, retro_content_filepath);
+
+      // Some debugging
+      log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
+      for(i = 0; i < dc->count; i++)
+      {
+         log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
+      }
+
+      // Init first image
+      dc->eject_state = false;
+      dc->index = 0;
+      retro_insert_image();
+
+      // If command was specified
+      if(dc->command)
+      {
+         // Execute the command
+         log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+         char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+         sprintf(command, "%s\n", dc->command);
+         kbd_buf_feed(command);
+         free(command);
+      }
+      else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
+      {
+         // Autoplay
+         retro_disk_auto();
+      }
+   }
+
+   // If it's a disk
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), DSK_FILE_EXT, 3))
+   {
+      // Add the file to disk control context
+      // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
+      dc_add_file(dc, retro_content_filepath);
+
+      // Init first disk
+      dc->index = 0;
+      dc->eject_state = false;
+      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      attach_disk((char *)dc->files[dc->index],0);
+      retro_disk_auto();
+   }
+
+   // If it's a tape
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CDT_FILE_EXT, 3))
+   {
+      int error = tape_insert ((char *)retro_content_filepath);
+      if (!error) {
+         kbd_buf_feed("|TAPE\nRUN\"\n^");
+         LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
+      } else {
+         LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
+      }
+   }
+
+   // Prepare SNA
+   strncat(retro_content_filepath, "0.SNA", sizeof(retro_content_filepath) - 1);
 }
 
 void retro_init(void)
@@ -1113,14 +1078,29 @@ void retro_init(void)
       retro_save_directory=retro_system_directory;
    }
 
-   if(retro_system_directory==NULL)sprintf(RETRO_DIR, "%c",'.');
-   else sprintf(RETRO_DIR, "%s", retro_system_directory);
+   if(retro_system_directory == NULL)
+   {
+      strcpy(retro_system_bios_directory, ".");
+   }
+   else
+   {
+      strncpy(
+         retro_system_bios_directory,
+         retro_system_directory,
+         sizeof(retro_system_bios_directory) - 1
+      );
+   }
 
-   sprintf(retro_system_data_directory, "%s%cdata",RETRO_DIR, slash); // TODO: unused ?
+   // TODO: future use to load custom bios
+   path_join(
+      retro_system_data_directory,
+      retro_system_bios_directory,
+      "data"
+   );
 
-   LOGI("Retro SYSTEM_DIRECTORY %s\n",retro_system_directory);
-   LOGI("Retro SAVE_DIRECTORY %s\n",retro_save_directory);
-   LOGI("Retro CONTENT_DIRECTORY %s\n",retro_content_directory);
+   LOGI("Retro SYSTEM_DIRECTORY %s\n", retro_system_directory);
+   LOGI("Retro SAVE_DIRECTORY %s\n", retro_save_directory);
+   LOGI("Retro CONTENT_DIRECTORY %s\n", retro_content_directory);
 
 #ifndef M16B
        enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
@@ -1285,9 +1265,9 @@ void retro_run(void)
 bool retro_load_game(const struct retro_game_info *game)
 {
    if (game){
-      strcpy(RPATH, (const char *) game->path);
+      strcpy(retro_content_filepath, (const char *) game->path);
    } else {
-      RPATH[0]='\0';
+      retro_content_filepath[0]='\0';
    }
 
    update_variables();

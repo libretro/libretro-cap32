@@ -177,7 +177,7 @@ int HandleExtension(char *path,char *ext);
 #include "retro_utils.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
-extern char RPATH[512];
+extern char retro_content_filepath[512];
 extern int autorun;
 extern int SND;
 extern bool kbd_runcmd;
@@ -1623,13 +1623,13 @@ void getConfigValueString (char* pchFileName, char* pchSection,
 void loadConfiguration (void)
 {
    unsigned i, n, iSide, iSector, iRomNum;
-   char chFileName[_MAX_PATH + 1];
-   char chPath[_MAX_PATH + 1];
+   char chFileName[_MAX_PATH + 11];
+   char chPath[_MAX_PATH + 16];
 
    (void)n;
 
    strncpy(chFileName, chAppPath, sizeof(chFileName)-10);
-   strcat(chFileName, "/cap32.cfg");
+   strncat(chFileName, "/cap32.cfg", sizeof(chFileName) - 1);
 
    memset(&CPC, 0, sizeof(CPC));
 
@@ -2068,7 +2068,7 @@ int retro_disk_auto()
         strcpy(Buffer, "|CPM");
       } else {
          strcpy(Buffer, "CAT");
-			printf("autoload not found\n");
+			printf("autoload: file to load not found\n");
       }
 
     } else {
@@ -2078,14 +2078,15 @@ int retro_disk_auto()
       else
       if (first_bin != -1) cur_name_id = first_bin;
 
-      sprintf(Buffer, "RUN\"%s", cpc_dsk_dirent[cur_name_id]);
+      // check added to avoid warning on gcc >= 8
+      if(snprintf(Buffer, sizeof(Buffer), "RUN\"%s", (const char*) &cpc_dsk_dirent[cur_name_id][0]) < 0)
+      {
+        printf("autoload: snprintf failed");
+      }
     }
   }
 
-  //if (CPC.psp_explore_disk == CPC_EXPLORE_FULL_AUTO)
-  {
-    strcat(Buffer, "\n");
-  }
+  strcat(Buffer, "\n");
 
   //printf("(%s)\n",Buffer);
   kbd_buf_feed(Buffer);
@@ -2135,17 +2136,28 @@ int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
-	  if(attach_disk(arv, drive) == 0)
-	  {
-		  retro_disk_auto();
-		  sprintf(RPATH,"%s%d.SNA",arv,drive);
-	  }
+      if(attach_disk(arv, drive) == 0)
+      {
+         retro_disk_auto();
+         snprintf(
+           retro_content_filepath,
+           sizeof(retro_computer_cfg),
+           "%s%d.SNA",
+           arv,
+           drive
+         );
+      }
    }
    else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
    {
-      snapshot_load (arv);
-      sprintf(RPATH,"%s",arv);
+      snapshot_load(arv);
+      strncpy(
+         retro_content_filepath,
+         arv,
+         sizeof(retro_content_filepath) - 1
+      );
    }
+
    return 0;
 }
 

@@ -20,16 +20,32 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #include "retro_utils.h"
+#ifdef VITA
+   #include "file/file_path.h"
+#endif
+
+// Verify file extension
+bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size)
+{
+   size_t file_len = strnlen(filename, filename_size);
+   size_t ext_len = strnlen(ext, ext_size);
+
+   if( ext_len > file_len || file_len >= filename_size - 1)
+      return false;
+
+   const char * file_ext = &filename[file_len - ext_len];
+
+   return (strncasecmp(file_ext, ext, filename_size) == 0);
+}
 
 // Verify if file exists
 bool file_exists(const char *filename)
 {
-   struct stat buf;
 #ifdef VITA
-	if (path_is_valid(filename) && !path_is_directory(filename))
+   if (path_is_valid(filename) && !path_is_directory(filename))
 #else
+   struct stat buf;
    if (stat(filename, &buf) == 0 &&
       (buf.st_mode & (S_IRUSR|S_IWUSR)) && !(buf.st_mode & S_IFDIR))
 #endif

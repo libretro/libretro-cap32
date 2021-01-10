@@ -34,6 +34,7 @@
 #define RETRO_PATH_SEPARATOR   		"/"
 #endif
 
+bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size);
 void path_join(char* out, const char* basedir, const char* filename);
 char* path_join_dup(const char* basedir, const char* filename);
 bool file_exists(const char *filename);
