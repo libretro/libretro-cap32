@@ -71,7 +71,6 @@ extern void play_tape();
 extern void retro_joy0(unsigned char joy0);
 extern void retro_key_down(int key);
 extern void retro_key_up(int key);
-extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
 PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
@@ -1270,7 +1269,10 @@ void retro_run(void)
    bool updated = false;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+   {
       update_variables();
+      retro_message("options updated, changes applied!");
+   }
 
    retro_loop();
 
@@ -1365,21 +1367,4 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
    (void)index;
    (void)enabled;
    (void)code;
-}
-
-// unused funcs
-void save_bkg()
-{
-   memcpy(save_Screen,video_buffer,gfx_buffer_size);
-}
-void restore_bgk()
-{
-   memcpy(video_buffer,save_Screen,gfx_buffer_size);
-}
-void Screen_SetFullUpdate(int scr)
-{
-   if(scr==0 ||scr>1)
-      memset(&video_buffer, 0, gfx_buffer_size);
-   if(scr>0)
-      memset(&bmp,0, gfx_buffer_size);
 }

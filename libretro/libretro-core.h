@@ -28,26 +28,11 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define TEX_MAX_WIDTH CPC_SCREEN_WIDTH * 2
 #define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT
-#define LOWRES 1
 
-//AUDIO
-#define FRAME_PERIOD_MS        20.0 // check cap32.h
-#define AUDIO_BYTES 2
-#define AUDIO_CHANNELS 2
-#define AUDIO_SAMPLE_SIZE 44100
-#define AUDIO_BUFSIZE (AUDIO_SAMPLE_SIZE * FRAME_PERIOD_MS / 1000)
-
-//LOG
-#if  defined(__ANDROID__) || defined(ANDROID)
-#include <android/log.h>
-#define LOG_TAG "RetroArch.Frodo"
-#define LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#else
-#define LOGI printf
-#endif
-
-//SCREEN 16BITS
-//#define M16B
+// compile flags
+#define NO_FLOPPY_SND
+#define LOWRES
+#define M16B // SCREEN 16BITS
 
 #ifdef M16B
    #define PIXEL_RAW_DENSITY 2
@@ -94,6 +79,21 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define CURSOR_MOVEMENT_Y 2
 #endif
 
+//AUDIO
+#define FRAME_PERIOD_MS        20.0 // check cap32.h
+#define AUDIO_BYTES 2
+#define AUDIO_CHANNELS 2
+#define AUDIO_SAMPLE_SIZE 44100
+#define AUDIO_BUFSIZE (AUDIO_SAMPLE_SIZE * FRAME_PERIOD_MS / 1000)
+
+//LOG
+#if  defined(__ANDROID__) || defined(ANDROID)
+#include <android/log.h>
+#define LOG_TAG "RetroArch.Frodo"
+#define LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#else
+#define LOGI printf
+#endif
 
 // BIT OPERATIONS - MACROS
 #define BIT_SET(var, bit)    var  = 1 << bit

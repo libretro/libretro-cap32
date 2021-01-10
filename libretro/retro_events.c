@@ -45,7 +45,6 @@ extern bool kbd_runcmd;
 
 extern void kbd_buf_feed(char *s);
 extern bool kbd_buf_update();
-extern void save_bkg();
 extern void play_tape();
 extern void stop_tape(void);
 extern void Tape_Rewind(void);
@@ -230,7 +229,9 @@ static unsigned do_action(const retro_action_t* action)
 {
    switch(action->type) {
       case EVENT_WRITE:
+         // TODO: generate an internal command for this behaivor
          kbd_buf_feed((char*) action->kbd_buf);
+         ev_set(EV_AUTO);
          break;
       case EVENT_VKEYB:
          ev_toggle_call();
