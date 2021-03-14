@@ -29,6 +29,13 @@ ifeq ($(shell uname -a),)
 	system_platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
 	system_platform = osx
+	arch = intel
+	ifeq ($(shell uname -p),powerpc)
+		arch = ppc
+	endif
+	ifeq ($(shell uname -p),arm)
+		arch = arm
+	endif
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
 	system_platform = win
 endif
@@ -66,11 +73,13 @@ else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
 	fpic := -fPIC
 	SHARED := -dynamiclib
+        MINVERSION :=
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
 	ifeq ($(OSX_LT_MAVERICKS),"YES")
-		fpic += -mmacosx-version-min=10.5
+		MINVERSION = -mmacosx-version-min=10.5
 	endif
+	fpic += $(MINVERSION)
 
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
@@ -78,25 +87,27 @@ else ifneq (,$(findstring ios,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro_ios.dylib
 	fpic := -fPIC
 	SHARED := -dynamiclib
+        MINVERSION :=
 
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
 	endif
 
-	CC = cc -arch armv7 -isysroot $(IOSSDK)
+ifeq ($(platform),ios-arm64)
+	CC    = cc -arch arm64 -isysroot $(IOSSDK)
 	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
-	CXX = c++ -arch armv7 -isysroot $(IOSSDK)
-ifeq ($(platform),ios9)
-	CC += -miphoneos-version-min=8.0
-	CXX += -miphoneos-version-min=8.0
-	CC_AS += -miphoneos-version-min=8.0
-	PLATFORM_DEFINES := -miphoneos-version-min=8.0
+	CXX   = c++ -arch arm64 -isysroot $(IOSSDK)
 else
-	CC += -miphoneos-version-min=5.0
-	CXX += -miphoneos-version-min=5.0
-	CC_AS += -miphoneos-version-min=5.0
-	PLATFORM_DEFINES := -miphoneos-version-min=5.0
+	CC    = cc -arch armv7 -isysroot $(IOSSDK)
+	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
+	CXX   = c++ -arch armv7 -isysroot $(IOSSDK)
 endif
+ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
+	MINVERSION = -miphoneos-version-min=8.0
+else
+	MINVERSION = -miphoneos-version-min=5.0
+endif
+	PLATFORM_DEFINES := $(MINVERSION)
 
 # tvOS
 else ifeq ($(platform), tvos-arm64)
@@ -107,6 +118,10 @@ else ifeq ($(platform), tvos-arm64)
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
 	endif
+
+	CC    = cc -arch arm64 -isysroot $(IOSSDK)
+	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
+	CXX   = c++ -arch arm64 -isysroot $(IOSSDK)
 
 # Theos
 else ifeq ($(platform), theos_ios)
