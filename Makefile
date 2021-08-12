@@ -284,6 +284,22 @@ else ifneq (,$(findstring armv,$(platform)))
 	endif
 	PLATFORM_DEFINES += -DARM
 
+#RETROFW
+else ifeq ($(platform), retrofw)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
+	CC_AS = /opt/retrofw-toolchain/usr/bin/mipsel-linux-as
+	CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
+	AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B
+	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
+	CFLAGS += -fomit-frame-pointer -ffast-math	
+	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
+	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
+	
 # emscripten
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
@@ -323,6 +339,9 @@ ifeq ($(DEBUG), 1)
 else ifeq ($(platform), emscripten)
 	CFLAGS += -O2
 	CXXFLAGS += -O2
+else ifeq ($(platform), retrofw)
+	CFLAGS += -Ofast
+	CXXFLAGS += -Ofast
 else
 	CFLAGS += -O3
 	CXXFLAGS += -O3
