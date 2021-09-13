@@ -6,6 +6,8 @@
 *.orig
 *.rej
 *.log
+# gimp dumps
+*.raw
 # editors
 .vscode
 .venv
