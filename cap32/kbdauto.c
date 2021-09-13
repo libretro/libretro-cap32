@@ -499,7 +499,6 @@ int cpc_get_key_from_ascii(char ascii)
 
 char kbd_feedbuf[255];
 int kbd_feedbuf_pos;
-bool kbd_runcmd=false;
 int kbd_mode = 0;
 
 extern void play_tape();
@@ -513,16 +512,14 @@ extern uint8_t keyboard_matrix[16];
 void kbd_buf_feed(char *s) {
 	strcpy(kbd_feedbuf, s);
 	kbd_feedbuf_pos=0;
-	kbd_runcmd=true;
 	//printf("cmd:%s\n",s);
 }
 
 void kbd_buf_clean(){
-   kbd_runcmd=false;
    memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix));
 }
 
-void kbd_buf_update() {
+bool kbd_buf_update() {
 
 	static int old=0;
 
@@ -530,7 +527,7 @@ void kbd_buf_update() {
 	if( kbd_feedbuf[kbd_feedbuf_pos]=='^' ) {
 		kbd_feedbuf_pos++;
 		play_tape();
-		return;
+		return false;
 	}
 
 	if( (kbd_feedbuf[kbd_feedbuf_pos]!=0) && old==0) {
@@ -561,8 +558,10 @@ void kbd_buf_update() {
 	else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')
    {
       kbd_buf_clean();
+      return true;
    }
 
+   return false;
 }
 
 //FIXME VIRTULAL KBD HANDLE

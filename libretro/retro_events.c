@@ -1,20 +1,41 @@
-/* Copyright (C) 2018
+/****************************************************************************
+ *  Caprice32 libretro port
  *
- * Permission is hereby granted, free of charge,
- * to any person obtaining a copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *  Copyright David Colmenero - D_Skywalk (2019-2021)
+ *  Copyright Daniel De Matteis (2012-2021)
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *  Redistribution and use of this code or any derivative works are permitted
+ *  provided that the following conditions are met:
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ *   - Redistributions may not be sold, nor may they be used in a commercial
+ *     product or activity.
+ *
+ *   - Redistributions that are modified from the original source must include the
+ *     complete source code, including the source code for all components used by a
+ *     binary built from the modified sources. However, as a special exception, the
+ *     source code distributed need not include anything that is normally distributed
+ *     (in either source or binary form) with the major components (compiler, kernel,
+ *     and so on) of the operating system on which the executable runs, unless that
+ *     component itself accompanies the executable.
+ *
+ *   - Redistributions must reproduce the above copyright notice, this list of
+ *     conditions and the following disclaimer in the documentation and/or other
+ *     materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -23,6 +44,7 @@
 #include <libretro-core.h>
 
 #include "retro_events.h"
+#include "retro_ui.h"
 
 /**
  * TODO: input_state assignments just need it here,
@@ -38,12 +60,12 @@ void retro_set_input_poll(retro_input_poll_t cb) { poll_cb = cb; }
 extern retro_input_poll_t input_poll_cb;
 extern retro_input_state_t input_state_cb;
 extern retro_environment_t environ_cb;
+extern retro_mouse_t mouse;
 
-extern int showkeyb;
 extern bool kbd_runcmd;
 
 extern void kbd_buf_feed(char *s);
-extern void save_bkg();
+extern bool kbd_buf_update();
 extern void play_tape();
 extern void stop_tape(void);
 extern void Tape_Rewind(void);
@@ -59,7 +81,13 @@ const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 static uint8_t keyboard_translation[MAX_KEYSYMS];
 unsigned int last_input[PORTS_NUMBER] = {0,0};
 uint32_t padnum = 0;
+
 bool (*ev_events)(void);
+bool (*process_events)(void);
+unsigned char (*process_ev_key)(int key, bool pressed);
+
+int event_call = EV_JOY;
+void ev_toggle_call();
 
 const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    { // JOYSTICK CFG
@@ -158,18 +186,18 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
 };
 
 /**
- * press_emulated_key:
+ * ev_press_key:
  * using CPC keyboard matrix sets as pressed
  **/
-static void press_emulated_key(uint8_t cpc_key) {
+void ev_press_key(uint8_t cpc_key) {
    keyboard_matrix[cpc_key >> 4] &= ~bit_values[cpc_key & 7]; // key is being held down
 }
 
 /**
- * release_emulated_key:
+ * ev_release_key:
  * using CPC keyboard matrix sets as released
  **/
-static void release_emulated_key(uint8_t cpc_key) {
+void ev_release_key(uint8_t cpc_key) {
    keyboard_matrix[cpc_key >> 4] |= bit_values[cpc_key & 7]; // key has been released
 }
 
@@ -222,15 +250,16 @@ static unsigned do_action(const retro_action_t* action)
 {
    switch(action->type) {
       case EVENT_WRITE:
+         // TODO: generate an internal command for this behaivor
          kbd_buf_feed((char*) action->kbd_buf);
+         ev_set(EV_AUTO);
          break;
       case EVENT_VKEYB:
-         showkeyb=-showkeyb;
-         //memset(keyboard_matrix, 0xff, sizeof(keyboard_matrix)); // clear CPC keyboard matrix
+         ev_toggle_call();
+         retro_ui_toggle_status(UI_KEYBOARD);
          break;
       case EVENT_GUI:
-         pauseg=1;
-         save_bkg();
+         retro_ui_toggle_status(UI_MENU);
          break;
       case EVENT_TAPE_ON:
          play_tape();
@@ -258,7 +287,7 @@ static unsigned do_action(const retro_action_t* action)
  *
  * TODO: add an help-screen in emulation screen?
  **/
-bool ev_events_joy()
+bool _events_joy()
 {
    static unsigned event = EVENT_NULL;
    unsigned n;
@@ -288,7 +317,7 @@ bool ev_events_joy()
  * ev_events_null:
  * simple disabled event combokey
  **/
-bool ev_events_null()
+bool _events_null()
 {
    return false;
 }
@@ -300,7 +329,7 @@ bool ev_events_null()
  *
  * process joystick using input_state_cb to CPC/Keyboard
  **/
-static void ev_process_joy(int playerID){
+static void _process_joy(int playerID){
 
    // is disabled?
    if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
@@ -312,33 +341,59 @@ static void ev_process_joy(int playerID){
    for (i = 0; i < MAX_BUTTONS; i++) {
       if (input_state_cb(playerID, RETRO_DEVICE_JOYPAD, 0, i)) {
          if(!(BIT_CHECK(last_input[playerID], i))) {
-            press_emulated_key(*(pad+i));
+            ev_press_key(*(pad+i));
             BIT_ADD(last_input[playerID], i);
          }
       }
       else if (BIT_CHECK(last_input[playerID], i)) {
-         release_emulated_key(*(pad+i));
+         ev_release_key(*(pad+i));
          BIT_CLEAR(last_input[playerID], i);
       }
    }
 }
 
+
 /**
  * ev_joysticks:
  * function to unify event code, call joy events and get user pad data
  **/
-void ev_joysticks() {
+bool ev_joysticks()
+{
    // you cannot use key-remap on player two, force read it
-   ev_process_joy(ID_PLAYER2);
+   _process_joy(ID_PLAYER2);
 
    // exit on controllers config to RETRO_DEVICE_AMSTRAD_KEYBOARD
    // but allows legacy keyboard-remap + joystick-simple combo, issue #63
    if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD &&
       retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_JOYSTICK)
-         return;
+         return false;
 
    if(!ev_events())
-      ev_process_joy(ID_PLAYER1);
+      _process_joy(ID_PLAYER1);
+
+   return true;
+}
+
+bool ev_autorun()
+{
+   static int delay = EMULATION_INIT_AUTORUNDELAY;
+   static int wait_computer = 1;
+
+   if(delay)
+   {
+      delay --;
+      return false;
+   }
+   
+   // wait one loop for the key be pressed
+   wait_computer ^= 1;
+   if(wait_computer)
+      return false;
+
+   if(kbd_buf_update())
+      ev_set(EV_JOY);
+
+   return true;
 }
 
 //-----------------------------------------------------
@@ -359,6 +414,7 @@ const retro_combo_event_t keyb_events[MAX_KEY_EVENT] =
    { RETROK_INSERT,
       { EVENT_CURSOR_JOY, "SWITCH CURSOR", "SWITCHED CURSOR/JOY" } },
 };
+
 
 /**
  * ev_events_key:
@@ -387,38 +443,43 @@ static void ev_events_key(unsigned keycode, bool down)
    }
 }
 
+
 /**
- * ev_key:
+ * process_ev_key:
  * emulator keyboard handler
  **/
-static bool ev_key(int key, bool pressed) {
+unsigned char _ev_key(int key, bool pressed) {
    uint8_t cpc_key = get_cpckey(key);
    if (cpc_key != CPC_KEY_NULL) {
       if (pressed)
-         press_emulated_key(cpc_key);
+         ev_press_key(cpc_key);
       else
-         release_emulated_key(cpc_key);
-      return true;
+         ev_release_key(cpc_key);
+      return cpc_key;
    }
-   return false;
+   return CPC_KEY_NULL;
+}
+
+/**
+ * _ev_key_null:
+ * Here we to try to avoid ghosting bug on old retroarch versions
+ * issue: https://github.com/libretro/RetroArch/issues/8838
+ **/
+unsigned char _ev_key_null(int key, bool pressed) {
+   return CPC_KEY_NULL;
 }
 
 /**
  * keyboard_cb:
  * Is called by main retro_callback when user press/release a key
  * just convert this event to an emulated event
- * BUG: generates ghosting release events when "amstrad keyboard" is selected on controls
  **/
 static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_t mod)
 {
-
    //printf( "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
    //       down ? "yes" : "no", keycode, character, mod);
 
-   if(kbd_runcmd) // FIXME -- send bug to libretro
-      return;
-
-   if(ev_key(keycode, down))
+   if(process_ev_key(keycode, down) != CPC_KEY_NULL)
       return;
 
    ev_events_key(keycode, down);
@@ -570,7 +631,41 @@ void ev_init(){
    struct retro_keyboard_callback cb = { keyboard_cb };
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
 
-   ev_events = ev_events_null;
+   ev_events = _events_null;
+   process_events = ev_joysticks;
+   process_ev_key = _ev_key_null;
+}
+
+void ev_set(int type)
+{
+   switch (type)
+   {
+      case EV_AUTO:
+         process_ev_key = _ev_key_null;
+         process_events = ev_autorun;
+         break;
+      
+      case EV_JOY:
+         process_ev_key = _ev_key;
+         process_events = ev_joysticks;
+         break;
+
+      case EV_KBD:
+         process_ev_key = _ev_key_null;
+         process_events = *ev_events;
+         break;
+   }
+
+   //printf("[CPC] [EV] type %u\n", type);
+   event_call = type;
+}
+
+void ev_toggle_call()
+{
+   if (event_call == EV_JOY)
+      ev_set(EV_KBD);
+   else
+      ev_set(EV_JOY);
 }
 
 void ev_combo_set(unsigned btn)
@@ -585,5 +680,165 @@ void ev_combo_set(unsigned btn)
       events_combo[JOY_EVENT_ID_B].id = RETRO_DEVICE_ID_JOYPAD_SELECT;
    }
 
-   ev_events = ev_events_joy;
+   ev_events = _events_joy;
+}
+
+static bool cursor_movement(int *axis, int value, int max_value, int sum)
+{
+   int abs_value = abs(value);
+   if (abs_value < 6)
+      sum = sum / 2;
+   else if (abs_value > 24)
+      sum = sum * 3;
+   else if (abs_value > 12)
+      sum = sum * 2;
+
+   int new_value = *axis;
+
+   new_value += (value > 0) ? sum : sum * -1;
+
+   if ( new_value < 0)
+   {
+      new_value = 0;
+   }
+   else if(new_value > max_value)
+   {
+      new_value = max_value;
+   }
+
+   if((*axis - new_value) == 0)
+      return false;
+
+   *axis = new_value;
+   return true;
+}
+
+void ev_mouse_motion()
+{
+   int mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
+   int mouse_y = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
+
+   // I think DS comes to this part if no event on screen
+   if( !mouse_x && !mouse_y )
+      return;
+
+   if (
+      mouse_x &&
+      cursor_movement(
+         &mouse.x,
+         mouse_x,
+         EMULATION_SCREEN_WIDTH - (6 * EMULATION_SCALE),
+         CURSOR_MOVEMENT_X
+      ))
+   {
+      mouse.status |= CURSOR_MOTION;
+   }
+
+   if (
+      mouse_y &&
+      cursor_movement(
+         &mouse.y,
+         mouse_y,
+         EMULATION_SCREEN_HEIGHT - 8,
+         CURSOR_MOVEMENT_Y
+      ))
+   {
+      mouse.status |= CURSOR_MOTION;
+   }
+
+}
+
+// TODO: check if focused because dont work correctly there...
+void ev_mouse_motion_absolute()
+{
+   int mouse_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
+   int mouse_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
+
+   // I think DS comes to this part if no event on screen
+   if( !mouse_x || !mouse_y ) {
+      return;
+   }
+
+   if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
+      return;
+
+   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xffff);
+   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xffff);
+
+   mouse.raw_x = mouse_x;
+   mouse.raw_y = mouse_y;
+   mouse.x = px;
+   mouse.y = py;
+   mouse.status |= CURSOR_MOTION;
+}
+
+void ev_cursor_click(unsigned int device, unsigned int event, int * ref_ptr, int value)
+{
+   int clicked = input_state_cb(0, device, 0, event);
+   if (clicked == *ref_ptr)
+      return;
+
+   *ref_ptr = clicked;
+   mouse.status |= value;
+}
+
+void ev_joy_motion()
+{
+   int cursor_x = 0;
+   int cursor_y = 0;
+
+   if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP))
+      cursor_y -= 8;
+
+   if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN))
+      cursor_y += 8;
+
+   if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT))
+      cursor_x -= 8 * EMULATION_SCALE;
+
+   if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT))
+      cursor_x += 8 * EMULATION_SCALE;
+
+   if (
+      cursor_x &&
+      cursor_movement(
+         &mouse.x,
+         cursor_x,
+         EMULATION_SCREEN_WIDTH - (6 * EMULATION_SCALE),
+         CURSOR_MOVEMENT_X
+      ))
+   {
+      mouse.status |= CURSOR_MOTION;
+   }
+
+   if (
+      cursor_y &&
+      cursor_movement(
+         &mouse.y,
+         cursor_y,
+         EMULATION_SCREEN_HEIGHT - 8,
+         CURSOR_MOVEMENT_Y
+      ))
+   {
+      mouse.status |= CURSOR_MOTION;
+   }
+}
+
+void ev_process_cursor()
+{
+   ev_joy_motion();
+   ev_mouse_motion();
+
+   ev_cursor_click(
+      RETRO_DEVICE_JOYPAD,
+      RETRO_DEVICE_ID_JOYPAD_A,
+      &mouse.click_joy,
+      CURSOR_CLICKED_JOY
+   );
+   ev_cursor_click(
+      RETRO_DEVICE_MOUSE,
+      RETRO_DEVICE_ID_MOUSE_LEFT,
+      &mouse.click,
+      CURSOR_CLICKED
+   );
 }

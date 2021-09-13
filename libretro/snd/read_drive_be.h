@@ -1,5 +1,5 @@
 /* PituKa - Amstrad CPC Emulator
-   (c) Copyright 2004-2005 David Skywalker
+   (c) Copyright 2004-2005 David Colmenero - D_Skywalk
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

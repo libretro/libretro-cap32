@@ -61,7 +61,7 @@ extern FILE *pfoDebug;
 #define MAX_SYNC_DEC 80
 #define MAX_SYNC_INC 80
 
-#define MAX_DRAWN 270 // Max displayed scan line (+1)
+#define MAX_DRAWN 272
 
 #define MIN_VHOLD 250
 #define MAX_VHOLD 380

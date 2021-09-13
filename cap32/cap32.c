@@ -162,10 +162,6 @@
    May 29, 2004 - 18:09 reintroduced tape_eject, tape_insert and tape_insert_voc; added sound support via the native SDL audio routines
 */
 
-#include <zlib.h>
-
-#define AUTODELAY 50
-
 /* forward declarations - some libretro port callbacks */
 void retro_loop(void);
 void doCleanUp (void);
@@ -177,17 +173,17 @@ int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
 #include "retro_snd.h"
+#include "retro_ui.h"
 #include "retro_utils.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
-extern char RPATH[512];
+extern char retro_content_filepath[512];
 extern int autorun;
 extern int SND;
 extern bool kbd_runcmd;
 int autoboot_delay=0;
 
 extern void kbd_buf_feed(char *s);
-extern void kbd_buf_update();
 extern void kbd_update_table(int lang);
 
 extern char DISKA_NAME[512];
@@ -947,10 +943,12 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
       FDC.motor = val & 0x01;
-      if(FDC.motor)
+      if(FDC.motor) {
          retro_snd_cmd(SND_FDCMOTOR, ST_LOOP);
-      else
+         retro_show_statusbar();
+      } else {
          retro_snd_cmd(SND_FDCMOTOR, ST_OFF);
+      }
       #ifdef DEBUG_FDC
       fputs(FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off", pfoDebug);
       #endif
@@ -1053,65 +1051,6 @@ int zip_dir (t_zip_info *zi)
 
    zi->iFiles = iFileCount;
    return 0; // operation completed successfully
-}
-
-int zip_extract (char *pchZipFile, char *pchFileName, uint32_t dwOffset)
-{
-   int iStatus, iCount;
-   uint32_t dwSize;
-   uint8_t *pbInputBuffer, *pbOutputBuffer;
-   FILE *pfileOut, *pfileIn;
-   z_stream z;
-
-   tmpnam(pchFileName); // generate a unique (temporary) file name for the decompression process
-
-   if (!(pfileOut = fopen(pchFileName, "wb")))
-      return ERR_FILE_UNZIP_FAILED; // couldn't create output file
-
-   pfileIn = fopen(pchZipFile, "rb"); // open ZIP file for reading
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to beginning of data block
-   if(!fread(pbGPBuffer, 30, 1, pfileIn)) { // read local header
-      fclose(pfileIn);
-      fclose(pfileOut);
-      return ERR_FILE_UNZIP_FAILED;
-   }
-   dwSize = *(uint32_t *)(pbGPBuffer + 18); // length of compressed data
-   dwOffset += 30 + *(uint16_t *)(pbGPBuffer + 26) + *(uint16_t *)(pbGPBuffer + 28);
-   fseek(pfileIn, dwOffset, SEEK_SET); // move file pointer to start of compressed data
-
-   pbInputBuffer = pbGPBuffer; // space for compressed data chunck
-   pbOutputBuffer = pbInputBuffer + 16384; // space for uncompressed data chunck
-   z.zalloc = (alloc_func)0;
-   z.zfree = (free_func)0;
-   z.opaque = (voidpf)0;
-   iStatus = inflateInit2(&z, -MAX_WBITS); // init zlib stream (no header)
-   do {
-      z.next_in = pbInputBuffer;
-      if (dwSize > 16384) { // limit input size to max 16K or remaining bytes
-         z.avail_in = 16384;
-      } else {
-         z.avail_in = dwSize;
-      }
-      z.avail_in = fread(pbInputBuffer, 1, z.avail_in, pfileIn); // load compressed data chunck from ZIP file
-      while ((z.avail_in) && (iStatus == Z_OK)) { // loop until all data has been processed
-         z.next_out = pbOutputBuffer;
-         z.avail_out = 16384;
-         iStatus = inflate(&z, Z_NO_FLUSH); // decompress data
-         iCount = 16384 - z.avail_out;
-         if (iCount) { // save data to file if output buffer is full
-            fwrite(pbOutputBuffer, 1, iCount, pfileOut);
-         }
-      }
-      dwSize -= 16384; // advance to next chunck
-   } while ((dwSize > 0) && (iStatus == Z_OK)) ; // loop until done
-   if (iStatus != Z_STREAM_END) {
-      return ERR_FILE_UNZIP_FAILED; // abort on error
-   }
-   iStatus = inflateEnd(&z); // clean up
-   fclose(pfileIn);
-   fclose(pfileOut);
-
-   return 0; // data was successfully decompressed
 }
 
 int emulator_select_ROM (void)
@@ -1684,13 +1623,13 @@ void getConfigValueString (char* pchFileName, char* pchSection,
 void loadConfiguration (void)
 {
    unsigned i, n, iSide, iSector, iRomNum;
-   char chFileName[_MAX_PATH + 1];
-   char chPath[_MAX_PATH + 1];
+   char chFileName[_MAX_PATH + 11];
+   char chPath[_MAX_PATH + 16];
 
    (void)n;
 
    strncpy(chFileName, chAppPath, sizeof(chFileName)-10);
-   strcat(chFileName, "/cap32.cfg");
+   strncat(chFileName, "/cap32.cfg", sizeof(chFileName) - 1);
 
    memset(&CPC, 0, sizeof(CPC));
 
@@ -2129,7 +2068,7 @@ int retro_disk_auto()
         strcpy(Buffer, "|CPM");
       } else {
          strcpy(Buffer, "CAT");
-			printf("autoload not found\n");
+			printf("autoload: file to load not found\n");
       }
 
     } else {
@@ -2139,14 +2078,15 @@ int retro_disk_auto()
       else
       if (first_bin != -1) cur_name_id = first_bin;
 
-      sprintf(Buffer, "RUN\"%s", cpc_dsk_dirent[cur_name_id]);
+      // check added to avoid warning on gcc >= 8
+      if(snprintf(Buffer, sizeof(Buffer), "RUN\"%s", (const char*) &cpc_dsk_dirent[cur_name_id][0]) < 0)
+      {
+        printf("autoload: snprintf failed");
+      }
     }
   }
 
-  //if (CPC.psp_explore_disk == CPC_EXPLORE_FULL_AUTO)
-  {
-    strcat(Buffer, "\n");
-  }
+  strcat(Buffer, "\n");
 
   //printf("(%s)\n",Buffer);
   kbd_buf_feed(Buffer);
@@ -2196,97 +2136,65 @@ int loadadsk (char *arv,int drive)
 {
    if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
    {
-	  if(attach_disk(arv, drive) == 0)
-	  {
-		  retro_disk_auto();
-		  sprintf(RPATH,"%s%d.SNA",arv,drive);
-	  }
+      if(attach_disk(arv, drive) == 0)
+      {
+         retro_disk_auto();
+         snprintf(
+           retro_content_filepath,
+           sizeof(retro_computer_cfg),
+           "%s%d.SNA",
+           arv,
+           drive
+         );
+      }
    }
    else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
    {
-      snapshot_load (arv);
-      sprintf(RPATH,"%s",arv);
+      snapshot_load(arv);
+      strncpy(
+         retro_content_filepath,
+         arv,
+         sizeof(retro_content_filepath) - 1
+      );
    }
+
    return 0;
-}
-
-void check_kbd_command()
-{
-
-   	if (autoboot_delay<AUTODELAY)
-    	autoboot_delay++;
-   	else if (autoboot_delay==AUTODELAY)
-   	{
-   		if (!autorun)
-   			kbd_runcmd=false;
-
-     		autoboot_delay++;
-   	}
-
-	if(kbd_runcmd==true && autoboot_delay>AUTODELAY){
-
-	  	static int pair=-1;
-
-      		pair=-pair;
-      		if(pair==1)
-      	   		return;
-
-		kbd_buf_update();
-
-	}
-
 }
 
 void retro_loop(void)
 {
-	while(theloop());
-	check_kbd_command();
-//printf("auto:%d run:%d cmd:%d\n",autoboot_delay,autorun,kbd_runcmd);
-}
-
-int theloop(void)
-{
-
-     if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
+	while(1)
    {
-      //int iTicksAdj = 0; // no adjustment necessary by default
-
-      if (CPC.snd_enabled)
+      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
       {
-
-         if (pbSndStream < CPC.snd_bufferptr)
-            dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-         else
-            dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-#if 0
-         if (dwSndDist < dwSndMinSafeDist)
-            iTicksAdj = -5; // speed emulation up to compensate
-         else if (dwSndDist > dwSndMaxSafeDist)
-            iTicksAdj = 5; // slow emulation down to compensate
-#endif
+         if (CPC.snd_enabled)
+         {
+            if (pbSndStream < CPC.snd_bufferptr)
+               dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
+            else
+               dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
+         }
       }
 
+      uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
+      if (VDU.scrln > 0)
+         CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
+      else
+         CPC.scr_base = retro_getScreenPtr(); // reset to surface start
+
+      CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
+
+      iExitCondition = z80_execute(); // run the emulation until an exit condition is met
+      if (iExitCondition == EC_FRAME_COMPLETE)
+      {
+         /* emulation finished rendering a complete frame? */
+         break; /* exit retro_loop for retro_run */
+      }
+      else if (iExitCondition == EC_SOUND_BUFFER)
+      {
+         mixsnd();
+      }
    }
-
-   uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
-   if (VDU.scrln > 0)
-      CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
-   else
-      CPC.scr_base = retro_getScreenPtr(); // reset to surface start
-
-   CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
-
-   iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-
-   if (iExitCondition == EC_FRAME_COMPLETE)
-   {
-      /* emulation finished rendering a complete frame? */
-      return 0; /* exit retro_loop for retro_run */
-   }
-   else if (iExitCondition == EC_SOUND_BUFFER)
-      mixsnd();
-
-   return 1;
 }
 
 int capmain (int argc, char **argv)

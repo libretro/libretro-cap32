@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright not6 - r-type (2015-2018)
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
  *  Copyright Daniel De Matteis (2012-2021)
  *
@@ -37,71 +36,27 @@
  *
  ****************************************************************************************/
 
-#include "retro_strings.h"
+#ifndef RETRO_UI_H__
+#define RETRO_UI_H__
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Note: This function returns a pointer to a substring_left of the original string.
-// If the given string was allocated dynamically, the caller must not overwrite
-// that pointer with the returned value, since the original pointer must be
-// deallocated using the same allocator with which it was allocated.  The return
-// value must NOT be deallocated using free() etc.
-char* trimwhitespace(char *str)
+typedef enum
 {
-  char *end;
+   UI_DISABLED  = 0,
+   UI_KEYBOARD  = 1,
+   UI_MENU      = 2,
+   UI_STATUSBAR = 3,
+   UI_LED       = 4,
+} retro_commands_ui_t;
 
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
+void retro_ui_init(void);
+void retro_ui_free(void);
 
-  if(*str == 0)  // All spaces?
-    return str;
+void retro_ui_set_status(retro_commands_ui_t cmd, bool value);
+void retro_ui_toggle_status(retro_commands_ui_t cmd);
+void retro_ui_process();
 
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
+void retro_show_statusbar();
+void retro_ui_update_text();
+void retro_ui_set_led(bool value);
 
-  // Write new null terminator character
-  end[1] = '\0';
-
-  return str;
-}
-
-// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
-char* strleft(const char* str, int len)
-{
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str, len);
-	return result;
-}
-
-// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
-char* strright(const char* str, int len)
-{
-	int pos = strlen(str) - len;
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str + pos, len);
-	return result;
-}
-
-// Returns true if 'str' starts with 'start'
-bool strstartswith(const char* str, const char* start)
-{
-	if (strlen(str) >= strlen(start))
-		if(!strncasecmp(str, start, strlen(start)))
-			return true;
-		
-	return false;
-}
-
-// Returns true if 'str' ends with 'end'
-bool strendswith(const char* str, const char* end)
-{
-	if (strlen(str) >= strlen(end))
-		if(!strcasecmp((char*)&str[strlen(str)-strlen(end)], end))
-			return true;
-		
-	return false;
-}
+#endif

@@ -54,6 +54,7 @@
 #include "z80.h"
 
 #include "retro_snd.h"
+#include "retro_ui.h"
 
 extern t_CPC CPC;
 extern t_FDC FDC;
@@ -723,6 +724,7 @@ uint8_t fdc_read_data(void)
             FDC.byte_count = 0; // clear byte counter
             FDC.phase = CMD_PHASE; // switch to command phase
             FDC.led = 0; // turn the drive LED off
+            retro_ui_set_led(false);
          }
          break;
    }
@@ -865,6 +867,8 @@ void fdc_readtrk(void)
 
 void fdc_write(void)
 {
+   retro_ui_set_led(true);
+
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
@@ -906,6 +910,8 @@ void fdc_write(void)
 void fdc_read(void)
 {
    retro_snd_cmd(SND_FDCREAD, ST_ON);
+   retro_ui_set_led(true);
+
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
@@ -1010,6 +1016,8 @@ void fdc_writeID(void)
 
 void fdc_scan(void)
 {
+   retro_ui_set_led(true);
+
    FDC.led = 1; // turn the drive LED on
    check_unit(); // switch to target drive
    if (init_status_regs() == 0)

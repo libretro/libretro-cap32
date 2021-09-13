@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright not6 - r-type (2015-2018)
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
  *  Copyright Daniel De Matteis (2012-2021)
  *
@@ -37,71 +36,30 @@
  *
  ****************************************************************************************/
 
-#include "retro_strings.h"
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//---------------------------------------------------------------------------------
+#ifndef _assets_h_
+#define _assets_h_
+//---------------------------------------------------------------------------------
+#define IMG_KEYBOARD_WIDTH  384
+#define IMG_KEYBOARD_HEIGHT 108
 
-// Note: This function returns a pointer to a substring_left of the original string.
-// If the given string was allocated dynamically, the caller must not overwrite
-// that pointer with the returned value, since the original pointer must be
-// deallocated using the same allocator with which it was allocated.  The return
-// value must NOT be deallocated using free() etc.
-char* trimwhitespace(char *str)
-{
-  char *end;
+extern const unsigned char ui_keyboard_bg[];
+extern const int ui_keyboard_bg_size;
 
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
+extern const unsigned char ui_keyboard_en[];
+extern const int ui_keyboard_en_size;
 
-  if(*str == 0)  // All spaces?
-    return str;
+//--------------------------------------------------------------------
 
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
+#define FNT_MIN_CHAR 32
+#define FNT_MAX_CHAR 126
+#define FNT_CHAR_WIDTH 6
+#define FNT_CHAR_HEIGHT 8
+#define BITS_IN_BYTE 8
 
-  // Write new null terminator character
-  end[1] = '\0';
+extern const unsigned char font[];
 
-  return str;
-}
-
-// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
-char* strleft(const char* str, int len)
-{
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str, len);
-	return result;
-}
-
-// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
-char* strright(const char* str, int len)
-{
-	int pos = strlen(str) - len;
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str + pos, len);
-	return result;
-}
-
-// Returns true if 'str' starts with 'start'
-bool strstartswith(const char* str, const char* start)
-{
-	if (strlen(str) >= strlen(start))
-		if(!strncasecmp(str, start, strlen(start)))
-			return true;
-		
-	return false;
-}
-
-// Returns true if 'str' ends with 'end'
-bool strendswith(const char* str, const char* end)
-{
-	if (strlen(str) >= strlen(end))
-		if(!strcasecmp((char*)&str[strlen(str)-strlen(end)], end))
-			return true;
-		
-	return false;
-}
+//---------------------------------------------------------------------------------
+#endif //_ui_h_
+//---------------------------------------------------------------------------------

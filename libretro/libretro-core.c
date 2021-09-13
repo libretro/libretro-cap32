@@ -1,3 +1,43 @@
+/****************************************************************************
+ *  Caprice32 libretro port
+ *
+ *  Copyright not6 - r-type (2015-2018)
+ *  Copyright David Colmenero - D_Skywalk (2019-2021)
+ *  Copyright Daniel De Matteis (2012-2021)
+ *
+ *  Redistribution and use of this code or any derivative works are permitted
+ *  provided that the following conditions are met:
+ *
+ *   - Redistributions may not be sold, nor may they be used in a commercial
+ *     product or activity.
+ *
+ *   - Redistributions that are modified from the original source must include the
+ *     complete source code, including the source code for all components used by a
+ *     binary built from the modified sources. However, as a special exception, the
+ *     source code distributed need not include anything that is normally distributed
+ *     (in either source or binary form) with the major components (compiler, kernel,
+ *     and so on) of the operating system on which the executable runs, unless that
+ *     component itself accompanies the executable.
+ *
+ *   - Redistributions must reproduce the above copyright notice, this list of
+ *     conditions and the following disclaimer in the documentation and/or other
+ *     materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************************/
+
+#include "microui.h"
 #include "libretro.h"
 #include "libretro-core.h"
 #include "string/stdstring.h"
@@ -6,15 +46,11 @@
 #include "retro_events.h"
 #include "retro_utils.h"
 #include "retro_snd.h"
+#include "retro_render.h"
+#include "retro_ui.h"
 
-//CORE VAR
-#ifdef _WIN32
-char slash = '\\';
-#else
-char slash = '/';
-#endif
-
-char RETRO_DIR[512];
+#include "gfx/software.h"
+#include "assets/assets.h"
 
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
@@ -34,8 +70,6 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 
-extern int showkeyb;
-
 extern int retro_disk_auto();
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
@@ -45,7 +79,6 @@ extern int tape_insert (char *pchFileName);
 extern int cart_insert (char *pchFileName);
 extern void enter_gui(void);
 extern void kbd_buf_feed(char *s);
-extern void kbd_buf_update();
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
@@ -62,38 +95,27 @@ extern void play_tape();
 extern void retro_joy0(unsigned char joy0);
 extern void retro_key_down(int key);
 extern void retro_key_up(int key);
-extern void Screen_SetFullUpdate(int scr);
 
 //VIDEO
-PIXEL_TYPE *video_buffer;
+PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
+PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
 uint32_t save_Screen[WINDOW_MAX_SIZE];
-uint32_t bmp[WINDOW_MAX_SIZE];
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
 
-//PATH
-char RPATH[512];
-int pauseg=0; //enter_gui
+// almost deprecated
+int pauseg = 0; 
+int autorun = 0;
+int SND=1;
+int SHIFTON=-1;
 
-extern int app_init(void);
-extern int app_free(void);
-extern int app_render(int poll);
-
-extern void app_screen_init(int width, int height);
-extern void app_screen_free(void);
-
-int retro_scr_style=0, retro_scr_w=0, retro_scr_h=0;
-int gfx_buffer_size=0;
-
-#include "vkbd.i"
+int retro_scr_style = 0;
+int gfx_buffer_size = 0;
 
 unsigned amstrad_devices[ 2 ];
 
-int autorun=0;
-
 int emu_status = COMPUTER_OFF;
-int gui_status = GUI_DISABLED;
 
 //CAP32 DEF BEGIN
 #include "cap32.h"
@@ -112,6 +134,8 @@ const char *retro_save_directory;
 const char *retro_system_directory;
 const char *retro_content_directory;
 char retro_system_data_directory[512];
+char retro_system_bios_directory[512];
+char retro_content_filepath[512];
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -119,6 +143,14 @@ static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 /*static*/ retro_audio_sample_batch_t audio_batch_cb;
 /*static*/ retro_environment_t environ_cb;
+/*static*/ retro_mouse_t mouse =
+{
+   EMULATION_SCREEN_WIDTH/2,
+   EMULATION_SCREEN_WIDTH/2,
+   EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
+   EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
+   0, 0, 0
+};
 
 // allowed file types
 #define CDT_FILE_EXT "cdt"
@@ -148,8 +180,8 @@ int retro_getGfxBpp(){
 }
 
 int retro_getGfxBps(){
-    LOGI("getBPS: %u\n", retro_scr_w);
-    return retro_scr_w;
+    LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
+    return EMULATION_SCREEN_WIDTH;
 }
 
 int retro_getAudioBuffer(){
@@ -195,6 +227,7 @@ void Add_Option(const char* option)
    sprintf(XARGV[PARAMCOUNT++],"%s",option);
 }
 
+// TODO: clean this...
 int pre_main(const char *argv)
 {
    int i;
@@ -209,13 +242,12 @@ int pre_main(const char *argv)
 
 
    if(Only1Arg)
-   {  Add_Option("x64");
+   {
+      Add_Option("x64");
+      if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), "crt", 3))
+         Add_Option("-cartcrt");
 
-      if (strlen(RPATH) >= strlen("crt"))
-         if(!strcasecmp(&RPATH[strlen(RPATH)-strlen("crt")], "crt"))
-            Add_Option("-cartcrt");
-
-      Add_Option(RPATH/*ARGUV[0]*/);
+      Add_Option(retro_content_filepath);
    }
    else
    { // Pass all cmdline args
@@ -327,24 +359,6 @@ void enter_options(void) {}
 
 #endif
 
-void save_bkg()
-{
-   memcpy(save_Screen,video_buffer,gfx_buffer_size);
-}
-
-void restore_bgk()
-{
-   memcpy(video_buffer,save_Screen,gfx_buffer_size);
-}
-
-void Screen_SetFullUpdate(int scr)
-{
-   if(scr==0 ||scr>1)
-      memset(&video_buffer, 0, gfx_buffer_size);
-   if(scr>0)
-      memset(&bmp,0, gfx_buffer_size);
-}
-
 void retro_message(const char *text) {
    struct retro_message msg;
    char msg_local[256];
@@ -427,11 +441,15 @@ void retro_set_environment(retro_environment_t cb)
          "Internal resolution; 384x272|768x272",
          #endif
       },
-      {
-         "cap32_statusbar", // unused - but i try to implement in a future
-         "Status Bar; disabled|enabled",
-      },
       #endif
+      {
+         "cap32_statusbar",
+         "Status Bar; onloading|enabled|disabled",
+      },
+      {
+         "cap32_floppy_sound",
+         "Floppy Sound; enabled|disabled",
+      },
       {
          "cap32_scr_tube",
          "Monitor Type; color|green|white",
@@ -498,8 +516,10 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "enabled") == 0)
-         autorun = 1;
+      if (strcmp(var.value, "disabled") == 0)
+         ev_set(EV_JOY);
+      else
+         ev_set(EV_AUTO);
    }
 
    var.key = "cap32_combokey";
@@ -553,18 +573,40 @@ static void update_variables(void)
       }
    }
 
+   var.key = "cap32_floppy_sound";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "disabled") == 0)
+          retro_computer_cfg.floppy_snd = 0;
+      else
+         retro_computer_cfg.floppy_snd = 1;
+   }
+
    var.key = "cap32_statusbar";
    var.value = NULL;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "enabled") == 0)
-         BIT_ADD(gui_status, GUI_STATUSBAR);
-
-      if (strcmp(var.value, "disabled") == 0)
-         BIT_CLEAR(gui_status, GUI_STATUSBAR);
-
-         //TODO: call update status
+      if (strcmp(var.value, "onloading") == 0)
+      {
+         if (retro_computer_cfg.statusbar != STATUSBAR_HIDE)
+         {
+            retro_computer_cfg.statusbar = STATUSBAR_HIDE;
+            retro_show_statusbar();
+         }
+      }
+      else if (strcmp(var.value, "enabled") == 0)
+      {
+         retro_computer_cfg.statusbar = STATUSBAR_SHOW;
+         retro_show_statusbar();
+      }
+      else if (strcmp(var.value, "disabled") == 0)
+      {
+         retro_computer_cfg.statusbar = STATUSBAR_OFF;
+         retro_ui_set_status(UI_STATUSBAR, false);
+      }
    }
 
    var.key = "cap32_scr_tube";
@@ -640,7 +682,10 @@ static void update_variables(void)
 
    // check if emulation need a restart (model/lang/... is changed)
    if(retro_computer_cfg.is_dirty)
+   {
       emu_restart();
+      retro_ui_update_text();
+   }
 }
 
 
@@ -652,7 +697,7 @@ void Emu_init()
       return;
    }
    emu_status = COMPUTER_BOOTING;
-   pre_main(RPATH);
+   pre_main(retro_content_filepath);
 }
 
 void Emu_uninit()
@@ -935,116 +980,96 @@ void computer_load_bios() {
    // TODO add load customs bios
 
    // cart is like a system bios
-   if (strlen(RPATH) >= strlen(CPR_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CPR_FILE_EXT)], CPR_FILE_EXT))
-      {
-         int result = cart_insert(RPATH);
-         if(result != 0) {
-            retro_message("Error Loading Cart...");
-         } else {
-            sprintf(RPATH,"%s",RPATH);
-         }
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CPR_FILE_EXT, 3))
+   {
+      int result = cart_insert(retro_content_filepath);
+      if(result != 0) {
+         retro_message("Error Loading Cart...");
       }
+   }
 }
 
 // load content
 void computer_load_file() {
    int i;
-   // If it's a m3u file
-   if (strlen(RPATH) >= strlen(M3U_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(M3U_FILE_EXT)], M3U_FILE_EXT))
-      {
-         // Parse the m3u file
-         dc_parse_m3u(dc, RPATH);
-
-         // Some debugging
-         log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
-         for(i = 0; i < dc->count; i++)
-         {
-            log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
-         }
-
-         // Init first image
-         dc->eject_state = false;
-         dc->index = 0;
-         retro_insert_image();
-
-         // If command was specified
-         if(dc->command)
-         {
-            // Execute the command
-            log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
-            char* command = calloc(strlen(dc->command) + 1, sizeof(char));
-            sprintf(command, "%s\n", dc->command);
-            kbd_buf_feed(command);
-            free(command);
-         }
-         else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
-         {
-            // Autoplay
-            retro_disk_auto();
-         }
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-      }
-
-   // If it's a disk
-   if (strlen(RPATH) >= strlen(DSK_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(DSK_FILE_EXT)], DSK_FILE_EXT))
-      {
-         // Add the file to disk control context
-         // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
-         dc_add_file(dc, RPATH);
-
-         // Init first disk
-         dc->index = 0;
-         dc->eject_state = false;
-         LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-         attach_disk((char *)dc->files[dc->index],0);
-         retro_disk_auto();
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-      }
-
-   // If it's a tape
-   if (strlen(RPATH) >= strlen(CDT_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(CDT_FILE_EXT)], CDT_FILE_EXT))
-      {
-         int error = tape_insert ((char *)RPATH);
-         if (!error) {
-            kbd_buf_feed("|TAPE\nRUN\"\n^");
-            LOGI("Tape inserted: %s\n", (char *)RPATH);
-         } else {
-            LOGI("Tape Error (%d): %s\n", error, (char *)RPATH);
-         }
-
-         // Prepare SNA
-         sprintf(RPATH,"%s%d.SNA",RPATH,0);
-
-         return;
-
-      }
 
    // If it's a snapshot
-   if (strlen(RPATH) >= strlen(SNA_FILE_EXT))
-      if(!strcasecmp(&RPATH[strlen(RPATH)-strlen(SNA_FILE_EXT)], SNA_FILE_EXT))
-      {
-         int error = snapshot_load (RPATH);
-         if (!error) {
-            LOGI("SNA loaded: %s\n", (char *)RPATH);
-         } else {
-            LOGI("SNA Error (%d): %s", error, (char *)RPATH);
-         }
-
-         return;
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), SNA_FILE_EXT, 3))
+   {
+      int error = snapshot_load (retro_content_filepath);
+      if (!error) {
+         LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
+      } else {
+         LOGI("SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
+      return;
+   }
+
+   // If it's a m3u file
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), M3U_FILE_EXT, 3))
+   {
+      // Parse the m3u file
+      dc_parse_m3u(dc, retro_content_filepath);
+
+      // Some debugging
+      log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
+      for(i = 0; i < dc->count; i++)
+      {
+         log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
+      }
+
+      // Init first image
+      dc->eject_state = false;
+      dc->index = 0;
+      retro_insert_image();
+
+      // If command was specified
+      if(dc->command)
+      {
+         // Execute the command
+         log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+         char* command = calloc(strlen(dc->command) + 1, sizeof(char));
+         sprintf(command, "%s\n", dc->command);
+         kbd_buf_feed(command);
+         free(command);
+      }
+      else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
+      {
+         // Autoplay
+         retro_disk_auto();
+      }
+   }
+
+   // If it's a disk
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), DSK_FILE_EXT, 3))
+   {
+      // Add the file to disk control context
+      // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
+      dc_add_file(dc, retro_content_filepath);
+
+      // Init first disk
+      dc->index = 0;
+      dc->eject_state = false;
+      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      attach_disk((char *)dc->files[dc->index],0);
+      retro_disk_auto();
+   }
+
+   // If it's a tape
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CDT_FILE_EXT, 3))
+   {
+      int error = tape_insert ((char *)retro_content_filepath);
+      if (!error) {
+         kbd_buf_feed("|TAPE\nRUN\"\n^");
+         LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
+      } else {
+         LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
+      }
+   }
+
+   // Prepare SNA
+   strncat(retro_content_filepath, "0.SNA", sizeof(retro_content_filepath) - 1);
 }
 
 void retro_init(void)
@@ -1086,14 +1111,29 @@ void retro_init(void)
       retro_save_directory=retro_system_directory;
    }
 
-   if(retro_system_directory==NULL)sprintf(RETRO_DIR, "%c",'.');
-   else sprintf(RETRO_DIR, "%s", retro_system_directory);
+   if(retro_system_directory == NULL)
+   {
+      strcpy(retro_system_bios_directory, ".");
+   }
+   else
+   {
+      strncpy(
+         retro_system_bios_directory,
+         retro_system_directory,
+         sizeof(retro_system_bios_directory) - 1
+      );
+   }
 
-   sprintf(retro_system_data_directory, "%s%cdata",RETRO_DIR, slash); // TODO: unused ?
+   // TODO: future use to load custom bios
+   path_join(
+      retro_system_data_directory,
+      retro_system_bios_directory,
+      "data"
+   );
 
-   LOGI("Retro SYSTEM_DIRECTORY %s\n",retro_system_directory);
-   LOGI("Retro SAVE_DIRECTORY %s\n",retro_save_directory);
-   LOGI("Retro CONTENT_DIRECTORY %s\n",retro_content_directory);
+   LOGI("Retro SYSTEM_DIRECTORY %s\n", retro_system_directory);
+   LOGI("Retro SAVE_DIRECTORY %s\n", retro_save_directory);
+   LOGI("Retro CONTENT_DIRECTORY %s\n", retro_content_directory);
 
 #ifndef M16B
        enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
@@ -1110,7 +1150,6 @@ void retro_init(void)
 
    // events initialize - joy and keyboard
    ev_init();
-   app_init();
 
    // Disk control interface
    unsigned dci_version = 0;
@@ -1125,23 +1164,24 @@ void retro_init(void)
    retro_computer_cfg.lang = -1;
    retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
+   retro_computer_cfg.statusbar = STATUSBAR_HIDE;
 
    update_variables();
 
    #ifdef LOWRES
-   retro_scr_w = 384;
    retro_scr_style = 3;
    #else
-   retro_scr_w = 768;
    retro_scr_style = 4;
    #endif
-   retro_scr_h = 272;
-   gfx_buffer_size = retro_scr_w * retro_scr_h * PITCH;
-
-   app_screen_init(retro_scr_w, retro_scr_h);
+   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * PITCH;
 
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
-         retro_scr_w, retro_scr_h, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+         EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+
+   memset(video_buffer, 0, gfx_buffer_size);
+   memset(bmp, 0, WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE)); // buffer UI
+
+   retro_ui_init();
 
    Emu_init();
 
@@ -1154,10 +1194,8 @@ extern void main_exit();
 void retro_deinit(void)
 {
    free_retro_snd();
-   app_free();
-   app_screen_free();
-
    Emu_uninit();
+   retro_ui_free();
 
    UnInitOSGLU();
 
@@ -1188,9 +1226,6 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
    info->library_name     = "cap32";
-   #ifdef LOWRES
-   #define SCREENMODE_STR " LO"
-   #endif
    #ifndef GIT_VERSION
    #define GIT_VERSION ""
    #endif
@@ -1203,8 +1238,8 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width = 384;
-   info->geometry.base_height = 272;
+   info->geometry.base_width = CPC_SCREEN_WIDTH;
+   info->geometry.base_height = CPC_SCREEN_HEIGHT;
    info->geometry.max_width = TEX_MAX_WIDTH;
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
@@ -1230,9 +1265,16 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_audio_mix()
 {
-   retro_snd_mixer();
+   if(retro_computer_cfg.floppy_snd)
+      retro_snd_mixer();
    memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
    audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
+}
+
+void retro_PollEvent()
+{
+   input_poll_cb(); // retroarch get keys
+   process_events();
 }
 
 void retro_run(void)
@@ -1240,28 +1282,25 @@ void retro_run(void)
    bool updated = false;
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-      update_variables();
-
-   if(pauseg==0)
    {
-      retro_loop();
-      Core_PollEvent();
-
-      if(showkeyb==1)
-         app_render(0);
+      update_variables();
+      retro_message("options updated, changes applied!");
    }
-   else if (pauseg==1)app_render(1);
 
-   video_cb(video_buffer, retro_scr_w, retro_scr_h, retro_scr_w << PIXEL_BYTES);
+   retro_loop();
 
+   retro_PollEvent();
+   retro_ui_process();
+
+   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << PIXEL_BYTES);
 }
 
 bool retro_load_game(const struct retro_game_info *game)
 {
    if (game){
-      strcpy(RPATH, (const char *) game->path);
+      strcpy(retro_content_filepath, (const char *) game->path);
    } else {
-      RPATH[0]='\0';
+      retro_content_filepath[0]='\0';
    }
 
    update_variables();

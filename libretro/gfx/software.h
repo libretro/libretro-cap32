@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright not6 - r-type (2015-2018)
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
  *  Copyright Daniel De Matteis (2012-2021)
  *
@@ -37,71 +36,22 @@
  *
  ****************************************************************************************/
 
-#include "retro_strings.h"
+#ifndef GFX_SOFTWARE_H__
+#define GFX_SOFTWARE_H__
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-// Note: This function returns a pointer to a substring_left of the original string.
-// If the given string was allocated dynamically, the caller must not overwrite
-// that pointer with the returned value, since the original pointer must be
-// deallocated using the same allocator with which it was allocated.  The return
-// value must NOT be deallocated using free() etc.
-char* trimwhitespace(char *str)
-{
-  char *end;
+//*****************************************************************************
+// Graph helpers functions
 
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
-
-  if(*str == 0)  // All spaces?
-    return str;
-
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
-
-  // Write new null terminator character
-  end[1] = '\0';
-
-  return str;
-}
-
-// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
-char* strleft(const char* str, int len)
-{
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str, len);
-	return result;
-}
-
-// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
-char* strright(const char* str, int len)
-{
-	int pos = strlen(str) - len;
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str + pos, len);
-	return result;
-}
-
-// Returns true if 'str' starts with 'start'
-bool strstartswith(const char* str, const char* start)
-{
-	if (strlen(str) >= strlen(start))
-		if(!strncasecmp(str, start, strlen(start)))
-			return true;
-		
-	return false;
-}
-
-// Returns true if 'str' ends with 'end'
-bool strendswith(const char* str, const char* end)
-{
-	if (strlen(str) >= strlen(end))
-		if(!strcasecmp((char*)&str[strlen(str)-strlen(end)], end))
-			return true;
-		
-	return false;
-}
+void draw_line(PIXEL_TYPE * buffer, int x, int y, int width, PIXEL_TYPE color);
+void draw_rect(PIXEL_TYPE * buffer, int x, int y, int width, int height, PIXEL_TYPE color);
+void draw_text(PIXEL_TYPE * buffer, int x, int y, const char * text, PIXEL_TYPE color);
+void draw_char(PIXEL_TYPE * buffer, int x, int y, char chr_idx, PIXEL_TYPE color);
+void draw_image(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, int width, int height);
+void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
+void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
+void convert_image(PIXEL_TYPE * buffer, const unsigned int * img, unsigned int size);
+PIXEL_TYPE convert_color (unsigned int color);
+#endif

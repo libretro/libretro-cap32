@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright not6 - r-type (2015-2018)
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
  *  Copyright Daniel De Matteis (2012-2021)
  *
@@ -37,71 +36,62 @@
  *
  ****************************************************************************************/
 
-#include "retro_strings.h"
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
 
-// Note: This function returns a pointer to a substring_left of the original string.
-// If the given string was allocated dynamically, the caller must not overwrite
-// that pointer with the returned value, since the original pointer must be
-// deallocated using the same allocator with which it was allocated.  The return
-// value must NOT be deallocated using free() etc.
-char* trimwhitespace(char *str)
+#include <libretro.h>
+#include <libretro-core.h>
+
+#include "gfx/software.h"
+#include "retro_render.h"
+#include "assets/assets.h"
+
+//unsigned int number = 0;
+
+void render_rect(PIXEL_TYPE * buffer, mu_Rect rect, mu_Color color)
 {
-  char *end;
-
-  // Trim leading space
-  while(isspace((unsigned char)*str)) str++;
-
-  if(*str == 0)  // All spaces?
-    return str;
-
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while(end > str && isspace((unsigned char)*end)) end--;
-
-  // Write new null terminator character
-  end[1] = '\0';
-
-  return str;
+   //printf("%u rect: %ix%i %i-%i\n", number, rect.x, rect.y, rect.w, rect.h);
+   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, RGB2COLOR(color.r, color.g, color.b));
 }
 
-// Returns a substring of 'str' that contains the 'len' leftmost characters of 'str'.
-char* strleft(const char* str, int len)
+void render_text(PIXEL_TYPE * buffer, const char *text, mu_Vec2 pos, mu_Color color)
 {
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str, len);
-	return result;
+   draw_text(buffer, pos.x, pos.y, text, RGB2COLOR(color.r, color.g, color.b));
 }
 
-// Returns a substring of 'str' that contains the 'len' rightmost characters of 'str'.
-char* strright(const char* str, int len)
+void render_icon(PIXEL_TYPE * buffer, int id, mu_Rect rect, mu_Color color)
 {
-	int pos = strlen(str) - len;
-	char* result = calloc(len + 1, sizeof(char));
-	strncpy(result, str + pos, len);
-	return result;
+   char chr = 0;
+   int x, y;
+   x = rect.x + FNT_CHAR_WIDTH / 4;
+   y = rect.y + FNT_CHAR_HEIGHT / 4;
+
+   switch (id)
+   {
+      case MU_ICON_CLOSE:		chr = 'X'; break;
+      case MU_ICON_CHECK:		chr = 'X'; break;
+      case MU_ICON_COLLAPSED:	chr = '>'; break;
+      case MU_ICON_EXPANDED:	chr = 'v'; break;
+      //case MU_ICON_RESIZE:	chr = '+'; break;
+  }
+
+  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, RGB2COLOR(52, 25, 52));
+  draw_char(buffer, x, y, chr, RGB2COLOR(color.r, color.g, color.b));
 }
 
-// Returns true if 'str' starts with 'start'
-bool strstartswith(const char* str, const char* start)
+// unneed it
+void render_clip(PIXEL_TYPE * buffer, mu_Rect rect)
+{}
+
+int text_width(mu_Font font, const char *text, int len)
 {
-	if (strlen(str) >= strlen(start))
-		if(!strncasecmp(str, start, strlen(start)))
-			return true;
-		
-	return false;
+  if (len == -1) { len = strlen(text); }
+  return len * 8 * EMULATION_SCALE;
 }
 
-// Returns true if 'str' ends with 'end'
-bool strendswith(const char* str, const char* end)
+int text_height(mu_Font font)
 {
-	if (strlen(str) >= strlen(end))
-		if(!strcasecmp((char*)&str[strlen(str)-strlen(end)], end))
-			return true;
-		
-	return false;
+  return 8 * EMULATION_SCALE;
 }
