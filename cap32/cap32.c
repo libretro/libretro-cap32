@@ -164,10 +164,6 @@
 
 #include <zlib.h>
 
-#if defined (__CELLOS_LV2__) && !defined(__PSL1GHT__)
-#define tmpnam(a)
-#endif
-
 #define AUTODELAY 50
 
 /* forward declarations - some libretro port callbacks */

@@ -2855,22 +2855,20 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	Sint32 xx0, yy0, xx1, yy1;
 	int result;
 	Uint32 intshift, erracc, erradj;
-	Uint32 erracctmp, wgt, wgtcompmask;
+	Uint32 erracctmp, wgt;
 	int dx, dy, tmp, xdir, y0p1, x0pxdir;
 
 	/*
 	* Check visibility of clipping rectangle
 	*/
-	if ((dst->clip_rect.w==0) || (dst->clip_rect.h==0)) {
+	if ((dst->clip_rect.w==0) || (dst->clip_rect.h==0))
 		return(0);
-	}
 
 	/*
 	* Clip line and test if we have to draw 
 	*/
-	if (!(_clipLine(dst, &x1, &y1, &x2, &y2))) {
+	if (!(_clipLine(dst, &x1, &y1, &x2, &y2)))
 		return (0);
-	}
 
 	/*
 	* Keep on working with 32bit numbers 
@@ -2883,7 +2881,8 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	/*
 	* Reorder points if required 
 	*/
-	if (yy0 > yy1) {
+	if (yy0 > yy1)
+   {
 		tmp = yy0;
 		yy0 = yy1;
 		yy1 = tmp;
@@ -2901,50 +2900,44 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	/*
 	* Check for special cases 
 	*/
-	if (dx == 0) {
-		/*
-		* Vertical line 
-		*/
-		if (draw_endpoint)
-		{
-			return (vlineColor(dst, x1, y1, y2, color));
-		} else {
-			if (dy>0) {
-				return (vlineColor(dst, x1, yy0, yy0+dy, color));
-			} else {
-				return (pixelColor(dst, x1, y1, color));
-			}
-		}
-	} else if (dy == 0) {
-		/*
-		* Horizontal line 
-		*/
-		if (draw_endpoint)
-		{
-			return (hlineColor(dst, x1, x2, y1, color));
-		} else {
-			if (dx!=0) {
-				return (hlineColor(dst, xx0, xx0+dx, y1, color));
-			} else {
-				return (pixelColor(dst, x1, y1, color));
-			}
-		}
-	} else if ((dx == dy) && (draw_endpoint)) {
+	if (dx == 0)
+   {
+      /*
+       * Vertical line 
+       */
+      if (draw_endpoint)
+         return (vlineColor(dst, x1, y1, y2, color));
+
+      if (dy>0)
+         return (vlineColor(dst, x1, yy0, yy0+dy, color));
+      return (pixelColor(dst, x1, y1, color));
+   }
+   else if (dy == 0)
+   {
+      /*
+       * Horizontal line 
+       */
+      if (draw_endpoint)
+         return (hlineColor(dst, x1, x2, y1, color));
+      if (dx!=0)
+         return (hlineColor(dst, xx0, xx0+dx, y1, color));
+      return (pixelColor(dst, x1, y1, color));
+   } else if ((dx == dy) && (draw_endpoint))
 		/*
 		* Diagonal line (with endpoint)
 		*/
 		return (lineColor(dst, x1, y1, x2, y2, color));
-	}
 
 	/*
 	* Adjust for negative dx and set xdir 
 	*/
-	if (dx >= 0) {
+	if (dx >= 0)
 		xdir = 1;
-	} else {
-		xdir = -1;
-		dx = (-dx);
-	}
+   else
+   {
+      xdir = -1;
+      dx = (-dx);
+   }
 
 	/*
 	* Line is not horizontal, vertical or diagonal (with endpoint)
@@ -2961,17 +2954,10 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	*/
 	intshift = 32 - AAbits;
 
-	/*
-	* Mask used to flip all bits in an intensity weighting 
-	*/
-	wgtcompmask = AAlevels - 1;
-
 	/* Lock surface */
-	if (RSDL_MUSTLOCK(dst)) {
-		if (RSDL_LockSurface(dst) < 0) {
+	if (RSDL_MUSTLOCK(dst))
+		if (RSDL_LockSurface(dst) < 0)
 			return (-1);
-		}
-	}
 
 	/*
 	* Draw the initial pixel in the foreground color 
@@ -2981,8 +2967,8 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	/*
 	* x-major or y-major? 
 	*/
-	if (dy > dx) {
-
+	if (dy > dx) 
+   {
 		/*
 		* y-major.  Calculate 16-bit fixed point fractional part of a pixel that
 		* X advances every time Y advances 1 pixel, truncating the result so that
@@ -3019,8 +3005,9 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 			result |= pixelColorWeightNolock (dst, x0pxdir, yy0, color, wgt);
 		}
 
-	} else {
-
+	}
+   else
+   {
 		/*
 		* x-major line.  Calculate 16-bit fixed-point fractional part of a pixel
 		* that Y advances each time X advances 1 pixel, truncating the result so
@@ -3061,18 +3048,16 @@ int _aalineColor(RSDL_Surface * dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2,
 	/*
 	* Do we have to draw the endpoint 
 	*/
-	if (draw_endpoint) {
+	if (draw_endpoint)
 		/*
 		* Draw final pixel, always exactly intersected by the line and doesn't
 		* need to be weighted. 
 		*/
 		result |= pixelColorNolock (dst, x2, y2, color);
-	}
 
 	/* Unlock surface */
-	if (RSDL_MUSTLOCK(dst)) {
+	if (RSDL_MUSTLOCK(dst))
 		RSDL_UnlockSurface(dst);
-	}
 
 	return (result);
 }
@@ -3398,23 +3383,20 @@ int arcColor(RSDL_Surface * dst, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, S
 	/*
 	* Check visibility of clipping rectangle
 	*/
-	if ((dst->clip_rect.w==0) || (dst->clip_rect.h==0)) {
+	if ((dst->clip_rect.w==0) || (dst->clip_rect.h==0))
 		return(0);
-	}
 
 	/*
 	* Sanity check radius 
 	*/
-	if (rad < 0) {
+	if (rad < 0)
 		return (-1);
-	}
 
 	/*
 	* Special case for rad=0 - draw a point 
 	*/
-	if (rad == 0) {
+	if (rad == 0)
 		return (pixelColor(dst, x, y, color));
-	}
 
 	/*
 	* Get arc's circle and clipping boundary and 
@@ -3422,41 +3404,38 @@ int arcColor(RSDL_Surface * dst, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, S
 	*/
 	x2 = x + rad;
 	left = dst->clip_rect.x;
-	if (x2<left) {
+	if (x2<left)
 		return(0);
-	} 
 	x1 = x - rad;
 	right = dst->clip_rect.x + dst->clip_rect.w - 1;
-	if (x1>right) {
+	if (x1>right)
 		return(0);
-	} 
 	y2 = y + rad;
 	top = dst->clip_rect.y;
-	if (y2<top) {
+	if (y2<top)
 		return(0);
-	} 
 	y1 = y - rad;
 	bottom = dst->clip_rect.y + dst->clip_rect.h - 1;
-	if (y1>bottom) {
+	if (y1>bottom)
 		return(0);
-	}  
 
-	// Octant labelling
-	//      
-	//  \ 5 | 6 /
-	//   \  |  /
-	//  4 \ | / 7
-	//     \|/
-	//------+------ +x
-	//     /|\
-	//  3 / | \ 0
-	//   /  |  \
-	//  / 2 | 1 \
-	//      +y
+	/* Octant labelling
+	 *      
+	 *  \ 5 | 6 /
+	 *   \  |  /
+	 *  4 \ | / 7
+	 *     \|/
+	 *------+------ +x
+	 *     /|\
+	 *  3 / | \ 0
+	 *   /  |  \
+	 *  / 2 | 1 \
+	 *      +y
 
-	// Initially reset bitmask to 0x00000000
-	// the set whether or not to keep drawing a given octant.
-	// For example: 0x00111100 means we're drawing in octants 2-5
+	 * Initially reset bitmask to 0x00000000
+	 * the set whether or not to keep drawing a given octant.
+	 * For example: 0x00111100 means we're drawing in octants 2-5
+    */
 	drawoct = 0; 
 
 	/*
@@ -6891,7 +6870,7 @@ void _murphyWideline(RSDL_gfxMurphyIterator *m, Sint16 x1, Sint16 y1, Sint16 x2,
 	float offset = (float)width / 2.f;
 
 	Sint16 temp;
-	Sint16 ptx, pty, ptxx, ptxy, ml1x, ml1y, ml2x, ml2y, ml1bx, ml1by, ml2bx, ml2by;
+	Sint16 ptx, pty, ml1x, ml1y, ml2x, ml2y, ml1bx, ml1by, ml2bx, ml2by;
 
 	int d0, d1;		/* difference terms d0=perpendicular to line, d1=along line */
 
@@ -6976,8 +6955,6 @@ void _murphyWideline(RSDL_gfxMurphyIterator *m, Sint16 x1, Sint16 y1, Sint16 x2,
 		m->last2x = -32768;
 		m->last2y = -32768;
 	}
-	ptxx = ptx;
-	ptxy = pty;
 
 	for (q = 0; dd <= tk; q++) {	/* outer loop, stepping perpendicular to line */
 

@@ -29,6 +29,13 @@ ifeq ($(shell uname -a),)
 	system_platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
 	system_platform = osx
+	arch = intel
+	ifeq ($(shell uname -p),powerpc)
+		arch = ppc
+	endif
+	ifeq ($(shell uname -p),arm)
+		arch = arm
+	endif
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
 	system_platform = win
 endif
@@ -66,11 +73,25 @@ else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
 	fpic := -fPIC
 	SHARED := -dynamiclib
+        MINVERSION :=
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
 	ifeq ($(OSX_LT_MAVERICKS),"YES")
-		fpic += -mmacosx-version-min=10.5
+		MINVERSION = -mmacosx-version-min=10.5
 	endif
+	fpic += $(MINVERSION)
+
+   ifeq ($(CROSS_COMPILE),1)
+		TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
+		CFLAGS   += $(TARGET_RULE)
+		CPPFLAGS += $(TARGET_RULE)
+		CXXFLAGS += $(TARGET_RULE)
+		LDFLAGS  += $(TARGET_RULE)
+   endif
+
+	CFLAGS  += $(ARCHFLAGS)
+	CXXFLAGS  += $(ARCHFLAGS)
+	LDFLAGS += $(ARCHFLAGS)
 
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
@@ -78,25 +99,27 @@ else ifneq (,$(findstring ios,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro_ios.dylib
 	fpic := -fPIC
 	SHARED := -dynamiclib
+        MINVERSION :=
 
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
 	endif
 
-	CC = cc -arch armv7 -isysroot $(IOSSDK)
+ifeq ($(platform),ios-arm64)
+	CC    = cc -arch arm64 -isysroot $(IOSSDK)
 	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
-	CXX = c++ -arch armv7 -isysroot $(IOSSDK)
-ifeq ($(platform),ios9)
-	CC += -miphoneos-version-min=8.0
-	CXX += -miphoneos-version-min=8.0
-	CC_AS += -miphoneos-version-min=8.0
-	PLATFORM_DEFINES := -miphoneos-version-min=8.0
+	CXX   = c++ -arch arm64 -isysroot $(IOSSDK)
 else
-	CC += -miphoneos-version-min=5.0
-	CXX += -miphoneos-version-min=5.0
-	CC_AS += -miphoneos-version-min=5.0
-	PLATFORM_DEFINES := -miphoneos-version-min=5.0
+	CC    = cc -arch armv7 -isysroot $(IOSSDK)
+	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
+	CXX   = c++ -arch armv7 -isysroot $(IOSSDK)
 endif
+ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
+	MINVERSION = -miphoneos-version-min=8.0
+else
+	MINVERSION = -miphoneos-version-min=5.0
+endif
+	PLATFORM_DEFINES := $(MINVERSION)
 
 # tvOS
 else ifeq ($(platform), tvos-arm64)
@@ -107,6 +130,10 @@ else ifeq ($(platform), tvos-arm64)
 	ifeq ($(IOSSDK),)
 		IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
 	endif
+
+	CC    = cc -arch arm64 -isysroot $(IOSSDK)
+	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
+	CXX   = c++ -arch arm64 -isysroot $(IOSSDK)
 
 # Theos
 else ifeq ($(platform), theos_ios)
@@ -131,28 +158,6 @@ else ifeq ($(platform), qnx)
 	PLATFORM_DEFINES := -fexceptions -marm -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=softfp
 	CFLAGS += -std=c99 -D_POSIX_C_SOURCE
 
-# PS3
-else ifeq ($(platform), ps3)
-	TARGET := $(TARGET_NAME)_libretro_$(platform).a
-	CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
-	CC_AS = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
-	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
-	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
-	PLATFORM_DEFINES := -D__CELLOS_LV2__ -Iutils/zlib
-	STATIC_LINKING = 1
-	HAVE_COMPAT = 1
-
-# sncps3
-else ifeq ($(platform), sncps3)
-	TARGET := $(TARGET_NAME)_libretro_ps3.a
-	CC = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
-	CC_AS = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
-	CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
-	AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
-	PLATFORM_DEFINES := -D__CELLOS_LV2__
-	STATIC_LINKING = 1
-	HAVE_COMPAT = 1
-
 # Lightweight PS3 Homebrew SDK
 else ifeq ($(platform), psl1ght)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
@@ -160,7 +165,7 @@ else ifeq ($(platform), psl1ght)
 	CC_AS = $(PS3DEV)/ppu/bin/ppu-gcc$(EXE_EXT)
 	CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
 	AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -D__CELLOS_LV2__ -D__PSL1GHT__
+	PLATFORM_DEFINES := -D__PSL1GHT__
 	STATIC_LINKING = 1
 	HAVE_COMPAT = 1
 
@@ -279,6 +284,22 @@ else ifneq (,$(findstring armv,$(platform)))
 	endif
 	PLATFORM_DEFINES += -DARM
 
+#RETROFW
+else ifeq ($(platform), retrofw)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
+	CC_AS = /opt/retrofw-toolchain/usr/bin/mipsel-linux-as
+	CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
+	AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B
+	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
+	CFLAGS += -fomit-frame-pointer -ffast-math	
+	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
+	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
+	
 # emscripten
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
@@ -318,6 +339,9 @@ ifeq ($(DEBUG), 1)
 else ifeq ($(platform), emscripten)
 	CFLAGS += -O2
 	CXXFLAGS += -O2
+else ifeq ($(platform), retrofw)
+	CFLAGS += -Ofast
+	CXXFLAGS += -Ofast
 else
 	CFLAGS += -O3
 	CXXFLAGS += -O3

@@ -144,8 +144,8 @@ typedef enum {
 } RSDL_bool;
 #endif
 
-#define RSDL_MUSTLOCK(a) 0
-#define RSDL_LockSurface(a) 0
+#define RSDL_MUSTLOCK(a) (0)
+#define RSDL_LockSurface(a) (0)
 #define RSDL_UnlockSurface(a) 
 #define RSDL_MapRGB(fmt, r, g, b) Retro_MapRGB(fmt, r, g, b)
 #define RSDL_MapRGBA(fmt, r, g, b,a) Retro_MapRGBA(fmt, r, g, b,a)
