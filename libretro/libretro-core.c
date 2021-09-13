@@ -18,15 +18,9 @@ char DISKB_NAME[512]="\0";
 char cart_name[512]="\0";
 
 //TIME
-#if defined (__CELLOS_LV2__) && !defined(__PSL1GHT__)
-#include "sys/sys_time.h"
-#include "sys/timer.h"
-#define usleep  sys_timer_usleep
-#else
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
-#endif
 
 // DISK CONTROL
 #include "retro_disk_control.h"
