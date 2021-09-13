@@ -192,8 +192,37 @@ void retro_show_statusbar()
    BIT_SET(ui_status, UI_STATUSBAR);
 }
 
+void retro_ui_prepare(void)
+{
+   // convert KeyboardOnScreen to current video/color-depth
+   convert_image(
+      keyboard_surface,
+      (const unsigned int *) ui_keyboard_bg,
+      IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
+   );
+
+   unsigned int * ui_keyboard_lang = (unsigned int *) ui_keyboard_en;
+   if (retro_computer_cfg.lang == 2) {
+      ui_keyboard_lang = (unsigned int *) ui_keyboard_es;
+   } else if(retro_computer_cfg.lang == 1) {
+      ui_keyboard_lang = (unsigned int *) ui_keyboard_fr;
+   }
+
+   // convert raw keyboard to current video/color-depth 
+   // and blit to keyboard_surface to optimize draw KoS
+   convert_image(
+      keyboard_lang,
+      (const unsigned int *) ui_keyboard_lang,
+      IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
+   );
+   draw_image_transparent(keyboard_surface, keyboard_lang, 0, 0, IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH);
+}
+
+//////////////// PUBLIC
 void retro_ui_update_text()
 {
+   retro_ui_prepare();
+
    char model[16];
    switch (retro_computer_cfg.model)
    {
@@ -225,11 +254,7 @@ void retro_ui_update_text()
       ui_string,
       RGB2COLOR(0x63, 0x63, 0x63)
    );
-
-
 }
-
-//////////////// PUBLIC
 
 void retro_ui_init(void)
 {
@@ -238,24 +263,9 @@ void retro_ui_init(void)
    keyboard_lang = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE);
    ui_surface = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE * 2);
 
-   // convert KeyboardOnScreen to current video/color-depth
-   convert_image(
-      keyboard_surface,
-      (const unsigned int *) ui_keyboard_bg,
-      IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
-   );
-
-   // convert raw keyboard to current video/color-depth 
-   // and blit to keyboard_surface to optimize draw KoS
-   convert_image(
-      keyboard_lang,
-      (const unsigned int *) ui_keyboard_en,
-      IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
-   );
-   draw_image_transparent(keyboard_surface, keyboard_lang, 0, 0, IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH);
-
    // init KoS
    keyboard_init();
+   retro_ui_prepare();
    retro_ui_update_text();
 
    // Micro UI init

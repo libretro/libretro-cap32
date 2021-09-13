@@ -50,6 +50,9 @@ extern const int ui_keyboard_bg_size;
 extern const unsigned char ui_keyboard_en[];
 extern const int ui_keyboard_en_size;
 
+extern const unsigned char ui_keyboard_es[];
+extern const unsigned char ui_keyboard_fr[];
+
 //--------------------------------------------------------------------
 
 #define FNT_MIN_CHAR 32
