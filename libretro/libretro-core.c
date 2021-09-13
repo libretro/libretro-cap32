@@ -11,7 +11,7 @@
 #include "retro_ui.h"
 
 #include "gfx/software.h"
-#include "assets/ui.h"
+#include "assets/assets.h"
 
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";

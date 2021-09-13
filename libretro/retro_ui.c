@@ -29,7 +29,7 @@
 #include "retro_events.h"
 #include "retro_render.h"
 #include "retro_keyboard.h"
-#include "assets/ui.h"
+#include "assets/assets.h"
 
 extern PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
 extern PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
@@ -37,6 +37,7 @@ extern retro_mouse_t mouse;
 extern computer_cfg_t retro_computer_cfg;
 
 PIXEL_TYPE * keyboard_surface = NULL;
+PIXEL_TYPE * keyboard_lang = NULL;
 PIXEL_TYPE * ui_surface = NULL;
 
 static unsigned char ui_status = 0;
@@ -213,14 +214,24 @@ void retro_ui_init(void)
 {
    // prepare pointer to surface data
    keyboard_surface = bmp;
-   ui_surface = bmp + ui_keyboard_size;
+   keyboard_lang = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE);
+   ui_surface = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE * 2);
 
    // convert KeyboardOnScreen to current video/color-depth
    convert_image(
       keyboard_surface,
-      (const unsigned int *) ui_keyboard_data,
+      (const unsigned int *) ui_keyboard_bg,
       IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
    );
+
+   // convert raw keyboard to current video/color-depth 
+   // and blit to keyboard_surface to optimize draw KoS
+   convert_image(
+      keyboard_lang,
+      (const unsigned int *) ui_keyboard_en,
+      IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
+   );
+   draw_image_transparent(keyboard_surface, keyboard_lang, 0, 0, IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH);
 
    // init KoS
    keyboard_init();

@@ -23,7 +23,7 @@
 #include <libretro.h>
 #include <libretro-core.h>
 
-#include "assets/ui.h"
+#include "assets/assets.h"
 #include "software.h"
 
 // FIXME PIXEL_BYTES
@@ -178,4 +178,24 @@ void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsi
    {
       *(buffer_ptr++) = *(img_ptr++);
    }
+}
+
+void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size)
+{
+   PIXEL_TYPE * buffer_ptr = (
+      (PIXEL_TYPE *) (buffer + x) + (y * EMULATION_SCREEN_WIDTH)
+   );
+   PIXEL_TYPE * img_ptr = img;
+   unsigned int loop_counter = (EMULATION_SCALE * size);
+
+   while (loop_counter--)
+   {
+      uint32_t value = *(img_ptr++);
+      if (value != PIXEL_TRANSPARENT)
+      {
+         *(buffer_ptr) = value;
+      }
+      buffer_ptr++;
+   }
+
 }

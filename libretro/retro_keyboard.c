@@ -25,7 +25,7 @@
 
 #include "retro_events.h"
 #include "retro_keyboard.h"
-#include "assets/ui.h"
+#include "assets/assets.h"
 #include "gfx/software.h"
 
 extern PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
@@ -37,8 +37,8 @@ extern PIXEL_TYPE * keyboard_surface;
 #define COMPOSE_YELLOW_COLOR RGB2COLOR(0xe7, 0xea, 0)
 #define COMPOSE_PRESS_COLOR RGB2COLOR(0xea, 0, 0x22)
 
-#define BASE_X 3
-#define BASE_Y 12 + ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT )
+#define BASE_X 2
+#define BASE_Y (12 + ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ))
 #define KEY_HEIGHT 16
 #define KEY_WIDTH 18
 #define KEY_GAP 3
@@ -48,7 +48,7 @@ extern PIXEL_TYPE * keyboard_surface;
 
 typedef struct {
    // calc keyboard position on screen
-   unsigned short x, y;
+   unsigned short top, left, bottom, right;
    unsigned short w, h;
    // keyboard internal value
    unsigned char value;
@@ -61,7 +61,7 @@ typedef struct {
 
 static retro_keyboard kbd_data [KEYBOARD_MAX_KEYS];
 static base_keyboard_t keyboard_positions [KEYBOARD_MAX_KEYS] = {
-   { CPC_KEY_ESC  , 20 },
+   { CPC_KEY_ESC  , 21 },
    { CPC_KEY_1    , KEY_WIDTH },
    { CPC_KEY_2    , KEY_WIDTH },
    { CPC_KEY_3    , KEY_WIDTH },
@@ -81,7 +81,7 @@ static base_keyboard_t keyboard_positions [KEYBOARD_MAX_KEYS] = {
    { CPC_KEY_F9   , KEY_WIDTH },
    { CPC_KEY_NULL , 0 }, // next line
 
-   { CPC_KEY_TAB  , 31},
+   { CPC_KEY_TAB  , 32},
    { CPC_KEY_Q    , KEY_WIDTH },
    { CPC_KEY_W    , KEY_WIDTH },
    { CPC_KEY_E    , KEY_WIDTH },
@@ -100,7 +100,7 @@ static base_keyboard_t keyboard_positions [KEYBOARD_MAX_KEYS] = {
    { CPC_KEY_F6   , KEY_WIDTH },
    { CPC_KEY_NULL , 0 }, // next line
 
-   { CPC_KEY_CAPS_LOCK, 37 },
+   { CPC_KEY_CAPS_LOCK, 38 },
    { CPC_KEY_A    , KEY_WIDTH },
    { CPC_KEY_S    , KEY_WIDTH },
    { CPC_KEY_D    , KEY_WIDTH },
@@ -137,7 +137,7 @@ static base_keyboard_t keyboard_positions [KEYBOARD_MAX_KEYS] = {
    { CPC_KEY_FDOT      , KEY_WIDTH },
    { CPC_KEY_NULL , 0 }, // next line
 
-   { CPC_KEY_CONTROL, 37 },
+   { CPC_KEY_CONTROL, 38 },
    { CPC_KEY_COPY, 36 },
    { CPC_KEY_SPACE, 168 },
    { CPC_KEY_INTRO, 65 },
@@ -159,24 +159,44 @@ void keyboard_init()
       }
 
       kbd_data[key].value = keyboard_positions[key].value;
-      kbd_data[key].x = x;
-      kbd_data[key].y = y;
-      kbd_data[key].w = x + (keyboard_positions[key].width * EMULATION_SCALE);
-      kbd_data[key].h = y + KEY_HEIGHT;
+      kbd_data[key].w = keyboard_positions[key].width * EMULATION_SCALE;
+      kbd_data[key].h = KEY_HEIGHT;
 
-      x = kbd_data[key].w + (KEY_GAP * EMULATION_SCALE);
+      kbd_data[key].top = y;
+      kbd_data[key].left = x;
+      kbd_data[key].right = x + kbd_data[key].w;
+      kbd_data[key].bottom = y + kbd_data[key].h;
+
+      x = kbd_data[key].right + (KEY_GAP * EMULATION_SCALE);
    }
 }
 
 static unsigned char _get_key()
 {
+
    for (int key = 0; key < KEYBOARD_MAX_KEYS; key++)
    {
       if (
-         mouse.x > kbd_data[key].x && mouse.x < kbd_data[key].w &&
-         mouse.y > kbd_data[key].y && mouse.y < kbd_data[key].h)
+         mouse.x > kbd_data[key].left && mouse.x < kbd_data[key].right &&
+         mouse.y > kbd_data[key].top && mouse.y < kbd_data[key].bottom)
       {
-         //printf("mouse: (%u,%u) (%i=%u)\n", mouse.x, mouse.y, key, kbd_data[key].value);
+         #ifdef DEBUG_KOS
+         int y = ((kbd_data[key].top) - BASE_Y) + 14;
+         printf("mouse: (%u,%u %u,%u) [%i=%u]\n", 
+            kbd_data[key].left, y, kbd_data[key].w, kbd_data[key].h,
+            key, kbd_data[key].value
+         );
+         
+         draw_rect(
+            keyboard_surface,
+            kbd_data[key].left + 4,
+            y,
+            kbd_data[key].w,
+            kbd_data[key].h,
+            0xaaaaaa
+         );
+         #endif
+
          return kbd_data[key].value;
       }
    }
@@ -194,8 +214,8 @@ static void _draw_compose_led (unsigned char key, bool clicked)
 
       draw_rect(
          keyboard_surface,
-         kbd_data[keys].x + (2 * EMULATION_SCALE),
-         kbd_data[keys].y - ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ) + 3,
+         kbd_data[keys].left + (2 * EMULATION_SCALE),
+         kbd_data[keys].top - ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ) + 3,
          KEYBOARD_LED_SIZE * EMULATION_SCALE,
          KEYBOARD_LED_SIZE,
          clicked ? COMPOSE_PRESS_COLOR : COMPOSE_CLEAN_COLOR

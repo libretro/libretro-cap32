@@ -25,7 +25,7 @@
 
 #include "gfx/software.h"
 #include "retro_render.h"
-#include "assets/ui.h"
+#include "assets/assets.h"
 
 //unsigned int number = 0;
 

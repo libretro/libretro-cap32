@@ -30,19 +30,22 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT
 
 // compile flags
-#define NO_FLOPPY_SND
-#define LOWRES
-#define M16B // SCREEN 16BITS
+//#define NO_FLOPPY_SND
+//#define NO_BORDER
+//#define LOWRES
+//#define M16B // SCREEN 16BITS
 
 #ifdef M16B
    #define PIXEL_RAW_DENSITY 2
    #define PIXEL_BYTES 1
    #define PIXEL_TYPE unsigned short
+   #define PIXEL_TRANSPARENT 0x0000
    #define PITCH 2
 #else
    #define PIXEL_RAW_DENSITY 1
    #define PIXEL_BYTES 2
    #define PIXEL_TYPE unsigned int
+   #define PIXEL_TRANSPARENT 0x000000
    #define PITCH 4
 #endif
 

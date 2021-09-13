@@ -1,4 +1,4 @@
-/* Copyright (C) 2018
+/* Copyright (C) 2021
  *
  * Permission is hereby granted, free of charge,
  * to any person obtaining a copy of this software and associated documentation files (the "Software"),
@@ -16,22 +16,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef GFX_SOFTWARE_H__
-#define GFX_SOFTWARE_H__
+//---------------------------------------------------------------------------------
+#ifndef _assets_h_
+#define _assets_h_
+//---------------------------------------------------------------------------------
+#define IMG_KEYBOARD_WIDTH  384
+#define IMG_KEYBOARD_HEIGHT 108
 
-#include <stdint.h>
-#include <stdbool.h>
+extern const unsigned char ui_keyboard_bg[];
+extern const int ui_keyboard_bg_size;
 
-//*****************************************************************************
-// Graph helpers functions
+extern const unsigned char ui_keyboard_en[];
+extern const int ui_keyboard_en_size;
 
-void draw_line(PIXEL_TYPE * buffer, int x, int y, int width, PIXEL_TYPE color);
-void draw_rect(PIXEL_TYPE * buffer, int x, int y, int width, int height, PIXEL_TYPE color);
-void draw_text(PIXEL_TYPE * buffer, int x, int y, const char * text, PIXEL_TYPE color);
-void draw_char(PIXEL_TYPE * buffer, int x, int y, char chr_idx, PIXEL_TYPE color);
-void draw_image(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, int width, int height);
-void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
-void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
-void convert_image(PIXEL_TYPE * buffer, const unsigned int * img, unsigned int size);
-PIXEL_TYPE convert_color (unsigned int color);
-#endif
+//--------------------------------------------------------------------
+
+#define FNT_MIN_CHAR 32
+#define FNT_MAX_CHAR 126
+#define FNT_CHAR_WIDTH 6
+#define FNT_CHAR_HEIGHT 8
+#define BITS_IN_BYTE 8
+
+extern const unsigned char font[];
+
+//---------------------------------------------------------------------------------
+#endif //_ui_h_
+//---------------------------------------------------------------------------------
