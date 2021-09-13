@@ -75,7 +75,7 @@ static mu_Context *ctx;
 #define UI_STRING_X 70 * EMULATION_SCALE
 #define UI_STRING_Y 2
 
-void _render_window(mu_Context *ctx)
+void _render_window()
 {
    if (
       mu_begin_window_ex(
@@ -115,7 +115,7 @@ void _process_click(int clicked)
       mu_input_mouseup(ctx, mouse.x, mouse.y, MU_MOUSE_LEFT);
 }
 
-void _process_input(mu_Context *ctx)
+void _process_input()
 {
    if(mouse.status == CURSOR_NONE)
       return;
@@ -133,14 +133,14 @@ void _process_input(mu_Context *ctx)
    mouse.status = CURSOR_NONE;
 }
 
-void _process_frame(mu_Context *ctx)
+void _process_frame()
 {
    mu_begin(ctx);
-   _render_window(ctx);
+   _render_window();
    mu_end(ctx);
 }
 
-void _process_commands(PIXEL_TYPE * buffer, mu_Context *ctx)
+void _process_commands(PIXEL_TYPE * buffer)
 {
    mu_Command *cmd = NULL;
    while (mu_next_command(ctx, &cmd)) {
@@ -325,12 +325,12 @@ void retro_ui_process()
       _process_statusbar();
    }
 
-   _process_input(ctx);
+   _process_input();
 
    if(ui_status & INTERNAL_UI_MENU)
    {
-      _process_frame(ctx);
-      _process_commands(video_buffer, ctx);
+      _process_frame();
+      _process_commands(video_buffer);
    }
 
    if(ui_status & (INTERNAL_UI_STATUSBAR ^ 0xFF))
