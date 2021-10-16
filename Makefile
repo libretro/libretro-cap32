@@ -300,6 +300,22 @@ else ifeq ($(platform), retrofw)
 	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
 	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
 	
+#MIYOO
+else ifeq ($(platform), miyoo)
+	TARGET := $(TARGET_NAME)_libretro.so
+   	CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   	CC_AS = /opt/miyoo/usr/bin/arm-linux-as
+   	CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   	AR = /opt/miyoo/usr/bin/arm-linux-ar
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B
+	CFLAGS += -ffast-math -march=armv5te -mtune=arm926ej-s
+	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
+	CFLAGS += -fomit-frame-pointer -ffast-math	
+	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
+	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
+
 # emscripten
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
