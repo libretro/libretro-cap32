@@ -43,6 +43,7 @@
 #include <libretro.h>
 #include <libretro-core.h>
 
+#include "assets/assets.h"
 #include "retro_events.h"
 #include "retro_ui.h"
 
@@ -77,6 +78,9 @@ const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
 #define MAX_PADCFG 4
+
+#define MAX_CURSOR_X (EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * PIXEL_BYTES))
+#define MAX_CURSOR_Y (EMULATION_SCREEN_HEIGHT - FNT_CHAR_HEIGHT)
 
 static uint8_t keyboard_translation[MAX_KEYSYMS];
 unsigned int last_input[PORTS_NUMBER] = {0,0};
@@ -713,6 +717,8 @@ static bool cursor_movement(int *axis, int value, int max_value, int sum)
    return true;
 }
 
+// relative mouse movement unused atm
+#ifdef MOUSE_RELATIVE
 void ev_mouse_motion()
 {
    int mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
@@ -747,9 +753,10 @@ void ev_mouse_motion()
    }
 
 }
+#else
 
-// TODO: check if focused because dont work correctly there...
-void ev_mouse_motion_absolute()
+// absolute mouse movement, currently default mode
+void ev_mouse_motion()
 {
    int mouse_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
    int mouse_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
@@ -761,16 +768,17 @@ void ev_mouse_motion_absolute()
 
    if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
       return;
-
+   
    int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xffff);
    int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xffff);
 
    mouse.raw_x = mouse_x;
    mouse.raw_y = mouse_y;
-   mouse.x = px;
-   mouse.y = py;
+   mouse.x = px < MAX_CURSOR_X? px : MAX_CURSOR_X;
+   mouse.y = py < MAX_CURSOR_Y? py : MAX_CURSOR_Y;
    mouse.status |= CURSOR_MOTION;
 }
+#endif
 
 void ev_cursor_click(unsigned int device, unsigned int event, int * ref_ptr, int value)
 {

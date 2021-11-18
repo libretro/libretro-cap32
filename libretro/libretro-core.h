@@ -73,6 +73,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define NO_BORDER
 //#define LOWRES
 //#define M16B // SCREEN 16BITS
+//#define MOUSE_RELATIVE // mouse relative movement
 
 #ifdef M16B
    #define PIXEL_RAW_DENSITY 2
