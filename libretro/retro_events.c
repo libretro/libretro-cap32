@@ -717,8 +717,32 @@ static bool cursor_movement(int *axis, int value, int max_value, int sum)
    return true;
 }
 
+#ifndef MOUSE_RELATIVE
+// absolute mouse movement, currently default mode
+void ev_mouse_motion()
+{
+   int mouse_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
+   int mouse_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
+
+   // I think DS comes to this part if no event on screen
+   if( !mouse_x || !mouse_y ) {
+      return;
+   }
+
+   if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
+      return;
+
+   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xffff);
+   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xffff);
+
+   mouse.raw_x = mouse_x;
+   mouse.raw_y = mouse_y;
+   mouse.x = px < MAX_CURSOR_X? px : MAX_CURSOR_X;
+   mouse.y = py < MAX_CURSOR_Y? py : MAX_CURSOR_Y;
+   mouse.status |= CURSOR_MOTION;
+}
+#else
 // relative mouse movement unused atm
-#ifdef MOUSE_RELATIVE
 void ev_mouse_motion()
 {
    int mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
@@ -752,31 +776,6 @@ void ev_mouse_motion()
       mouse.status |= CURSOR_MOTION;
    }
 
-}
-#else
-
-// absolute mouse movement, currently default mode
-void ev_mouse_motion()
-{
-   int mouse_x = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
-   int mouse_y = input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
-
-   // I think DS comes to this part if no event on screen
-   if( !mouse_x || !mouse_y ) {
-      return;
-   }
-
-   if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
-      return;
-   
-   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xffff);
-   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xffff);
-
-   mouse.raw_x = mouse_x;
-   mouse.raw_y = mouse_y;
-   mouse.x = px < MAX_CURSOR_X? px : MAX_CURSOR_X;
-   mouse.y = py < MAX_CURSOR_Y? py : MAX_CURSOR_Y;
-   mouse.status |= CURSOR_MOTION;
 }
 #endif
 
