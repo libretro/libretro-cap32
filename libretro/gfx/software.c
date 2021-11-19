@@ -47,15 +47,28 @@
 #include "assets/assets.h"
 #include "software.h"
 
-// FIXME PIXEL_BYTES
+union TPixel
+{
+   struct
+   {
+      #ifdef MSB_FIRST
+      uint8_t b;
+      uint8_t g;
+      uint8_t r;
+      #else
+      uint8_t r;
+      uint8_t g;
+      uint8_t b;
+      #endif
+   };
+   unsigned int colour;
+};
+
+union TPixel pixel;
 
 #define DATA2BLUE5(colour)       (((colour>>3) & 0x1F))
 #define DATA2GREEN6(colour)      (((colour>>2) & 0x3F) << 5)
 #define DATA2RED5(colour)        (((colour>>3) & 0x1F) << 11)
-
-#define DATA2BLUE(colour)       ((colour >> 16) & 0xFF)
-#define DATA2GREEN(colour)      ((colour >> 8) & 0xFF)
-#define DATA2RED(colour)        (colour & 0xFF)
 
 #ifdef LOWRES
 #define DRAW2BUFFER(buffer, img)      *(buffer++) = *(img++);
@@ -67,20 +80,20 @@
 }
 #endif
 
-//#endif
 PIXEL_TYPE convert_color (unsigned int colour)
 {
+   pixel.colour = colour;
    #ifdef M16B
    return (
-      DATA2RED5(DATA2RED(colour))
-      | DATA2GREEN6(DATA2GREEN(colour))
-      | DATA2BLUE5(DATA2BLUE(colour))
+      DATA2RED5(pixel.r)
+      | DATA2GREEN6(pixel.g)
+      | DATA2BLUE5(pixel.b)
    );
    #else
    return (
-      ( DATA2RED(colour) << 16)
-      | (colour & 0x00FF00)
-      | DATA2BLUE(colour)
+      (pixel.r << 16)
+      | (pixel.g << 8)
+      | pixel.b
    );
    #endif
 }
