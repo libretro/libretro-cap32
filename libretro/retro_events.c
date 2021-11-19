@@ -843,8 +843,8 @@ void ev_process_cursor()
       CURSOR_CLICKED_JOY
    );
    ev_cursor_click(
-      RETRO_DEVICE_MOUSE,
-      RETRO_DEVICE_ID_MOUSE_LEFT,
+      RETRO_DEVICE_POINTER,
+      RETRO_DEVICE_ID_POINTER_PRESSED,
       &mouse.click,
       CURSOR_CLICKED
    );
