@@ -225,11 +225,7 @@ void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y,
    while (loop_counter--)
    {
       uint32_t value = *(img_ptr++);
-      // FIXME: check wiiu error rendering
-      // At the moment this code is only used when mounting on-screen keyboard.
-      // As its mask is 000000 or FFFFFF, in theory there should be no problem.
-      // But the transformation for little/big endian should be done correctly.
-      if ((value & 0xFFFF) != PIXEL_TRANSPARENT)
+      if (value != PIXEL_TRANSPARENT)
       {
          *(buffer_ptr) = value;
       }
