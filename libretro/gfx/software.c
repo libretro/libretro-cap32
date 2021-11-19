@@ -70,10 +70,6 @@ union TPixel pixel;
 #define DATA2GREEN6(colour)      (((colour>>2) & 0x3F) << 5)
 #define DATA2RED5(colour)        (((colour>>3) & 0x1F) << 11)
 
-#define DATA2BLUE(colour)       ((colour >> 16) & 0xFF)
-#define DATA2GREEN(colour)      ((colour >> 8) & 0xFF)
-#define DATA2RED(colour)        (colour & 0xFF)
-
 #ifdef LOWRES
 #define DRAW2BUFFER(buffer, img)      *(buffer++) = *(img++);
 #else
