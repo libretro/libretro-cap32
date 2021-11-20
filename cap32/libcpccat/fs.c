@@ -1430,16 +1430,16 @@ int result;
   }
   n = my_read((uchar*)&disk_header,0x100);
   if (n!=0x100) {
-    return -1;
+    return -2;
   }
   if (!tag_ok()) {
     //fprintf(stdout,"\"%s\" is not a DSK image!",name);
-    return -1;
+    return -3;
   }
   if ((disk_header.nbof_heads<1) || (disk_header.nbof_tracks<1)) {
     //fprintf(stdout,"--==>>> open_image: \"%s\"",name);
     abandonimage();
-    return -1;
+    return -4;
   }
 
   /* added function to malloc block which is size of the biggest track */
@@ -1449,16 +1449,14 @@ int result;
   if (track==NULL)
   {
     abandonimage();
-    return -1;
+    return -5;
   }
-
-
 
   if (!validate_image())
   {
     //fprintf(stdout, "Image file is corrupted!");
     abandonimage();
-    return -1;
+    return -6;
   }
 
 
@@ -1470,7 +1468,7 @@ int result;
   if (read_track(0,0))
   {
     abandonimage();
-    return -1;
+    return -7;
   }
 
 
@@ -1485,17 +1483,17 @@ int result;
     {
       //fprintf(stdout, "Multiple formats found!");
       abandonimage();
-      return -1;
+      return -8;
     }
 
     if (result==-1)
     {
       printf("dsk format not recognised heads(%d)\n", disk_header.nbof_heads);
       abandonimage();
-      return -1;
+      return -9;
     }
 
-    //fprintf(stdout, "DSK_FORMAT: %x\n", dpb->SEC1_side1);
+    fprintf(stdout, "DSK_FORMAT: %x\n", dpb->SEC1_side1);
     cpc_dsk_type = dpb->SEC1_side1;
 
   }
@@ -1509,7 +1507,7 @@ int result;
   {
     //fprintf(stdout, disc_format_not_recognised_string);
     abandonimage();
-    return -1;
+    return -10;
   }
 
 
@@ -1522,7 +1520,7 @@ int result;
   {
     abandonimage();
 
-    return -1;
+    return -11;
   }
 
   directory = (DirEntry*)malloc(sizeof(DirEntry)*(dpb->DRM+1));
@@ -1531,7 +1529,7 @@ int result;
   if (directory==NULL)
   {
     abandonimage();
-    return -1;
+    return -12;
   }
 
 /* allocate block buffer */
@@ -1540,7 +1538,7 @@ int result;
   if (block_buffer==NULL)
   {
     abandonimage();
-    return -1;
+    return -13;
   }
 
 /* get directory information */

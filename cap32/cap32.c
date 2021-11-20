@@ -2027,7 +2027,8 @@ cap32_disk_dir(char *FileName)
 
 int retro_disk_auto()
 {
-  char Buffer[128];
+  char Buffer[256];
+  char* bptr = Buffer;
   int  index;
   int  found = 0;
   int  first_bas = -1;
@@ -2127,35 +2128,6 @@ int detach_disk(int drive)
    {
       dsk_eject(&driveB);
       DISKB_NAME[0] = '\0';
-   }
-
-   return 0;
-}
-
-int loadadsk (char *arv,int drive)
-{
-   if( HandleExtension(arv,"DSK") || HandleExtension(arv,"dsk") )
-   {
-      if(attach_disk(arv, drive) == 0)
-      {
-         retro_disk_auto();
-         snprintf(
-           retro_content_filepath,
-           sizeof(retro_computer_cfg),
-           "%s%d.SNA",
-           arv,
-           drive
-         );
-      }
-   }
-   else if( HandleExtension(arv,"sna") || HandleExtension(arv,"SNA") )
-   {
-      snapshot_load(arv);
-      strncpy(
-         retro_content_filepath,
-         arv,
-         sizeof(retro_content_filepath) - 1
-      );
    }
 
    return 0;
