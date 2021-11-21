@@ -68,14 +68,14 @@ struct t_header  {	/* track header of size 0x100 */
 		/*0D-0F	unused (0)*/
 	uchar	track;
 		/*10	tracknumber (0 to number-of-tracks - 1)*/
-	uchar	head;
+	uchar	head; // side
 		/*11	headnumber (0)*/
 	uchar	unused[2];
 		/*12-13	unused (0)*/
 		/*Format-Track-Parameter:*/
 	uchar	BPS;
 		/*14	BPS (bytes per sector) (2 for 0x200 Bytes)*/
-	uchar	SPT;
+	uchar	SPT; // sectors
 		/*15	SPT (sectors per track) (9, max. 18 possible)*/
 	uchar	GAP3;
 		/*16	GAP#3 Format (gap for formatting: 0x4E)*/

@@ -2025,10 +2025,12 @@ cap32_disk_dir(char *FileName)
    return error;
 }
 
+extern void loader_init();
+extern void loader_loop();
+
 int retro_disk_auto()
 {
   char Buffer[256];
-  char* bptr = Buffer;
   int  index;
   int  found = 0;
   int  first_bas = -1;
@@ -2036,6 +2038,10 @@ int retro_disk_auto()
   int  first_bin = -1;
 
   cur_name_id = 0;
+
+   loader_init();
+   loader_loop(&Buffer);
+
 /*
   char *RunName = psp_run_search(CPC.cpc_save_name);
 
@@ -2044,7 +2050,7 @@ int retro_disk_auto()
     if (!strcasecmp(RunName, "|CPM")) strcpy(Buffer, "|CPM");
     else  snprintf(Buffer, MAX_PATH, "RUN\"%s", RunName);
 
-  } else */ {
+  } else {
 
     for (index = 0; index < cpc_dsk_num_entry; index++) {
       char* scan = strchr(cpc_dsk_dirent[index], '.');
@@ -2086,6 +2092,7 @@ int retro_disk_auto()
       }
     }
   }
+  */
 
   strcat(Buffer, "\n");
 
@@ -2104,6 +2111,7 @@ int attach_disk(char *arv, int drive)
 		{
 			sprintf(DISKA_NAME,"%s",arv);
 			result = cap32_disk_dir(arv);
+
          if(result)
             printf("error dsk: %d\n", result);
 		}

@@ -633,7 +633,7 @@ void malloc_track()
   track = (void *)malloc(max_track_size);
 }
 
-int read_track (int hd, int trk)
+int read_track (int hd, int trk) // 0, 0
 {
 /*  ^^^^^^^^^^ */
 long  n, pos;
@@ -1289,9 +1289,9 @@ int sector_exists(uchar *track, ushort SEC1)
   /* check if SEC1 exists in sectors available on track 0 */
   for (i=0; i<spt; i++)
   {
-    //printf("%x == %x\n", sector_info->sector, SEC1);
     if (sector_info->sector == SEC1)
     {
+      printf("%i) !!%x == %x [%02x.%02x.%02x]\n", i, sector_info->sector, SEC1, sector_info->head, sector_info->track, sector_info->BPS);
       return 1;
     }
 
@@ -1319,7 +1319,7 @@ int  select_format(uchar *track)
     /* check if first sector exists in list of sectors in track */
     if (sector_exists(track, cur_entry->dpb.SEC1_side1))
     {
-      //printf("%d == %d\n", spt, cur_entry->dpb.SECS);
+      printf("    %d == %d\n", spt, cur_entry->dpb.SECS);
 
       /* correct sectors per track? */
       if (spt == cur_entry->dpb.SECS)

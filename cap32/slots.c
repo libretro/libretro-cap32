@@ -586,7 +586,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
                pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
                for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
-                  memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
+                  memcpy(drive->track[track][side].sector[sector].CHRN.data, (pbPtr + 0x18), 4); // copy CHRN
                   memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
                   sector_set_sizes(&drive->track[track][side].sector[sector], dwSectorSize, dwSectorSize); // weak sectors support
                   drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
@@ -599,6 +599,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                }
             }
          }
+         drive->extended = false; // normal disk - used on loader
          drive->altered = 0; // disk is as yet unmodified
       } else {
          if (memcmp(pbPtr, "EXTENDED", 8) == 0) { // extended DSK image?
@@ -643,7 +644,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                      pbDataPtr = drive->track[track][side].data; // pointer to start of memory buffer
                      pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
                      for (sector = 0; sector < dwSectors; sector++) { // loop for all sectors
-                        memcpy(drive->track[track][side].sector[sector].CHRN, (pbPtr + 0x18), 4); // copy CHRN
+                        memcpy(drive->track[track][side].sector[sector].CHRN.data, (pbPtr + 0x18), 4); // copy CHRN
                         memcpy(drive->track[track][side].sector[sector].flags, (pbPtr + 0x1c), 2); // copy ST1 & ST2
                         uint32_t dwRealSize = 0x80 << *(pbPtr + 0x1b);
                         dwSectorSize = *(pbPtr + 0x1e) + (*(pbPtr + 0x1f) << 8); // sector size in bytes
@@ -661,6 +662,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                   }
                }
             }
+            drive->extended = true; // extended disk - used on loader
             drive->altered = 0; // disk is as yet unmodified
          } else {
             iRetCode = ERR_DSK_INVALID; // file could not be identified as a valid DSK
@@ -721,7 +723,7 @@ int dsk_save (char *pchFileName, t_drive *drive, char chID)
                th.gap3 = 0x4e;
                th.filler = 0xe5;
                for (sector = 0; sector < th.sectors; sector++) {
-                  memcpy(&th.sector[sector][0], drive->track[track][side].sector[sector].CHRN, 4); // copy CHRN
+                  memcpy(&th.sector[sector][0], drive->track[track][side].sector[sector].CHRN.data, 4); // copy CHRN
                   memcpy(&th.sector[sector][4], drive->track[track][side].sector[sector].flags, 2); // copy ST1 & ST2
                   th.sector[sector][6] = drive->track[track][side].sector[sector].total_size & 0xff;
                   th.sector[sector][7] = (drive->track[track][side].sector[sector].total_size >> 8) & 0xff; // sector size in bytes
@@ -801,7 +803,7 @@ int dsk_format (t_drive *drive, int iFormat)
          {
             // loop for all sectors
             CHRN[2] = disk_format[iFormat].sector_ids[side][sector];
-            memcpy(drive->track[track][side].sector[sector].CHRN, CHRN, 4); // copy CHRN
+            memcpy(drive->track[track][side].sector[sector].CHRN.data, CHRN, 4); // copy CHRN
             sector_set_sizes(&drive->track[track][side].sector[sector], dwSectorSize, dwSectorSize);
             drive->track[track][side].sector[sector].data = pbDataPtr; // store pointer to sector data
             pbDataPtr += dwSectorSize;

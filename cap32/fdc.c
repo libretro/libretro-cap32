@@ -227,7 +227,7 @@ t_sector *find_sector(uint8_t *requested_CHRN)
    loop_count = 0; // detection of index hole counter
    idx = active_drive->current_sector; // get the active sector index
    do {
-      if (!(memcmp(&active_track->sector[idx].CHRN, requested_CHRN, 4))) { // sector matches requested ID?
+      if (!(memcmp(&active_track->sector[idx].CHRN.data, requested_CHRN, 4))) { // sector matches requested ID?
          sector = &active_track->sector[idx]; // return value points to sector information
          if ((sector->flags[0] & 0x20) || (sector->flags[1] & 0x20)) { // any Data Errors?
             if (active_drive->random_DEs) { // simulate 'random' DEs?
@@ -237,7 +237,7 @@ t_sector *find_sector(uint8_t *requested_CHRN)
          FDC.result[RES_ST2] &= ~(0x02 | 0x10); // remove possible Bad Cylinder + No Cylinder flags
          break;
       }
-      uint8_t cylinder = active_track->sector[idx].CHRN[0]; // extract C
+      uint8_t cylinder = active_track->sector[idx].CHRN.cylinder; // extract C
       if (cylinder == 0xff) {
          FDC.result[RES_ST2] |= 0x02; // Bad Cylinder
       }
@@ -361,7 +361,7 @@ static INLINE void cmd_readtrk(void)
    t_sector *sector;
 
    sector = &active_track->sector[active_drive->current_sector];
-   if (memcmp(&sector->CHRN, &FDC.command[CMD_C], 4)) { // sector does not match requested ID?
+   if (memcmp(&sector->CHRN.data, &FDC.command[CMD_C], 4)) { // sector does not match requested ID?
       FDC.result[RES_ST1] |= 0x04; // No Data
    }
    FDC.result[RES_ST2] &= 0xbf; // clear Control Mark, if it was set
@@ -567,7 +567,7 @@ void fdc_write_data(uint8_t val)
                      pbDataPtr = active_track->data;
                      pbPtr = pbGPBuffer;
                      for (sector = 0; sector < FDC.command[CMD_H]; sector++) {
-                        memcpy(active_track->sector[sector].CHRN, pbPtr, 4); // copy CHRN
+                        memcpy(active_track->sector[sector].CHRN.data, pbPtr, 4); // copy CHRN
                         memset(active_track->sector[sector].flags, 0, 2); // clear ST1 & ST2
                         active_track->sector[sector].data = pbDataPtr; // store pointer to sector data
                         pbDataPtr += sector_size;
@@ -960,7 +960,7 @@ void fdc_readID(void)
          if (idx >= active_track->sectors) { // index beyond number of sectors for this track?
             idx = 0; // reset index
          }
-         memcpy(&FDC.result[RES_C], &active_track->sector[idx].CHRN, 4); // copy sector's CHRN to result buffer
+         memcpy(&FDC.result[RES_C], &active_track->sector[idx].CHRN.data, 4); // copy sector's CHRN to result buffer
          active_drive->current_sector = idx + 1; // update sector table index for active drive
       }
       else { // unformatted track

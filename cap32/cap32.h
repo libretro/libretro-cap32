@@ -429,7 +429,15 @@ typedef struct {
 } t_VDU;
 
 typedef struct {
-   unsigned char CHRN[4]; // the CHRN for this sector
+   union {
+      unsigned char data[4];
+      struct {
+         unsigned char cylinder;
+         unsigned char side;
+         unsigned char sector;
+         unsigned char bps;
+      };
+   } CHRN; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions
    unsigned char *data; // pointer to sector data
    unsigned int size; // sector size in bytes
@@ -457,6 +465,7 @@ typedef struct {
    unsigned int write_protected; // is the image write protected?
    unsigned int random_DEs; // sectors with Data Errors return random data?
    unsigned int flipped; // reverse the side to access?
+   bool extended;
    t_track track[DSK_TRACKMAX][DSK_SIDEMAX]; // array of track information structures
 } t_drive;
 
