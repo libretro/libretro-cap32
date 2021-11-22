@@ -37,47 +37,89 @@
 
 #include <stdio.h>
 
-#include "../../cap32/cap32.h"
+#include "loader.h"
 #include "formats.h"
+#include "catalog.h"
 
 extern DPB_list formats_list;
 extern t_drive driveA;
+
+extern char catalog_dirent[CAT_MAX_ENTRY][CAT_NAME_SIZE];
+extern int catalog_entry;
 
 void loader_init () {
    formats_init();
 }
 
-void loader_loop (char * Buffer) {
-   int found_count = 0;
-   DPB_list_entry *cur_entry;
-   DPB_list_entry *dpb_entry_found = NULL;
+bool _loader_find (char * text) {
+   int found = 0;
+   int first_bas = -1;
+   int first_spc = -1;
+   int first_bin = -1;
+   int cur_name_id = 0;
 
-   /* go through list of supported formats */
-   cur_entry = formats_list.first;
+   for (int index = 0; index < catalog_entry; index++) {
+      char* scan = strchr(catalog_dirent[index], '.');
+      if (!scan)
+         continue;
 
+      if (!strcasecmp(scan + 1, "BAS")) {
+         if (first_bas == -1) first_bas = index;
+         found = true;
+      } else if (!strcasecmp(scan + 1, "")) {
+         if (first_spc == -1) first_spc = index;
+         found = true;
+      } else
+      if (!strcasecmp(scan + 1, "BIN")) {
+         if (first_bin == -1) first_bin = index;
+         found = true;
+      }
+   }
+
+   if (!found) {
+      return false;
+   }
+
+   if (first_bas != -1)
+      cur_name_id = first_bas;
+   else if (first_spc != -1)
+      cur_name_id = first_spc;
+   else if (first_bin != -1)
+      cur_name_id = first_bin;
+
+   // check added to avoid warning on gcc >= 8
+   if(snprintf(text, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[cur_name_id]) < 0) {
+      printf("autoload: snprintf failed\n");
+      return false;
+   }
+
+   return true;
+}
+
+void loader_failed (char * text, bool cpc_dsk_system) {
+   if (cpc_dsk_system) {
+      strcpy(text, "|CPM");
+   } else {
+      strcpy(text, "CAT");
+   }
+}
+
+void loader_run (char * key_buffer) {
+   DPB_type *dpb = NULL;
+   t_drive *current_drive = &driveA; 
+
+   memset(key_buffer, 0, LOADER_MAX_SIZE);
    printf(">>> INIT LOADER! \n");
-   while (cur_entry!=NULL)
-   {
-      printf(">>> %02x.%02x.%02x\n",
-         cur_entry->dpb.SEC1_side1,
-         cur_entry->dpb.SECS,
-         cur_entry->dpb.HDS
-      );
+   dpb = format_find(current_drive);
 
-      snprintf(Buffer, 256, "%02x.%u [%02x.%02x.%02x.%02x][%02x.%02x.%02x.%02x].%u",
-         driveA.track[0][0].sectors,
-         driveA.track[0][0].size,
-         driveA.track[0][0].sector[0].CHRN.data[0],
-         driveA.track[0][0].sector[0].CHRN.data[1],
-         driveA.track[0][0].sector[0].CHRN.data[2],
-         driveA.track[0][0].sector[0].CHRN.data[3],
-         driveA.track[0][0].sector[0].CHRN.cylinder,
-         driveA.track[0][0].sector[0].CHRN.side,
-         driveA.track[0][0].sector[0].CHRN.sector,
-         driveA.track[0][0].sector[0].CHRN.bps,
-         driveA.extended
-      );
+   if (dpb == NULL) {
+      printf("    ERR! FORMAT NOT FOUND\n");
+      strcpy(key_buffer, "CAT");
+      return;
+   }
 
-      cur_entry = cur_entry->next;
+   archive_init(dpb->DRM, current_drive);
+   if(!_loader_find(key_buffer)) {
+      loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
    }
 }

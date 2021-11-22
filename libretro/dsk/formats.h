@@ -1,7 +1,7 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  code adapted from libcpc, ported to retroarch by
+ *  code adapted from libcpccat, ported to retroarch by
  *   David Colmenero - D_Skywalk (2019-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
@@ -35,6 +35,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
+
+#include "../../cap32/cap32.h"
 
 typedef enum
 {
@@ -107,4 +109,9 @@ typedef struct DPB_list
 	DPB_list_entry *first;
 } DPB_list;
 
+#define DSK_TYPE_DATA    0x1C
+#define DSK_TYPE_SYSTEM  0x41
+
 void formats_init();
+bool sector_exists(t_track *track, unsigned short sector);
+DPB_type *format_find (t_drive *drive);

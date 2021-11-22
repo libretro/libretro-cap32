@@ -175,6 +175,7 @@ int HandleExtension(char *path,char *ext);
 #include "retro_snd.h"
 #include "retro_ui.h"
 #include "retro_utils.h"
+#include "dsk/loader.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char retro_content_filepath[512];
@@ -2025,22 +2026,21 @@ cap32_disk_dir(char *FileName)
    return error;
 }
 
-extern void loader_init();
-extern void loader_loop();
-
 int retro_disk_auto()
 {
-  char Buffer[256];
+  char key_buffer[LOADER_MAX_SIZE];
+  /*
   int  index;
   int  found = 0;
   int  first_bas = -1;
   int  first_spc = -1;
   int  first_bin = -1;
+  */
 
   cur_name_id = 0;
 
    loader_init();
-   loader_loop(&Buffer);
+   loader_run(key_buffer);
 
 /*
   char *RunName = psp_run_search(CPC.cpc_save_name);
@@ -2091,13 +2091,13 @@ int retro_disk_auto()
         printf("autoload: snprintf failed");
       }
     }
-  }
+  //}
   */
 
-  strcat(Buffer, "\n");
+  printf(" >>> \"%s\"\n",key_buffer);
+  strcat(key_buffer, "\n");
 
-  //printf("(%s)\n",Buffer);
-  kbd_buf_feed(Buffer);
+  kbd_buf_feed(key_buffer);
 
   return 1;
 }
@@ -2110,10 +2110,10 @@ int attach_disk(char *arv, int drive)
 		if((result = dsk_load( arv, &driveA, 'A')) == 0)
 		{
 			sprintf(DISKA_NAME,"%s",arv);
-			result = cap32_disk_dir(arv);
+			//result = cap32_disk_dir(arv);
 
-         if(result)
-            printf("error dsk: %d\n", result);
+         //if(result)
+         //   printf("error dsk: %d\n", result);
 		}
 	} else {
 		if((result = dsk_load( arv, &driveB, 'B')) == 0)

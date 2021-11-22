@@ -24,6 +24,7 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/libcpccat/fs.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
 	$(CORE_DIR)/libretro/microui/microui.c \
+	$(CORE_DIR)/libretro/dsk/catalog.c \
 	$(CORE_DIR)/libretro/dsk/loader.c \
 	$(CORE_DIR)/libretro/dsk/formats.c \
 	$(CORE_DIR)/libretro/gfx/software.c \
