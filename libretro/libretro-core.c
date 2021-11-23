@@ -51,6 +51,7 @@
 
 #include "gfx/software.h"
 #include "assets/assets.h"
+#include "dsk/loader.h"
 
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
@@ -70,7 +71,6 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 
-extern int retro_disk_auto();
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
 extern int attach_disk(char *arv, int drive);
@@ -196,7 +196,7 @@ int retro_getAudioBuffer(){
    return audio_buffer_size; // return the closest match as 2^n
 }
 
-unsigned int * retro_getScreenPtr(){
+INLINE unsigned int * retro_getScreenPtr(){
     return (unsigned int *) video_buffer;
 }
 
@@ -975,6 +975,18 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
 }
 
+int computer_autoload()
+{
+   char key_buffer[LOADER_MAX_SIZE];
+
+   loader_init();
+   loader_run(key_buffer);
+   strcat(key_buffer, "\n");
+   kbd_buf_feed(key_buffer);
+
+   return 1;
+}
+
 // load bios content
 void computer_load_bios() {
    // TODO add load customs bios
@@ -1037,7 +1049,7 @@ void computer_load_file() {
       else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
       {
          // Autoplay
-         retro_disk_auto();
+         computer_autoload();
       }
    }
 
@@ -1053,7 +1065,7 @@ void computer_load_file() {
       dc->eject_state = false;
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       attach_disk((char *)dc->files[dc->index],0);
-      retro_disk_auto();
+      computer_autoload();
    }
 
    // If it's a tape

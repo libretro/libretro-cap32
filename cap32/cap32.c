@@ -175,7 +175,6 @@ int HandleExtension(char *path,char *ext);
 #include "retro_snd.h"
 #include "retro_ui.h"
 #include "retro_utils.h"
-#include "dsk/loader.h"
 
 extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char retro_content_filepath[512];
@@ -1979,18 +1978,6 @@ int  UnInitOSGLU(void)
 {
    doCleanUp();
    return 0;
-}
-
-int retro_disk_auto()
-{
-   char key_buffer[LOADER_MAX_SIZE];
-
-   loader_init();
-   loader_run(key_buffer);
-   strcat(key_buffer, "\n");
-   kbd_buf_feed(key_buffer);
-
-   return 1;
 }
 
 // TO BE REMOVED

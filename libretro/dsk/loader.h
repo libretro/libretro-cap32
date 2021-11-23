@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  code adapted from libcpccat, ported to retroarch by
  *   David Colmenero - D_Skywalk (2019-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
