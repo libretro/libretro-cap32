@@ -121,6 +121,4 @@ void loader_run (char * key_buffer) {
    if(!_loader_find(key_buffer)) {
       loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
    }
-
-   printf("[LOADER] >>> autorun: \"%s\"\n", key_buffer);
 }

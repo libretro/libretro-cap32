@@ -975,16 +975,17 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
 }
 
-int computer_autoload()
+void computer_autoload()
 {
    char key_buffer[LOADER_MAX_SIZE];
 
    loader_init();
    loader_run(key_buffer);
+
+   LOGI("[core] DSK autorun: \"%s\"\n", key_buffer);
+
    strcat(key_buffer, "\n");
    kbd_buf_feed(key_buffer);
-
-   return 1;
 }
 
 // load bios content
