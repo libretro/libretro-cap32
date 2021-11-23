@@ -639,6 +639,8 @@ int read_track (int hd, int trk) // 0, 0
 long  n, pos;
 int    track_size;
 
+  printf("  read_track[trk=%i,hd=%i]\n", trk, hd);
+
   if (trk == cur_trk && hd == cur_hd) {
     return 0;
   }
@@ -654,6 +656,8 @@ int    track_size;
 
   if (pos==0)
     return -1;
+
+  printf("  read_track[%i/%i]: seek=0x%04lx size=%i\n", trk, hd, pos, track_size);
 
   n = my_lseek(pos,SEEK_SET);
   if (n == -1L) {
@@ -904,6 +908,7 @@ uchar *sector_ptr;
   hd  = hd_calc (blk);*/
 
   calc_t_s_h(blk, &trk, &sec, &hd);
+  printf("blk=%i trk=%i sec=%i hd=%i\n", blk, trk, sec, hd);
 
   while (filled < dpb->BLS)
   {
@@ -1146,6 +1151,7 @@ int  mask;
   {
     if ((directory[i].user!=0xE5) && (directory[i].first)) {
       strncpy((char *)cpc_dsk_dirent[cpc_dsk_num_entry], (char *)directory[i].name, CPC_NAME_SIZE);
+      printf("dirent(%i) a(%i) [%s]\n", cpc_dsk_num_entry, i, cpc_dsk_dirent[cpc_dsk_num_entry]);
       cpc_dsk_num_entry++;
       if (cpc_dsk_num_entry >= CPC_MAX_ENTRY) break;
     }

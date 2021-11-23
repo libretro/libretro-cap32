@@ -184,6 +184,9 @@ void sector_set_sizes(t_sector * sector, unsigned int size, unsigned int total_s
 unsigned char* sector_get_read_data(t_sector * sector)
 {
    sector->weak_read_version = (sector->weak_read_version + 1) % sector->weak_versions;
+   #ifdef DEBUG_FDC
+   printf("sector_get_read_data: %u\n", sector->weak_read_version * sector->size);
+   #endif
    return &sector->data[sector->weak_read_version * sector->size];
 }
 
@@ -254,6 +257,11 @@ t_sector *find_sector(uint8_t *requested_CHRN)
       FDC.result[RES_ST2] &= ~0x10; // remove possible No Cylinder flag
    }
    active_drive->current_sector = idx; // update sector table index for active drive
+
+   #ifdef DEBUG_FDC
+   printf("sector: %u [%02x.%02x.%02x.%02x]\n", idx, requested_CHRN[0], requested_CHRN[1], requested_CHRN[2], requested_CHRN[3]);
+   #endif
+
    return sector;
 }
 
@@ -338,6 +346,11 @@ loop:
          else {
             sector_size = 128 << FDC.command[CMD_N]; // determine number of bytes from N value
          }
+
+         #ifdef DEBUG_FDC
+         printf("r:%u-%u\n",CMD_C, sector_size);
+         #endif
+
          FDC.buffer_count = sector_size; // init number of bytes to transfer
          FDC.buffer_ptr = sector_get_read_data(sector); // pointer to sector data (weak sector support)
          FDC.buffer_endptr = active_track->data + active_track->size; // pointer beyond end of track data

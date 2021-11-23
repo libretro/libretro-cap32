@@ -46,59 +46,43 @@
 #define DSK_NAME_SIZE 8
 #define DSK_EXT_SIZE 3
 
-//#define CAT_DEBUG 1
+//#define CAT_DEBUG
 
 char catalog_dirent[CAT_MAX_ENTRY][CAT_NAME_SIZE];
 int catalog_entry = 0;
 
-CatalogEntry * _catalog_init(unsigned short alloc_size) {
-   CatalogEntry *catalog = (CatalogEntry *) malloc(sizeof(CatalogEntry) * (alloc_size + 1));
-   if (catalog == NULL) {
-      return NULL;
-   }
-
-   for (int i = 0; i <= alloc_size; i++) {
-      catalog[i].valid = false;
-      memset(catalog[i].name, 0, 13);
-   }
-
-   #ifdef CAT_DEBUG
-   printf("  archive: created %u entries.\n", alloc_size);
-   #endif
-
-   return catalog;
-}
-
-DSKEntry * _catalog_entry(unsigned char pos, t_drive *drive)
+DSKEntry * _catalog_entry(unsigned char pos, unsigned short track_offset, t_drive *drive)
 {
    int offset = pos * sizeof(DSKEntry);
    int entry = pos % ENTRIES_PER_SECTOR;
+   int track = track_offset;
 
-   unsigned int sector_size = drive->track[0][0].sector[0].size;
+   unsigned int sector_size = drive->track[track][0].sector[0].size;
    unsigned int sector = offset / sector_size;
 
    #ifdef CAT_DEBUG
-   printf("    entry(%i): s[%u,%u] ==> %u a[%u] (%lu)\n",
+   printf("    entry(%i): s[%u,%u] ==> %u a[%u,%u] (%lu)\n",
       pos,
       sector,
       sector_size,
       offset,
       entry,
+      track,
       sizeof(DSKEntry)
    );
    #endif
 
-   DSKEntry * archive_info = (DSKEntry *) drive->track[0][0].sector[sector].data;
+   DSKEntry * archive_info = (DSKEntry *) drive->track[track][0].sector[sector].data;
    archive_info += entry;
 
    return archive_info;
 }
 
 bool _is_valid_extension(const char *ext) {
-   if (! strcasecmp(ext, "BAS"))
+   if (! strncasecmp(ext, "BAS", 3))
       return true;
    
-   if (! strcasecmp(ext, "BIN"))
+   if (! strncasecmp(ext, "BIN", 3))
       return true;
 
    if (! strncmp(ext, "   ", 3))
@@ -107,40 +91,38 @@ bool _is_valid_extension(const char *ext) {
    return false;
 }
 
-void _catalog_build_name(CatalogEntry * cat)
+bool _catalog_build_name(char *name, char *raw_name, char *raw_ext)
 {
    int  i, j;
-   char *buf = cat->name;
-   char *name = cat->raw_name;
-   char *ext = cat->raw_ext;
 
-
-   if(!_is_valid_extension(ext))
-      return;
+   if(!_is_valid_extension(raw_ext))
+      return false;
 
    for (i = 0; i < DSK_NAME_SIZE; i++) {
-      if (name[i] == ' ')
+      if (raw_name[i] == ' ')
          break;
 
-      buf[i] = name[i];
+      name[i] = raw_name[i];
    }
 
-   buf[i] = '.';
+   name[i] = '.';
    i ++;
 
    // check extension
    for (j = 0; j < DSK_EXT_SIZE; j++, i++) {
-      if (ext[j] == ' ')
+      if (raw_ext[j] == ' ')
          break;
 
-      buf[i] = ext[j];
+      name[i] = raw_ext[j];
    }
 
-   buf[i] = 0;
+   name[i] = 0;
 
    // name > '.'
-   if (i > 1)
-      cat->valid = true;
+   if (i <= 1)
+      return false;
+
+   return true;
 }
 
 bool _catalog_exist_name(char * archive_name) {
@@ -162,46 +144,37 @@ void _catalog_add(char * archive_name) {
    catalog_entry ++;
 }
 
-void archive_init(unsigned short alloc_size, t_drive *drive)
+void archive_init(unsigned short alloc_size, unsigned short track_offset, t_drive *drive)
 {
    int i = 0;
-   CatalogEntry *catalog = NULL;
-
-   catalog = _catalog_init(alloc_size);
-   if (catalog == NULL) {
-      return;
-   }
+   char raw_name[8 + 3];
+   char tmp_name[13]; /* <raw_name 8>+"."+<raw_ext 3>+"\0" */
 
    for (i = 0; i <= alloc_size; i++) {
-      DSKEntry * archive_info = _catalog_entry(i, drive);
+      const DSKEntry * archive_info = _catalog_entry(i, track_offset, drive);
 
       // ignore empty entries
       if (archive_info->user == 0xE5)
          continue;
 
       // filter filename/extension using mask
-      for (int j = 0; j < 8; j++)
-         catalog[i].raw_name[j] = archive_info->raw_name[j] & 0x7F;
+      for (int j = 0; j < 8 + 3; j++)
+         raw_name[j] = archive_info->file.raw[j] & 0x7F;
 
-      for (int j=0; j < 3; j++)
-         catalog[i].raw_ext[j] = archive_info->raw_ext[j] & 0x7F;
+      #ifdef CAT_DEBUG
+      printf("entry[%i/%i] [%s]\n", i, alloc_size, raw_name);
+      #endif
 
-      _catalog_build_name(&catalog[i]);
-
-      if (!catalog[i].valid)
+      if(!_catalog_build_name(tmp_name, raw_name, raw_name + 8))
          continue;
 
       #ifdef CAT_DEBUG
-      printf("  drive_data(%i/%i): t[0][0] [%s] v[%u]\n\n",
-         i, alloc_size,
-         catalog[i].name,
-         catalog[i].valid
+      printf("  drive_data(%i/%i): t[%i][0] [%s]\n\n",
+         i, alloc_size, track_offset,
+         tmp_name
       );
       #endif
 
-      _catalog_add(catalog[i].name);
+      _catalog_add(tmp_name);
    }
-
-   // free allocated info
-   free(catalog);
 }

@@ -200,8 +200,6 @@ extern char cart_name[512];
 #include "slots.h"
 #include "errors.h"
 
-#define VERSION_STRING "v4.2.0"
-
 #define MSG_SNA_LOAD             32
 #define MSG_SNA_SAVE             33
 #define MSG_DSK_LOAD             34
@@ -542,7 +540,7 @@ uint8_t z80_IN_handler (reg_pair port)
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
-								 (CRTC.flag_invsync ? 1 : 0); // VSYNC status
+                         (CRTC.flag_invsync ? 1 : 0); // VSYNC status
             } else {
                ret_val = PPI.portB; // return last programmed value
             }
@@ -1909,7 +1907,7 @@ void doCleanUp (void)
 
 void emu_reset(void)
 {
-	emulator_reset(false);
+   emulator_reset(false);
 }
 
 void emu_restart(void)
@@ -1923,7 +1921,7 @@ void emu_restart(void)
 
 void change_model(int val){
 
-	CPC.model=val;
+   CPC.model=val;
 
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
@@ -1933,7 +1931,7 @@ void change_model(int val){
 
 void change_ram(int val){
 
-	CPC.ram_size=val;
+   CPC.ram_size=val;
 
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
@@ -1942,11 +1940,11 @@ void change_ram(int val){
 }
 
 uint8_t* get_ram_ptr() {
-	return pbRAM;
+   return pbRAM;
 }
 
 size_t get_ram_size(void) {
-	return CPC.ram_size * 1024;
+   return CPC.ram_size * 1024;
 }
 
 void change_lang(int val){
@@ -1983,116 +1981,13 @@ int  UnInitOSGLU(void)
    return 0;
 }
 
-uint32_t dwSndDist;
-int iExitCondition;
-bool bolDone;
-
-//FIXME RETRO
-//AUTOBOOT TAKEN FROM CPCDROID
-#include "cpc_cat.h"
-
-static int cur_name_id  = 0;
-
-int cpc_dsk_system = 0;
-int
-cap32_disk_dir(char *FileName)
-{
-   int error = cpc_dsk_dir(FileName);
-   if (! error) {
-      cpc_dsk_system = (cpc_dsk_type == DSK_TYPE_SYSTEM);
-      printf("INFO-DSK: num: %d sys(%d)\n", cpc_dsk_num_entry, cpc_dsk_system);
-      if (cpc_dsk_num_entry > 20) {
-         int index;
-         for (index = 0; index < cpc_dsk_num_entry; index++) {
-            int cpos = 0;
-            printf("INFO: DIR-INIT: i(%d) p(%d) = %x\n", index, cpos, cpc_dsk_dirent[index][cpos]);
-            for (cpos = 0; cpc_dsk_dirent[index][cpos]; cpos++) {
-               /* with no printable chars in first ? might be CPM */
-               if (cpc_dsk_dirent[index][cpos] < 32) {
-                  if(!index) {
-                     cpc_dsk_num_entry = 0;
-                  } else {
-                     // some filenames are loaded used it! -- fixed cracked custom DSKs
-                     cpc_dsk_num_entry = index;
-                  }
-                  printf("DSK_LOAD INFO-SYS: dsk: i(%d) p(%d) = %d \n", index, cpos, cpc_dsk_dirent[index][cpos]);
-                  break;
-               }
-            }
-         }
-      } else {
-      }
-   }
-   return error;
-}
-
 int retro_disk_auto()
 {
   char key_buffer[LOADER_MAX_SIZE];
-  /*
-  int  index;
-  int  found = 0;
-  int  first_bas = -1;
-  int  first_spc = -1;
-  int  first_bin = -1;
-  */
 
-  cur_name_id = 0;
 
    loader_init();
    loader_run(key_buffer);
-
-/*
-  char *RunName = psp_run_search(CPC.cpc_save_name);
-
-  if (RunName != (char *)0 ) {
-
-    if (!strcasecmp(RunName, "|CPM")) strcpy(Buffer, "|CPM");
-    else  snprintf(Buffer, MAX_PATH, "RUN\"%s", RunName);
-
-  } else {
-
-    for (index = 0; index < cpc_dsk_num_entry; index++) {
-      char* scan = strchr(cpc_dsk_dirent[index], '.');
-      if (scan) {
-        if (! strcasecmp(scan+1, "BAS")) {
-          if (first_bas == -1) first_bas = index;
-          found = 1;
-        } else
-        if (! strcasecmp(scan+1, "")) {
-          if (first_spc == -1) first_spc = index;
-          found = 1;
-        } else
-        if (! strcasecmp(scan+1, "BIN")) {
-          if (first_bin == -1) first_bin = index;
-          found = 1;
-        }
-      }
-    }
-    if (! found) {
-
-      if (cpc_dsk_system) {
-        strcpy(Buffer, "|CPM");
-      } else {
-         strcpy(Buffer, "CAT");
-			printf("autoload: file to load not found\n");
-      }
-
-    } else {
-      if (first_bas != -1) cur_name_id = first_bas;
-      else
-      if (first_spc != -1) cur_name_id = first_spc;
-      else
-      if (first_bin != -1) cur_name_id = first_bin;
-
-      // check added to avoid warning on gcc >= 8
-      if(snprintf(Buffer, sizeof(Buffer), "RUN\"%s", (const char*) &cpc_dsk_dirent[cur_name_id][0]) < 0)
-      {
-        printf("autoload: snprintf failed");
-      }
-    }
-  //}
-  */
 
   printf(" >>> \"%s\"\n",key_buffer);
   strcat(key_buffer, "\n");
@@ -2102,25 +1997,30 @@ int retro_disk_auto()
   return 1;
 }
 
+// TO BE REMOVED
+//#define OLD_LOADER
+#ifdef OLD_LOADER
+//AUTOBOOT TAKEN FROM CPCDROID
+#include "cpc_cat.h"
+#endif
+
 int attach_disk(char *arv, int drive)
 {
-	int result = 1;
+   int result = 1;
 
-	if(!drive) {
-		if((result = dsk_load( arv, &driveA, 'A')) == 0)
-		{
-			sprintf(DISKA_NAME,"%s",arv);
-			//result = cap32_disk_dir(arv);
-
-         //if(result)
-         //   printf("error dsk: %d\n", result);
-		}
-	} else {
-		if((result = dsk_load( arv, &driveB, 'B')) == 0)
-		{
-			sprintf(DISKB_NAME,"%s",arv);
-			cap32_disk_dir(arv);
-		}
+   if(!drive) {
+      if((result = dsk_load( arv, &driveA, 'A')) == 0)
+      {
+         sprintf(DISKA_NAME,"%s",arv);
+         #ifdef OLD_LOADER
+			result = cpc_dsk_dir(arv);
+         #endif
+      }
+   } else {
+      if((result = dsk_load( arv, &driveB, 'B')) == 0)
+      {
+         sprintf(DISKB_NAME,"%s",arv);
+      }
    }
    return result;
 }
@@ -2143,19 +2043,10 @@ int detach_disk(int drive)
 
 void retro_loop(void)
 {
-	while(1)
-   {
-      if ((CPC.limit_speed) && (iExitCondition == EC_CYCLE_COUNT))
-      {
-         if (CPC.snd_enabled)
-         {
-            if (pbSndStream < CPC.snd_bufferptr)
-               dwSndDist = CPC.snd_bufferptr - pbSndStream; // determine distance between play and write cursors
-            else
-               dwSndDist = (pbSndBufferEnd - pbSndStream) + (CPC.snd_bufferptr - pbSndBuffer);
-         }
-      }
+   static int iExitCondition = EC_FRAME_COMPLETE;
 
+   while(1)
+   {
       uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
       if (VDU.scrln > 0)
          CPC.scr_base = retro_getScreenPtr() + (VDU.scrln * CPC.scr_line_offs); // determine current position
@@ -2216,9 +2107,6 @@ int capmain (int argc, char **argv)
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
 
    dwTicksOffset     = (int)(FRAME_PERIOD_MS / (double)(CPC.speed/CPC_BASE_FREQUENCY_MHZ));
-
-   iExitCondition    = EC_FRAME_COMPLETE;
-   bolDone           = false;
 
    emu_status = COMPUTER_READY; // set computer init as completed
 

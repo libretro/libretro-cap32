@@ -43,8 +43,13 @@ typedef union {
       unsigned char data[32];
       struct {
          unsigned char user;
-         char raw_name[8]; // raw filename
-         char raw_ext[3];
+         union {
+            char raw[8+3];
+            struct {
+               char raw_name[8]; // raw filename
+               char raw_ext[3];
+            };
+         } file;
          unsigned char extent;
          unsigned char unused[2];
          unsigned char rec;
@@ -52,12 +57,4 @@ typedef union {
       };
 } DSKEntry;
 
-typedef struct {
-   char raw_name[8];   /* padded with space */
-   char raw_ext[3];    /* ditto        */
-   char name[13];   /* <root 8>+"."+<ext 3>+"\0" (for globbing) */
-
-   bool valid;      /* this entry is first */
-} CatalogEntry;
-
-void archive_init(unsigned short alloc_size, t_drive *drive);
+void archive_init(unsigned short alloc_size, unsigned short track_offset, t_drive *drive);
