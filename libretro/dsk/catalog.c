@@ -61,7 +61,7 @@ DSKEntry * _catalog_entry(unsigned char pos, unsigned short track_offset, t_driv
    unsigned int sector = offset / sector_size;
 
    #ifdef CAT_DEBUG
-   printf("    entry(%i): s[%u,%u] ==> %u a[%u,%u] (%lu)\n",
+   printf("[LOADER] [CAT]: entry(%i): s[%u,%u] ==> %u a[%u,%u] (%lu)\n",
       pos,
       sector,
       sector_size,
@@ -139,7 +139,9 @@ void _catalog_add(char * archive_name) {
       return;
 
    strncpy(catalog_dirent[catalog_entry], archive_name, CAT_NAME_SIZE);
-   printf("dirent(%i) [%s]\n", catalog_entry, catalog_dirent[catalog_entry]);
+   #ifdef CAT_DEBUG
+   printf("[LOADER] [CAT]: dirent(%i) [%s]\n", catalog_entry, catalog_dirent[catalog_entry]);
+   #endif
 
    catalog_entry ++;
 }
@@ -162,14 +164,14 @@ void archive_init(unsigned short alloc_size, unsigned short track_offset, t_driv
          raw_name[j] = archive_info->file.raw[j] & 0x7F;
 
       #ifdef CAT_DEBUG
-      printf("entry[%i/%i] [%s]\n", i, alloc_size, raw_name);
+      printf("[LOADER] [CAT]: entry[%i/%i] [%s]\n", i, alloc_size, raw_name);
       #endif
 
       if(!_catalog_build_name(tmp_name, raw_name, raw_name + 8))
          continue;
 
       #ifdef CAT_DEBUG
-      printf("  drive_data(%i/%i): t[%i][0] [%s]\n\n",
+      printf("[LOADER] [CAT]: drive_data(%i/%i): t[%i][0] [%s]\n\n",
          i, alloc_size, track_offset,
          tmp_name
       );

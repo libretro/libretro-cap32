@@ -230,7 +230,7 @@ bool sector_find(t_track *track, unsigned short sector_signature)
 {
    for (int i = 0; i < track->sectors; i++) {
       #ifdef FORMAT_DEBUG
-      printf("%i) !!%x == %x [%02x.%02x.%02x]\n", i,
+      printf("[LOADER] [FMT]: %i !!%x == %x [%02x.%02x.%02x]\n", i,
          track->sector[i].CHRN.sector,
          sector_signature,
          track->sector[i].CHRN.side,
@@ -290,7 +290,7 @@ void calc_dpb(DPB_type *dpb)
    }
 
    #ifdef FORMAT_DEBUG
-   printf("  upd: %02x.%02x.%u.%u.%lu.%02x\n",
+   printf("[LOADER] [FMT]: upd: %02x.%02x.%u.%u.%lu.%02x\n",
       dpb->BLS,
       dpb->DSM,
       blknr_size,
@@ -346,7 +346,7 @@ DPB_type *format_find (t_drive *drive)
       );
       #endif
 
-      fprintf(stdout, "  >>> format \"%s\" matching disk\n", cur_entry->ident);
+      printf("[LOADER] >>> format: \"%s\" matching disk.\n", cur_entry->ident);
       dpb_found = &cur_entry->dpb;
       found_count++;
    }

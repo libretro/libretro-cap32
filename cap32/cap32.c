@@ -1983,18 +1983,14 @@ int  UnInitOSGLU(void)
 
 int retro_disk_auto()
 {
-  char key_buffer[LOADER_MAX_SIZE];
-
+   char key_buffer[LOADER_MAX_SIZE];
 
    loader_init();
    loader_run(key_buffer);
+   strcat(key_buffer, "\n");
+   kbd_buf_feed(key_buffer);
 
-  printf(" >>> \"%s\"\n",key_buffer);
-  strcat(key_buffer, "\n");
-
-  kbd_buf_feed(key_buffer);
-
-  return 1;
+   return 1;
 }
 
 // TO BE REMOVED
