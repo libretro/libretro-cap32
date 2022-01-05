@@ -144,6 +144,4 @@ Jack the Nipper II... In Coconut Capers (E).dsk
 
 - [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59)
 
-- Android version is not fully tested/optimized.
-
 - Old3DS need some optimizations (~18fps).
