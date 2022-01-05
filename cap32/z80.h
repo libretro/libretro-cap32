@@ -92,9 +92,9 @@ typedef struct {
 #define _IM       z80.IM
 #define _HALT     z80.HALT
 
+#define EC_FRAME_COMPLETE  0
 #define EC_BREAKPOINT      10
 #define EC_TRACE           20
-#define EC_FRAME_COMPLETE  30
 #define EC_CYCLE_COUNT     40
 #define EC_SOUND_BUFFER    50
 

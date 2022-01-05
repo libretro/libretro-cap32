@@ -533,6 +533,8 @@ static INLINE void Synthesizer_Mixer_Q(void)
    Right_Chan += LevR;
 }
 
+extern void retro_audio_mix_sample(int32_t sample);
+
 void Synthesizer_Stereo16(void)
 {
    int Tick_Counter = 0;
@@ -550,16 +552,25 @@ void Synthesizer_Stereo16(void)
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
 
-   *(uint32_t *)CPC.snd_bufferptr = val.d; // write to mixing buffer
-
-   CPC.snd_bufferptr += 4;
    Left_Chan          = 0;
    Right_Chan         = 0;
+
+   // mix cap32 audio and RA snd_mixer (fx)
+   // TODO: allow differents audio/configs
+   retro_audio_mix_sample(val.d);
+
+   /**
+    * retroarch internal mixer is used
+   
+   *(uint32_t *)CPC.snd_bufferptr = val.d; // write to mixing buffer
+   CPC.snd_bufferptr += 4;
+
    if (CPC.snd_bufferptr >= pbSndBufferEnd)
    {
       CPC.snd_bufferptr = pbSndBuffer;
       PSG.buffer_full   = 1;
    }
+   */
 }
 
 

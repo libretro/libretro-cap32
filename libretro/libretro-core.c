@@ -107,7 +107,6 @@ int audio_buffer_size = 0;
 // almost deprecated
 int pauseg = 0; 
 int autorun = 0;
-int SND=1;
 int SHIFTON=-1;
 
 int retro_scr_style = 0;
@@ -193,6 +192,8 @@ int retro_getAudioBuffer(){
 
    while (audio_buffer_size < sample_size)
       audio_buffer_size <<= 1;
+
+   LOGI("getAudioBuffer: %u\n", audio_buffer_size);
    return audio_buffer_size; // return the closest match as 2^n
 }
 
@@ -1276,12 +1277,21 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
-void retro_audio_mix()
+void retro_audio_mix_sample(int32_t sample)
 {
    if(retro_computer_cfg.floppy_snd)
-      retro_snd_mixer();
+      retro_snd_mixer_sample(&sample);
+
+   audio_cb(sample, sample);
+}
+
+void retro_audio_mix_batch()
+{
+   if(retro_computer_cfg.floppy_snd)
+      retro_snd_mixer_batch();
+
    memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
-   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
+   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size / AUDIO_BYTES / AUDIO_CHANNELS);
 }
 
 void retro_PollEvent()

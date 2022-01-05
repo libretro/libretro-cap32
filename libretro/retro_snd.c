@@ -193,13 +193,13 @@ void sound_stop(retro_guisnd_t* snd) {
 
 
 /**
- * mix_audio:
+ * mix_audio_batch:
  * @snd: sample struct to mix in emulator buffer
  *
  * this is a very simple mixer loop that just send a full snd_buffer_size
  * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
  */
-static void mix_audio(retro_guisnd_t* snd)
+static void mix_audio_batch(retro_guisnd_t* snd)
 {
    if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
       // exits if no loop sound...
@@ -231,14 +231,14 @@ static void mix_audio(retro_guisnd_t* snd)
 
 
 /**
- * retro_snd_mixer:
- * mixes each sound (active or looped) into emulator buffer
+ * retro_snd_mixer_batch:
+ * mixes each sound (active or looped) into emulator buffer for batch audio cb
  */
-void retro_snd_mixer() {
+void retro_snd_mixer_batch() {
    int n;
    for(n = 0; n < SND_LAST; n++) {
       if (sounds[n].state != ST_OFF) {
-         mix_audio(&sounds[n]);
+         mix_audio_batch(&sounds[n]);
       }
    }
 }
@@ -258,4 +258,49 @@ void retro_snd_cmd(int snd_type, audio_status_t new_status) {
    sounds[snd_type].state = new_status;
    if(new_status == ST_OFF)
       sounds[snd_type].sample_pos = 0;
+}
+
+
+/**
+ * mix_audio_sample:
+ * @snd: sample struct to mix in emulator buffer
+ * @sample_buffer: stereo sample buffer to be mixed
+ *
+ * this is a very simple mixer that just writes to the sample_buffer (L/R)
+ * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
+ */
+static void mix_audio_sample(retro_guisnd_t* snd, int32_t* sample_buffer)
+{
+   if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
+      // exits if no loop sound...
+      if(snd->state == ST_ON) {
+         sound_stop(snd);
+         return;
+      }
+      snd->sample_pos = 0;
+   }
+
+   int16_t* samples = (int16_t*) sample_buffer;
+   int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (AUDIO_BYTES * snd->sample_pos));
+
+   *samples += *rawsamples16;
+   *(samples + 1) += *rawsamples16;
+
+   snd->sample_pos ++;
+}
+
+
+/**
+ * retro_snd_mixer_sample:
+ * @sample_buffer: stereo sample buffer to be mixed
+ * 
+ * mix fx to current stereo sample
+ */
+void retro_snd_mixer_sample(int32_t* sample_buffer) {
+   int n;
+   for(n = 0; n < SND_LAST; n++) {
+      if (sounds[n].state != ST_OFF) {
+         mix_audio_sample(&sounds[n], sample_buffer);
+      }
+   }
 }

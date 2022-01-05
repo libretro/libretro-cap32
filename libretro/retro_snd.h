@@ -64,6 +64,7 @@ bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size);
 void free_retro_snd();
 
 void retro_snd_cmd(int snd_type, audio_status_t new_status);
-void retro_snd_mixer();
+void retro_snd_mixer_batch();
+void retro_snd_mixer_sample(int32_t* sample);
 
 #endif

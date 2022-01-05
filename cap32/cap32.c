@@ -167,8 +167,7 @@ void retro_loop(void);
 void doCleanUp (void);
 int theloop(void);
 int capmain (int argc, char **argv);
-void retro_audio_mix();
-void mixsnd (void);
+void retro_audio_mix_batch (void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
@@ -179,7 +178,6 @@ int HandleExtension(char *path,char *ext);
 extern unsigned int bmp[WINDOW_MAX_SIZE];
 extern char retro_content_filepath[512];
 extern int autorun;
-extern int SND;
 extern bool kbd_runcmd;
 int autoboot_delay=0;
 
@@ -1952,15 +1950,10 @@ void change_lang(int val){
    retro_computer_cfg.is_dirty = true;
 }
 
-
 void mixsnd(void)
 {
-   if(SND != 1)
-      return;
-
-   retro_audio_mix();
+   retro_audio_mix_batch();
 }
-
 
 int skel_main(int argc, char *argv[])
 {
@@ -2028,7 +2021,7 @@ void retro_loop(void)
 {
    static int iExitCondition = EC_FRAME_COMPLETE;
 
-   while(1)
+   do
    {
       uint32_t dwOffset = CPC.scr_pos - CPC.scr_base; // offset in current surface row
       if (VDU.scrln > 0)
@@ -2039,16 +2032,19 @@ void retro_loop(void)
       CPC.scr_pos = CPC.scr_base + dwOffset; // update current rendering position
 
       iExitCondition = z80_execute(); // run the emulation until an exit condition is met
-      if (iExitCondition == EC_FRAME_COMPLETE)
-      {
-         /* emulation finished rendering a complete frame? */
-         break; /* exit retro_loop for retro_run */
-      }
-      else if (iExitCondition == EC_SOUND_BUFFER)
+
+      /*
+       * now using per sample sound mixer, this part is unused now
+      if (iExitCondition == EC_SOUND_BUFFER)
       {
          mixsnd();
       }
-   }
+      */
+
+   // emulation finished rendering a complete frame?
+   // iExitCondition == EC_FRAME_COMPLETE (val 0)
+   } while (iExitCondition);
+   // exit retro_loop for retro_run
 }
 
 int capmain (int argc, char **argv)
