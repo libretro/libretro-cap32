@@ -1281,7 +1281,7 @@ void retro_audio_mix()
    if(retro_computer_cfg.floppy_snd)
       retro_snd_mixer();
    memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
-   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size);
+   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size / 4);
 }
 
 void retro_PollEvent()
