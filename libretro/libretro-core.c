@@ -1277,12 +1277,12 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
-void retro_audio_mix_sample(int32_t sample)
+void retro_audio_mix_sample(int16_t left, int16_t right)
 {
    if(retro_computer_cfg.floppy_snd)
-      retro_snd_mixer_sample(&sample);
+      retro_snd_mixer_sample(&left, &right);
 
-   audio_cb(sample, sample);
+   audio_cb(left, right);
 }
 
 void retro_audio_mix_batch()

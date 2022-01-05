@@ -269,7 +269,7 @@ void retro_snd_cmd(int snd_type, audio_status_t new_status) {
  * this is a very simple mixer that just writes to the sample_buffer (L/R)
  * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
  */
-static void mix_audio_sample(retro_guisnd_t* snd, int32_t* sample_buffer)
+static void mix_audio_sample(retro_guisnd_t* snd, int16_t* left, int16_t* right)
 {
    if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
       // exits if no loop sound...
@@ -280,11 +280,10 @@ static void mix_audio_sample(retro_guisnd_t* snd, int32_t* sample_buffer)
       snd->sample_pos = 0;
    }
 
-   int16_t* samples = (int16_t*) sample_buffer;
    int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (AUDIO_BYTES * snd->sample_pos));
 
-   *samples += *rawsamples16;
-   *(samples + 1) += *rawsamples16;
+   *left += *rawsamples16;
+   *right += *rawsamples16;
 
    snd->sample_pos ++;
 }
@@ -296,11 +295,11 @@ static void mix_audio_sample(retro_guisnd_t* snd, int32_t* sample_buffer)
  * 
  * mix fx to current stereo sample
  */
-void retro_snd_mixer_sample(int32_t* sample_buffer) {
+void retro_snd_mixer_sample(int16_t* left, int16_t* right) {
    int n;
    for(n = 0; n < SND_LAST; n++) {
       if (sounds[n].state != ST_OFF) {
-         mix_audio_sample(&sounds[n], sample_buffer);
+         mix_audio_sample(&sounds[n], left, right);
       }
    }
 }

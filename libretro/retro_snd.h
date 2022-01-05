@@ -65,6 +65,6 @@ void free_retro_snd();
 
 void retro_snd_cmd(int snd_type, audio_status_t new_status);
 void retro_snd_mixer_batch();
-void retro_snd_mixer_sample(int32_t* sample);
+void retro_snd_mixer_sample(int16_t* left, int16_t* right);
 
 #endif

@@ -533,7 +533,7 @@ static INLINE void Synthesizer_Mixer_Q(void)
    Right_Chan += LevR;
 }
 
-extern void retro_audio_mix_sample(int32_t sample);
+extern void retro_audio_mix_sample(int16_t left, int16_t right);
 
 void Synthesizer_Stereo16(void)
 {
@@ -547,21 +547,26 @@ void Synthesizer_Stereo16(void)
       LoopCount.Hi--;
    }
    LoopCount.Re += LoopCountInit;
+
+   // TODO: allow differents audio/configs
+
+   // mix cap32 audio and RA snd_mixer (fx)
+   retro_audio_mix_sample(
+      Left_Chan / Tick_Counter,
+      Right_Chan / Tick_Counter
+   );
+
+   Left_Chan          = 0;
+   Right_Chan         = 0;
+
+   /**
+    * retroarch internal mixer is used
+   
    reg_pair val;
 
    val.w.l = Left_Chan / Tick_Counter;
    val.w.h = Right_Chan / Tick_Counter;
 
-   Left_Chan          = 0;
-   Right_Chan         = 0;
-
-   // mix cap32 audio and RA snd_mixer (fx)
-   // TODO: allow differents audio/configs
-   retro_audio_mix_sample(val.d);
-
-   /**
-    * retroarch internal mixer is used
-   
    *(uint32_t *)CPC.snd_bufferptr = val.d; // write to mixing buffer
    CPC.snd_bufferptr += 4;
 
