@@ -556,9 +556,6 @@ void Synthesizer_Stereo16(void)
       Right_Chan / Tick_Counter
    );
 
-   Left_Chan          = 0;
-   Right_Chan         = 0;
-
    /**
     * retroarch internal mixer is used
    
@@ -576,6 +573,9 @@ void Synthesizer_Stereo16(void)
       PSG.buffer_full   = 1;
    }
    */
+
+   Left_Chan          = 0;
+   Right_Chan         = 0;
 }
 
 
