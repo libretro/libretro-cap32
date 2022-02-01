@@ -112,7 +112,7 @@
 
 typedef struct {
    char id[8+1];
-   char unused1[8];
+   char unused1[7];
    unsigned char version;
    unsigned char AF[2];
    unsigned char BC[2];
