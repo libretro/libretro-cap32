@@ -94,10 +94,19 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if ((sna_buffer == NULL) || (buffer_size < sizeof(sh)))
       return ERR_SNA_SIZE;
 
-   memcpy(&sh, sna_buffer, sizeof(sh));
-
-   if (memcmp(sh.id, "MV - SNA", 8) != 0) // valid SNApshot image?
+   // check valid SNApshot image
+   if (memcmp(sna_buffer, "MV - SNA", sizeof(sh.id)) != 0)
       return ERR_SNA_INVALID;
+
+   // old format has 8+1 ID size, check moved SNA_VERSION position on buffer
+   // more info at: cap32.h on SNA - struct
+   if (sna_buffer[sizeof(sh.id) + sizeof(sh.unused1)] == 0) {
+      printf("slots::SNA: detected old format...\n");
+      // to fix old position simply move pointer one position: M>V - SNA
+      sna_buffer++;
+   }
+
+   memcpy(&sh, sna_buffer, sizeof(sh));
 
    dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
    dwSnapSize &= ~0x3f; // limit to multiples of 64

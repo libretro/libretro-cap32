@@ -108,11 +108,13 @@
 #define MF2_RUNNING     2
 #define MF2_INVISIBLE   4
 
-
+// SNA INFO: https://www.cpcwiki.eu/index.php/Format:SNA_snapshot_file_format
+#define SNA_ID          8
+#define SNA_ID_UNUSED   8
 
 typedef struct {
-   char id[8+1];
-   char unused1[7];
+   char id[SNA_ID];
+   char unused1[SNA_ID_UNUSED];
    unsigned char version;
    unsigned char AF[2];
    unsigned char BC[2];
