@@ -90,6 +90,7 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    reg_pair port;
    uint32_t dwSnapSize, dwModel, dwFlags;
    t_SNA_header sh;
+   int old_snapshot;
 
    if ((sna_buffer == NULL) || (buffer_size < sizeof(sh)))
       return ERR_SNA_SIZE;
@@ -98,6 +99,12 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
 
    if (memcmp(sh.id, "MV - SNA", 8) != 0) // valid SNApshot image?
       return ERR_SNA_INVALID;
+
+   old_snapshot = sh.ram_size[1] == 64 || sh.ram_size[1] == 128;
+
+   if (old_snapshot) {
+      memcpy(&sh, sna_buffer+1, sizeof(sh));
+   }
 
    dwSnapSize = sh.ram_size[0] + (sh.ram_size[1] * 256); // memory dump size
    dwSnapSize &= ~0x3f; // limit to multiples of 64
@@ -120,7 +127,11 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if (sizeof(sh) + (dwSnapSize * 1024) > buffer_size)
       return ERR_SNA_INVALID;
 
-   memcpy(pbRAM, (uint8_t*)(sna_buffer + sizeof(sh)), dwSnapSize * 1024); // read memory dump into CPC RAM
+   if (old_snapshot) {
+      memcpy(pbRAM, (uint8_t*)(sna_buffer + sizeof(sh) + 1), dwSnapSize * 1024); // read memory dump into CPC RAM
+   } else {
+      memcpy(pbRAM, (uint8_t*)(sna_buffer + sizeof(sh)), dwSnapSize * 1024); // read memory dump into CPC RAM
+   }
 
    // Z80
    _A = sh.AF[1];
