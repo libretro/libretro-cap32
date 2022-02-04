@@ -4,11 +4,9 @@ LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro-common
 INCFLAGS := \
 	-I$(CORE_DIR) \
 	-I$(CORE_DIR)/cap32 \
-	-I$(CORE_DIR)/cap32/libcpccat \
 	-I$(CORE_DIR)/libretro  \
 	-I$(CORE_DIR)/libretro/microui \
-	-I$(LIBRETRO_COMM_DIR)/include \
-	-I$(DEPS)/zlib
+	-I$(LIBRETRO_COMM_DIR)/include
 
 SOURCES_C := \
 	$(CORE_DIR)/libretro/libretro-core.c \
@@ -21,7 +19,6 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/cart.c \
 	$(CORE_DIR)/cap32/asic.c \
 	$(CORE_DIR)/cap32/z80.c \
-	$(CORE_DIR)/cap32/libcpccat/fs.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
 	$(CORE_DIR)/libretro/microui/microui.c \
 	$(CORE_DIR)/libretro/dsk/catalog.c \
