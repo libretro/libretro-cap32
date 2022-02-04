@@ -1262,7 +1262,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
 
-   info->timing.fps = 50.0;
+   info->timing.fps = CPC_TIMING;
    info->timing.sample_rate = 44100.0;
 }
 
