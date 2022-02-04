@@ -20,7 +20,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include <zlib.h>
 #include "fs.h"
 
 #include "cpc_cat.h"
@@ -50,69 +49,41 @@ unsigned char filler;  /* copied from track header */
 DirEntry *directory = (DirEntry*)NULL;
 uchar  *block_buffer = NULL;  /* Buffer for 1024 or more bytes */
 static int    imagefile = -1;    /* ... handle of imagefile */
-static gzFile gz_imagefile = 0;
-static int  gz_format = 0;
 
 int image_type = 0;
 
 static int my_open(const char* name)
 {
-   char *scan = strrchr(name, '.');
-   gz_format = 0;
-   if (scan && (!strcasecmp(scan, ".dsz")))
-      gz_format = 1;
-
-   if (gz_format)
-   {
-      gz_imagefile = gzopen(name, "rb+");
-      if (! gz_imagefile) return -1;
-   }
-   else
-   {
-	int fmode = O_RDONLY;
+  int fmode = O_RDONLY;
 #ifdef _WIN32
  	fmode |=O_BINARY;
 #endif
-      imagefile = open(name, fmode);
-      if (imagefile < 0) return -1;
-   }
-   return 0;
+
+  imagefile = open(name, fmode);
+  if (imagefile < 0)
+    return -1;
+
+  return 0;
 }
 
 static int my_close(void)
 {
   int ret_val = 0;
-  if (gz_format)
+  if (imagefile >= 0)
   {
-    if (gz_imagefile)
-    {
-      ret_val = gzclose(gz_imagefile);
-      gz_imagefile = 0;
-    }
-
-  }
-  else
-  {
-    if (imagefile >= 0)
-    {
-      ret_val = close(imagefile);
-      imagefile = -1;
-    }
+    ret_val = close(imagefile);
+    imagefile = -1;
   }
   return ret_val;
 }
 
 static int my_read(uchar* a_ptr, size_t a_size)
 {
-  if (gz_format)
-    return gzread( gz_imagefile, a_ptr, a_size);
   return read(imagefile, a_ptr, a_size);
 }
 
 static int my_lseek(long offs, int whence)
 {
-  if (gz_format)
-    return gzseek( gz_imagefile, offs, whence);
   return lseek(imagefile, offs, whence);
 }
 
@@ -1393,8 +1364,6 @@ initialise(void)
   directory = NULL;
   block_buffer = NULL;
   imagefile = -1;
-  gz_imagefile = 0;
-  gz_format = 0;
 }
 
 /********
