@@ -1928,7 +1928,9 @@ void change_model(int val){
 
 void change_ram(int val){
 
-   CPC.ram_size=val;
+   CPC.ram_size = val <= 512
+      ? val
+      : 512;
 
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
       CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB

@@ -413,16 +413,17 @@ void retro_set_environment(retro_environment_t cb)
          "Combo Key; select|y|b|disabled",
       },
       {
-         "cap32_autorun",
-         "Autorun; enabled|disabled",
-      },
-      {
          "cap32_model",
          "Model; 6128|464|6128+",
       },
+      // rcheevos disallowed_setting: cap32_autorun disabled
+      {
+         "cap32_autorun",
+         "Advanced > Autorun; enabled|disabled",
+      },
       {
          "cap32_ram",
-         "Advanced > Ram size; 128|64|192|512|576",
+         "Advanced > Ram size; 128|64|192|512",
       },
       {
          "cap32_advanced_green_phosphor",
@@ -1091,12 +1092,15 @@ void retro_init(void)
    struct retro_log_callback log;
    const char *system_dir = NULL;
    dc = dc_create();
+   bool achievements = true;
 
    // Init log
    if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
       log_cb = log.log;
    else
       log_cb = fallback_log;
+
+   environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &achievements);
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
@@ -1149,10 +1153,10 @@ void retro_init(void)
    LOGI("Retro SAVE_DIRECTORY %s\n", retro_save_directory);
    LOGI("Retro CONTENT_DIRECTORY %s\n", retro_content_directory);
 
-#ifndef M16B
-       enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
+#ifdef M16B
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 #else
-       enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
 #endif
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
