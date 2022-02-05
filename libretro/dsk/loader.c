@@ -96,12 +96,19 @@ bool _loader_find (char * text) {
    return true;
 }
 
-void loader_failed (char * text, bool cpc_dsk_system) {
+void _loader_failed (char * text, bool cpc_dsk_system, bool is_hexagon) {
    if (cpc_dsk_system) {
       strcpy(text, "|CPM");
-   } else {
-      strcpy(text, "CAT");
+      return;
    }
+
+   if (is_hexagon) {
+      strcpy(text, "RUN\"DISK");
+      return;
+   }
+
+   // usefull to user see catalogue files (or run DSK protections)
+   strcpy(text, "CAT");
 }
 
 void loader_run (char * key_buffer) {
@@ -119,6 +126,10 @@ void loader_run (char * key_buffer) {
 
    archive_init(dpb->DRM, dpb->OFS, current_drive);
    if(!_loader_find(key_buffer)) {
-      loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
+      _loader_failed(
+         key_buffer,
+         dpb->SEC1_side1 == DSK_TYPE_SYSTEM,
+         format_hexagon_protection(current_drive)
+      );
    }
 }

@@ -360,3 +360,34 @@ DPB_type *format_find (t_drive *drive)
    return dpb_found;
 }
 
+#define HEXAGON_FILE_POS      0x1001
+#define HEXAGON_FILE_STR      "DISK"
+#define HEXAGON_HEADER_POS    0x101C
+#define HEXAGON_TRACK_SIZE    0x1400
+#define HEXAGON_HEADER_STR    "HEXAGON"
+
+bool format_hexagon_protection (t_drive *drive) {
+   t_track *first_track = &drive->track[0][0];
+
+
+   if (first_track->size != HEXAGON_TRACK_SIZE)
+      return false;
+
+   if (memcmp(
+      first_track->data + HEXAGON_HEADER_POS,
+      HEXAGON_HEADER_STR,
+      7
+   ) != 0)
+      return false;
+
+   if (memcmp(
+      first_track->data + HEXAGON_FILE_POS,
+      HEXAGON_FILE_STR,
+      4
+   ) != 0)
+      return false;
+
+   printf("[LOADER] >>> protection: HEXAGON/DATA_B matching disk.\n");
+
+   return true;
+}

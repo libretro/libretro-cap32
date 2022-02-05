@@ -114,4 +114,5 @@ typedef struct DPB_list
 
 void formats_init();
 bool sector_exists(t_track *track, unsigned short sector);
+bool format_hexagon_protection(t_drive *drive);
 DPB_type *format_find (t_drive *drive);
