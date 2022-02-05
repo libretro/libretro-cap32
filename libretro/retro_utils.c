@@ -50,8 +50,13 @@
 // Verify file extension
 bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size)
 {
+#ifndef __PS3__
    size_t file_len = strnlen(filename, filename_size);
    size_t ext_len = strnlen(ext, ext_size);
+#else
+   size_t file_len = strlen(filename) > filename_size ? filename_size : strlen(filename);
+   size_t ext_len = strlen(ext) > ext_size ? ext_size : strlen(ext);
+#endif
 
    if( ext_len > file_len || file_len >= filename_size - 1)
       return false;
