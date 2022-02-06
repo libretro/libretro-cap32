@@ -6,8 +6,15 @@
 *.orig
 *.rej
 *.log
+*.hex
+*.diff
 # gimp dumps
 *.raw
 # editors
 .vscode
 .venv
+
+# rom assets
+*.dsk
+*.sna
+*.cdt
