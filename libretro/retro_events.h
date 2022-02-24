@@ -203,6 +203,7 @@ extern bool (*process_events)(void);
 void ev_combo_set(unsigned btn);
 void ev_set(int type);
 void ev_init();
+void ev_autorun_prepare(char * kbd_buffer);
 
 void Core_PollEvent(void);
 

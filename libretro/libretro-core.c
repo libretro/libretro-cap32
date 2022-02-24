@@ -56,6 +56,7 @@
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
 char cart_name[512]="\0";
+char loader_buffer[LOADER_MAX_SIZE];
 
 //TIME
 #include <sys/types.h>
@@ -78,14 +79,13 @@ extern int detach_disk(int drive);
 extern int tape_insert (char *pchFileName);
 extern int cart_insert (char *pchFileName);
 extern void enter_gui(void);
-extern void kbd_buf_feed(char *s);
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
 extern int InitOSGLU(void);
 extern int  UnInitOSGLU(void);
 extern void emu_reset(void);
-extern void emu_restart(void);
+extern void emu_reconfigure(void);
 extern void change_ram(int val);
 extern uint8_t* get_ram_ptr();
 extern size_t get_ram_size();
@@ -685,8 +685,9 @@ static void update_variables(void)
    // check if emulation need a restart (model/lang/... is changed)
    if(retro_computer_cfg.is_dirty)
    {
-      emu_restart();
+      emu_reconfigure();
       retro_ui_update_text();
+      computer_reset();
    }
 }
 
@@ -723,6 +724,7 @@ void retro_shutdown_core(void)
 void retro_reset(void)
 {
    emu_reset();
+   computer_reset();
 }
 
 //*****************************************************************************
@@ -754,7 +756,8 @@ static void retro_insert_image()
       int error = tape_insert ((char *) dc->files[dc->index]);
       if (!error)
       {
-         kbd_buf_feed("|TAPE\nRUN\"\n^");
+         strcpy(loader_buffer, TAPE_LOADER_STR);
+         ev_autorun_prepare(loader_buffer);
          LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
       }
       else
@@ -979,15 +982,19 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void computer_autoload()
 {
-   char key_buffer[LOADER_MAX_SIZE];
-
    loader_init();
-   loader_run(key_buffer);
+   loader_run(loader_buffer);
 
-   LOGI("[core] DSK autorun: \"%s\"\n", key_buffer);
+   LOGI("[core] DSK autorun: \"%s\"\n", loader_buffer);
 
-   strcat(key_buffer, "\n");
-   kbd_buf_feed(key_buffer);
+   strcat(loader_buffer, "\n");
+   ev_autorun_prepare(loader_buffer);
+}
+
+void computer_reset()
+{
+   LOGI("[core::reset] kbd: \"%s\"\n", loader_buffer);
+   ev_autorun_prepare(loader_buffer);
 }
 
 // load bios content
@@ -1044,10 +1051,8 @@ void computer_load_file() {
       {
          // Execute the command
          log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
-         char* command = calloc(strlen(dc->command) + 1, sizeof(char));
-         sprintf(command, "%s\n", dc->command);
-         kbd_buf_feed(command);
-         free(command);
+         snprintf(loader_buffer, LOADER_MAX_SIZE - 2, "%s\n", dc->command);
+         ev_autorun_prepare(loader_buffer);
       }
       else if (dc->unit == DC_IMAGE_TYPE_FLOPPY)
       {
@@ -1076,7 +1081,8 @@ void computer_load_file() {
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
-         kbd_buf_feed("|TAPE\nRUN\"\n^");
+         strcpy(loader_buffer, TAPE_LOADER_STR);
+         ev_autorun_prepare(loader_buffer);
          LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
       } else {
          LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);

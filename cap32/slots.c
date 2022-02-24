@@ -113,16 +113,10 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if (!dwSnapSize)
       return ERR_SNA_SIZE;
 
+   // only clean ram and reconfigure CPC.ram_size
+   memset(pbRAM, 0, CPC_MAX_RAM * 1024 * sizeof(uint8_t)); // clean allocated memory
    if (buffer_size > CPC.ram_size) { // memory dump size differs from current RAM size?
-      uint8_t *pbTemp;
-
-      pbTemp = (uint8_t*) malloc(dwSnapSize * 1024);
-      if (pbTemp) {
-         free(pbRAM);
-         CPC.ram_size = dwSnapSize;
-         pbRAM = pbTemp;
-      } else
-         return ERR_OUT_OF_MEMORY;
+      CPC.ram_size = dwSnapSize;
    }
 
    emulator_reset(false);

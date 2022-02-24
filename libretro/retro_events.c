@@ -176,7 +176,7 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
    { RETRO_DEVICE_ID_JOYPAD_A,
       { EVENT_WRITE, "RUN\"DISK\nRUN\"DISC\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_X,
-      { EVENT_WRITE, "|TAPE\nRUN\"\n^" } },
+      { EVENT_WRITE, TAPE_LOADER_STR } },
    { RETRO_DEVICE_ID_JOYPAD_START,
       { EVENT_VKEYB, "VKEYB\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_UP,
@@ -378,14 +378,22 @@ bool ev_joysticks()
    return true;
 }
 
+void ev_autorun_prepare(char * kbd_buffer)
+{
+   Tape_Rewind();
+
+   kbd_buf_feed(kbd_buffer);
+   ev_set(EV_AUTO);
+}
+
 bool ev_autorun()
 {
-   static int delay = EMULATION_INIT_AUTORUNDELAY;
+   static int autorun_delay = EMULATION_INIT_AUTORUNDELAY;
    static int wait_computer = 1;
 
-   if(delay)
+   if(autorun_delay)
    {
-      delay --;
+      autorun_delay --;
       return false;
    }
    
@@ -395,7 +403,13 @@ bool ev_autorun()
       return false;
 
    if(kbd_buf_update())
+   {
       ev_set(EV_JOY);
+
+      // prepare next autorun
+      autorun_delay = EMULATION_INIT_AUTORUNDELAY;
+      wait_computer = 1;
+   }
 
    return true;
 }

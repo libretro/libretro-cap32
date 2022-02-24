@@ -52,6 +52,7 @@
 #define CPC_BASE_FREQUENCY_MHZ 4.0
 #define FRAME_PERIOD_MS        20.0
 #define CYCLE_COUNT_INIT (CPC_BASE_FREQUENCY_MHZ*FRAME_PERIOD_MS*1000)
+#define CPC_MAX_RAM 512 // max emulated RAM
 
 #define CPC_SCR_WIDTH 1024 // max width
 #define CPC_SCR_HEIGHT 312 // max height

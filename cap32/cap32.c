@@ -175,13 +175,6 @@ int HandleExtension(char *path,char *ext);
 #include "retro_ui.h"
 #include "retro_utils.h"
 
-extern unsigned int bmp[WINDOW_MAX_SIZE];
-extern char retro_content_filepath[512];
-extern int autorun;
-extern bool kbd_runcmd;
-int autoboot_delay=0;
-
-extern void kbd_buf_feed(char *s);
 extern void kbd_update_table(int lang);
 
 extern char DISKA_NAME[512];
@@ -1198,7 +1191,7 @@ int emulator_init (void)
    (void)iErr;
 
    pbGPBuffer     = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
-   pbRAM          = (uint8_t*) retro_malloc(get_ram_size() * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbRAM          = (uint8_t*) retro_malloc(CPC_MAX_RAM * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
    pbROM          = (uint8_t*) retro_malloc(32 * 1024 * sizeof(uint8_t));
    pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
 
@@ -1907,9 +1900,8 @@ void emu_reset(void)
    emulator_reset(false);
 }
 
-void emu_restart(void)
+void emu_reconfigure(void)
 {
-   /* Reconfigure emulator */
    emulator_shutdown();
    emulator_init();
 

@@ -71,6 +71,8 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH CPC_SCREEN_WIDTH * 2
 #define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT
 
+#define TAPE_LOADER_STR "|TAPE\nRUN\"\n^        "
+
 // compile flags
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
@@ -187,6 +189,7 @@ typedef struct{
 
 
 void retro_message(const char *text);
+void computer_reset();
 
 //SCREEN FUNCTIONS
 extern int retro_getStyle();
