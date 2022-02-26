@@ -423,7 +423,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_ram",
-         "Advanced > Ram size; 128|64|192|512",
+         "Advanced > Ram size; 128|64|192|576",
       },
       {
          "cap32_advanced_green_phosphor",
