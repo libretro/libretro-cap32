@@ -52,7 +52,11 @@
 #define CPC_BASE_FREQUENCY_MHZ 4.0
 #define FRAME_PERIOD_MS        20.0
 #define CYCLE_COUNT_INIT (CPC_BASE_FREQUENCY_MHZ*FRAME_PERIOD_MS*1000)
-#define CPC_MAX_RAM 576 // max emulated RAM
+
+
+// max emulated RAM is 64 + 512
+// https://www.grimware.org/doku.php/documentations/devices/gatearraydo=export_xhtml#mmr
+#define CPC_MAX_RAM 576
 
 #define CPC_SCR_WIDTH 1024 // max width
 #define CPC_SCR_HEIGHT 312 // max height

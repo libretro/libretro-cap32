@@ -1910,22 +1910,24 @@ void emu_reconfigure(void)
 
 void change_model(int val){
 
-   CPC.model=val;
+   CPC.model = val;
 
+   // minimum RAM size for CPC 6128 is 128KB (64+64)
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
-      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+      CPC.ram_size   = 128;
 
    retro_computer_cfg.is_dirty = true;
 }
 
 void change_ram(int val){
-
-   CPC.ram_size = val <= 576
+   // first check for MAX RAM
+   CPC.ram_size = val <= CPC_MAX_RAM
       ? val
-      : 576;
+      : CPC_MAX_RAM;
 
+   // minimum RAM size for CPC 6128 is 128KB (64+64)
    if ((CPC.model >= 2) && (CPC.ram_size < 128))
-      CPC.ram_size   = 128; // minimum RAM size for CPC 6128 is 128KB
+      CPC.ram_size = 128;
 
    retro_computer_cfg.is_dirty = true;
 }
