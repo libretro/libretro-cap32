@@ -1,6 +1,6 @@
 # CAPRICE32 4.5+ LIBRETRO - [changelog](CHANGES.md)
 
-All the credit of the caprice32 Emulator to Ulrich Doewich
+**All the credit of the caprice32 Emulator to Ulrich Doewich**
 
 You can download the caprice32 original source code [here](http://sourceforge.net/projects/caprice32/)
 
