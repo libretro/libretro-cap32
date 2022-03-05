@@ -414,7 +414,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_model",
-         "Model; 6128|464|6128+",
+         "Model; 6128|464|6128+ (experimental)",
       },
       // rcheevos disallowed_setting: cap32_autorun disabled
       {
@@ -546,7 +546,7 @@ static void update_variables(void)
       int val = 2; // DEFAULT 6128
       if (strcmp(var.value, "464") == 0) val=0;
       else if (strcmp(var.value, "6128") == 0) val=2;
-      else if (strcmp(var.value, "6128+") == 0) val=3;
+      else if (strcmp(var.value, "6128+ (experimental)") == 0) val=3;
 
       if (retro_computer_cfg.model != val) {
          retro_computer_cfg.model = val;
