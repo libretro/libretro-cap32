@@ -47,11 +47,31 @@ extern t_drive driveA;
 extern char catalog_dirent[CAT_MAX_ENTRY][CAT_NAME_SIZE];
 extern int catalog_entry;
 
-void loader_init () {
+void loader_init ()
+{
    formats_init();
 }
 
-bool _loader_find (char * text) {
+bool _loader_find_file (char * key_buffer, char * filename)
+{
+   for (int index = 0; index < catalog_entry; index++) {
+      if (memcmp(catalog_dirent[index], filename, strlen(filename)) != 0)
+         continue;
+
+      if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[index]) < 0)
+      {
+         printf("autoload: snprintf failed\n");
+         return false;
+      }
+
+      return true;
+   }
+
+   return false;
+}
+
+bool _loader_find (char * key_buffer)
+{
    int found = 0;
    int first_bas = -1;
    int first_spc = -1;
@@ -63,14 +83,18 @@ bool _loader_find (char * text) {
       if (!scan)
          continue;
 
-      if (!strcasecmp(scan + 1, "BAS")) {
+      if (!strcasecmp(scan + 1, "BAS"))
+      {
          if (first_bas == -1) first_bas = index;
          found = true;
-      } else if (!strcasecmp(scan + 1, "")) {
+      }
+      else if (!strcasecmp(scan + 1, ""))
+      {
          if (first_spc == -1) first_spc = index;
          found = true;
-      } else
-      if (!strcasecmp(scan + 1, "BIN")) {
+      }
+      else if (!strcasecmp(scan + 1, "BIN"))
+      {
          if (first_bin == -1) first_bin = index;
          found = true;
       }
@@ -88,7 +112,8 @@ bool _loader_find (char * text) {
       cur_name_id = first_bin;
 
    // check added to avoid warning on gcc >= 8
-   if(snprintf(text, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[cur_name_id]) < 0) {
+   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[cur_name_id]) < 0)
+   {
       printf("autoload: snprintf failed\n");
       return false;
    }
@@ -96,36 +121,51 @@ bool _loader_find (char * text) {
    return true;
 }
 
-void _loader_failed (char * text, bool cpc_dsk_system, bool is_hexagon) {
-   if (cpc_dsk_system) {
-      strcpy(text, "|CPM");
+void _loader_failed (char * key_buffer, bool cpc_dsk_system, bool is_hexagon)
+{
+   if (cpc_dsk_system)
+   {
+      strcpy(key_buffer, "|CPM");
       return;
    }
 
-   if (is_hexagon) {
-      strcpy(text, "RUN\"DISK");
+   if (is_hexagon)
+   {
+      strcpy(key_buffer, "RUN\"DISK");
       return;
    }
 
    // usefull to user see catalogue files (or run DSK protections)
-   strcpy(text, "CAT");
+   strcpy(key_buffer, "CAT");
 }
 
-void loader_run (char * key_buffer) {
+void loader_run (char * key_buffer)
+{
    DPB_type *dpb = NULL;
    t_drive *current_drive = &driveA; 
 
    memset(key_buffer, 0, LOADER_MAX_SIZE);
    dpb = format_find(current_drive);
 
-   if (dpb == NULL) {
+   if (dpb == NULL)
+   {
       printf("[LOADER] FORMAT NOT FOUND.\n");
       strcpy(key_buffer, "CAT");
       return;
    }
 
    archive_init(dpb->DRM, dpb->OFS, current_drive);
-   if(!_loader_find(key_buffer)) {
+
+   // first we try to find classic run filenames
+   if(_loader_find_file(key_buffer, "DISC"))
+      return;
+
+   if(_loader_find_file(key_buffer, "DISK"))
+      return;
+
+   // try to find BAS / BIN / . files (in alphabetical order)
+   if(!_loader_find(key_buffer))
+   {
       _loader_failed(
          key_buffer,
          dpb->SEC1_side1 == DSK_TYPE_SYSTEM,

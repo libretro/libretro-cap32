@@ -78,7 +78,8 @@ DSKEntry * _catalog_entry(unsigned char pos, unsigned short track_offset, t_driv
    return archive_info;
 }
 
-bool _is_valid_extension(const char *ext) {
+bool _is_valid_extension(const char *ext)
+{
    if (! strncasecmp(ext, "BAS", 3))
       return true;
    
@@ -125,8 +126,10 @@ bool _catalog_build_name(char *name, char *raw_name, char *raw_ext)
    return true;
 }
 
-bool _catalog_exist_name(char * archive_name) {
-   for (int p = 0; p < catalog_entry; p++) {
+bool _catalog_exist_name(char * archive_name)
+{
+   for (int p = 0; p < catalog_entry; p++)
+   {
       if(!strncmp(catalog_dirent[p], archive_name, CAT_NAME_SIZE))
          return true;
    }
@@ -134,7 +137,8 @@ bool _catalog_exist_name(char * archive_name) {
    return false;
 }
 
-void _catalog_add(char * archive_name) {
+void _catalog_add(char * archive_name)
+{
    if (_catalog_exist_name(archive_name))
       return;
 
@@ -152,7 +156,8 @@ void archive_init(unsigned short alloc_size, unsigned short track_offset, t_driv
    char raw_name[8 + 3];
    char tmp_name[13]; /* <raw_name 8>+"."+<raw_ext 3>+"\0" */
 
-   for (i = 0; i <= alloc_size; i++) {
+   for (i = 0; i <= alloc_size; i++)
+   {
       const DSKEntry * archive_info = _catalog_entry(i, track_offset, drive);
 
       // ignore empty entries
