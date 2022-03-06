@@ -169,6 +169,7 @@ typedef struct {
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
    bool floppy_snd;
+   bool autorun;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 

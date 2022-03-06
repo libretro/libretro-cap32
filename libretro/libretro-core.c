@@ -105,8 +105,6 @@ int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
 
 // almost deprecated
-int pauseg = 0; 
-int autorun = 0;
 int SHIFTON=-1;
 
 int retro_scr_style = 0;
@@ -518,7 +516,9 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if (strcmp(var.value, "disabled") == 0)
+      retro_computer_cfg.autorun = strcmp(var.value, "disabled") != 0;
+      printf("AUTORUN: %i\n\n", retro_computer_cfg.autorun);
+      if (!retro_computer_cfg.autorun)
          ev_set(EV_JOY);
       else
          ev_set(EV_AUTO);
@@ -982,6 +982,9 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void computer_autoload()
 {
+   if (!retro_computer_cfg.autorun)
+      return;
+
    loader_init();
    loader_run(loader_buffer);
 
@@ -993,7 +996,10 @@ void computer_autoload()
 
 void computer_reset()
 {
-   LOGI("[core::reset] kbd: \"%s\"\n", loader_buffer);
+   if (!retro_computer_cfg.autorun)
+      return;
+
+   LOGI("[core::reset] DSK autorun: \"%s\"\n", loader_buffer);
    ev_autorun_prepare(loader_buffer);
 }
 
@@ -1344,10 +1350,7 @@ bool retro_load_game(const struct retro_game_info *game)
 
 }
 
-void retro_unload_game(void)
-{
-   pauseg=-1;
-}
+void retro_unload_game(void){}
 
 unsigned retro_get_region(void)
 {
