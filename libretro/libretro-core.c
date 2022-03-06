@@ -517,7 +517,6 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       retro_computer_cfg.autorun = strcmp(var.value, "disabled") != 0;
-      printf("AUTORUN: %i\n\n", retro_computer_cfg.autorun);
       if (!retro_computer_cfg.autorun)
          ev_set(EV_JOY);
       else
