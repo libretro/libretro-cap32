@@ -80,23 +80,34 @@ DSKEntry * _catalog_entry(unsigned char pos, unsigned short track_offset, t_driv
 
 bool _is_valid_extension(const char *ext)
 {
-   if (! strncasecmp(ext, "BAS", 3))
+   if (!strncasecmp(ext, "BAS", 3))
       return true;
    
-   if (! strncasecmp(ext, "BIN", 3))
+   if (!strncasecmp(ext, "BIN", 3))
       return true;
 
-   if (! strncmp(ext, "   ", 3))
+   if (!strncmp(ext, "   ", 3))
       return true;
 
    return false;
 }
 
+bool _is_valid_filename(const char *name)
+{
+   if (strchr(name, '"') != NULL)
+      return false;
+
+   return true;
+}
+
 bool _catalog_build_name(char *name, char *raw_name, char *raw_ext)
 {
-   int  i, j;
+   int i, j;
 
-   if(!_is_valid_extension(raw_ext))
+   if (!_is_valid_extension(raw_ext))
+      return false;
+
+   if (!_is_valid_filename(raw_name))
       return false;
 
    for (i = 0; i < DSK_NAME_SIZE; i++) {
