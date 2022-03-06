@@ -121,20 +121,8 @@ bool _loader_find (char * key_buffer)
    return true;
 }
 
-void _loader_failed (char * key_buffer, bool cpc_dsk_system, bool is_hexagon)
+void _loader_failed (char * key_buffer)
 {
-   if (cpc_dsk_system)
-   {
-      strcpy(key_buffer, "|CPM");
-      return;
-   }
-
-   if (is_hexagon)
-   {
-      strcpy(key_buffer, "RUN\"DISK");
-      return;
-   }
-
    // usefull to user see catalogue files (or run DSK protections)
    strcpy(key_buffer, "CAT");
 }
@@ -154,7 +142,27 @@ void loader_run (char * key_buffer)
       return;
    }
 
-   archive_init(dpb->DRM, dpb->OFS, current_drive);
+   // first try with detected disks
+   if (dpb->SEC1_side1 == DSK_TYPE_SYSTEM)
+   {
+      strcpy(key_buffer, "|CPM");
+      return;
+   }
+
+   if (format_hexagon_protection(current_drive))
+   {
+      strcpy(key_buffer, "RUN\"DISK");
+      return;
+   }
+
+   // if is a normal data disk, build his catalogue
+   // first check with normal DRM data
+   // TODO: we need unit-test here...
+   if(!archive_init(dpb->DRM, dpb->OFS, current_drive))
+   {
+      // try to the calculated DBL catalogue size
+      archive_init(dpb->DBL, dpb->OFS, current_drive);
+   }
 
    // first we try to find classic run filenames
    if(_loader_find_file(key_buffer, "DISC"))
@@ -166,10 +174,6 @@ void loader_run (char * key_buffer)
    // try to find BAS / BIN / . files (in alphabetical order)
    if(!_loader_find(key_buffer))
    {
-      _loader_failed(
-         key_buffer,
-         dpb->SEC1_side1 == DSK_TYPE_SYSTEM,
-         format_hexagon_protection(current_drive)
-      );
+      _loader_failed(key_buffer);
    }
 }

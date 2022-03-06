@@ -42,8 +42,10 @@
 #include <ctype.h>
 
 #include "formats.h"
+#include "catalog.h"
 
 #define EXTENTSIZE	16384	/* 16 kByte, constant for CP/M */
+#define SECTOR_NOT_FOUND 0xFF
 //#define FORMAT_DEBUG
 
 DPB_list formats_list;
@@ -226,7 +228,7 @@ void formats_init() {
    _dpb_list_add_item(&formats_list,"system_b", "system_b", &dsk_type_system_big);
 }
 
-bool sector_find(t_track *track, unsigned short sector_signature)
+int sector_find(t_track *track, unsigned short sector_signature)
 {
    for (int i = 0; i < track->sectors; i++) {
       #ifdef FORMAT_DEBUG
@@ -239,11 +241,11 @@ bool sector_find(t_track *track, unsigned short sector_signature)
       );
       #endif
       if (track->sector[i].CHRN.sector == sector_signature) {
-         return true;
+         return i;
       }
    }
 
-   return false;
+   return SECTOR_NOT_FOUND;
 }
 
 void calc_dpb(DPB_type *dpb)
@@ -312,8 +314,8 @@ DPB_type *format_find (t_drive *drive)
    /* go through list of supported formats */
    for (cur_entry = formats_list.first; cur_entry!=NULL; cur_entry = cur_entry->next)
    {
-
-      if ( (!sector_find(first_track, cur_entry->dpb.SEC1_side1))
+      unsigned short catalogue_sector = sector_find(first_track, cur_entry->dpb.SEC1_side1);
+      if ((catalogue_sector == SECTOR_NOT_FOUND)
          || (first_track->sectors != cur_entry->dpb.SECS)
          || (drive->sides != cur_entry->dpb.HDS - 1) // zero base number of sides
          || (drive->tracks < cur_entry->dpb.TRKS)
@@ -322,11 +324,12 @@ DPB_type *format_find (t_drive *drive)
       }
 
       #ifdef FORMAT_DEBUG
-      printf(">>> %02x.%02x.%02x.%u\n",
+      printf(">>> %02x.%02x.%02x.%u [CAT: %u]\n",
          cur_entry->dpb.SEC1_side1,
          cur_entry->dpb.SECS,
          cur_entry->dpb.HDS - 1, // heads
-         cur_entry->dpb.TRKS
+         cur_entry->dpb.TRKS,
+         catalogue_sector
       );
 
       printf(" >>> %02x.%u [%02x.%02x.%02x.%02x][%02x.%02x.%02x.%02x].%u.%u.%u\n",
@@ -348,6 +351,12 @@ DPB_type *format_find (t_drive *drive)
 
       printf("[LOADER] >>> format: \"%s\" matching disk.\n", cur_entry->ident);
       dpb_found = &cur_entry->dpb;
+
+      // calc catalogue size
+      dpb_found->DBL = catalogue_sector
+         ? (catalogue_sector + 1) * CAT_ENTRIES
+         : dpb_found->DRM;
+
       found_count++;
    }
 

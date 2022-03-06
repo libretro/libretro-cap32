@@ -38,6 +38,7 @@
 
 #define CAT_MAX_ENTRY 64
 #define CAT_NAME_SIZE 20
+#define CAT_ENTRIES 16
 
 typedef union {
       unsigned char data[32];
@@ -57,4 +58,4 @@ typedef union {
       };
 } DSKEntry;
 
-void archive_init(unsigned short alloc_size, unsigned short track_offset, t_drive *drive);
+int archive_init(unsigned short catalogue_size, unsigned short track_offset, t_drive *drive);

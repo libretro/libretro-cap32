@@ -42,7 +42,6 @@
 #include "../../cap32/cap32.h"
 #include "catalog.h"
 
-#define ENTRIES_PER_SECTOR 16
 #define DSK_NAME_SIZE 8
 #define DSK_EXT_SIZE 3
 
@@ -54,7 +53,7 @@ int catalog_entry = 0;
 DSKEntry * _catalog_entry(unsigned char pos, unsigned short track_offset, t_drive *drive)
 {
    int offset = pos * sizeof(DSKEntry);
-   int entry = pos % ENTRIES_PER_SECTOR;
+   int entry = pos % CAT_ENTRIES;
    int track = track_offset;
 
    unsigned int sector_size = drive->track[track][0].sector[0].size;
@@ -161,13 +160,13 @@ void _catalog_add(char * archive_name)
    catalog_entry ++;
 }
 
-void archive_init(unsigned short alloc_size, unsigned short track_offset, t_drive *drive)
+int archive_init(unsigned short catalogue_size, unsigned short track_offset, t_drive *drive)
 {
-   int i = 0;
+   int i = 0, files_found = 0;
    char raw_name[8 + 3];
    char tmp_name[13]; /* <raw_name 8>+"."+<raw_ext 3>+"\0" */
 
-   for (i = 0; i <= alloc_size; i++)
+   for (i = 0; i <= catalogue_size; i++)
    {
       const DSKEntry * archive_info = _catalog_entry(i, track_offset, drive);
 
@@ -180,7 +179,7 @@ void archive_init(unsigned short alloc_size, unsigned short track_offset, t_driv
          raw_name[j] = archive_info->file.raw[j] & 0x7F;
 
       #ifdef CAT_DEBUG
-      printf("[LOADER] [CAT]: entry[%i/%i] [%s]\n", i, alloc_size, raw_name);
+      printf("[LOADER] [CAT]: entry[%i/%i] [%s]\n", i, catalogue_size, raw_name);
       #endif
 
       if(!_catalog_build_name(tmp_name, raw_name, raw_name + 8))
@@ -188,11 +187,14 @@ void archive_init(unsigned short alloc_size, unsigned short track_offset, t_driv
 
       #ifdef CAT_DEBUG
       printf("[LOADER] [CAT]: drive_data(%i/%i): t[%i][0] [%s]\n\n",
-         i, alloc_size, track_offset,
+         i, catalogue_size, track_offset,
          tmp_name
       );
       #endif
 
       _catalog_add(tmp_name);
+      files_found++;
    }
+
+   return files_found;
 }
