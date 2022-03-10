@@ -90,6 +90,9 @@ bool (*ev_events)(void);
 bool (*process_events)(void);
 unsigned char (*process_ev_key)(int key, bool pressed);
 
+static int autorun_delay = EMULATION_INIT_AUTORUNDELAY;
+static int wait_computer = 1;
+
 int event_call = EV_JOY;
 void ev_toggle_call();
 
@@ -384,13 +387,13 @@ void ev_autorun_prepare(char * kbd_buffer)
 
    kbd_buf_feed(kbd_buffer);
    ev_set(EV_AUTO);
+
+   autorun_delay = EMULATION_INIT_AUTORUNDELAY;
+   wait_computer = 1;
 }
 
 bool ev_autorun()
 {
-   static int autorun_delay = EMULATION_INIT_AUTORUNDELAY;
-   static int wait_computer = 1;
-
    if(autorun_delay)
    {
       autorun_delay --;

@@ -503,6 +503,7 @@ int kbd_mode = 0;
 
 extern void play_tape();
 
+static int old=0;
 static uint8_t bit_values2[8] = {
    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
@@ -511,7 +512,8 @@ extern uint8_t keyboard_matrix[16];
 
 void kbd_buf_feed(char *s) {
 	strcpy(kbd_feedbuf, s);
-	kbd_feedbuf_pos=0;
+	kbd_feedbuf_pos = 0;
+	old = 0;
 	//printf("cmd:%s\n",s);
 }
 
@@ -520,8 +522,6 @@ void kbd_buf_clean(){
 }
 
 bool kbd_buf_update() {
-
-	static int old=0;
 
 	//handle special case for playtape
 	if( kbd_feedbuf[kbd_feedbuf_pos]=='^' ) {

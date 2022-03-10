@@ -984,7 +984,6 @@ void computer_autoload()
    if (!retro_computer_cfg.autorun)
       return;
 
-   loader_init();
    loader_run(loader_buffer);
 
    LOGI("[core] DSK autorun: \"%s\"\n", loader_buffer);
@@ -1217,6 +1216,7 @@ void retro_init(void)
    if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
       LOGI("AUDIO FORMAT is not supported.\n");
 
+   loader_init();
 }
 
 extern void main_exit();
