@@ -647,18 +647,25 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                }
             }
             break;
-         case 3: // set memory configuration
-            #ifdef DEBUG_GA
-            if (dwDebugFlag) {
-               fprintf(pfoDebug, "mem 0x%02x\r\n", val);
-            }
-            #endif
-            GateArray.RAM_config = val;
-            ga_memory_manager();
-            if (CPC.mf2) { // MF2 enabled?
-               *(pbMF2ROM + 0x03fff) = val;
-            }
+         // gate array do not set the memory configuration 
+         // more info: https://www.cpcwiki.eu/index.php/I/O_Port_Summary
+         case 3: 
+            // nothing to do
             break;
+      }
+   }
+
+   /* MEMORY CONFIGURATION is done by another chip */
+   if (!(port.b.h & 0x80) && (val & 0xc0) == 0xc0) {
+      #ifdef DEBUG_GA
+      if (dwDebugFlag) {
+         fprintf(pfoDebug, "mem 0x%02x\r\n", val);
+      }
+      #endif
+      GateArray.RAM_config = val;
+      ga_memory_manager();
+      if (CPC.mf2) { // MF2 enabled?
+         *(pbMF2ROM + 0x03fff) = val;
       }
    }
 
