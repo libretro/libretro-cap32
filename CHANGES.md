@@ -1,6 +1,13 @@
 # Future
 
 # 4.5.3
+- CORE: fix memory chip configuration - thx @jcgamestoy
+- CPC+: now using white cart also marked as experimental
+- AUTORUN: fix ARMOURLOC protection
+- AUTORUN: find for DISC/DISK filenames
+- AUTORUN: computer restart fixes
+- CORE: fixed max memory configuration
+- CORE: do not reallocate ram on reset
 - CHEEVOS: updated core to allow achievements - thx @Jamiras
 - AUTORUN: better hexagon DSK detection
 - CORE: removed unused old cpccat
