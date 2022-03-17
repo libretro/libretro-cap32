@@ -1,6 +1,7 @@
 # Future
 
 # 4.5.3
+- AUTORUN: revert system detection at first, CPM only if loader is failed
 - CORE: fix memory chip configuration - thx @jcgamestoy
 - CPC+: now using white cart also marked as experimental
 - AUTORUN: fix ARMOURLOC protection

@@ -121,8 +121,14 @@ bool _loader_find (char * key_buffer)
    return true;
 }
 
-void _loader_failed (char * key_buffer)
+void _loader_failed (char * key_buffer, bool is_system)
 {
+   if (is_system)
+   {
+      strcpy(key_buffer, "|CPM");
+      return;
+   }
+
    // usefull to user see catalogue files (or run DSK protections)
    strcpy(key_buffer, "CAT");
 }
@@ -139,13 +145,6 @@ void loader_run (char * key_buffer)
    {
       printf("[LOADER] FORMAT NOT FOUND.\n");
       strcpy(key_buffer, "CAT");
-      return;
-   }
-
-   // first try with detected disks
-   if (dpb->SEC1_side1 == DSK_TYPE_SYSTEM)
-   {
-      strcpy(key_buffer, "|CPM");
       return;
    }
 
@@ -174,6 +173,6 @@ void loader_run (char * key_buffer)
    // try to find BAS / BIN / . files (in alphabetical order)
    if(!_loader_find(key_buffer))
    {
-      _loader_failed(key_buffer);
+      _loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
    }
 }
