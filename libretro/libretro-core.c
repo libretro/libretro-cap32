@@ -97,9 +97,8 @@ extern void retro_key_down(int key);
 extern void retro_key_up(int key);
 
 //VIDEO
-PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
-PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
-uint32_t save_Screen[WINDOW_MAX_SIZE];
+PIXEL_TYPE * video_buffer;
+PIXEL_TYPE * temp_buffer;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -1203,11 +1202,14 @@ void retro_init(void)
    #endif
    gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * PITCH;
 
-   fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d bs%u).\n",
-         EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size, (unsigned int) sizeof(bmp));
+   fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
+         EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size);
+
+   video_buffer = (PIXEL_TYPE *) retro_malloc(gfx_buffer_size);
+   temp_buffer = (PIXEL_TYPE *) retro_malloc(WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE));
 
    memset(video_buffer, 0, gfx_buffer_size);
-   memset(bmp, 0, WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE)); // buffer UI
+   memset(temp_buffer, 0, WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE)); // buffer UI
 
    retro_ui_init();
 
@@ -1231,6 +1233,9 @@ void retro_deinit(void)
    // Clean the m3u storage
    if(dc)
       dc_free(dc);
+
+   retro_free(video_buffer);
+   retro_free(temp_buffer);
 
    LOGI("Retro DeInit\n");
 }

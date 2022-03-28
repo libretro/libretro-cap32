@@ -49,8 +49,6 @@
 #include "assets/assets.h"
 #include "gfx/software.h"
 
-extern PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
-extern PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
 extern retro_mouse_t mouse;
 extern PIXEL_TYPE * keyboard_surface;
 

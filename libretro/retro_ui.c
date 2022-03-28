@@ -52,8 +52,9 @@
 #include "retro_keyboard.h"
 #include "assets/assets.h"
 
-extern PIXEL_TYPE video_buffer[WINDOW_MAX_SIZE];
-extern PIXEL_TYPE bmp[WINDOW_MAX_SIZE];
+extern PIXEL_TYPE * video_buffer;
+extern PIXEL_TYPE * temp_buffer;
+
 extern retro_mouse_t mouse;
 extern computer_cfg_t retro_computer_cfg;
 
@@ -259,9 +260,9 @@ void retro_ui_update_text()
 void retro_ui_init(void)
 {
    // prepare pointer to surface data
-   keyboard_surface = bmp;
-   keyboard_lang = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE);
-   ui_surface = bmp + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE * 2);
+   keyboard_surface = temp_buffer;
+   keyboard_lang = temp_buffer + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE);
+   ui_surface = temp_buffer + ((IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH) * EMULATION_SCALE * 2);
 
    // init KoS
    keyboard_init();
