@@ -1162,19 +1162,6 @@ void retro_init(void)
    LOGI("Retro SAVE_DIRECTORY %s\n", retro_save_directory);
    LOGI("Retro CONTENT_DIRECTORY %s\n", retro_content_directory);
 
-#ifdef M16B
-   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-#else
-   enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
-#endif
-
-   if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-   {
-      fprintf(stderr, "PIXEL FORMAT is not supported.\n");
-      LOGI("PIXEL FORMAT is not supported.\n");
-      exit(0);
-   }
-
    // events initialize - joy and keyboard
    ev_init();
 
@@ -1267,7 +1254,6 @@ void retro_get_system_info(struct retro_system_info *info)
    info->valid_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u";
    info->need_fullpath    = true;
    info->block_extract = false;
-
 }
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
@@ -1340,6 +1326,21 @@ void retro_run(void)
 
 bool retro_load_game(const struct retro_game_info *game)
 {
+   // notify the frontend of the retro_pixel_format we want use.
+   #ifdef M16B
+      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   #else
+      enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
+   #endif
+
+   if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
+   {
+      LOGI("PIXEL FORMAT is not supported (%u).\n", fmt);
+      return false;
+   }
+
+   LOGI("PIXEL FORMAT selected (%u).\n", fmt);
+
    if (game){
       strcpy(retro_content_filepath, (const char *) game->path);
    } else {
