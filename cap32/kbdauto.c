@@ -510,11 +510,15 @@ static uint8_t bit_values2[8] = {
 
 extern uint8_t keyboard_matrix[16];
 
+#define LOOPS_TO_WAIT 40
+static int wait_loop=0;
+
 void kbd_buf_feed(char *s) {
-	strcpy(kbd_feedbuf, s);
-	kbd_feedbuf_pos = 0;
-	old = 0;
-	//printf("cmd:%s\n",s);
+   strcpy(kbd_feedbuf, s);
+   kbd_feedbuf_pos = 0;
+   old = 0;
+   wait_loop = LOOPS_TO_WAIT;
+   //printf("cmd:%s\n",s);
 }
 
 void kbd_buf_clean(){
@@ -522,40 +526,45 @@ void kbd_buf_clean(){
 }
 
 bool kbd_buf_update() {
+   // handle special case for playtape
+   if( kbd_feedbuf[kbd_feedbuf_pos]=='^' ) {
+      kbd_feedbuf_pos++;
+      play_tape();
+      return false;
+   }
+   // handle wait for x loops
+   else if( kbd_feedbuf[kbd_feedbuf_pos]=='~' ) {
+      if (wait_loop--)
+         return false;
 
-	//handle special case for playtape
-	if( kbd_feedbuf[kbd_feedbuf_pos]=='^' ) {
-		kbd_feedbuf_pos++;
-		play_tape();
-		return false;
-	}
+      wait_loop = LOOPS_TO_WAIT;
+      kbd_feedbuf_pos++;
 
-	if( (kbd_feedbuf[kbd_feedbuf_pos]!=0) && old==0) {
+   }
+   // handle emulated keyboard
+   else if( (kbd_feedbuf[kbd_feedbuf_pos]!=0) && old==0) {
+      int cpc_key = cpc_kbd[cpc_get_key_from_ascii(kbd_feedbuf[kbd_feedbuf_pos])];
+      // printf("kpress:%2x (%x,%x) ,",cpc_key,cpc_key >> 4,cpc_key & 7);
 
-     	int cpc_key = cpc_kbd[cpc_get_key_from_ascii(kbd_feedbuf[kbd_feedbuf_pos])];
-//		printf("kpress:%2x (%x,%x) ,",cpc_key,cpc_key >> 4,cpc_key & 7);
+      if(cpc_key & MOD_CPC_SHIFT)
+         keyboard_matrix[0x25 >> 4] &= ~bit_values2[0x25 & 7]; // key needs to be SHIFTed
 
-		if(cpc_key & MOD_CPC_SHIFT)
-			keyboard_matrix[0x25 >> 4] &= ~bit_values2[0x25 & 7]; // key needs to be SHIFTed
+      keyboard_matrix[(unsigned char)cpc_key >> 4] &= ~bit_values2[(unsigned char)cpc_key & 7]; // key is being held down
+      old=kbd_feedbuf[kbd_feedbuf_pos];
+   }
+   else if( (kbd_feedbuf[kbd_feedbuf_pos]!=0)  && old!=0){
+      int cpc_key = cpc_kbd[cpc_get_key_from_ascii(old)];//&0xff;
+      // printf("krelea:%2x \n",cpc_key);
 
-		keyboard_matrix[(unsigned char)cpc_key >> 4] &= ~bit_values2[(unsigned char)cpc_key & 7]; // key is being held down
-		old=kbd_feedbuf[kbd_feedbuf_pos];
+      if(cpc_key & MOD_CPC_SHIFT)
+         keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
 
-	}
-	else if( (kbd_feedbuf[kbd_feedbuf_pos]!=0)  && old!=0){
+      keyboard_matrix[(unsigned char)cpc_key >> 4] |= bit_values2[(unsigned char)cpc_key & 7];
 
-		int cpc_key = cpc_kbd[cpc_get_key_from_ascii(old)];//&0xff;
-//		printf("krelea:%2x \n",cpc_key);
-
-		if(cpc_key & MOD_CPC_SHIFT)
-			keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
-
-		keyboard_matrix[(unsigned char)cpc_key >> 4] |= bit_values2[(unsigned char)cpc_key & 7];
-
-		old=0;
-		kbd_feedbuf_pos++;
-	}
-	else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')
+      old=0;
+      kbd_feedbuf_pos++;
+   }
+   else if(kbd_feedbuf[kbd_feedbuf_pos]=='\0')
    {
       kbd_buf_clean();
       return true;
@@ -569,22 +578,22 @@ extern int SHIFTON;
 
 void vkbd_key(int key,int pressed){
 
-	//printf("key(%x)=%x shift:%d\n",key,pressed,SHIFTON);
-	if(pressed){
+   //printf("key(%x)=%x shift:%d\n",key,pressed,SHIFTON);
+   if(pressed){
 
-		if(SHIFTON==1)
-			keyboard_matrix[0x25 >> 4] &= ~bit_values2[0x25 & 7]; // key needs to be SHIFTed
+      if(SHIFTON==1)
+         keyboard_matrix[0x25 >> 4] &= ~bit_values2[0x25 & 7]; // key needs to be SHIFTed
 
-		keyboard_matrix[(unsigned char)key >> 4] &= ~bit_values2[(unsigned char)key & 7]; // key is being held down
+      keyboard_matrix[(unsigned char)key >> 4] &= ~bit_values2[(unsigned char)key & 7]; // key is being held down
 
-	}
-	else {
-		if(SHIFTON==1)
-			keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
+   }
+   else {
+      if(SHIFTON==1)
+         keyboard_matrix[0x25 >> 4] |= bit_values2[0x25 & 7]; // make sure key is unSHIFTed
 
-		keyboard_matrix[(unsigned char)key >> 4] |= bit_values2[(unsigned char)key & 7];
+      keyboard_matrix[(unsigned char)key >> 4] |= bit_values2[(unsigned char)key & 7];
 
-	}
+   }
 
 }
 

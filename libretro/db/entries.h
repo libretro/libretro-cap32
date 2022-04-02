@@ -1,7 +1,7 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *   David Colmenero - D_Skywalk (2019-2021)
+ *  Copyright David Colmenero - D_Skywalk (2019-2022)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -35,5 +35,48 @@
  *
  ****************************************************************************************/
 
-void loader_init ();
-void loader_run (char * text);
+#include <libretro.h>
+#include "database.h"
+
+// no-cpc-intro CRC database
+t_file_entry database[] = {
+   { // Abadia.rmp
+      {0xd37cf8e7, 0xaa05ed4a},
+      {RETROK_z, RETROK_s, DB_CLEAN, RETROK_SPACE, DB_CLEAN, DB_CLEAN, RETROK_k, RETROK_l, RETROK_a, RETROK_n, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {0, 1, -1, 2, -1, -1, 3, 4, 5, 6, -1, -1, -1, -1},
+      0,
+   },
+   { // Abbey.rmp
+      {0xbf188ce3, 0x6e5f98ff},
+      {RETROK_z, RETROK_y, DB_KEEP, RETROK_SPACE, DB_KEEP, DB_KEEP, RETROK_k, RETROK_l, RETROK_a, RETROK_n, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {7, 8, -1, 9, -1, -1, 10, 11, 12, 13, -1, -1, -1, -1},
+      -1,
+   },
+};
+
+// dictionary commands
+char commands[] = {
+   "|CPM\0" ""
+};
+
+// dictionary names
+char input_names[] = {
+   "Mover Adso\0"
+   "Decir Si\0"
+   "Start / Dejar Objeto\0"
+   "Girar Izquierda\0"
+   "Girar Derecha\0"
+   "Avanzar\0"
+   "Decir No\0"
+   "Send Adso Forward\0"
+   "Answer Yes\0"
+   "Start / Drop Object\0"
+   "Turn Counterclockwise\0"
+   "Turn Clockwise\0"
+   "Move Forward\0"
+   "Answer No\0"
+};
+
+
+// gen hash: 1648674136.6454308
+

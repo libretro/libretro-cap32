@@ -37,6 +37,7 @@
 
 #include <stdio.h>
 
+#include "libretro-core.h"
 #include "loader.h"
 #include "formats.h"
 #include "catalog.h"

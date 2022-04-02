@@ -397,6 +397,9 @@ include Makefile.common
 HEADERS += $(ROMS:.rom=.h) $(SNAPS:.szx=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
+# List of dependencies defined from list of object files
+DEPS := $(OBJS:.o=.d)
+
 INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 
 %.o: %.cpp

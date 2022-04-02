@@ -1,4 +1,6 @@
-DEPS = $(CORE_DIR)/utils
+DEPS = $(CORE_DIR)/utils \
+	/libretro/db/entries.h
+
 LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro-common
 
 INCFLAGS := \
@@ -21,6 +23,7 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/z80.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
 	$(CORE_DIR)/libretro/microui/microui.c \
+	$(CORE_DIR)/libretro/db/database.c \
 	$(CORE_DIR)/libretro/dsk/catalog.c \
 	$(CORE_DIR)/libretro/dsk/loader.c \
 	$(CORE_DIR)/libretro/dsk/formats.c \

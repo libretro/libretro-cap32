@@ -57,7 +57,7 @@
 #define ID_PLAYER1 0
 #define ID_PLAYER2 1
 
-#define PADCFG_JOYSTICK 0
+#define PADCFG_AUTO 0
 #define PADCFG_QAOP 1
 #define PADCFG_INCENTIVE 2
 #define PADCFG_JOYSTICK_2 3
@@ -71,7 +71,15 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define TEX_MAX_WIDTH CPC_SCREEN_WIDTH * 2
 #define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT
 
-#define TAPE_LOADER_STR "|TAPE\nRUN\"\n^        "
+// --- loader
+#define LOADER_MAX_SIZE 256
+#define LOADER_TAPE_STR "|TAPE\nRUN\"\n^        "
+
+// --- events
+#define MAX_KEYSYMS 324
+#define MAX_BUTTONS 14
+#define MAX_PADCFG 4
+
 
 // compile flags
 //#define NO_FLOPPY_SND
@@ -160,6 +168,7 @@ extern int emu_status;
 #define STATUSBAR_SHOW    1
 #define STATUSBAR_OFF     2
 
+//core structures
 typedef struct {
    int model;
    int ram; /*request only! beware: 6128 enforces minimum!*/
@@ -170,24 +179,40 @@ typedef struct {
    bool is_dirty;
    bool floppy_snd;
    bool autorun;
+   bool use_internal_remap;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 
-//STRUCTURES
-typedef struct{
-     signed short x, y;
-     unsigned short w, h;
-} retro_Rect;
+typedef enum {
+   BTN_B      = 0,
+   BTN_Y      = 1,
+   BTN_SELECT = 2,
+   BTN_START  = 3,
+   BTN_DUP    = 4,
+   BTN_DDOWN  = 5,
+   BTN_DLEFT  = 6,
+   BTN_DRIGHT = 7,
+   BTN_A      = 8,
+   BTN_X      = 9,
+   BTN_L      = 10,
+   BTN_R      = 11,
+   BTN_L2     = 12,
+   BTN_R2     = 13,
+} t_buttons;
 
-typedef struct{
-     unsigned char *pixels;
-     unsigned short w, h,pitch;
-} retro_Surface;
+typedef struct {
+   unsigned char buttons[MAX_BUTTONS];
+} t_button_cfg;
 
-typedef struct{
-     unsigned char r,g,b;
-} retro_pal;
 
+typedef struct {
+   uint32_t hash;
+   t_button_cfg btn_config;
+   char loader_command[LOADER_MAX_SIZE];
+   bool has_command;
+   bool has_btn;
+} game_cfg_t;
+extern game_cfg_t game_configuration;
 
 void retro_message(const char *text);
 void computer_reset();
