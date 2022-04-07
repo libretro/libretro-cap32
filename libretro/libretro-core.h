@@ -81,18 +81,23 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define MOUSE_RELATIVE // mouse relative movement
 
 #ifdef M16B
-   #define PIXEL_RAW_DENSITY 2
-   #define PIXEL_BYTES 1
    #define PIXEL_TYPE unsigned short
-   #define PIXEL_TRANSPARENT 0x0000
-   #define PITCH 2
 #else
-   #define PIXEL_RAW_DENSITY 1
-   #define PIXEL_BYTES 2
    #define PIXEL_TYPE unsigned int
-   #define PIXEL_TRANSPARENT 0x000000
-   #define PITCH 4
 #endif
+
+#define PIXEL_TRANSPARENT 0x0000
+//#define PIXEL_TYPE unsigned short
+#define PIXEL_PITCH_16BIT 2
+#define PIXEL_PITCH_24BIT 4
+#define PIXEL_DEPTH_DEFAULT_SIZE PIXEL_PITCH_24BIT
+
+typedef struct {
+   uint8_t raw_density;
+   uint8_t bytes;
+   uint8_t pitch;
+} retro_depth_t;
+extern retro_depth_t retro_depth_cfg;
 
 #ifdef M16B
    #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))

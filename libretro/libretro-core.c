@@ -71,6 +71,7 @@ static dc_storage* dc;
 retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
+retro_depth_t retro_depth_cfg;
 
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
@@ -97,8 +98,8 @@ extern void retro_key_down(int key);
 extern void retro_key_up(int key);
 
 //VIDEO
-PIXEL_TYPE * video_buffer;
-PIXEL_TYPE * temp_buffer;
+uint32_t * video_buffer;
+uint32_t * temp_buffer;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -171,8 +172,8 @@ int retro_getStyle(){
 }
 
 int retro_getGfxBpp(){
-    LOGI("getBPP: %u\n", 16 * PIXEL_BYTES);
-    return 16 * PIXEL_BYTES;
+    LOGI("getBPP: %u\n", 16 * retro_depth_cfg.bytes);
+    return 16 * retro_depth_cfg.bytes;
 }
 
 int retro_getGfxBps(){
@@ -424,11 +425,15 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_advanced_green_phosphor",
-         "Advanced > Green Phosphor blueish; 15|20|30|5|10",
+         "Video > Green Phosphor blueish; 15|20|30|5|10",
       },
       {
          "cap32_scr_intensity",
-         "Advanced > Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
+         "Video > Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
+      },
+      {
+         "cap32_gfx_colors",
+         "Video > Color Depth; 24bit|16bit",
       },
       #if 0
       {
@@ -659,6 +664,23 @@ static void update_variables(void)
       if(emu_status & COMPUTER_READY) {
          CPC.scr_intensity = val;
          video_set_palette();
+      }
+   }
+
+   var.key = "cap32_gfx_colors";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "16bits") == 0)
+      {
+         retro_depth_cfg.bytes = 1;
+         retro_depth_cfg.pitch = 2;
+         retro_depth_cfg.raw_density = 2;
+      } else {
+         retro_depth_cfg.bytes = 2;
+         retro_depth_cfg.pitch = 4;
+         retro_depth_cfg.raw_density = 1;
       }
    }
 
@@ -1187,16 +1209,16 @@ void retro_init(void)
    #else
    retro_scr_style = 4;
    #endif
-   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * PITCH;
+   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * retro_depth_cfg.pitch;
 
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
          EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size);
 
-   video_buffer = (PIXEL_TYPE *) retro_malloc(gfx_buffer_size);
-   temp_buffer = (PIXEL_TYPE *) retro_malloc(WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE));
+   video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
+   temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
-   memset(temp_buffer, 0, WINDOW_MAX_SIZE * sizeof(PIXEL_TYPE)); // buffer UI
+   memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
 
    retro_ui_init();
 
@@ -1321,7 +1343,7 @@ void retro_run(void)
    retro_PollEvent();
    retro_ui_process();
 
-   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << PIXEL_BYTES);
+   video_cb(video_buffer, EMULATION_SCREEN_WIDTH<<1, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH<<2);
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -1330,7 +1352,7 @@ bool retro_load_game(const struct retro_game_info *game)
    #ifdef M16B
       enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
    #else
-      enum retro_pixel_format fmt =RETRO_PIXEL_FORMAT_XRGB8888;
+      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
    #endif
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))

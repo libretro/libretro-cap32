@@ -1436,7 +1436,7 @@ int video_set_palette (void)
 
    for (n = 0; n < 32; n++)
    {
-      colours[n] = (PIXEL_TYPE) CPC.video_monitor(colours_rgb[n][0], colours_rgb[n][1], colours_rgb[n][2]);
+      colours[n] = CPC.video_monitor(colours_rgb[n][0], colours_rgb[n][1], colours_rgb[n][2]);
    }
 
    for (n = 0; n < 17; n++)
@@ -1523,7 +1523,7 @@ int video_init (void)
    video_set_style();
 
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
-                     / (2 / PIXEL_BYTES) ) ;
+                     / (2 / retro_depth_cfg.bytes) ) ;
 
    return 0;
 }

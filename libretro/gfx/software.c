@@ -206,7 +206,7 @@ void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsi
       (PIXEL_TYPE *) (buffer + x) + (y * EMULATION_SCREEN_WIDTH)
    );
    uint32_t * img_ptr = (uint32_t *) img;
-   unsigned int loop_counter = (EMULATION_SCALE * size) / PIXEL_RAW_DENSITY;
+   unsigned int loop_counter = (EMULATION_SCALE * size) / retro_depth_cfg.raw_density;
 
    while (loop_counter--)
    {
