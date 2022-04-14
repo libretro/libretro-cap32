@@ -148,13 +148,6 @@ static retro_audio_sample_t audio_cb;
    0, 0, 0
 };
 
-// allowed file types
-#define CDT_FILE_EXT "cdt"
-#define DSK_FILE_EXT "dsk"
-#define M3U_FILE_EXT "m3u"
-#define SNA_FILE_EXT "sna"
-#define CPR_FILE_EXT "cpr"
-
 void retro_set_input_state(retro_input_state_t cb)
 {
    input_state_cb = cb;
@@ -411,7 +404,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_model",
-         "Model; 6128|464|6128+ (experimental)",
+         "Model; 6128|464|664|6128+ (experimental)",
       },
       // rcheevos disallowed_setting: cap32_autorun disabled
       {
@@ -541,10 +534,11 @@ static void update_variables(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      int val = 2; // DEFAULT 6128
-      if (strcmp(var.value, "464") == 0) val=0;
-      else if (strcmp(var.value, "6128") == 0) val=2;
-      else if (strcmp(var.value, "6128+ (experimental)") == 0) val=3;
+      int val = CPC_MODEL_6128; // DEFAULT 6128
+      if (strcmp(var.value, "464") == 0) val = CPC_MODEL_464;
+      else if (strcmp(var.value, "664") == 0) val = CPC_MODEL_664;
+      else if (strcmp(var.value, "6128") == 0) val = CPC_MODEL_6128;
+      else if (strcmp(var.value, "6128+ (experimental)") == 0) val = CPC_MODEL_PLUS;
 
       if (retro_computer_cfg.model != val) {
          retro_computer_cfg.model = val;
@@ -757,6 +751,7 @@ static void retro_insert_image()
          strcpy(loader_buffer, TAPE_LOADER_STR);
          ev_autorun_prepare(loader_buffer);
          LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
+         retro_computer_cfg.slot = SLOT_TAP;
       }
       else
       {
@@ -767,6 +762,7 @@ static void retro_insert_image()
    {
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       attach_disk((char *)dc->files[dc->index],0);
+      retro_computer_cfg.slot = SLOT_DSK;
    }
 }
 
@@ -978,6 +974,46 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
 }
 
+void computer_set_model(int model)
+{
+
+   if (CPC.model == model)
+      return;
+
+   printf("[computer_set_model] model [%i => %i]\n", CPC.model, model);
+
+   CPC.model = model;
+   retro_computer_cfg.model = model;
+
+   emu_reconfigure();
+   retro_ui_update_text();
+   computer_reset();
+}
+
+void check_flags(const char *filename, unsigned int size)
+{
+   LOGI("model %i %s %i %i \n", CPC.model, filename, file_check_flag(filename, size, FLAG_BIOS_664, 5), file_check_flag(filename, size, FLAG_BIOS_B10, 10));
+
+   if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
+   {
+      computer_set_model(1);
+   }
+
+   if (file_check_flag(filename, size, FLAG_BIOS_B10, 10))
+   {
+      if (retro_computer_cfg.slot == SLOT_DSK)
+         computer_set_model(1);
+      else
+         computer_set_model(0);
+   }
+
+   // model 464 using disk => 664
+   if (CPC.model == CPC_MODEL_464 && retro_computer_cfg.slot == SLOT_DSK)
+   {
+      computer_set_model(1);
+   }
+}
+
 void computer_autoload()
 {
    if (!retro_computer_cfg.autorun)
@@ -1005,7 +1041,7 @@ void computer_load_bios() {
    // TODO add load customs bios
 
    // cart is like a system bios
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CPR_FILE_EXT, 3))
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CPR, 3))
    {
       int result = cart_insert(retro_content_filepath);
       if(result != 0) {
@@ -1019,11 +1055,12 @@ void computer_load_file() {
    int i;
 
    // If it's a snapshot
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), SNA_FILE_EXT, 3))
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3))
    {
       int error = snapshot_load (retro_content_filepath);
       if (!error) {
          LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
+         retro_computer_cfg.slot = SLOT_SNA;
       } else {
          LOGI("SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
@@ -1032,7 +1069,7 @@ void computer_load_file() {
    }
 
    // If it's a m3u file
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), M3U_FILE_EXT, 3))
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_M3U, 3))
    {
       // Parse the m3u file
       dc_parse_m3u(dc, retro_content_filepath);
@@ -1065,7 +1102,7 @@ void computer_load_file() {
    }
 
    // If it's a disk
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), DSK_FILE_EXT, 3))
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_DSK, 3))
    {
       // Add the file to disk control context
       // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
@@ -1077,20 +1114,25 @@ void computer_load_file() {
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       attach_disk((char *)dc->files[dc->index],0);
       computer_autoload();
+      retro_computer_cfg.slot = SLOT_DSK;
    }
 
    // If it's a tape
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), CDT_FILE_EXT, 3))
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CDT, 3))
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
          strcpy(loader_buffer, TAPE_LOADER_STR);
          ev_autorun_prepare(loader_buffer);
          LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
+         retro_computer_cfg.slot = SLOT_TAP;
       } else {
          LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
       }
    }
+
+   // check custom filename config
+   check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
    // Prepare SNA
    strncat(retro_content_filepath, "0.SNA", sizeof(retro_content_filepath) - 1);

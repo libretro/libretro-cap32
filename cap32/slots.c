@@ -203,7 +203,7 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if (sh.version > 1) { // does the snapshot have version 2 data?
       dwModel = sh.cpc_model; // determine the model it was saved for
       if (dwModel != CPC.model) { // different from what we're currently running?
-         if (dwModel > 3) { // not one of the known models?
+         if (dwModel > CPC_MODEL_MAX) { // not one of the known models?
             emulator_reset(false);
             return ERR_SNA_CPC_TYPE;
          }

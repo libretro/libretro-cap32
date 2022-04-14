@@ -160,10 +160,15 @@ extern int emu_status;
 #define STATUSBAR_SHOW    1
 #define STATUSBAR_OFF     2
 
+#define SLOT_SNA 0
+#define SLOT_DSK 1
+#define SLOT_TAP 2
+
 typedef struct {
    int model;
    int ram; /*request only! beware: 6128 enforces minimum!*/
    int lang;
+   int slot;
    uint32_t combokey;
    uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
@@ -198,5 +203,19 @@ extern int retro_getGfxBpp();
 extern int retro_getGfxBps();
 extern int retro_getAudioBuffer();
 extern unsigned int * retro_getScreenPtr();
+
+// allowed file types
+#define EXT_FILE_CDT "cdt"
+#define EXT_FILE_DSK "dsk"
+#define EXT_FILE_M3U "m3u"
+#define EXT_FILE_SNA "sna"
+#define EXT_FILE_CPR "cpr"
+
+// allowed file flags
+#define FLAG_BIOS_464 "[464]"
+#define FLAG_BIOS_CPM "[CPM]"
+#define FLAG_BIOS_664 "[664]"
+#define FLAG_BIOS_B10 "Basic 1.0"
+#define FLAG_BIOS_B11 "Basic 1.1"
 
 #endif

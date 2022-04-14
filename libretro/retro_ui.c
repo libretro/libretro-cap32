@@ -228,6 +228,7 @@ void retro_ui_update_text()
    switch (retro_computer_cfg.model)
    {
       case 0: strncpy(model, "464", sizeof(model)); break;
+      case 1: strncpy(model, "664", sizeof(model)); break;
       case 3: strncpy(model, "6128+", sizeof(model)); break;
       default: strncpy(model, "6128", sizeof(model)); break;
    }
