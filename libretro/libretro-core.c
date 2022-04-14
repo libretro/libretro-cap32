@@ -73,7 +73,7 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 game_cfg_t game_configuration;
-t_button_cfg btnPAD[MAX_PADCFG];
+extern t_button_cfg btnPAD[MAX_PADCFG];
 
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);

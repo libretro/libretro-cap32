@@ -443,5 +443,9 @@ clean:
 	rm -f $(HEADERS)
 	rm -f $(TARGET)
 
+db:
+	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
+	rm -f $(CORE_DIR)/libretro/db/*.o
+
 .PHONY: $(TARGET) clean clean-objs
 endif
