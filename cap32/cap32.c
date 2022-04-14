@@ -467,7 +467,7 @@ void ga_memory_manager (void)
          membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
    }
-   if (CPC.model > 2 && GateArray.registerPageOn) {
+   if (CPC.model > CPC_MODEL_6128 && GateArray.registerPageOn) {
       membank_read[1] = pbRegisterPage;
       membank_write[1] = pbRegisterPage;
    }
@@ -526,7 +526,7 @@ uint8_t z80_IN_handler (reg_pair port)
             // 6128+: always use port B as input as this fixes Tintin on the moon.
             // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
             // TODO: verify with CPC (non-plus) if we go in the else in some cases
-            if (CPC.model > 2 || PPI.control & 2) { // port B set to input?
+            if (CPC.model > CPC_MODEL_6128 || PPI.control & 2) { // port B set to input?
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
@@ -674,7 +674,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       uint8_t crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
          // 6128+: this is where we should detect the ASIC (un)locking sequence
-         if (CPC.model > 2) {
+         if (CPC.model > CPC_MODEL_6128) {
             asic_poke_lock_sequence(val);
          }
          CRTC.reg_select = val;
@@ -825,7 +825,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
    if (!(port.b.h & 0x20))
    {
       /* ROM select? */
-      if (CPC.model <= 2) {
+      if (CPC.model <= CPC_MODEL_6128) {
          GateArray.upper_ROM = val;
          pbExpansionROM = memmap_ROM[val];
 
@@ -1056,15 +1056,18 @@ int emulator_select_ROM (void)
    // TODO load custom bios
    switch(CPC.model)
    {
-      case 0: // 464
-         memcpy(pbROM, OS_464, (32*1024)); // FIXME FOR CPC 464
+      case CPC_MODEL_464:
+         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464
          break;
-              // 664
-      case 2: // 6128
-         memcpy(pbROM, OS_6128, (32*1024));
+      case CPC_MODEL_664:
+         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464 and 664
          memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
-      case 3: // 6128+
+      case CPC_MODEL_6128:
+         memcpy(pbROM, OS_BASIC11, (32*1024));
+         memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
+         break;
+      case CPC_MODEL_PLUS:
          if(cart_name[0] == '\0') {
             cpr_load(&OS_6128P[0]);
             if (pbCartridgePages[0] != NULL)
@@ -1081,14 +1084,14 @@ int emulator_select_ROM (void)
       pbPtr = pbROMlo;
       switch(CPC.model)
       {
-         case 0: // 464
+         case CPC_MODEL_464:
+         case CPC_MODEL_664:
             pbPtr += 0x1d69; // location of the keyboard translation table
             break;
-         case 1: // 664
-         case 2: // 6128
+         case CPC_MODEL_6128:
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
-         case 3: // 6128+
+         case CPC_MODEL_PLUS:
             if(cart_name[0] == '\0')
                pbPtr += 0x1eef; // Only patch system cartridge
             break;
@@ -1108,7 +1111,7 @@ int emulator_select_ROM (void)
 void emulator_reset (bool bolMF2Reset)
 {
    int n;
-   if(CPC.model > 2){
+   if(CPC.model > CPC_MODEL_6128){
       if (pbCartridgePages[0] != NULL)
          pbROMlo = pbCartridgePages[0];
    }
@@ -1468,7 +1471,7 @@ void video_set_style (void)
    switch (dwXScale)
    {
       case 1:
-      if (CPC.model > 2) {
+      if (CPC.model > CPC_MODEL_6128) {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half_plus;
       } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half;
@@ -1477,7 +1480,7 @@ void video_set_style (void)
          CPC.scr_prerendersync = (void(*)(void))prerender_sync_half;
          break;
       case 2:
-      if (CPC.model > 2) {
+      if (CPC.model > CPC_MODEL_6128) {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_plus;
       } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal;
@@ -1631,8 +1634,8 @@ void loadConfiguration (void)
 
    //CPC.model = getConfigValueInt(chFileName, "system", "model", 2); // CPC 6128
    CPC.model = retro_computer_cfg.model;
-   if (CPC.model > 3)
-      CPC.model = 2;
+   if (CPC.model > CPC_MODEL_MAX)
+      CPC.model = CPC_MODEL_6128;
 
    CPC.jumpers       = getConfigValueInt(chFileName, "system", "jumpers", 0x1e) & 0x1e; // OEM is Amstrad, video refresh is 50Hz
    //CPC.ram_size      = getConfigValueInt(chFileName, "system", "ram_size", 128) & 0x02c0; // 128KB RAM

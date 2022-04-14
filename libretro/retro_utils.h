@@ -58,6 +58,7 @@
 #endif
 
 bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size);
+bool file_check_flag(const char *filename, const size_t filename_size, const char *flag, const size_t flag_size);
 void path_join(char* out, const char* basedir, const char* filename);
 char* path_join_dup(const char* basedir, const char* filename);
 

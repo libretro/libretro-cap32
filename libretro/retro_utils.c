@@ -71,6 +71,26 @@ bool file_check_extension(const char *filename, const size_t filename_size, cons
    return (strncasecmp(file_ext, ext, filename_size) == 0);
 }
 
+bool file_check_flag(const char *filename, const size_t filename_size, const char *flag, const size_t flag_size)
+{
+#ifndef __PS3__
+   size_t file_len = strnlen(filename, filename_size);
+   size_t flag_len = strnlen(flag, flag_size);
+#else
+   size_t file_len = strlen(filename) > filename_size ? filename_size : strlen(filename);
+   size_t flag_len = strlen(flag) > flag_size ? flag_size : strlen(flag);
+#endif
+
+  for (int i = 0; i < file_len; i++) {
+     if (i + flag_len > file_len)
+        return false;
+
+      if (strncasecmp(&filename[i], flag, flag_len) == 0)
+         return true;
+  }
+  return false;
+}
+
 // Verify if file exists
 bool file_exists(const char *filename)
 {
