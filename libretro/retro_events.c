@@ -74,11 +74,6 @@ extern void Tape_Rewind(void);
 extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
-// --- events code
-#define MAX_KEYSYMS 324
-#define MAX_BUTTONS 14
-#define MAX_PADCFG 4
-
 #define MAX_CURSOR_X (EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * PIXEL_BYTES))
 #define MAX_CURSOR_Y (EMULATION_SCREEN_HEIGHT - FNT_CHAR_HEIGHT)
 
@@ -96,8 +91,8 @@ static int wait_computer = 1;
 int event_call = EV_JOY;
 void ev_toggle_call();
 
-const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
-   { // JOYSTICK CFG
+t_button_cfg btnPAD[MAX_PADCFG] = {
+   {{ // JOYSTICK CFG
    CPC_KEY_JOY_FIRE2,   // B
    CPC_KEY_NULL,        // Y
    CPC_KEY_NULL,        // SELECT
@@ -113,8 +108,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_INTRO,       // R
    CPC_KEY_F1,          // L2
    CPC_KEY_F2,          // R2
-   },
-   { // KEYBOARD CFG ( QAOP )
+   }},
+   {{ // KEYBOARD CFG ( QAOP )
    CPC_KEY_B,           // B
    CPC_KEY_Y,           // Y
    CPC_KEY_S,           // SELECT
@@ -130,8 +125,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_INTRO,       // R
    CPC_KEY_F1,          // L2
    CPC_KEY_F2,          // R2
-   },
-   { // KEYBOARD CFG ( INCENTIVE )
+   }},
+   {{ // KEYBOARD CFG ( INCENTIVE )
    CPC_KEY_SPACE,       // B
    CPC_KEY_W,           // Y
    CPC_KEY_S,           // SELECT
@@ -147,8 +142,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
-   },
-   { // JOYSTICK PLAYER 2 CFG
+   }},
+   {{ // JOYSTICK PLAYER 2 CFG
    CPC_KEY_JOY2_FIRE2,  // B
    CPC_KEY_SPACE,       // Y
    CPC_KEY_S,           // SELECT
@@ -164,7 +159,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_NULL,        // R
    CPC_KEY_NULL,        // L2
    CPC_KEY_NULL,        // R2
-   },
+   }},
 };
 
 // ---------------------------------------------
@@ -179,7 +174,7 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
    { RETRO_DEVICE_ID_JOYPAD_A,
       { EVENT_WRITE, "RUN\"DISK\nRUN\"DISC\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_X,
-      { EVENT_WRITE, TAPE_LOADER_STR } },
+      { EVENT_WRITE, LOADER_TAPE_STR } },
    { RETRO_DEVICE_ID_JOYPAD_START,
       { EVENT_VKEYB, "VKEYB\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_UP,
@@ -212,7 +207,7 @@ void ev_release_key(uint8_t cpc_key) {
  * get_cpckey:
  * from RETROK_x converts to CPC_KEY_x
  **/
-static uint8_t get_cpckey (unsigned int keysym)
+uint8_t get_cpckey (unsigned int keysym)
 {
    if (keysym >= MAX_KEYSYMS) {
       return CPC_KEY_NULL;
@@ -342,7 +337,7 @@ static void _process_joy(int playerID){
    if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
       return;
 
-   uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]];
+   uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]].buttons;
 
    int i;
    for (i = 0; i < MAX_BUTTONS; i++) {
@@ -372,7 +367,7 @@ bool ev_joysticks()
    // exit on controllers config to RETRO_DEVICE_AMSTRAD_KEYBOARD
    // but allows legacy keyboard-remap + joystick-simple combo, issue #63
    if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD &&
-      retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_JOYSTICK)
+      retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_AUTO)
          return false;
 
    if(!ev_events())

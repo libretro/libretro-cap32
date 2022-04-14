@@ -1,0 +1,21 @@
+input_player1_key_start = "49"
+input_player1_key_start_name = "Start One Player"
+input_player1_key_b = "116"
+input_player1_key_b_name = "Toggle"
+input_player1_key_x = "51"
+input_player1_key_x_name = "Joystick 2 Select"
+input_player1_key_select = "50"
+input_player1_key_select_name = "Joystick 1 Select"
+
+entry_map_type = "keep" # default
+
+entry_hash_1 = 36d943ea
+entry_hash_2 = e7df0e60
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]ELITE"
+

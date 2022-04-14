@@ -52,6 +52,7 @@
 #include "gfx/software.h"
 #include "assets/assets.h"
 #include "dsk/loader.h"
+#include "db/database.h"
 
 char DISKA_NAME[512]="\0";
 char DISKB_NAME[512]="\0";
@@ -71,6 +72,8 @@ static dc_storage* dc;
 retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
+game_cfg_t game_configuration;
+extern t_button_cfg btnPAD[MAX_PADCFG];
 
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
@@ -392,15 +395,19 @@ void retro_set_environment(retro_environment_t cb)
    struct retro_variable variables[] = {
       {
          "cap32_retrojoy0",
-         "User 1 Amstrad Joystick Config; joystick|qaop|incentive",
+         "Controls > User 1 Controller Config; auto|qaop|incentive",
       },
       {
          "cap32_retrojoy1",
-         "User 2 Amstrad Joystick Config; joystick|qaop|incentive|joystick_port2",
+         "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port2",
       },
       {
          "cap32_combokey",
-         "Combo Key; select|y|b|disabled",
+         "Controls > Combo Key; select|y|b|disabled",
+      },
+      {
+         "cap32_db_mapkeys",
+         "Controls > Use internal Remap DB; enabled|disabled",
       },
       {
          "cap32_model",
@@ -492,7 +499,7 @@ static int controller_port_variable(unsigned port, struct retro_variable *var)
          return PADCFG_JOYSTICK_2;
    }
 
-   return PADCFG_JOYSTICK;
+   return PADCFG_AUTO;
 }
 
 static void update_variables(void)
@@ -528,6 +535,16 @@ static void update_variables(void)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_SELECT);
    }
 
+   var.key = "cap32_db_mapkeys";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "disabled") == 0)
+         retro_computer_cfg.use_internal_remap = false;
+      else
+         retro_computer_cfg.use_internal_remap = true;
+   }
 
    var.key = "cap32_model";
    var.value = NULL;
@@ -748,7 +765,7 @@ static void retro_insert_image()
       int error = tape_insert ((char *) dc->files[dc->index]);
       if (!error)
       {
-         strcpy(loader_buffer, TAPE_LOADER_STR);
+         strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
          LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
          retro_computer_cfg.slot = SLOT_TAP;
@@ -980,7 +997,7 @@ void computer_set_model(int model)
    if (CPC.model == model)
       return;
 
-   printf("[computer_set_model] model [%i => %i]\n", CPC.model, model);
+   LOGI("[computer_set_model] model [%i => %i]\n", CPC.model, model);
 
    CPC.model = model;
    retro_computer_cfg.model = model;
@@ -992,8 +1009,6 @@ void computer_set_model(int model)
 
 void check_flags(const char *filename, unsigned int size)
 {
-   LOGI("model %i %s %i %i \n", CPC.model, filename, file_check_flag(filename, size, FLAG_BIOS_664, 5), file_check_flag(filename, size, FLAG_BIOS_B10, 10));
-
    if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
    {
       computer_set_model(1);
@@ -1016,10 +1031,21 @@ void check_flags(const char *filename, unsigned int size)
 
 void computer_autoload()
 {
+   if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
+   {
+      LOGI("[DB] game remap applied.\n");
+      memcpy(btnPAD[0].buttons, game_configuration.btn_config.buttons, sizeof(t_button_cfg));
+   }
+
    if (!retro_computer_cfg.autorun)
       return;
 
-   loader_run(loader_buffer);
+   if (game_configuration.has_command)
+   {
+      strncpy(loader_buffer, game_configuration.loader_command, LOADER_MAX_SIZE);
+   } else {
+      loader_run(loader_buffer);
+   }
 
    LOGI("[core] DSK autorun: \"%s\"\n", loader_buffer);
 
@@ -1052,7 +1078,17 @@ void computer_load_bios() {
 
 // load content
 void computer_load_file() {
-   int i;
+
+   uint32_t hash = get_hash(retro_content_filepath);
+   if (hash)
+   {
+      get_database(hash);
+      LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u ]\n",
+         hash,
+         game_configuration.has_btn,
+         game_configuration.has_command
+      );
+   }
 
    // If it's a snapshot
    if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3))
@@ -1076,7 +1112,7 @@ void computer_load_file() {
 
       // Some debugging
       log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
-      for(i = 0; i < dc->count; i++)
+      for(int i = 0; i < dc->count; i++)
       {
          log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
       }
@@ -1122,7 +1158,7 @@ void computer_load_file() {
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
-         strcpy(loader_buffer, TAPE_LOADER_STR);
+         strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
          LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
          retro_computer_cfg.slot = SLOT_TAP;
@@ -1214,6 +1250,8 @@ void retro_init(void)
    else
       environ_cb(RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE, &disk_interface);
 
+   memset(&game_configuration, 0, sizeof(game_cfg_t));
+
    // prepare shared variables
    retro_computer_cfg.model = -1;
    retro_computer_cfg.ram = -1;
@@ -1221,6 +1259,7 @@ void retro_init(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = 0;
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
    retro_computer_cfg.statusbar = STATUSBAR_HIDE;
+   retro_computer_cfg.use_internal_remap = false;
 
    update_variables();
 

@@ -29,6 +29,7 @@
 #include "cart.h"
 #include "z80.h"
 #include "errors.h"
+#include "retro_utils.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -56,22 +57,6 @@ extern FILE *pfileObject;
 uint8_t *pbTapeImage = NULL;
 uint8_t *pbTapeImageEnd = NULL;
 uint8_t *pbSnaImage = NULL;
-
-
-/**
- * file utils
- */
-int file_size (int file_num)
-{
-   struct stat s;
-
-   if (!fstat(file_num, &s)) {
-      return s.st_size;
-   } else {
-      return 0;
-   }
-}
-
 
 /**
  * SNA handlers

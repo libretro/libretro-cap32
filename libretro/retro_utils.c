@@ -42,10 +42,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include<lrc_hash.h>
+
 #include "retro_utils.h"
 #ifdef VITA
    #include "file/file_path.h"
 #endif
+
+extern FILE *pfileObject;
+extern uint8_t* pbGPBuffer;
 
 // Verify file extension
 bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size)
@@ -103,6 +108,17 @@ bool file_exists(const char *filename)
    return false;
 }
 
+int file_size (int file_num)
+{
+   struct stat s;
+
+   if (!fstat(file_num, &s)) {
+      return s.st_size;
+   } else {
+      return 0;
+   }
+}
+
 void path_join(char* out, const char* basedir, const char* filename)
 {
    snprintf(out, RETRO_PATH_MAX, "%s%s%s", basedir, RETRO_PATH_SEPARATOR, filename);
@@ -144,4 +160,58 @@ void retro_free(void * mem) {
    #else
    free(mem);
    #endif
+}
+
+// ----------------------------- crc32b --------------------------------
+
+/* This is the basic CRC-32 calculation with some optimization but no
+table lookup. The the byte reversal is avoided by shifting the crc reg
+right instead of left and by using a reversed 32-bit word to represent
+the polynomial. */
+
+uint32_t crc32_calculate(uint8_t * data, uint32_t size) {
+   uint32_t byte, crc, mask;
+
+   crc = 0xFFFFFFFF;
+
+   for (int i = 0; i < size; i++) {
+      byte = data[i];
+      crc = crc ^ byte;
+      for (int j = 7; j >= 0; j--) {
+         mask = -(crc & 1);
+         crc = (crc >> 1) ^ (0xedb88320 & mask);
+      }
+   }
+   return ~crc;
+}
+
+uint32_t get_hash(const char* pchFileName) {
+
+   uint32_t size;
+
+   if ((pfileObject = fopen(pchFileName, "rb")) == NULL)
+   {
+       return 0;
+   }
+
+   size = file_size(fileno(pfileObject));
+   if (!size)
+   { // the sna image should have at least the header...
+      fclose(pfileObject);
+      return 0;
+   }
+
+   uint8_t * data = (uint8_t *) malloc(size);
+
+   if(!fread(data, size, 1, pfileObject)) { // read snapshot
+      fclose(pfileObject);
+      free(data);
+      return 0;
+   }
+   uint32_t crc = crc32_calculate(data, size);
+
+   free(data);
+   fclose(pfileObject);
+
+   return crc;
 }

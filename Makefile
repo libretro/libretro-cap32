@@ -397,6 +397,9 @@ include Makefile.common
 HEADERS += $(ROMS:.rom=.h) $(SNAPS:.szx=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
+# List of dependencies defined from list of object files
+DEPS := $(OBJS:.o=.d)
+
 INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 
 %.o: %.cpp
@@ -439,6 +442,10 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(HEADERS)
 	rm -f $(TARGET)
+
+db:
+	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
+	rm -f $(CORE_DIR)/libretro/db/*.o
 
 .PHONY: $(TARGET) clean clean-objs
 endif
