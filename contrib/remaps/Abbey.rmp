@@ -27,7 +27,7 @@ input_player1_key_y_name = "answer yes"
 #    [enter] => \n
 #    [quote] => "
 #    [wait] => wait 5 seconds
-entry_command = "RUN[quote]GAME.BIN"
+entry_command = "|CPM"
 
 # game hashes
 entry_hash_1 = "0xbf188ce3" # comment here

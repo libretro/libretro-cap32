@@ -997,7 +997,7 @@ void computer_set_model(int model)
    if (CPC.model == model)
       return;
 
-   printf("[computer_set_model] model [%i => %i]\n", CPC.model, model);
+   LOGI("[computer_set_model] model [%i => %i]\n", CPC.model, model);
 
    CPC.model = model;
    retro_computer_cfg.model = model;
@@ -1009,8 +1009,6 @@ void computer_set_model(int model)
 
 void check_flags(const char *filename, unsigned int size)
 {
-   LOGI("model %i %s %i %i \n", CPC.model, filename, file_check_flag(filename, size, FLAG_BIOS_664, 5), file_check_flag(filename, size, FLAG_BIOS_B10, 10));
-
    if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
    {
       computer_set_model(1);

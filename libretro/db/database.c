@@ -3,6 +3,8 @@
 
 #include "entries.h"
 
+// #define DEBUG_DATABASE
+
 extern t_button_cfg btnPAD[MAX_PADCFG];
 
 unsigned char get_keybind (unsigned int key, unsigned char position)
@@ -10,14 +12,48 @@ unsigned char get_keybind (unsigned int key, unsigned char position)
    switch (key)
    {
       case DB_CLEAN:
+         #ifdef DEBUG_DATABASE
+         printf("[keybind-clean] k:%u p:%u = %u\n", key, position, btnPAD[0].buttons[position]);
+         #endif
          return 0xff;
 
       case DB_KEEP:
+         #ifdef DEBUG_DATABASE
+         printf("[keybind-keep] k:%u p:%u = %u\n", key, position, btnPAD[0].buttons[position]);
+         #endif
          return btnPAD[0].buttons[position];
 
       default:
+         #ifdef DEBUG_DATABASE
+         printf("[keybind-cfg] k:%u p:%u = %u\n", key, position, get_cpckey(key));
+         #endif
          return get_cpckey(key);
    }
+}
+
+const char * string_find(const char * data, size_t data_leng, unsigned int position)
+{
+   for(size_t n = 0; n < (data_leng - 1); n++)
+   {
+      if (!position)
+         return &data[n];
+
+      if (data[n] == '\0')
+         position --;
+   }
+
+   return NULL;
+}
+
+void command_add(unsigned int command_position)
+{
+   const char * command = string_find(commands, sizeof(commands), command_position);
+
+   if (!command || strlen(command) > LOADER_MAX_SIZE)
+      return;
+
+   strcpy(game_configuration.loader_command, command);
+   game_configuration.has_command = true;
 }
 
 void database_entry(t_file_entry * entry)
@@ -31,10 +67,9 @@ void database_entry(t_file_entry * entry)
       game_configuration.has_btn = true;
    }
 
-   if (entry->loader_command[0])
+   if (entry->loader_command != COMMAND_EMPTY)
    {
-      strncpy(game_configuration.loader_command, entry->loader_command, LOADER_MAX_SIZE);
-      game_configuration.has_command = true;
+      command_add(entry->loader_command);
    }
 }
 
@@ -52,6 +87,5 @@ bool get_database(const uint32_t hash)
          }
       }
    }
-
    return false;
 }

@@ -3,6 +3,7 @@
 
 #define DB_CLEAN 0xfff
 #define DB_KEEP 0xffff
+#define COMMAND_EMPTY -1
 
 typedef struct {
    uint32_t hash_list[16];

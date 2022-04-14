@@ -85,7 +85,7 @@ HEADER = """/*******************************************************************
 #include <libretro.h>
 #include "database.h"
 
-// no-cpc-intro CRC database
+// clean-cpc-db CRC database
 t_file_entry database[] = {
 """
 FOOTER = """
@@ -173,7 +173,7 @@ def file_get_entry(l_File):
     if command:
         command = command.upper() \
             .replace('[ENTER]', '\\n') \
-            .replace('[QUOTE]', '"') \
+            .replace('[QUOTE]', '\\"') \
             .replace('[WAIT]', '~')
         if not command in commands:
             commands.append(command)
@@ -201,6 +201,7 @@ with open(lr_path) as lr:
         if found and retro_prefix in line:
             tmp = line.split('=')
             retro_key[tmp[1].replace(',', '').strip()] = tmp[0].strip()
+
 
 # build final file
 text = HEADER
