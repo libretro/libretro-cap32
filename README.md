@@ -37,108 +37,23 @@ Caprice brings some default keymaps confings, these configs are detailed at libr
 
 ## Features not covered in docs
 
- * New Model: [cap32_model] (6128 | 464 | 6128+)
+ * New Model: [cap32_model] (6128 | 464 | 664 | 6128+)
 
-Choose which Amstrad CPC model to emulate, currently added 6128+
+Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.0 games and DSK
 
- * New Combo Key: [cap32_combokey] (select | y | b | disabled)
+### New filename flags (case insensitive)
 
-Choose which combo key do you want use and it's ignored from user keymap. If you set as disabled, all joypad buttons are available for your game remaps.
+* "[664]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
+* "BASIC 1.0": Force 464 model when you load CDT or 664 model if use DSK.
+* "[CPM]": Force load CPM BIOS first, useful for some infocom CPM games (WIP).
 
-### New Remaps
-
- * QAOP MAP changed to: 
-```
-   CPC_KEY_SPACE,       // BUTTON A
-   CPC_KEY_B,           // BUTTON B
-   CPC_KEY_N,           // BUTTON X
-   CPC_KEY_Y,           // BUTTON Y
-   CPC_KEY_S,           // SELECT
-   CPC_KEY_K,           // START
-   CPC_KEY_Q,           // PAD UP
-   CPC_KEY_A,           // PAD DOWN
-   CPC_KEY_O,           // PAD LEFT
-   CPC_KEY_P,           // PAD RIGHT
-```
-
-* Simplified JOYSTICK MAP: BUTTON Y, X, SELECT, START - not binded to any key to allow customize on CONTROLS menu.
-```
-   CPC_KEY_JOY_FIRE1,   // BUTTON A
-   CPC_KEY_JOY_FIRE2,   // BUTTON B
-   UNUSED,              // BUTTON X
-   UNUSED,              // BUTTON Y
-   UNUSED,              // SELECT
-   UNUSED,              // START
-   CPC_KEY_JOY_UP,      // PAD UP
-   CPC_KEY_JOY_DOWN,    // PAD DOWN
-   CPC_KEY_JOY_LEFT,    // PAD LEFT
-   CPC_KEY_JOY_RIGHT,   // PAD RIGHT
-```
- * New joystick on port_2: 
-```
-   CPC_KEY_JOY2_FIRE1,  // BUTTON A
-   CPC_KEY_JOY2_FIRE2,  // BUTTON B
-   CPC_KEY_X,           // BUTTON X
-   CPC_KEY_SPACE,       // BUTTON Y
-   CPC_KEY_S,           // SELECT
-   CPC_KEY_J,           // START
-   CPC_KEY_JOY2_UP,     // PAD UP
-   CPC_KEY_JOY2_DOWN,   // PAD DOWN
-   CPC_KEY_JOY2_LEFT,   // PAD LEFT
-   CPC_KEY_JOY2_RIGHT,  // PAD RIGHT
-```
-
- * L/R L2/R2 changed to allow more combos:
-```
-   CPC_KEY_CONTROL,     // BUTTON L
-   CPC_KEY_INTRO,       // BUTTON R
-   CPC_KEY_F1,          // L2
-   CPC_KEY_F2,          // R2
-```
-
-## M3U and Disk/Tape control
-
-When you have a multi game image, you can use a m3u file to specify each disk or tape of the game and change them from the RetroArch Disk control interface.
-
-A M3U file is a simple text file with one disk per line (see https://en.wikipedia.org/wiki/M3U).
-
-Example :
-
-Alive (F).m3u
-```
-Alive (F) - Disk 1A.dsk
-Alive (F) - Disk 1B.dsk
-```
-Path can be absolute or relative to the location of the M3U file.
-
-When a game ask for it, you can change the current disk in the RetroArch 'Disk Control' menu :
-- Eject the current disk with 'Disk Cycle Tray Status'.
-- Select the right disk index.
-- Insert the new disk with 'Disk Cycle Tray Status'.
-
-When the core start, the first disk will be mounted and the first executable autostarted (if autostart is enabled).
-
-
-### Specify a specific command to launch a game
-
-If the autolaunch option of the core does a pretty good job to guess what command must be executed to launch a game on the CPC, there is some problems (cpm disk and strange catalogs for the most).
-
-You can specify a command to be executed on the CPC when the emu launch.
-
-All you have to do is to add a comment like this in the m3u file :
+Examples :
 
 ```
-#COMMAND:<YOUR_COMMAND_HERE>
+Alive (1990)(Company)(fr)[664].dsk => 664
+Manic Miner (UK) (1984) (Version Basic 1.0) [Amsoft].dsk => 664
+Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
 ```
-
-Even for one disk game, you can create a m3u file like this one :
-
-Jack the Nipper II... In Coconut Capers.m3u
-```
-#COMMAND:|CPM
-Jack the Nipper II... In Coconut Capers (E).dsk
-```
-
 
 # Known Bugs
 
