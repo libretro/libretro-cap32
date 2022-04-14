@@ -1,0 +1,14 @@
+input_player1_key_up = "97"
+input_player1_key_down = "122"
+input_player1_key_right = "109"
+input_player1_key_left = "110"
+input_player1_key_a = "32"
+input_player1_key_a_name = "Flame"
+input_player1_key_start = "52"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 827e83ac
+entry_hash_2 = 8d64a322
+entry_hash_3 = f9fce391
+entry_hash_4 = 59d6aef1

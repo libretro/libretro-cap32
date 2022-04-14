@@ -15,8 +15,8 @@ input_player1_key_y = "115"
 input_player1_key_y_name = "Decir Si"
 
 # game hashes
-entry_hash_1 = "0xd37cf8e7" # comment
-entry_hash_2 = "0xaa05ed4a"
+entry_hash_1 = "0xaa05ed4a" # (S) (128K) (1988) (CPM) [Original]
+entry_hash_2 = "0xd37cf8e7"
 
 # game load command
 # special commands: 

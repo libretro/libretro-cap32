@@ -57,6 +57,7 @@ void retro_ui_process();
 
 void retro_show_statusbar();
 void retro_ui_update_text();
+void retro_ui_draw_db();
 void retro_ui_set_led(bool value);
 
 #endif

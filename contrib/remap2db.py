@@ -112,11 +112,18 @@ file_list = [
         if os.path.isfile(os.path.join(current_path, f))
 ]
 
+file_list.sort()
+
 def map2text(o_Entry):
     map_text = ''
     for key in KEYS_MAP:
+        # clean / keep
         if not o_Entry[key]:
             map_text += o_Entry['current_mode']
+        # custom key/joy internal code
+        elif o_Entry[key][0] == '$':
+            map_text += o_Entry[key][1:]
+        # retroarch keyboard code
         else:
             map_text += retro_key[o_Entry[key]]
         map_text += ', '

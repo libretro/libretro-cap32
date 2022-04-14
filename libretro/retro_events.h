@@ -144,6 +144,21 @@ enum emu_key_id {
    CPC_KEY_NULL                   = 0xFF
 };
 
+enum retro_joystick_button
+{
+   JOY_PORT1_UP = 200,
+   JOY_PORT1_DOWN = 201,
+   JOY_PORT1_RIGHT = 202,
+   JOY_PORT1_LEFT = 203,
+   JOY_PORT1_FIRE1 = 204,
+   JOY_PORT1_FIRE2 = 205,
+   JOY_PORT2_UP = 206,
+   JOY_PORT2_DOWN = 207,
+   JOY_PORT2_RIGHT = 208,
+   JOY_PORT2_LEFT = 209,
+   JOY_PORT2_FIRE1 = 210,
+   JOY_PORT2_FIRE2 = 211,
+};
 
 enum retro_events_action_type
 {

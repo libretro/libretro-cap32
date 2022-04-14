@@ -1,0 +1,16 @@
+input_player1_key_start = "49"
+input_player1_key_start_name = "Start One Player"
+input_player1_key_a = "113"
+input_player1_key_a_name = "Jump"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Bubble"
+input_player1_key_x = "97"
+input_player1_key_x_name = "[A]"
+
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 95d9f222 # (UK) (1987) [Original]
+entry_hash_2 = dc214555 # (UK) (1988) (Hack)

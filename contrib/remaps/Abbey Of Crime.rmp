@@ -30,7 +30,7 @@ input_player1_key_y_name = "answer yes"
 entry_command = "|CPM"
 
 # game hashes
-entry_hash_1 = "0xbf188ce3" # comment here
+entry_hash_1 = "0xbf188ce3" # (UK) (128K) (2017) (CPM)
 entry_hash_2 = "0x6e5f98ff"
 
 # map type (clean/keep)

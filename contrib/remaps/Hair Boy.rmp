@@ -1,0 +1,7 @@
+input_player1_key_a = "32"
+input_player1_key_a_name = "Jump"
+input_player1_key_right = "275"
+input_player1_key_left = "276"
+input_player1_key_start = "32"
+
+entry_hash_1 = 0xca1ccfa9 # (2016) (cpcretrodev.byterealms) [cr]

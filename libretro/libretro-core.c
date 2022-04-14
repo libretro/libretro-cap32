@@ -73,6 +73,7 @@ retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
 game_cfg_t game_configuration;
+
 extern t_button_cfg btnPAD[MAX_PADCFG];
 
 extern void change_model(int val);
@@ -1055,6 +1056,8 @@ void computer_autoload()
 
 void computer_reset()
 {
+   retro_ui_draw_db();
+
    if (!retro_computer_cfg.autorun)
       return;
 
@@ -1431,6 +1434,7 @@ bool retro_load_game(const struct retro_game_info *game)
    update_variables();
    computer_load_bios();
    computer_load_file();
+   retro_ui_draw_db();
 
    return true;
 

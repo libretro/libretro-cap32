@@ -1,4 +1,11 @@
 # Future
+- DB: new games from retroachievements
+- UI: added DB icon DSK to status bar
+- DB: you could add direct tokens using $ (for joystick keybinds or cleans)
+- DB: added DB v1 using clean-cpc-db info
+- CORE: added model 664 to allow DSK and BASIC 1.0
+- CORE: detect some configurations from filename
+- VIDEO: minor fixes (requires more work)
 
 # 4.5.3
 - AUTORUN: revert system detection at first, CPM only if loader is failed

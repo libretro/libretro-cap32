@@ -1,0 +1,9 @@
+input_player1_key_x = "32"
+input_player1_key_x_name = "Time Left"
+input_player1_key_start = "27"
+input_player1_key_start_name = "Pause"
+
+entry_hash_1 = f964db5d # (UK) (1990) (Spain retail version) [Original] - no codes
+entry_hash_2 = a14a1e0f # (UK) (1990) (UK retail version) [Original]
+entry_hash_3 = b9d14a6d # (F) (1990) (v2) [Original]
+entry_hash_4 = 18d230b1 # (F) (1990) (v3) [Original]
