@@ -85,9 +85,7 @@ typedef struct {
 
    int      num_extents;    /* calculated from EXM*/
 
-   unsigned char *label_data;   /* NULL = no label file, !=NULL = label file */
-   unsigned long label_data_length;
-
+   char *label;   /* label dsk type */
 } DPB_type;
 
 /* KT - added link list of DPB's */
@@ -113,6 +111,7 @@ typedef struct DPB_list
 #define DSK_TYPE_SYSTEM  0x41
 
 void formats_init();
+void formats_clean();
 bool sector_exists(t_track *track, unsigned short sector);
 bool format_hexagon_protection(t_drive *drive);
 DPB_type *format_find (t_drive *drive);

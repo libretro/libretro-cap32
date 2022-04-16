@@ -166,6 +166,10 @@ int archive_init(unsigned short catalogue_size, unsigned short track_offset, t_d
    char raw_name[8 + 3];
    char tmp_name[13]; /* <raw_name 8>+"."+<raw_ext 3>+"\0" */
 
+   // clean base catalogue
+   catalog_entry = 0;
+   memset(catalog_dirent, 0, sizeof(catalog_dirent));
+
    for (i = 0; i <= catalogue_size; i++)
    {
       const DSKEntry * archive_info = _catalog_entry(i, track_offset, drive);

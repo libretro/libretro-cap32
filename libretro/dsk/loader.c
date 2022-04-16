@@ -134,13 +134,9 @@ void _loader_failed (char * key_buffer, bool is_system)
    strcpy(key_buffer, "CAT");
 }
 
-void loader_run (char * key_buffer)
+void _loader_run (char * key_buffer, DPB_type *dpb, t_drive *current_drive)
 {
-   DPB_type *dpb = NULL;
-   t_drive *current_drive = &driveA; 
-
    memset(key_buffer, 0, LOADER_MAX_SIZE);
-   dpb = format_find(current_drive);
 
    if (dpb == NULL)
    {
@@ -176,4 +172,18 @@ void loader_run (char * key_buffer)
    {
       _loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
    }
+}
+
+void loader_run (char * key_buffer)
+{
+   DPB_type *dpb = NULL;
+   t_drive *current_drive = &driveA; 
+
+   dpb = format_find(current_drive);
+   _loader_run(key_buffer, dpb, current_drive);
+}
+
+void loader_clean ()
+{
+   formats_clean();
 }

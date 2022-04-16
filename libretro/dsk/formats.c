@@ -151,7 +151,7 @@ char * _upper(char *s)  {
   return p;
 }
 
-void _dpb_list_add_entry(DPB_list *list, DPB_list_entry *entry)
+void _list_add_entry(DPB_list *list, DPB_list_entry *entry)
 {
    DPB_list_entry *cur_entry;
 
@@ -170,15 +170,18 @@ void _dpb_list_add_entry(DPB_list *list, DPB_list_entry *entry)
    }
 }
 
-void _dpb_list_add_item(DPB_list *list,char *description, char *ident, DPB_type *dpb)
+void _list_add_item(DPB_list *list,char *description, char *ident, DPB_type *dpb)
 {
    DPB_list_entry *entry = (DPB_list_entry *) malloc(sizeof(DPB_list_entry));
    if (entry!=NULL) {
-      if (description==NULL) {
+      /* copy dpb */
+      memcpy(&entry->dpb, dpb, sizeof(DPB_type));
+
+      if (description == NULL) {
          entry->description = NULL;
       } else {
          entry->description = (char *) malloc(strlen(description) + 1);
-         if (entry->description!=NULL) {
+         if (entry->description != NULL) {
             strcpy(entry->description, description);
          }
       }
@@ -187,14 +190,16 @@ void _dpb_list_add_item(DPB_list *list,char *description, char *ident, DPB_type 
          entry->ident = NULL;
       } else {
          entry->ident = (char *) malloc(strlen(ident) + 1);
-         if (entry->ident!=NULL) {
+         if (entry->ident != NULL) {
             strcpy(entry->ident, ident);
             _upper(entry->ident);
          }
-      }
-      /* copy dpb */
-      memcpy(&entry->dpb, dpb, sizeof(DPB_type));
 
+         entry->dpb.label = (char *) malloc(strlen(ident) + 1);
+         if (entry->dpb.label != NULL) {
+            strcpy(entry->dpb.label, entry->ident);
+         }
+      }
       /* if cylinders is 40, but used in a 80 track drive, then the drive
       head is automatically double stepped */
       /* want to use cylinders from .def because this is good for discs
@@ -202,7 +207,7 @@ void _dpb_list_add_item(DPB_list *list,char *description, char *ident, DPB_type 
       entry->next = NULL;
    }
 
-   _dpb_list_add_entry(list, entry);
+   _list_add_entry(list, entry);
 }
 
 int _get_bit_count_from_mask(unsigned long mask)
@@ -219,13 +224,53 @@ int _get_bit_count_from_mask(unsigned long mask)
 
 void formats_init() {
    formats_list.first = NULL;
-   _dpb_list_add_item(&formats_list,"data", "data", &dsk_type_data);
+   _list_add_item(&formats_list,"data", "data", &dsk_type_data);
    // fix big data format (ex: Prehistorik II)
-   _dpb_list_add_item(&formats_list,"data_b", "data_b", &dsk_type_data_big);
+   _list_add_item(&formats_list,"data_b", "data_b", &dsk_type_data_big);
 
    /* system */
-   _dpb_list_add_item(&formats_list,"system", "system", &dsk_type_system);
-   _dpb_list_add_item(&formats_list,"system_b", "system_b", &dsk_type_system_big);
+   _list_add_item(&formats_list,"system", "system", &dsk_type_system);
+   _list_add_item(&formats_list,"system_b", "system_b", &dsk_type_system_big);
+}
+
+void _list_clean_item(DPB_list_entry *entry)
+{
+   // printf("[FORMAT] item-cleaned: %s\n", entry->description);
+   if (entry->description != NULL) {
+      free(entry->description);
+      entry->description = NULL;
+   }
+
+   if (entry->ident != NULL) {
+      free(entry->ident);
+      entry->ident = NULL;
+   }
+
+   if (entry->dpb.label != NULL) {
+      free(entry->dpb.label);
+      entry->dpb.label = NULL;
+   }
+}
+
+void _list_clean_entry(DPB_list_entry *entry)
+{
+   if (entry == NULL)
+      return;
+
+   _list_clean_entry(entry->next);
+   // printf("[FORMAT] entry-cleaned: %s\n", entry->description);
+   _list_clean_item(entry);
+   free(entry->next);
+   entry->next = NULL;
+}
+
+
+void formats_clean() {
+   DPB_list_entry *cur_entry = formats_list.first;
+   // recursive call
+   _list_clean_entry(cur_entry);
+   free(cur_entry);
+   formats_list.first = cur_entry = NULL;
 }
 
 int sector_find(t_track *track, unsigned short sector_signature)
@@ -347,9 +392,9 @@ DPB_type *format_find (t_drive *drive)
          drive->sides,
          drive->tracks
       );
+      printf("[LOADER] >>> format: \"%s\" matching disk.\n", dpb_found->label);
       #endif
 
-      printf("[LOADER] >>> format: \"%s\" matching disk.\n", cur_entry->ident);
       dpb_found = &cur_entry->dpb;
 
       // calc catalogue size
@@ -370,6 +415,7 @@ DPB_type *format_find (t_drive *drive)
 }
 
 #define HEXAGON_TRACK_SIZE    0x1400
+#define HEXAGON_TRACK_SIZE_V2 0x1800
 #define HEXAGON_SECTOR_SIZE   0xA
 #define HEXAGON_SECTOR_POS    0x8
 #define HEXAGON_FILE_POS      0x1
@@ -377,32 +423,64 @@ DPB_type *format_find (t_drive *drive)
 #define HEXAGON_HEADER_POS    0x1C
 #define HEXAGON_HEADER_STR    "HEXAGON"
 
-bool format_hexagon_protection (t_drive *drive) {
-   t_track *first_track = &drive->track[0][0];
-
-   if (first_track->size != HEXAGON_TRACK_SIZE)
+bool _hexagon_protection_check (t_track *first_track, int tracks, int sectors, int header_token, int file_token) {
+   if (first_track->size != tracks)
       return false;
 
-   if (first_track->sectors != HEXAGON_SECTOR_SIZE)
+   if (first_track->sectors != sectors)
       return false;
 
    t_sector * hexagon_sector = &first_track->sector[HEXAGON_SECTOR_POS];
 
    if (memcmp(
-      hexagon_sector->data + HEXAGON_HEADER_POS,
+      hexagon_sector->data + header_token,
       HEXAGON_HEADER_STR,
       7
    ) != 0)
       return false;
 
    if (memcmp(
-      hexagon_sector->data + HEXAGON_FILE_POS,
+      hexagon_sector->data + file_token,
       HEXAGON_FILE_STR,
       4
    ) != 0)
       return false;
 
-   printf("[LOADER] >>> protection: HEXAGON/DATA_B matching disk.\n");
+   #ifdef FORMAT_DEBUG
+   printf("[LOADER] >>> protection: HEXAGON/DATA_B matching disk t(%i).\n", tracks);
+   #endif
 
    return true;
+}
+
+bool format_hexagon_protection (t_drive *drive) {
+   t_track *first_track = &drive->track[0][0];
+
+   bool result = _hexagon_protection_check(
+      first_track,
+      HEXAGON_TRACK_SIZE_V2,
+      HEXAGON_SECTOR_SIZE,
+      HEXAGON_HEADER_POS,
+      HEXAGON_FILE_POS
+   );
+
+   if (result)
+      return true;
+
+   #ifdef FORMAT_DEBUG
+   printf("%i = %i, %i = %i\n",
+      first_track->sectors, HEXAGON_SECTOR_SIZE,
+      first_track->size, HEXAGON_TRACK_SIZE
+   );
+   #endif
+
+   result = _hexagon_protection_check(
+      first_track,
+      HEXAGON_TRACK_SIZE,
+      HEXAGON_SECTOR_SIZE,
+      HEXAGON_HEADER_POS,
+      HEXAGON_FILE_POS
+   );
+
+   return result;
 }

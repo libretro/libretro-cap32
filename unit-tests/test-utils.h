@@ -35,6 +35,6 @@
  *
  ****************************************************************************************/
 
-void loader_init ();
-void loader_clean ();
-void loader_run (char * text);
+int test_dsk(char * filename_dsk, char * result_string, char * format_expected);
+
+extern uint8_t *pbGPBuffer;

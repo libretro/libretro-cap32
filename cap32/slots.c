@@ -47,8 +47,10 @@ extern t_flags1 flags1;
 extern t_disk_format disk_format[MAX_DISK_FORMAT];
 extern uint8_t *pbROM;
 
+// TODO: remove pbGPBuffer and pbTapeImage dependency
 extern uint8_t *pbTapeImage;
 extern uint8_t *pbGPBuffer;
+
 extern uint8_t *pbRAM;
 extern uint8_t *pbRAMbuffer;
 
@@ -524,6 +526,10 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
    int iRetCode;
    uint32_t dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
    uint8_t *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
+
+   #ifdef _UNITTEST_DEBUG
+   printf("[ dsk_load ] %s\n", pchFileName);
+   #endif
 
    iRetCode = 0;
    dsk_eject(drive);

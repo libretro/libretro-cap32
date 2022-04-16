@@ -1307,6 +1307,7 @@ void retro_deinit(void)
 
    retro_free(video_buffer);
    retro_free(temp_buffer);
+   loader_clean();
 
    LOGI("Retro DeInit\n");
 }
