@@ -778,8 +778,14 @@ static void retro_insert_image()
    }
    else
    {
+      int error = attach_disk((char *)dc->files[dc->index],0);
+      if (error)
+      {
+         retro_message("Error Loading DSK...");
+         LOGI("Disk (%d) Error : %s\n", dc->index+1, dc->files[dc->index]);
+         return;
+      }
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-      attach_disk((char *)dc->files[dc->index],0);
       retro_computer_cfg.slot = SLOT_DSK;
    }
 }
@@ -1151,9 +1157,14 @@ void computer_load_file() {
       dc->index = 0;
       dc->eject_state = false;
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-      attach_disk((char *)dc->files[dc->index],0);
-      computer_autoload();
-      retro_computer_cfg.slot = SLOT_DSK;
+      int error = attach_disk((char *)dc->files[dc->index],0);
+      if (error) {
+         retro_message("Error Loading DSK...");
+         LOGI("DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+      } else {
+         computer_autoload();
+         retro_computer_cfg.slot = SLOT_DSK;
+      }
    }
 
    // If it's a tape

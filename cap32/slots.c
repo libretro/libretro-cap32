@@ -566,9 +566,8 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                }
                dwSectorSize = 0x80 << *(pbPtr + 0x14); // determine sector size in bytes
                dwSectors = *(pbPtr + 0x15); // grab number of sectors
-               if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                  iRetCode = ERR_DSK_SECTORS;
-                  goto exit;
+               if (dwSectors > DSK_SECTORMAX) { // allow maximum sector64 games
+                  dwSectors = DSK_SECTORMAX; // TODO: flag or recalculate
                }
                drive->track[track][side].sectors = dwSectors; // store sector count
                drive->track[track][side].size = dwTrackSize; // store track size
@@ -624,9 +623,8 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                         goto exit;
                      }
                      dwSectors = *(pbPtr + 0x15); // number of sectors for this track
-                     if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                        iRetCode = ERR_DSK_SECTORS;
-                        goto exit;
+                     if (dwSectors > DSK_SECTORMAX) { // allow maximum sector64 games
+                        dwSectors = DSK_SECTORMAX; // TODO: flag or recalculate
                      }
                      drive->track[track][side].sectors = dwSectors; // store sector count
                      drive->track[track][side].size = dwTrackSize; // store track size
@@ -647,8 +645,9 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                         pbDataPtr += dwSectorSize;
                         pbPtr += 8;
                      }
+                     // TODO: fails with gaps
                      if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
-                        iRetCode = ERR_DSK_INVALID;
+                        iRetCode = ERR_DSK_INVALID + 400;
                         goto exit;
                      }
                   } else {
@@ -659,7 +658,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
             drive->extended = true; // extended disk - used on loader
             drive->altered = 0; // disk is as yet unmodified
          } else {
-            iRetCode = ERR_DSK_INVALID; // file could not be identified as a valid DSK
+            iRetCode = ERR_DSK_INVALID + 500; // file could not be identified as a valid DSK
          }
       }
 
@@ -671,7 +670,7 @@ exit:
 
    if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
-
+printf("\n\nLOAD? %i\n", iRetCode);
    return iRetCode;
 }
 

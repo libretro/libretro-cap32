@@ -136,16 +136,22 @@ t_file_entry database[] = {
       {-1, 34, -1, -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Nanako Descends to Hell.rmp
+      {0x6c2cdcea},
+      {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_SPACE, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 35, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Nemesis.rmp
       {0xb35ed50},
       {RETROK_RETURN, RETROK_m, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {35, 34, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      {36, 34, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Prince of Persia.rmp
       {0xf964db5d, 0xa14a1e0f, 0xb9d14a6d, 0x18d230b1},
       {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_ESCAPE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, -1, -1, 24, -1, -1, -1, -1, -1, 36, -1, -1, -1, -1},
+      {-1, -1, -1, 24, -1, -1, -1, -1, -1, 37, -1, -1, -1, -1},
       -1,
    },
    { // Robocop.rmp
@@ -157,7 +163,7 @@ t_file_entry database[] = {
    { // Shinobi.rmp
       {0x6f1e3eb0, 0xbd6c0af},
       {RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {37, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      {38, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Shinobu.rmp
@@ -169,7 +175,7 @@ t_file_entry database[] = {
    { // Thanatos copy.rmp
       {0x827e83ac, 0x8d64a322, 0xf9fce391, 0x59d6aef1},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_a, RETROK_z, RETROK_n, RETROK_m, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, -1, -1, -1, -1, -1, -1, -1, 38, -1, -1, -1, -1, -1},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 39, -1, -1, -1, -1, -1},
       -1,
    },
    { // Wonderboy.rmp
@@ -221,6 +227,7 @@ char input_names[] = {
    "Throw Piece\0"
    "Speed Up\0"
    "Music Toggle\0"
+   "Use\0"
    "Select Weapon\0"
    "Time Left\0"
    "Magic\0"
@@ -228,5 +235,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1649972160.196408
+// gen hash: 1650324943.9294157
 

@@ -1994,9 +1994,6 @@ int attach_disk(char *arv, int drive)
       if((result = dsk_load( arv, &driveA, 'A')) == 0)
       {
          sprintf(DISKA_NAME,"%s",arv);
-         #ifdef OLD_LOADER
-			result = cpc_dsk_dir(arv);
-         #endif
       }
    } else {
       if((result = dsk_load( arv, &driveB, 'B')) == 0)
