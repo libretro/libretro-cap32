@@ -647,7 +647,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                      }
                      // TODO: fails with gaps
                      if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
-                        iRetCode = ERR_DSK_INVALID + 400;
+                        iRetCode = ERR_DSK_INVALID;
                         goto exit;
                      }
                   } else {
@@ -658,7 +658,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
             drive->extended = true; // extended disk - used on loader
             drive->altered = 0; // disk is as yet unmodified
          } else {
-            iRetCode = ERR_DSK_INVALID + 500; // file could not be identified as a valid DSK
+            iRetCode = ERR_DSK_INVALID; // file could not be identified as a valid DSK
          }
       }
 
@@ -670,7 +670,7 @@ exit:
 
    if (iRetCode != 0) // on error, 'eject' disk from drive
       dsk_eject(drive);
-printf("\n\nLOAD? %i\n", iRetCode);
+
    return iRetCode;
 }
 
