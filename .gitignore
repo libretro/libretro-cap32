@@ -22,4 +22,6 @@
 
 # tests files
 tests/
+unit-tests/db-test
+unit-tests/entry-test
 unit-tests/autorun

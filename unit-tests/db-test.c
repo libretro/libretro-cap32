@@ -1,5 +1,5 @@
 /****************************************************************************
- *  Caprice32 libretro port
+ *  Caprice32 libretro unit-tests
  *
  *   David Colmenero - D_Skywalk (2019-2021)
  *
@@ -34,9 +34,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
-#include "libretro/retro_utils.h"
 
-int test_dsk(char * filename_dsk, char * result_string, char * format_expected);
-int test_dsk_hashed(char * file_path, char * result_string, uint32_t file_hash);
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-extern uint8_t *pbGPBuffer;
+#include "../cmocka/include/cmocka.h"
+#include "libretro/dsk/loader.h"
+#include "test-utils.h"
+#include "db-entries.h"
+
+char * basedir = NULL;
+char rompath[RETRO_PATH_MAX];
+game_cfg_t game_configuration;
+
+static void cleancpcdb_tests(void **state) {
+   (void) state; /* unused */
+
+   uint32_t db_size = sizeof(cleancpcdb) / sizeof(t_test_entry);
+   for (int n = 0; n < db_size; n++)
+   {
+      // clean config
+      memset(&game_configuration, 0, sizeof(game_cfg_t));
+
+      // prepare entry
+      t_test_entry * entry = &cleancpcdb[n];
+
+      // prepare rom path
+      path_join(rompath, basedir, entry->filepath);
+
+      // run test
+      test_dsk_hashed(rompath, entry->autorun, entry->hash);
+   }
+}
+
+int main(int argc, char* argv[]) {
+   if (argc != 2) {
+      printf("usage:\n\t%s <path-to-roms>\n", argv[0]);
+      exit(1);
+   }
+
+   basedir = argv[1];
+
+   pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   loader_init();
+
+   const struct CMUnitTest tests[] = {
+      cmocka_unit_test(cleancpcdb_tests),
+   };
+
+   cmocka_run_group_tests(tests, NULL, NULL);
+   free(pbGPBuffer);
+   loader_clean();
+}

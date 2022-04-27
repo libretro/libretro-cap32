@@ -52,6 +52,12 @@ t_file_entry database[] = {
       {7, 8, -1, 9, -1, -1, 10, 11, 12, 13, -1, -1, -1, -1},
       0,
    },
+   { // Aventura Original.rmp
+      {0xb0c8cc9e},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      0,
+   },
    { // Batman (1986).rmp
       {0x814d462},
       {RETROK_KP1, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -235,5 +241,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1650324943.9294157
+// gen hash: 1651091446.9969506
 

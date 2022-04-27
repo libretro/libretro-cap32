@@ -140,7 +140,7 @@ void _loader_run (char * key_buffer, DPB_type *dpb, t_drive *current_drive)
 
    if (dpb == NULL)
    {
-      printf("[LOADER] FORMAT NOT FOUND.\n");
+      printf("[LOADER ERR] FORMAT NOT FOUND.\n");
       strcpy(key_buffer, "CAT");
       return;
    }

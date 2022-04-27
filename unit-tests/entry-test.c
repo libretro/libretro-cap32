@@ -1,7 +1,7 @@
 /****************************************************************************
- *  Caprice32 libretro port
+ *  Caprice32 libretro unit-tests for clean-cpc-db
  *
- *   David Colmenero - D_Skywalk (2019-2021)
+ *   David Colmenero - D_Skywalk (2019-2022)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -34,9 +34,60 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
-#include "libretro/retro_utils.h"
 
-int test_dsk(char * filename_dsk, char * result_string, char * format_expected);
-int test_dsk_hashed(char * file_path, char * result_string, uint32_t file_hash);
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "cap32/slots.h"
+#include "libretro-core.h"
+#include "libretro/dsk/formats.h"
+#include "libretro/dsk/loader.h"
 
 extern uint8_t *pbGPBuffer;
+
+void test_loader(t_drive * drive, char * loader_buffer)
+{
+   DPB_type *dpb = NULL;
+   dpb = format_find(drive);
+   _loader_run(loader_buffer, dpb, drive);
+}
+
+int test_dsk(char * filename_dsk)
+{
+   t_drive drive;
+   char loader_buffer[LOADER_MAX_SIZE];
+
+   memset(&drive, 0, sizeof(t_drive)); // clear disk
+   memset(pbGPBuffer, 0, 128 * 1024 * sizeof(uint8_t)); // clear cache
+
+   int result = dsk_load(filename_dsk, &drive, 'A');
+   if (result != 0) {
+      return result;
+   }
+
+   test_loader(&drive, loader_buffer);
+   printf("AUTORUN-RESULT: [%s]\n", loader_buffer);
+   return result;
+}
+
+int main(int argc, char* argv[]) {
+   int result = 0;
+   if (argc != 2) {
+      printf("usage:\n\t%s <DSK>\n", argv[0]);
+   }
+
+   pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   loader_init();
+
+   if((result = test_dsk(argv[1])) != 0) {
+      printf("AUTORUN-ERROR: %i - '%s'\n", result, argv[1]);
+   }
+
+   free(pbGPBuffer);
+   loader_clean();
+
+   exit(result);
+}

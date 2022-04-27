@@ -83,6 +83,9 @@ bool get_database(const uint32_t hash)
          if (database[n].hash_list[i] == hash)
          {
             database_entry(&database[n]);
+            #ifdef _UNITTEST_DEBUG
+            printf("[  ENTRY!  ] --- crc: 0x%x cmd: %i\n", hash, game_configuration.has_command);
+            #endif
             return true;
          }
       }
