@@ -1,0 +1,10 @@
+# Fix bad original catalogue
+entry_hash_1 = 0x504d8d95 # (FR) (1987) [Original]
+
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[QUOTE]COBRA."

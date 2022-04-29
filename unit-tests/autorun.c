@@ -51,20 +51,20 @@ static void cpm_tests_success(void **state) {
    test_dsk("tests/cpm/Deadline (1982)(Infocom)[CPM].dsk", "|CPM", "SYSTEM");
    test_dsk("tests/cpm/Enchanter (1984)(Infocom)[CPM].dsk", "|CPM", "SYSTEM");
    test_dsk("tests/heroquest/Hero Quest (UK) (Face A) (128K) (2022) (CPM) (Hack).dsk", "|CPM", "SYSTEM");
+   test_dsk("tests/cpm/Bestial Warrior (1989)(Dinamic Software)(es)[lightgun].dsk", "|CPM", "SYSTEM");
 
-   // fails
-   // tests/cpm/Bestial Warrior (1989)(Dinamic Software)(es)[lightgun].dsk
-   // test_dsk("tests/cpm/Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side A)[CPM] .dsk", "|CPM", "SYSTEM");
+   // fails CPM BOOT
+   //test_dsk("tests/cpm/Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side A)[CPM] .dsk", "|CPM", "SYSTEM");
 
 }
 
 static void hexagon_tests_success(void **state) {
    (void) state; /* unused */
 
-   test_dsk("tests/hexagon/cd.dsk", "RUN\"DISK", "DATA_B");
-   test_dsk("tests/hexagon/gng.dsk", "RUN\"DISK", "DATA_B");
-   test_dsk("tests/hexagon/gauntlet.dsk", "RUN\"DISK.", "DATA_B");
-   test_dsk("tests/hexagon/Bigfoot (1988)(Codemasters).dsk", "RUN\"DISK", "DATA_B");
+   test_dsk("tests/hexagon/cd.dsk", "RUN\"DISK.", "DATA_B");
+   test_dsk("tests/hexagon/gng.dsk", "RUN\"DISK.", "D10");
+   test_dsk("tests/hexagon/gauntlet.dsk", "RUN\"DISK.", "D10");
+   test_dsk("tests/hexagon/Bigfoot (1988)(Codemasters).dsk", "RUN\"DISK.", "DATA_B");
 }
 
 static void speedlock_tests_success(void **state) {
@@ -73,7 +73,7 @@ static void speedlock_tests_success(void **state) {
    test_dsk("tests/speedlock-v1990/Back_To_The_Future_II__Side_A.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/speedlock-v1990/Back_to_the_Future-Speedlock.dsk", "RUN\"DISC.BIN", "DATA_B");
    test_dsk("tests/speedlock-v1990/Edd_The_Duck__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA");
-   test_dsk("tests/speedlock-v1990/Saint_Dragon__Side_A.dsk", "RUN\"DISC.BIN", "DATA_B");
+   test_dsk("tests/speedlock-v1990/Saint_Dragon__Side_A.dsk", "RUN\"DISC.BIN", "D10");
    test_dsk("tests/speedlock-v1990/Total_Recall__(UK_Retail)__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA_B");
 }
 
@@ -88,9 +88,9 @@ static void basic_tests_success(void **state) {
 
    test_dsk("tests/Cauldron_2__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/Abadia.dsk", "|CPM", "SYSTEM");
-   test_dsk("tests/Bonanza_Bros - bad scroll.dsk", "RUN\"DISK", "DATA_B");
+   test_dsk("tests/Bonanza_Bros - bad scroll.dsk", "RUN\"DISK.", "DATA_B");
    test_dsk("tests/Cauldron_2__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA");
-   test_dsk("tests/Prince_of_Persia__(Release_DROSOFT)__ENGLISH.dsk", "RUN\"PRINCE.BIN", "SYSTEM");
+   test_dsk("tests/Prince_of_Persia__(Release_DROSOFT)__ENGLISH.dsk", "RUN\"PRINCE.BIN", "D10");
    test_dsk("tests/Shovel Adventure JGN Edition.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/The_Shadows_of_Sergoth__ENGLISH-FRENCH-SPANISH__Side_A.dsk", "RUN\"DISC.BAS", "DATA");
 }
@@ -104,8 +104,7 @@ int main(void) {
       cmocka_unit_test(cpm_tests_success),
       cmocka_unit_test(speedlock_tests_success),
       cmocka_unit_test(hexagon_tests_success),
-      // wip
-      // cmocka_unit_test(hidden_tests_success),
+      cmocka_unit_test(hidden_tests_success),
    };
 
    cmocka_run_group_tests(tests, NULL, NULL);

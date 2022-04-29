@@ -6,17 +6,18 @@
 
 #include "cap32/slots.h"
 #include "libretro-core.h"
-#include "libretro/dsk/formats.h"
+#include "libretro/dsk/format.h"
 #include "libretro/db/database.h"
 #include "test-utils.h"
 
 void test_loader(t_drive * drive, char * format_expected, char * loader_buffer)
 {
-   DPB_type *dpb = NULL;
-   dpb = format_find(drive);
-   _loader_run(loader_buffer, dpb, drive);
+   retro_format_info_t* test_format = NULL;
+   test_format = format_get(drive);
+
+   _loader_run(loader_buffer, test_format, drive);
    if (strlen(format_expected))
-      assert_string_equal(dpb->label, format_expected);
+      assert_string_equal(test_format->label, format_expected);
 }
 
 int load_dsk(t_drive * drive, char * filename_dsk)

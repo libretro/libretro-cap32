@@ -19,7 +19,7 @@ entry_hash_1 = "0xaa05ed4a" # (S) (128K) (1988) (CPM) [Original]
 entry_hash_2 = "0xd37cf8e7"
 
 # game load command
-# special commands: 
+# special commands:
 #    [enter] => \n
 #    [quote] => "
 #    [wait] => wait 5 seconds

@@ -82,6 +82,12 @@ t_file_entry database[] = {
       {22, 23, 24, -1, -1, -1, -1, -1, 25, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Cobra - Loriciels.rmp
+      {0x504d8d95},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      1,
+   },
    { // Donkey Kong.rmp
       {0x9b7c1f2},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_1, RETROK_q, RETROK_a, RETROK_LEFTBRACKET, RETROK_RIGHTBRACKET, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
@@ -116,7 +122,7 @@ t_file_entry database[] = {
       {0x36d943ea, 0xe7df0e60, 0x3e88f3f7},
       {RETROK_t, DB_KEEP, RETROK_2, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_3, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {28, -1, 29, 20, -1, -1, -1, -1, -1, 30, -1, -1, -1, -1},
-      1,
+      2,
    },
    { // Klax.rmp
       {0x96b53a41},
@@ -194,6 +200,7 @@ t_file_entry database[] = {
 
 char commands[] = {
    "|CPM\0"
+   "RUN\"COBRA.\0"
    "RUN\"ELITE\0"
 };
 
@@ -241,5 +248,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1651091446.9969506
+// gen hash: 1651220468.218838
 
