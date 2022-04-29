@@ -1,0 +1,15 @@
+input_player1_key_right = "101"
+input_player1_key_left = "119"
+
+input_player1_key_a = "113"
+input_player1_key_a_name = "Jump"
+
+input_player1_key_y = "109"
+input_player1_key_y_name = "Music Toggle"
+
+input_player1_key_start = "49"
+input_player1_key_select = "50"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x7c096b33 # (UK) (2020)

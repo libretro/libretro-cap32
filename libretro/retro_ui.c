@@ -73,7 +73,7 @@ static mu_Context *ctx;
 #define INTERNAL_UI_LED       16
 
 // UI STRING POSITION ON KEYBOARD
-#define UI_STRING_X 70 * EMULATION_SCALE
+#define UI_STRING_X 75 * EMULATION_SCALE
 #define UI_STRING_Y 2
 
 void _render_window()
@@ -228,6 +228,7 @@ void retro_ui_update_text()
    switch (retro_computer_cfg.model)
    {
       case 0: strncpy(model, "464", sizeof(model)); break;
+      case 1: strncpy(model, "664", sizeof(model)); break;
       case 3: strncpy(model, "6128+", sizeof(model)); break;
       default: strncpy(model, "6128", sizeof(model)); break;
    }
@@ -255,6 +256,31 @@ void retro_ui_update_text()
       ui_string,
       RGB2COLOR(0x63, 0x63, 0x63)
    );
+}
+
+void retro_ui_draw_db(void)
+{
+   // darker DSK if no btn or cmd is found
+   if (game_configuration.has_btn || game_configuration.has_command)
+      return;
+
+   draw_rect(
+      keyboard_surface,
+      8,
+      UI_STRING_Y + 4,
+      5 * EMULATION_SCALE,
+      3,
+      RGB2COLOR(0x3f, 0x3f, 0x3f)
+      );
+
+   draw_rect(
+      keyboard_surface,
+      10,
+      UI_STRING_Y + 1,
+      3 * EMULATION_SCALE,
+      1,
+      RGB2COLOR(0xcc, 0xcc, 0xcc)
+      );
 }
 
 void retro_ui_init(void)

@@ -29,6 +29,7 @@
 #include "cart.h"
 #include "z80.h"
 #include "errors.h"
+#include "retro_utils.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -46,8 +47,10 @@ extern t_flags1 flags1;
 extern t_disk_format disk_format[MAX_DISK_FORMAT];
 extern uint8_t *pbROM;
 
+// TODO: remove pbGPBuffer and pbTapeImage dependency
 extern uint8_t *pbTapeImage;
 extern uint8_t *pbGPBuffer;
+
 extern uint8_t *pbRAM;
 extern uint8_t *pbRAMbuffer;
 
@@ -56,22 +59,6 @@ extern FILE *pfileObject;
 uint8_t *pbTapeImage = NULL;
 uint8_t *pbTapeImageEnd = NULL;
 uint8_t *pbSnaImage = NULL;
-
-
-/**
- * file utils
- */
-int file_size (int file_num)
-{
-   struct stat s;
-
-   if (!fstat(file_num, &s)) {
-      return s.st_size;
-   } else {
-      return 0;
-   }
-}
-
 
 /**
  * SNA handlers
@@ -203,7 +190,7 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if (sh.version > 1) { // does the snapshot have version 2 data?
       dwModel = sh.cpc_model; // determine the model it was saved for
       if (dwModel != CPC.model) { // different from what we're currently running?
-         if (dwModel > 3) { // not one of the known models?
+         if (dwModel > CPC_MODEL_MAX) { // not one of the known models?
             emulator_reset(false);
             return ERR_SNA_CPC_TYPE;
          }
@@ -540,6 +527,10 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
    uint32_t dwTrackSize, track, side, sector, dwSectorSize, dwSectors;
    uint8_t *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
 
+   #ifdef _UNITTEST_DEBUG
+   printf("[ dsk_load ] %s\n", pchFileName);
+   #endif
+
    iRetCode = 0;
    dsk_eject(drive);
    if ((pfileObject = fopen(pchFileName, "rb")) != NULL)
@@ -575,9 +566,8 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                }
                dwSectorSize = 0x80 << *(pbPtr + 0x14); // determine sector size in bytes
                dwSectors = *(pbPtr + 0x15); // grab number of sectors
-               if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                  iRetCode = ERR_DSK_SECTORS;
-                  goto exit;
+               if (dwSectors > DSK_SECTORMAX) { // allow maximum sector64 games
+                  dwSectors = DSK_SECTORMAX; // TODO: flag or recalculate
                }
                drive->track[track][side].sectors = dwSectors; // store sector count
                drive->track[track][side].size = dwTrackSize; // store track size
@@ -633,9 +623,8 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                         goto exit;
                      }
                      dwSectors = *(pbPtr + 0x15); // number of sectors for this track
-                     if (dwSectors > DSK_SECTORMAX) { // abort if sector count greater than maximum
-                        iRetCode = ERR_DSK_SECTORS;
-                        goto exit;
+                     if (dwSectors > DSK_SECTORMAX) { // allow maximum sector64 games
+                        dwSectors = DSK_SECTORMAX; // TODO: flag or recalculate
                      }
                      drive->track[track][side].sectors = dwSectors; // store sector count
                      drive->track[track][side].size = dwTrackSize; // store track size
@@ -656,6 +645,7 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                         pbDataPtr += dwSectorSize;
                         pbPtr += 8;
                      }
+                     // TODO: fails with gaps
                      if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
                         iRetCode = ERR_DSK_INVALID;
                         goto exit;

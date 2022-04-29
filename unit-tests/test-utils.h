@@ -1,8 +1,7 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright David Colmenero - D_Skywalk (2019-2021)
- *  Copyright Daniel De Matteis (2012-2021)
+ *   David Colmenero - D_Skywalk (2019-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -35,29 +34,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
+#include "libretro/retro_utils.h"
 
-#ifndef RETRO_UI_H__
-#define RETRO_UI_H__
+int test_dsk(char * filename_dsk, char * result_string, char * format_expected);
+int test_dsk_hashed(char * file_path, char * result_string, uint32_t file_hash);
 
-typedef enum
-{
-   UI_DISABLED  = 0,
-   UI_KEYBOARD  = 1,
-   UI_MENU      = 2,
-   UI_STATUSBAR = 3,
-   UI_LED       = 4,
-} retro_commands_ui_t;
-
-void retro_ui_init(void);
-void retro_ui_free(void);
-
-void retro_ui_set_status(retro_commands_ui_t cmd, bool value);
-void retro_ui_toggle_status(retro_commands_ui_t cmd);
-void retro_ui_process();
-
-void retro_show_statusbar();
-void retro_ui_update_text();
-void retro_ui_draw_db();
-void retro_ui_set_led(bool value);
-
-#endif
+extern uint8_t *pbGPBuffer;

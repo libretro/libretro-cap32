@@ -1,0 +1,7 @@
+input_player1_key_b = "257"
+input_player1_key_b_name = "Carry"
+input_player1_key_x = "32"
+input_player1_key_x_name = "Carry and Jump"
+input_player1_key_start = "13"
+
+entry_hash_1 = 0x814d462 # (UK) (1986) [Original]

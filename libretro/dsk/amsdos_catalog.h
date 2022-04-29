@@ -1,8 +1,8 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright David Colmenero - D_Skywalk (2019-2021)
- *  Copyright Daniel De Matteis (2012-2021)
+ *  format.h is inspired on caprice-forever by Frédéric Coste (Fredouille)
+ *   David Colmenero - D_Skywalk (2019-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -36,28 +36,32 @@
  *
  ****************************************************************************************/
 
-#ifndef RETRO_UI_H__
-#define RETRO_UI_H__
+#include "../../cap32/cap32.h"
 
-typedef enum
+#define CAT_MAX_ENTRY 64
+#define CAT_NAME_SIZE 20
+
+typedef struct
 {
-   UI_DISABLED  = 0,
-   UI_KEYBOARD  = 1,
-   UI_MENU      = 2,
-   UI_STATUSBAR = 3,
-   UI_LED       = 4,
-} retro_commands_ui_t;
+   char filename[CAT_NAME_SIZE];
+   bool is_hidden;
+   bool is_readonly;
+} amsdos_entry_t;
 
-void retro_ui_init(void);
-void retro_ui_free(void);
+typedef struct {
+   bool has_cat_art;
+   bool probe_cpm;
+   // normal entries
+   int last_entry;
+   amsdos_entry_t dirent[CAT_MAX_ENTRY];
+   int entries_listed_found;
+   int entries_hidden_found;
+   int first_listed_dirent;
+   int first_hidden_dirent;
+   int track_hidden_id;
+   int track_listed_id;
+} catalogue_info_t;
 
-void retro_ui_set_status(retro_commands_ui_t cmd, bool value);
-void retro_ui_toggle_status(retro_commands_ui_t cmd);
-void retro_ui_process();
+extern catalogue_info_t catalogue;
 
-void retro_show_statusbar();
-void retro_ui_update_text();
-void retro_ui_draw_db();
-void retro_ui_set_led(bool value);
-
-#endif
+int catalog_probe(t_drive *drive, unsigned char user);

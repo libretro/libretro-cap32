@@ -1,8 +1,8 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  code adapted from libcpccat, pituka, wiituka ported to retroarch by
- *   David Colmenero - D_Skywalk (2019-2021)
+ *  format.h is inspired on caprice-forever by Frédéric Coste (Fredouille)
+ *    and adapted to libretro by David Colmenero - D_Skywalk (2019-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -36,26 +36,33 @@
  *
  ****************************************************************************************/
 
-#define CAT_MAX_ENTRY 64
-#define CAT_NAME_SIZE 20
-#define CAT_ENTRIES 16
+#include "../../cap32/cap32.h"
 
-typedef union {
-      unsigned char data[32];
-      struct {
-         unsigned char user;
-         union {
-            char raw[8+3];
-            struct {
-               char raw_name[8]; // raw filename
-               char raw_ext[3];
-            };
-         } file;
-         unsigned char extent;
-         unsigned char unused[2];
-         unsigned char rec;
-         unsigned char gap[16];
-      };
-} DSKEntry;
+// formats info: http://www.cpcwiki.eu/index.php/ParaDOS
 
-int archive_init(unsigned short catalogue_size, unsigned short track_offset, t_drive *drive);
+#define FORMAT_ID_DATA   0xC0
+#define FORMAT_ID_SYSTEM 0x40
+#define FORMAT_ID_IBM    0x00
+
+typedef enum {
+   FORMAT_TYPE_UNKNOWN       = 0,
+   FORMAT_TYPE_AMSDOS_DATA   = 1,
+   FORMAT_TYPE_AMSDOS_SYSTEM = 2,
+   FORMAT_TYPE_AMSDOS_IBM    = 3,
+   FORMAT_TYPE_ROMDOS_D10    = 4,
+   FORMAT_TYPE_ROMDOS_D01    = 5,
+} retro_format_type_t;
+
+typedef struct {
+   unsigned short sectors; // max number of sectors per track (8, >9)
+   unsigned short tracks; // max number of tracks per side (>40, 80)
+   unsigned short sides; // max number of sides (1/2)
+   unsigned char sector_size; // Bytes Per Sector [SECTOR_CHRN_N]
+   unsigned char sector_id; // Sector ID Mask [SECTOR_CHRN_R]
+   unsigned char catalogue_sector; // sector catalogue expected
+   retro_format_type_t type; // format ID
+   char label[10]; // format string
+} retro_format_info_t;
+
+retro_format_info_t* format_get (t_drive *drive);
+bool format_probe_hexagon (t_drive *drive);

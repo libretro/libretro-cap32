@@ -1,0 +1,8 @@
+entry_hash_1 = b0c8cc9e # (S) (1989) (CPM) [Original]
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "|CPM"

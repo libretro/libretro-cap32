@@ -1,0 +1,39 @@
+# ignored
+input_libretro_device_p1 = "259"
+input_libretro_device_p2 = "1"
+input_player1_analog_dpad_mode = "1"
+input_player2_analog_dpad_mode = "1"
+input_remap_port_p1 = "0"
+input_remap_port_p2 = "1"
+
+# start mapping
+input_player1_key_a = "97"
+input_player1_key_a_name = "Move forward"
+input_player1_key_b = "122"
+input_player1_key_b_name = "Send adso Forward"
+input_player1_key_left = "107"
+input_player1_key_left_name = "Turn Counterclockwise"
+input_player1_key_right = "108"
+input_player1_key_right_name = "Turn Clockwise"
+input_player1_key_start = "32"
+input_player1_key_start_name = "Start / Drop Object"
+input_player1_key_x = "110"
+input_player1_key_x_name = "Answer No"
+input_player1_key_y = "121"
+input_player1_key_y_name = "answer yes"
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "|CPM"
+
+# game hashes
+entry_hash_1 = "0xbf188ce3" # (UK) (128K) (2017) (CPM)
+entry_hash_2 = "0x6e5f98ff" # (UK) (128K) (2017) (cpcrulez)
+
+# map type (clean/keep)
+# keep: use joystick as base and add/changes inputs given above
+# clean: clear all default binds and only uses the given above
+entry_map_type = "clean"

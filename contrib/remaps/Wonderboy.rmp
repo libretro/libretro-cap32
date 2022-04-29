@@ -1,0 +1,9 @@
+input_player1_key_y = "8"
+input_player1_key_y_name = "Music Toggle"
+input_player1_key_up = "$DB_CLEAN"
+input_player1_key_start = "49"
+input_player1_key_select = "27"
+input_player1_key_b = "$204"
+input_player1_key_a = "$200"
+
+entry_hash_1 = 0xb1026135 # (UK) (1987) (CPM) [Original]

@@ -1,0 +1,17 @@
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_right = "275"
+input_player1_key_left = "276"
+input_player1_key_b = "105"
+input_player1_key_b_name = "Fire Left"
+input_player1_key_a = "111"
+input_player1_key_a_name = "Fire Right"
+input_player1_key_y = "13"
+input_player1_key_y_name = "Bomb"
+input_player1_key_select = "112"
+input_player1_key_select_name = "Pause"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xd851fde0 # (UK) (128K) (2 faces) (2016) [CPC CPC+] (site download)
+entry_hash_2 = 0x5c3cfc2c # (UK) (128K) (2 faces) (2016) [CPC CPC+] (site download)

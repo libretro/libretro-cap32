@@ -67,6 +67,12 @@
 #define CPC_MONITOR_GREEN 1
 #define CPC_MONITOR_WHITE 2
 
+#define CPC_MODEL_464 0
+#define CPC_MODEL_664 1
+#define CPC_MODEL_6128 2
+#define CPC_MODEL_PLUS 3
+#define CPC_MODEL_MAX 3
+
 #define ICN_DISK_WIDTH 14
 #define ICN_DISK_HEIGHT 16
 #define ICN_TAPE_WIDTH 18
@@ -441,8 +447,8 @@ typedef struct {
       struct {
          unsigned char cylinder;
          unsigned char side;
-         unsigned char sector;
-         unsigned char bps;
+         unsigned char sector_info;
+         unsigned char sector_size;
       };
    } CHRN; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions

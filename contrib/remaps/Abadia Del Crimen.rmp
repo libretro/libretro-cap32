@@ -1,0 +1,31 @@
+# start input mapping
+input_player1_key_a = "97"
+input_player1_key_a_name = "Avanzar"
+input_player1_key_b = "122"
+input_player1_key_b_name = "Mover Adso"
+input_player1_key_left = "107"
+input_player1_key_left_name = "Girar Izquierda"
+input_player1_key_right = "108"
+input_player1_key_right_name = "Girar Derecha"
+input_player1_key_start = "32"
+input_player1_key_start_name = "Start / Dejar Objeto"
+input_player1_key_x = "110"
+input_player1_key_x_name = "Decir No"
+input_player1_key_y = "115"
+input_player1_key_y_name = "Decir Si"
+
+# game hashes
+entry_hash_1 = "0xaa05ed4a" # (S) (128K) (1988) (CPM) [Original]
+entry_hash_2 = "0xd37cf8e7" # (S) (128K) (1988) (CPM) (cpcrulez)
+
+# game load command
+# special commands:
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "|CPM"
+
+# map type (clean/keep)
+# keep: use joystick as base and add/changes inputs given above
+# clean: clear all default binds and only uses the given above
+entry_map_type = "clean"

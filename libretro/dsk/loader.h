@@ -35,7 +35,4 @@
  *
  ****************************************************************************************/
 
-#define LOADER_MAX_SIZE 256
-
-void loader_init ();
 void loader_run (char * text);

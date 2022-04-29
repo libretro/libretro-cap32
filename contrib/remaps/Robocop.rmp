@@ -1,0 +1,13 @@
+input_player1_key_b = "32"
+input_player1_key_y = "32"
+input_player1_key_start = "49"
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "107"
+input_player1_key_right = "108"
+input_player1_key_a = "120"
+input_player1_key_x = "32"
+
+entry_hash_1 = b6017864 # (UK) (1989) (Spain retail version) [Original]
+entry_hash_2 = da1142c4 # (UK) (1989) (v2) (French retail version) (CPM) [Original]
+entry_hash_3 = f70eee66 # (UK) (1989) (French retail version) (CPM) [Original] (Weak Sectors)

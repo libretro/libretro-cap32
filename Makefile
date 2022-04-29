@@ -373,6 +373,10 @@ ifeq ($(LOG_PERFORMANCE), 1)
 	CXXFLAGS += -DLOG_PERFORMANCE
 endif
 
+ifeq ($(DEBUG_TEST), 1)
+CFLAGS += -D_UNITTEST_DEBUG
+endif
+
 GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
     CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
@@ -396,6 +400,9 @@ include Makefile.common
 
 HEADERS += $(ROMS:.rom=.h) $(SNAPS:.szx=.h)
 OBJS += $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
+
+# List of dependencies defined from list of object files
+DEPS := $(OBJS:.o=.d)
 
 INCDIRS := $(EXTRA_INCLUDES) $(INCFLAGS)
 
@@ -439,6 +446,20 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(HEADERS)
 	rm -f $(TARGET)
+
+db:
+	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
+	rm -f $(CORE_DIR)/libretro/db/*.o
+
+# unit test lib
+$(CORE_DIR)/unit-tests/cmocka.o:
+	@$(CC) -c -o $(CORE_DIR)/unit-tests/cmocka.o $< $(CFLAGS) -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+
+# to get more info: make clean && make unit-test DEBUG_TEST=1
+unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
+	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/cmocka/include
+	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+	$(CORE_DIR)/unit-tests/autorun
 
 .PHONY: $(TARGET) clean clean-objs
 endif

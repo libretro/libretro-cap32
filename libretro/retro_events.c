@@ -96,8 +96,8 @@ static int wait_computer = 1;
 int event_call = EV_JOY;
 void ev_toggle_call();
 
-const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
-   { // JOYSTICK CFG
+t_button_cfg btnPAD[MAX_PADCFG] = {
+   {{ // JOYSTICK CFG
    CPC_KEY_JOY_FIRE2,   // B
    CPC_KEY_NULL,        // Y
    CPC_KEY_NULL,        // SELECT
@@ -113,8 +113,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_INTRO,       // R
    CPC_KEY_F1,          // L2
    CPC_KEY_F2,          // R2
-   },
-   { // KEYBOARD CFG ( QAOP )
+   }},
+   {{ // KEYBOARD CFG ( QAOP )
    CPC_KEY_B,           // B
    CPC_KEY_Y,           // Y
    CPC_KEY_S,           // SELECT
@@ -130,8 +130,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_INTRO,       // R
    CPC_KEY_F1,          // L2
    CPC_KEY_F2,          // R2
-   },
-   { // KEYBOARD CFG ( INCENTIVE )
+   }},
+   {{ // KEYBOARD CFG ( INCENTIVE )
    CPC_KEY_SPACE,       // B
    CPC_KEY_W,           // Y
    CPC_KEY_S,           // SELECT
@@ -147,8 +147,8 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
-   },
-   { // JOYSTICK PLAYER 2 CFG
+   }},
+   {{ // JOYSTICK PLAYER 2 CFG
    CPC_KEY_JOY2_FIRE2,  // B
    CPC_KEY_SPACE,       // Y
    CPC_KEY_S,           // SELECT
@@ -164,7 +164,7 @@ const uint8_t btnPAD[MAX_PADCFG][MAX_BUTTONS] = {
    CPC_KEY_NULL,        // R
    CPC_KEY_NULL,        // L2
    CPC_KEY_NULL,        // R2
-   },
+   }},
 };
 
 // ---------------------------------------------
@@ -179,7 +179,7 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
    { RETRO_DEVICE_ID_JOYPAD_A,
       { EVENT_WRITE, "RUN\"DISK\nRUN\"DISC\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_X,
-      { EVENT_WRITE, TAPE_LOADER_STR } },
+      { EVENT_WRITE, LOADER_TAPE_STR } },
    { RETRO_DEVICE_ID_JOYPAD_START,
       { EVENT_VKEYB, "VKEYB\n", NULL } },
    { RETRO_DEVICE_ID_JOYPAD_UP,
@@ -212,7 +212,7 @@ void ev_release_key(uint8_t cpc_key) {
  * get_cpckey:
  * from RETROK_x converts to CPC_KEY_x
  **/
-static uint8_t get_cpckey (unsigned int keysym)
+uint8_t get_cpckey (unsigned int keysym)
 {
    if (keysym >= MAX_KEYSYMS) {
       return CPC_KEY_NULL;
@@ -342,7 +342,7 @@ static void _process_joy(int playerID){
    if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
       return;
 
-   uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]];
+   uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]].buttons;
 
    int i;
    for (i = 0; i < MAX_BUTTONS; i++) {
@@ -372,7 +372,7 @@ bool ev_joysticks()
    // exit on controllers config to RETRO_DEVICE_AMSTRAD_KEYBOARD
    // but allows legacy keyboard-remap + joystick-simple combo, issue #63
    if(amstrad_devices[0] == RETRO_DEVICE_AMSTRAD_KEYBOARD &&
-      retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_JOYSTICK)
+      retro_computer_cfg.padcfg[ID_PLAYER1] != PADCFG_AUTO)
          return false;
 
    if(!ev_events())
@@ -507,6 +507,26 @@ static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_
 }
 
 /**
+ * init_joystick_table:
+ * prepare joystick table using internal JOY enums
+ * allows remaps using joy events
+ **/
+void init_joystick_table() {
+   keyboard_translation[JOY_PORT1_UP] = CPC_KEY_JOY_UP;
+   keyboard_translation[JOY_PORT1_DOWN] = CPC_KEY_JOY_DOWN;
+   keyboard_translation[JOY_PORT1_RIGHT] = CPC_KEY_JOY_RIGHT;
+   keyboard_translation[JOY_PORT1_LEFT] = CPC_KEY_JOY_LEFT;
+   keyboard_translation[JOY_PORT1_FIRE1] = CPC_KEY_JOY_FIRE1;
+   keyboard_translation[JOY_PORT1_FIRE2] = CPC_KEY_JOY_FIRE2;
+   keyboard_translation[JOY_PORT2_UP] = CPC_KEY_JOY2_UP;
+   keyboard_translation[JOY_PORT2_DOWN] = CPC_KEY_JOY2_DOWN;
+   keyboard_translation[JOY_PORT2_RIGHT] = CPC_KEY_JOY2_RIGHT;
+   keyboard_translation[JOY_PORT2_LEFT] = CPC_KEY_JOY2_LEFT;
+   keyboard_translation[JOY_PORT2_FIRE1] = CPC_KEY_JOY2_FIRE1;
+   keyboard_translation[JOY_PORT2_FIRE2] = CPC_KEY_JOY2_FIRE2;
+}
+
+/**
  * init_keyboard_table:
  * prepare keyboard table using RETROK_x enums
  * assignments F1/F2/... are emulated only on KEYPAD, add to Fx?
@@ -514,84 +534,84 @@ static void keyboard_cb(bool down, unsigned keycode, uint32_t character, uint16_
 void init_keyboard_table() {
    memset(keyboard_translation, CPC_KEY_NULL, MAX_KEYSYMS );
 
-	keyboard_translation[RETROK_0] = CPC_KEY_ZERO;
-	keyboard_translation[RETROK_1] = CPC_KEY_1;
-	keyboard_translation[RETROK_2] = CPC_KEY_2;
-	keyboard_translation[RETROK_3] = CPC_KEY_3;
-	keyboard_translation[RETROK_4] = CPC_KEY_4;
-	keyboard_translation[RETROK_5] = CPC_KEY_5;
-	keyboard_translation[RETROK_6] = CPC_KEY_6;
-	keyboard_translation[RETROK_7] = CPC_KEY_7;
-	keyboard_translation[RETROK_8] = CPC_KEY_8;
-	keyboard_translation[RETROK_9] = CPC_KEY_9;
-	keyboard_translation[RETROK_a] = CPC_KEY_A;
-	keyboard_translation[RETROK_b] = CPC_KEY_B;
-	keyboard_translation[RETROK_c] = CPC_KEY_C;
-	keyboard_translation[RETROK_d] = CPC_KEY_D;
-	keyboard_translation[RETROK_e] = CPC_KEY_E;
-	keyboard_translation[RETROK_f] = CPC_KEY_F;
-	keyboard_translation[RETROK_g] = CPC_KEY_G;
-	keyboard_translation[RETROK_h] = CPC_KEY_H;
-	keyboard_translation[RETROK_i] = CPC_KEY_I;
-	keyboard_translation[RETROK_j] = CPC_KEY_J;
-	keyboard_translation[RETROK_k] = CPC_KEY_K;
-	keyboard_translation[RETROK_l] = CPC_KEY_L;
-	keyboard_translation[RETROK_m] = CPC_KEY_M;
-	keyboard_translation[RETROK_n] = CPC_KEY_N;
-	keyboard_translation[RETROK_o] = CPC_KEY_O;
-	keyboard_translation[RETROK_p] = CPC_KEY_P;
-	keyboard_translation[RETROK_q] = CPC_KEY_Q;
-	keyboard_translation[RETROK_r] = CPC_KEY_R;
-	keyboard_translation[RETROK_s] = CPC_KEY_S;
-	keyboard_translation[RETROK_t] = CPC_KEY_T;
-	keyboard_translation[RETROK_u] = CPC_KEY_U;
-	keyboard_translation[RETROK_v] = CPC_KEY_V;
-	keyboard_translation[RETROK_w] = CPC_KEY_W;
-	keyboard_translation[RETROK_x] = CPC_KEY_X;
-	keyboard_translation[RETROK_y] = CPC_KEY_Y;
-	keyboard_translation[RETROK_z] = CPC_KEY_Z;
-	keyboard_translation[RETROK_SPACE] = CPC_KEY_SPACE;
-	keyboard_translation[RETROK_COMMA] = CPC_KEY_COMMA;
-	keyboard_translation[RETROK_PERIOD] = CPC_KEY_DOT;
-	keyboard_translation[RETROK_SEMICOLON] = CPC_KEY_COLON;
-	keyboard_translation[RETROK_MINUS] = CPC_KEY_MINUS;
-	keyboard_translation[RETROK_EQUALS] = CPC_KEY_HAT;
-	keyboard_translation[RETROK_LEFTBRACKET] = CPC_KEY_AT;
-	keyboard_translation[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;
+   keyboard_translation[RETROK_0] = CPC_KEY_ZERO;
+   keyboard_translation[RETROK_1] = CPC_KEY_1;
+   keyboard_translation[RETROK_2] = CPC_KEY_2;
+   keyboard_translation[RETROK_3] = CPC_KEY_3;
+   keyboard_translation[RETROK_4] = CPC_KEY_4;
+   keyboard_translation[RETROK_5] = CPC_KEY_5;
+   keyboard_translation[RETROK_6] = CPC_KEY_6;
+   keyboard_translation[RETROK_7] = CPC_KEY_7;
+   keyboard_translation[RETROK_8] = CPC_KEY_8;
+   keyboard_translation[RETROK_9] = CPC_KEY_9;
+   keyboard_translation[RETROK_a] = CPC_KEY_A;
+   keyboard_translation[RETROK_b] = CPC_KEY_B;
+   keyboard_translation[RETROK_c] = CPC_KEY_C;
+   keyboard_translation[RETROK_d] = CPC_KEY_D;
+   keyboard_translation[RETROK_e] = CPC_KEY_E;
+   keyboard_translation[RETROK_f] = CPC_KEY_F;
+   keyboard_translation[RETROK_g] = CPC_KEY_G;
+   keyboard_translation[RETROK_h] = CPC_KEY_H;
+   keyboard_translation[RETROK_i] = CPC_KEY_I;
+   keyboard_translation[RETROK_j] = CPC_KEY_J;
+   keyboard_translation[RETROK_k] = CPC_KEY_K;
+   keyboard_translation[RETROK_l] = CPC_KEY_L;
+   keyboard_translation[RETROK_m] = CPC_KEY_M;
+   keyboard_translation[RETROK_n] = CPC_KEY_N;
+   keyboard_translation[RETROK_o] = CPC_KEY_O;
+   keyboard_translation[RETROK_p] = CPC_KEY_P;
+   keyboard_translation[RETROK_q] = CPC_KEY_Q;
+   keyboard_translation[RETROK_r] = CPC_KEY_R;
+   keyboard_translation[RETROK_s] = CPC_KEY_S;
+   keyboard_translation[RETROK_t] = CPC_KEY_T;
+   keyboard_translation[RETROK_u] = CPC_KEY_U;
+   keyboard_translation[RETROK_v] = CPC_KEY_V;
+   keyboard_translation[RETROK_w] = CPC_KEY_W;
+   keyboard_translation[RETROK_x] = CPC_KEY_X;
+   keyboard_translation[RETROK_y] = CPC_KEY_Y;
+   keyboard_translation[RETROK_z] = CPC_KEY_Z;
+   keyboard_translation[RETROK_SPACE] = CPC_KEY_SPACE;
+   keyboard_translation[RETROK_COMMA] = CPC_KEY_COMMA;
+   keyboard_translation[RETROK_PERIOD] = CPC_KEY_DOT;
+   keyboard_translation[RETROK_SEMICOLON] = CPC_KEY_COLON;
+   keyboard_translation[RETROK_MINUS] = CPC_KEY_MINUS;
+   keyboard_translation[RETROK_EQUALS] = CPC_KEY_HAT;
+   keyboard_translation[RETROK_LEFTBRACKET] = CPC_KEY_AT;
+   keyboard_translation[RETROK_RIGHTBRACKET] =CPC_KEY_OPEN_SQUARE_BRACKET;
 
-	keyboard_translation[RETROK_TAB] = CPC_KEY_TAB;
-	keyboard_translation[RETROK_RETURN] = CPC_KEY_RETURN;
-	keyboard_translation[RETROK_BACKSPACE] = CPC_KEY_DEL;
-	keyboard_translation[RETROK_ESCAPE] = CPC_KEY_ESC;
+   keyboard_translation[RETROK_TAB] = CPC_KEY_TAB;
+   keyboard_translation[RETROK_RETURN] = CPC_KEY_RETURN;
+   keyboard_translation[RETROK_BACKSPACE] = CPC_KEY_DEL;
+   keyboard_translation[RETROK_ESCAPE] = CPC_KEY_ESC;
 
-	keyboard_translation[RETROK_UP] = CPC_KEY_CURSOR_UP;
-	keyboard_translation[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
-	keyboard_translation[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
-	keyboard_translation[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
+   keyboard_translation[RETROK_UP] = CPC_KEY_CURSOR_UP;
+   keyboard_translation[RETROK_DOWN] = CPC_KEY_CURSOR_DOWN;
+   keyboard_translation[RETROK_LEFT] = CPC_KEY_CURSOR_LEFT;
+   keyboard_translation[RETROK_RIGHT] = CPC_KEY_CURSOR_RIGHT;
 
-	keyboard_translation[RETROK_KP0] = CPC_KEY_F0;
-	keyboard_translation[RETROK_KP1] = CPC_KEY_F1;
-	keyboard_translation[RETROK_KP2] = CPC_KEY_F2;
-	keyboard_translation[RETROK_KP3] = CPC_KEY_F3;
-	keyboard_translation[RETROK_KP4] = CPC_KEY_F4;
-	keyboard_translation[RETROK_KP5] = CPC_KEY_F5;
-	keyboard_translation[RETROK_KP6] = CPC_KEY_F6;
-	keyboard_translation[RETROK_KP7] = CPC_KEY_F7;
-	keyboard_translation[RETROK_KP8] = CPC_KEY_F8;
-	keyboard_translation[RETROK_KP9] = CPC_KEY_F9;
+   keyboard_translation[RETROK_KP0] = CPC_KEY_F0;
+   keyboard_translation[RETROK_KP1] = CPC_KEY_F1;
+   keyboard_translation[RETROK_KP2] = CPC_KEY_F2;
+   keyboard_translation[RETROK_KP3] = CPC_KEY_F3;
+   keyboard_translation[RETROK_KP4] = CPC_KEY_F4;
+   keyboard_translation[RETROK_KP5] = CPC_KEY_F5;
+   keyboard_translation[RETROK_KP6] = CPC_KEY_F6;
+   keyboard_translation[RETROK_KP7] = CPC_KEY_F7;
+   keyboard_translation[RETROK_KP8] = CPC_KEY_F8;
+   keyboard_translation[RETROK_KP9] = CPC_KEY_F9;
 
    keyboard_translation[RETROK_KP_ENTER] = CPC_KEY_INTRO;
-	keyboard_translation[RETROK_KP_PERIOD] = CPC_KEY_FDOT;
+   keyboard_translation[RETROK_KP_PERIOD] = CPC_KEY_FDOT;
 
    keyboard_translation[RETROK_DELETE] = CPC_KEY_CLR;
 
-	keyboard_translation[RETROK_LSHIFT] = CPC_KEY_SHIFT;
-	keyboard_translation[RETROK_RSHIFT] = CPC_KEY_SHIFT;
-	keyboard_translation[RETROK_LCTRL] = CPC_KEY_CONTROL;
-	keyboard_translation[RETROK_RCTRL] = CPC_KEY_CONTROL;
-	keyboard_translation[RETROK_CAPSLOCK] = CPC_KEY_CAPS_LOCK;
+   keyboard_translation[RETROK_LSHIFT] = CPC_KEY_SHIFT;
+   keyboard_translation[RETROK_RSHIFT] = CPC_KEY_SHIFT;
+   keyboard_translation[RETROK_LCTRL] = CPC_KEY_CONTROL;
+   keyboard_translation[RETROK_RCTRL] = CPC_KEY_CONTROL;
+   keyboard_translation[RETROK_CAPSLOCK] = CPC_KEY_CAPS_LOCK;
 
-	keyboard_translation[RETROK_LALT] = CPC_KEY_COPY;
+   keyboard_translation[RETROK_LALT] = CPC_KEY_COPY;
    keyboard_translation[RETROK_RALT] = CPC_KEY_COPY;
    keyboard_translation[RETROK_BACKQUOTE] = CPC_KEY_FORWARD_SLASH;
    keyboard_translation[RETROK_SLASH] = CPC_KEY_BACKSLASH;
@@ -609,45 +629,46 @@ void init_keyboard_table() {
 void ev_init(){
 
    struct retro_input_descriptor inputDescriptors[] = {
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X, "X" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y, "Y" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R, "R" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L, "L" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
-		{ 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X, "X" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y, "Y" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R, "R" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L, "L" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
 
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X, "X" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y, "Y" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R, "R" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L, "L" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
-		{ 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X, "X" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y, "Y" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Start" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R, "R" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L, "L" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2, "R2" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
 
-		{ 0 }
-	};
-	environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
+      { 0 }
+   };
+   environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, &inputDescriptors);
 
    init_keyboard_table();
+   init_joystick_table();
 
    struct retro_keyboard_callback cb = { keyboard_cb };
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);

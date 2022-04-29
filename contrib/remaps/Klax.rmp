@@ -1,0 +1,13 @@
+input_player1_key_right = "112"
+input_player1_key_left = "111"
+input_player1_key_a = "32"
+input_player1_key_a_name = "Throw piece"
+input_player1_key_b = "97"
+input_player1_key_b_name = "Drop piece"
+input_player1_key_x = "113"
+input_player1_key_x_name = "Speed up"
+input_player1_key_start = "48"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x96b53a41 # (UK) (1990) (CPM) [Original]

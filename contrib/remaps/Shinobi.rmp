@@ -1,0 +1,5 @@
+input_player1_key_b = "32"
+input_player1_key_b_name = "Magic"
+
+entry_hash_1 = 0x6f1e3eb0 # (UK) (1989) [Original]
+entry_hash_2 = 0xbd6c0af # (UK) (1989) [REMAKE] (clean-cpc-db fixed release)

@@ -19,3 +19,10 @@
 *.sna
 *.cdt
 *.m3u
+
+# tests files
+tests/
+tests-db/
+unit-tests/db-test
+unit-tests/entry-test
+unit-tests/autorun

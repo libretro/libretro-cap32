@@ -1,0 +1,11 @@
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_right = "112"
+input_player1_key_left = "111"
+input_player1_key_a = "32"
+input_player1_key_a_name = "Use"
+input_player1_key_start = "32"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x6c2cdcea # (UK) (2009) (site download)

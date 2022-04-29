@@ -1,0 +1,14 @@
+input_player1_key_start = "49"
+input_player1_key_start_name = "Start One Player"
+input_player1_key_b = "116"
+input_player1_key_b_name = "Toggle"
+input_player1_key_x = "51"
+input_player1_key_x_name = "Joystick 2 Select"
+input_player1_key_select = "50"
+input_player1_key_select_name = "Joystick 1 Select"
+
+entry_map_type = "keep" # default
+
+entry_hash_1 = 36d943ea # (UK) (1986) (v2) [Original]
+entry_hash_2 = e7df0e60 # (UK) (1986) (Spain retail version) [Original]
+entry_hash_3 = 3e88f3f7 # (UK) (1986) [Original]

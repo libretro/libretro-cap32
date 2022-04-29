@@ -42,6 +42,7 @@
 #define RETRO_UTILS_H__
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 //*****************************************************************************
@@ -57,9 +58,13 @@
 #endif
 
 bool file_check_extension(const char *filename, const size_t filename_size, const char *ext, const size_t ext_size);
+bool file_check_flag(const char *filename, const size_t filename_size, const char *flag, const size_t flag_size);
 void path_join(char* out, const char* basedir, const char* filename);
 char* path_join_dup(const char* basedir, const char* filename);
+
 bool file_exists(const char *filename);
+int file_size (int file_num);
+uint32_t get_hash(const char *filename);
 
 void *retro_malloc(size_t size);
 void retro_free(void * mem);
