@@ -31,7 +31,7 @@ entry_command = "|CPM"
 
 # game hashes
 entry_hash_1 = "0xbf188ce3" # (UK) (128K) (2017) (CPM)
-entry_hash_2 = "0x6e5f98ff"
+entry_hash_2 = "0x6e5f98ff" # (UK) (128K) (2017) (cpcrulez)
 
 # map type (clean/keep)
 # keep: use joystick as base and add/changes inputs given above

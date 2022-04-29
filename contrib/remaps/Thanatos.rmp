@@ -1,0 +1,14 @@
+input_player1_key_up = "97"
+input_player1_key_down = "122"
+input_player1_key_right = "109"
+input_player1_key_left = "110"
+input_player1_key_a = "32"
+input_player1_key_a_name = "Flame"
+input_player1_key_start = "52"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 827e83ac # (UK) (1986) (UK retail version) [Ubi Soft] [Original]
+entry_hash_2 = 8d64a322 # (UK) (1986) [Durell Software] [Original]
+entry_hash_3 = f9fce391 # (UK) (1986) [Durell Software] (v2) [Original]
+entry_hash_4 = 59d6aef1 # (UK) (1986) (Spain retail version) [Original]

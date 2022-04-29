@@ -6,5 +6,5 @@ input_player1_key_a_name = "Jump"
 input_player1_key_start = "50"
 input_player1_key_select_name = "Start"
 
-entry_hash_1 = 0x10bd9015
+entry_hash_1 = 0x10bd9015 # (UK) (1987) (clean-cpc-db fixed release)
 

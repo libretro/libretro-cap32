@@ -13,5 +13,5 @@ input_player1_key_select_name = "Pause"
 
 entry_map_type = "clean"
 
-entry_hash_1 = 0xd851fde0
-entry_hash_2 = 0x5c3cfc2c
+entry_hash_1 = 0xd851fde0 # (UK) (128K) (2 faces) (2016) [CPC CPC+] (site download)
+entry_hash_2 = 0x5c3cfc2c # (UK) (128K) (2 faces) (2016) [CPC CPC+] (site download)

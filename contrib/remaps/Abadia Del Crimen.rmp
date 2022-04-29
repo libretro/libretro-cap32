@@ -16,7 +16,7 @@ input_player1_key_y_name = "Decir Si"
 
 # game hashes
 entry_hash_1 = "0xaa05ed4a" # (S) (128K) (1988) (CPM) [Original]
-entry_hash_2 = "0xd37cf8e7"
+entry_hash_2 = "0xd37cf8e7" # (S) (128K) (1988) (CPM) (cpcrulez)
 
 # game load command
 # special commands:

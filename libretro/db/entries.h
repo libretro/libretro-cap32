@@ -190,7 +190,7 @@ t_file_entry database[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
-   { // Thanatos copy.rmp
+   { // Thanatos.rmp
       {0x827e83ac, 0x8d64a322, 0xf9fce391, 0x59d6aef1},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_a, RETROK_z, RETROK_n, RETROK_m, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
       {-1, -1, -1, -1, -1, -1, -1, -1, 39, -1, -1, -1, -1, -1},
@@ -255,5 +255,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1651235030.538823
+// gen hash: 1651236014.801458
 
