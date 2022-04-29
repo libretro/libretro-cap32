@@ -46,20 +46,25 @@ extern t_drive driveA;
 
 //#define LOADER_DEBUG
 
+bool _loader_launch(char * key_buffer, char * filename)
+{
+   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", filename) < 0)
+   {
+      printf("[LOADER] !!!! _loader_run: snprintf failed\n");
+      return false;
+   }
+
+   return true;
+}
+
+
 bool _loader_find_file (char * key_buffer, char * filename)
 {
    for (int idx = 0; idx < catalogue.last_entry; idx++) {
       if (memcmp(catalogue.dirent[idx].filename, filename, strlen(filename)) != 0)
          continue;
 
-      if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[idx].filename) < 0)
-      {
-         printf("[LOADER] !!!! autoload: snprintf failed\n");
-         return false;
-      }
-
-      // copied ok => exit loop
-      return true;
+      return _loader_launch(key_buffer, catalogue.dirent[idx].filename);
    }
 
    // loop finished, file not found
@@ -110,27 +115,15 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
    else if (first_bin != -1)
       cur_name_id = first_bin;
 
-   // check added to avoid warning on gcc >= 8
-   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[cur_name_id].filename) < 0)
-   {
-      printf("autoload: snprintf failed\n");
-      return false;
-   }
-
-   return true;
+   return _loader_launch(key_buffer, catalogue.dirent[cur_name_id].filename);
 }
 
 bool _loader_one_listed(char * key_buffer)
 {
    if (catalogue.entries_listed_found != 1)
       return false;
-   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[catalogue.first_listed_dirent].filename) < 0)
-   {
-      printf("[LOADER] !!!! autoload: snprintf failed\n");
-      return false;
-   }
 
-   return true;
+   return _loader_launch(key_buffer, catalogue.dirent[catalogue.first_listed_dirent].filename);
 }
 
 bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
@@ -154,13 +147,7 @@ bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
    printf("[  LOADER  ] >>> using hidden\n");
    #endif
 
-   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[catalogue.first_hidden_dirent].filename) < 0)
-   {
-      printf("[LOADER] !!!! autoload: snprintf failed\n");
-      return false;
-   }
-
-   return true;
+   return _loader_launch(key_buffer, catalogue.dirent[catalogue.first_hidden_dirent].filename);
 }
 
 bool _loader_cpm(char * key_buffer, retro_format_info_t *format)
