@@ -52,6 +52,12 @@ t_file_entry database[] = {
       {7, 8, -1, 9, -1, -1, 10, 11, 12, 13, -1, -1, -1, -1},
       0,
    },
+   { // Asterix and the Magic Carpet.rmp
+      {0x392fbb50, 0x33e38c87, 0x31d37ba2},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      1,
+   },
    { // Aventura Original.rmp
       {0xb0c8cc9e},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -86,7 +92,7 @@ t_file_entry database[] = {
       {0x504d8d95},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      1,
+      2,
    },
    { // Donkey Kong.rmp
       {0x9b7c1f2},
@@ -122,7 +128,7 @@ t_file_entry database[] = {
       {0x36d943ea, 0xe7df0e60, 0x3e88f3f7},
       {RETROK_t, DB_KEEP, RETROK_2, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_3, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {28, -1, 29, 20, -1, -1, -1, -1, -1, 30, -1, -1, -1, -1},
-      2,
+      3,
    },
    { // Klax.rmp
       {0x96b53a41},
@@ -200,6 +206,7 @@ t_file_entry database[] = {
 
 char commands[] = {
    "|CPM\0"
+   "|CPM\n~~LOADER\0"
    "RUN\"COBRA.\0"
    "RUN\"ELITE\0"
 };
@@ -248,5 +255,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1651220468.218838
+// gen hash: 1651235030.538823
 

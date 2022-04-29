@@ -44,8 +44,7 @@
 
 extern t_drive driveA;
 
-void loader_init(){}
-void loader_clean(){}
+//#define LOADER_DEBUG
 
 bool _loader_find_file (char * key_buffer, char * filename)
 {
@@ -136,12 +135,14 @@ bool _loader_one_listed(char * key_buffer)
 
 bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
 {
+   #ifdef LOADER_DEBUG
    printf("[  LOADER  ] >>> hidden[%u, %u] [%u == %u]\n",
       catalogue.entries_listed_found,
       catalogue.entries_hidden_found,
       catalogue.track_hidden_id,
       format->catalogue_sector
    );
+   #endif
 
    if (catalogue.entries_listed_found || catalogue.entries_hidden_found != 1)
       return false;
@@ -149,7 +150,9 @@ bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
    if (catalogue.track_hidden_id != format->catalogue_sector)
       return false;
 
+   #ifdef LOADER_DEBUG
    printf("[  LOADER  ] >>> using hidden\n");
+   #endif
 
    if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[catalogue.first_hidden_dirent].filename) < 0)
    {
@@ -162,13 +165,16 @@ bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
 
 bool _loader_cpm(char * key_buffer, retro_format_info_t *format)
 {
-   // todo - check track
+   #ifdef LOADER_DEBUG
    printf("[  LOADER  ] >>> CPM [%u] [%u,%u] [%u == %u]\n", catalogue.probe_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found, catalogue.track_listed_id, format->catalogue_sector);
+   #endif
 
    if (!catalogue.probe_cpm || catalogue.entries_listed_found || catalogue.entries_hidden_found)
       return false;
 
+   #ifdef LOADER_DEBUG
    printf("[  LOADER  ] >>> using CPM [%u,%u,%u]\n", catalogue.probe_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found);
+   #endif
    strcpy(key_buffer, "|CPM");
 
    return true;
@@ -191,34 +197,15 @@ void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *curren
 {
    memset(key_buffer, 0, LOADER_MAX_SIZE);
 
-   // check current format ?
-   #ifdef TEST_CODE
-   if (format->type == FORMAT_TYPE_UNKNOWN)
-   {
-      printf("[LOADER ERR] FORMAT NOT FOUND.\n");
-      strcpy(key_buffer, "CAT");
-      return;
-   }
-
-   if (format_probe_hexagon(current_drive))
-   {
-      strcpy(key_buffer, "RUN\"DISK");
-      return;
-   }
-   #endif
-
-   //printf("[  LOADER  ] cat\n");
    catalog_probe(current_drive, 0);
 
    if (_loader_cpm(key_buffer, format))
       return;
 
-   //printf("[  LOADER  ] disc\n");
    // first we try to find classic run filenames
    if (_loader_find_file(key_buffer, "DISC"))
       return;
 
-   //printf("[  LOADER  ] disk\n");
    if (_loader_find_file(key_buffer, "DISK"))
       return;
 
@@ -231,11 +218,12 @@ void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *curren
    if (_loader_hidden(key_buffer, format))
       return;
 
+   #ifdef LOADER_DEBUG
    printf("[  LOADER  ] bas/bin/.\n");
-   // try to find BAS / BIN / . files
+   #endif
+
    if(!_loader_find(key_buffer, format))
    {
-      //printf("[  LOADER  ] failed?!\n");
       _loader_failed(key_buffer, format->type == FORMAT_TYPE_AMSDOS_SYSTEM);
    }
 }
@@ -243,9 +231,6 @@ void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *curren
 void loader_run (char * key_buffer)
 {
    t_drive *current_drive = &driveA; 
-
-   //DPB_type *dpb = NULL;
-   //dpb = format_find(current_drive);
 
    retro_format_info_t* test_format = NULL;
    test_format = format_get(current_drive);

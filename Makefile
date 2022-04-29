@@ -461,15 +461,5 @@ unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
 	$(CORE_DIR)/unit-tests/autorun
 
-# to get more info: make clean && make db-test DEBUG_TEST=1
-db-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
-	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/cmocka/include
-	@$(CC) -o $(CORE_DIR)/unit-tests/db-test $(CORE_DIR)/unit-tests/db-test.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
-	@echo "now run: $(CORE_DIR)/unit-tests/db-test <you-rom-path>"
-
-# test DSK loader
-entry-test: $(OBJS)
-	@$(CC) -o $(CORE_DIR)/unit-tests/entry-test $(CORE_DIR)/unit-tests/entry-test.c $(OBJS) $(LDFLAGS) $(TEST_FLAGS) -Wno-implicit-function-declaration $(CFLAGS) $(INCDIRS)
-
 .PHONY: $(TARGET) clean clean-objs
 endif

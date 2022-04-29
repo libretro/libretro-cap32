@@ -1299,8 +1299,6 @@ void retro_init(void)
 
    if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
       LOGI("AUDIO FORMAT is not supported.\n");
-
-   loader_init();
 }
 
 extern void main_exit();
@@ -1318,7 +1316,6 @@ void retro_deinit(void)
 
    retro_free(video_buffer);
    retro_free(temp_buffer);
-   loader_clean();
 
    LOGI("Retro DeInit\n");
 }

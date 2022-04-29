@@ -97,7 +97,6 @@ static void basic_tests_success(void **state) {
 
 int main(void) {
    pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
-   loader_init();
 
    const struct CMUnitTest tests[] = {
       cmocka_unit_test(basic_tests_success),
@@ -109,5 +108,4 @@ int main(void) {
 
    cmocka_run_group_tests(tests, NULL, NULL);
    free(pbGPBuffer);
-   loader_clean();
 }
