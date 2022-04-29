@@ -53,7 +53,7 @@ static void cpm_tests_success(void **state) {
    test_dsk("tests/heroquest/Hero Quest (UK) (Face A) (128K) (2022) (CPM) (Hack).dsk", "|CPM", "SYSTEM");
    test_dsk("tests/cpm/Bestial Warrior (1989)(Dinamic Software)(es)[lightgun].dsk", "|CPM", "SYSTEM");
 
-   // fails CPM BOOT
+   // TODO: fails CPM BOOT
    //test_dsk("tests/cpm/Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side A)[CPM] .dsk", "|CPM", "SYSTEM");
 
 }
@@ -89,7 +89,6 @@ static void basic_tests_success(void **state) {
    test_dsk("tests/Cauldron_2__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/Abadia.dsk", "|CPM", "SYSTEM");
    test_dsk("tests/Bonanza_Bros - bad scroll.dsk", "RUN\"DISK.", "DATA_B");
-   test_dsk("tests/Cauldron_2__ENGLISH.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/Prince_of_Persia__(Release_DROSOFT)__ENGLISH.dsk", "RUN\"PRINCE.BIN", "D10");
    test_dsk("tests/Shovel Adventure JGN Edition.dsk", "RUN\"DISC.BIN", "DATA");
    test_dsk("tests/The_Shadows_of_Sergoth__ENGLISH-FRENCH-SPANISH__Side_A.dsk", "RUN\"DISC.BAS", "DATA");

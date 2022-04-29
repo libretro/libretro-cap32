@@ -130,7 +130,6 @@ retro_format_info_t* format_get (t_drive *drive)
    return format_found;
 }
 
-
 #define HEXAGON_TRACK_SIZE    0x1400
 #define HEXAGON_TRACK_SIZE_V2 0x1800
 #define HEXAGON_SECTOR_SIZE   0xA
