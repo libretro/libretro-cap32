@@ -27,6 +27,8 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/dsk/catalog.c \
 	$(CORE_DIR)/libretro/dsk/loader.c \
 	$(CORE_DIR)/libretro/dsk/formats.c \
+	$(CORE_DIR)/libretro/dsk/format.c \
+	$(CORE_DIR)/libretro/dsk/amsdos_catalog.c \
 	$(CORE_DIR)/libretro/gfx/software.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_bg.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_en.c \

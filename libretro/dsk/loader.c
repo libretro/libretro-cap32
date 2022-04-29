@@ -38,65 +38,64 @@
 #include <stdio.h>
 
 #include "libretro-core.h"
+#include "dsk/format.h"
+#include "dsk/amsdos_catalog.h"
 #include "loader.h"
-#include "formats.h"
-#include "catalog.h"
 
-extern DPB_list formats_list;
 extern t_drive driveA;
 
-extern char catalog_dirent[CAT_MAX_ENTRY][CAT_NAME_SIZE];
-extern int catalog_entry;
-
-void loader_init ()
-{
-   formats_init();
-}
+void loader_init(){}
+void loader_clean(){}
 
 bool _loader_find_file (char * key_buffer, char * filename)
 {
-   for (int index = 0; index < catalog_entry; index++) {
-      if (memcmp(catalog_dirent[index], filename, strlen(filename)) != 0)
+   for (int idx = 0; idx < catalogue.last_entry; idx++) {
+      if (memcmp(catalogue.dirent[idx].filename, filename, strlen(filename)) != 0)
          continue;
 
-      if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[index]) < 0)
+      if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[idx].filename) < 0)
       {
-         printf("autoload: snprintf failed\n");
+         printf("[LOADER] !!!! autoload: snprintf failed\n");
          return false;
       }
 
+      // copied ok => exit loop
       return true;
    }
 
+   // loop finished, file not found
    return false;
 }
 
-bool _loader_find (char * key_buffer)
+bool _loader_find (char * key_buffer, retro_format_info_t *format)
 {
+   if (catalogue.track_listed_id != format->catalogue_sector && catalogue.track_hidden_id != format->catalogue_sector)
+      return false;
+
    int found = 0;
    int first_bas = -1;
    int first_spc = -1;
    int first_bin = -1;
    int cur_name_id = 0;
 
-   for (int index = 0; index < catalog_entry; index++) {
-      char* scan = strchr(catalog_dirent[index], '.');
+   for (int idx = 0; idx < catalogue.last_entry; idx++) {
+      char* scan = strchr(catalogue.dirent[idx].filename, '.');
       if (!scan)
          continue;
 
       if (!strcasecmp(scan + 1, "BAS"))
       {
-         if (first_bas == -1) first_bas = index;
+         if (first_bas == -1) first_bas = idx;
          found = true;
       }
       else if (!strcasecmp(scan + 1, ""))
       {
-         if (first_spc == -1) first_spc = index;
+         if (first_spc == -1) first_spc = idx;
          found = true;
       }
       else if (!strcasecmp(scan + 1, "BIN"))
       {
-         if (first_bin == -1) first_bin = index;
+         if (first_bin == -1) first_bin = idx;
          found = true;
       }
    }
@@ -113,11 +112,64 @@ bool _loader_find (char * key_buffer)
       cur_name_id = first_bin;
 
    // check added to avoid warning on gcc >= 8
-   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalog_dirent[cur_name_id]) < 0)
+   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[cur_name_id].filename) < 0)
    {
       printf("autoload: snprintf failed\n");
       return false;
    }
+
+   return true;
+}
+
+bool _loader_one_listed(char * key_buffer)
+{
+   if (catalogue.entries_listed_found != 1)
+      return false;
+   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[catalogue.first_listed_dirent].filename) < 0)
+   {
+      printf("[LOADER] !!!! autoload: snprintf failed\n");
+      return false;
+   }
+
+   return true;
+}
+
+bool _loader_hidden(char * key_buffer, retro_format_info_t *format)
+{
+   printf("[  LOADER  ] >>> hidden[%u, %u] [%u == %u]\n",
+      catalogue.entries_listed_found,
+      catalogue.entries_hidden_found,
+      catalogue.track_hidden_id,
+      format->catalogue_sector
+   );
+
+   if (catalogue.entries_listed_found || catalogue.entries_hidden_found != 1)
+      return false;
+
+   if (catalogue.track_hidden_id != format->catalogue_sector)
+      return false;
+
+   printf("[  LOADER  ] >>> using hidden\n");
+
+   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", catalogue.dirent[catalogue.first_hidden_dirent].filename) < 0)
+   {
+      printf("[LOADER] !!!! autoload: snprintf failed\n");
+      return false;
+   }
+
+   return true;
+}
+
+bool _loader_cpm(char * key_buffer, retro_format_info_t *format)
+{
+   // todo - check track
+   printf("[  LOADER  ] >>> CPM [%u] [%u,%u] [%u == %u]\n", catalogue.probe_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found, catalogue.track_listed_id, format->catalogue_sector);
+
+   if (!catalogue.probe_cpm || catalogue.entries_listed_found || catalogue.entries_hidden_found)
+      return false;
+
+   printf("[  LOADER  ] >>> using CPM [%u,%u,%u]\n", catalogue.probe_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found);
+   strcpy(key_buffer, "|CPM");
 
    return true;
 }
@@ -134,56 +186,69 @@ void _loader_failed (char * key_buffer, bool is_system)
    strcpy(key_buffer, "CAT");
 }
 
-void _loader_run (char * key_buffer, DPB_type *dpb, t_drive *current_drive)
+
+void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *current_drive)
 {
    memset(key_buffer, 0, LOADER_MAX_SIZE);
 
-   if (dpb == NULL)
+   // check current format ?
+   #ifdef TEST_CODE
+   if (format->type == FORMAT_TYPE_UNKNOWN)
    {
       printf("[LOADER ERR] FORMAT NOT FOUND.\n");
       strcpy(key_buffer, "CAT");
       return;
    }
 
-   if (format_hexagon_protection(current_drive))
+   if (format_probe_hexagon(current_drive))
    {
       strcpy(key_buffer, "RUN\"DISK");
       return;
    }
+   #endif
 
-   // if is a normal data disk, build his catalogue
-   // first check with normal DRM data
-   // TODO: we need unit-test here...
-   if(!archive_init(dpb->DRM, dpb->OFS, current_drive))
-   {
-      // try to the calculated DBL catalogue size
-      archive_init(dpb->DBL, dpb->OFS, current_drive);
-   }
+   //printf("[  LOADER  ] cat\n");
+   catalog_probe(current_drive, 0);
 
+   if (_loader_cpm(key_buffer, format))
+      return;
+
+   //printf("[  LOADER  ] disc\n");
    // first we try to find classic run filenames
-   if(_loader_find_file(key_buffer, "DISC"))
+   if (_loader_find_file(key_buffer, "DISC"))
       return;
 
-   if(_loader_find_file(key_buffer, "DISK"))
+   //printf("[  LOADER  ] disk\n");
+   if (_loader_find_file(key_buffer, "DISK"))
       return;
 
-   // try to find BAS / BIN / . files (in alphabetical order)
-   if(!_loader_find(key_buffer))
+   if (_loader_find_file(key_buffer, "JEU.BAS"))
+      return;
+
+   if (_loader_one_listed(key_buffer))
+      return;
+
+   if (_loader_hidden(key_buffer, format))
+      return;
+
+   printf("[  LOADER  ] bas/bin/.\n");
+   // try to find BAS / BIN / . files
+   if(!_loader_find(key_buffer, format))
    {
-      _loader_failed(key_buffer, dpb->SEC1_side1 == DSK_TYPE_SYSTEM);
+      //printf("[  LOADER  ] failed?!\n");
+      _loader_failed(key_buffer, format->type == FORMAT_TYPE_AMSDOS_SYSTEM);
    }
 }
 
 void loader_run (char * key_buffer)
 {
-   DPB_type *dpb = NULL;
    t_drive *current_drive = &driveA; 
 
-   dpb = format_find(current_drive);
-   _loader_run(key_buffer, dpb, current_drive);
-}
+   //DPB_type *dpb = NULL;
+   //dpb = format_find(current_drive);
 
-void loader_clean ()
-{
-   formats_clean();
+   retro_format_info_t* test_format = NULL;
+   test_format = format_get(current_drive);
+
+   _loader_run(key_buffer, test_format, current_drive);
 }

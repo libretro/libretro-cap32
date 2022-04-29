@@ -447,8 +447,8 @@ typedef struct {
       struct {
          unsigned char cylinder;
          unsigned char side;
-         unsigned char sector;
-         unsigned char bps;
+         unsigned char sector_info;
+         unsigned char sector_size;
       };
    } CHRN; // the CHRN for this sector
    unsigned char flags[4]; // ST1 and ST2 - reflects any possible error conditions

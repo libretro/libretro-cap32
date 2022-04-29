@@ -278,14 +278,14 @@ int sector_find(t_track *track, unsigned short sector_signature)
    for (int i = 0; i < track->sectors; i++) {
       #ifdef FORMAT_DEBUG
       printf("[LOADER] [FMT]: %i !!%x == %x [%02x.%02x.%02x]\n", i,
-         track->sector[i].CHRN.sector,
+         track->sector[i].CHRN.sector_info,
          sector_signature,
          track->sector[i].CHRN.side,
          track->sector[i].CHRN.cylinder,
-         track->sector[i].CHRN.bps
+         track->sector[i].CHRN.sector_size
       );
       #endif
-      if (track->sector[i].CHRN.sector == sector_signature) {
+      if (track->sector[i].CHRN.sector_info == sector_signature) {
          return i;
       }
    }
@@ -386,8 +386,8 @@ DPB_type *format_find (t_drive *drive)
          first_track->sector[0].CHRN.data[3],
          first_track->sector[0].CHRN.cylinder,
          first_track->sector[0].CHRN.side,
-         first_track->sector[0].CHRN.sector,
-         first_track->sector[0].CHRN.bps,
+         first_track->sector[0].CHRN.sector_info,
+         first_track->sector[0].CHRN.sector_size,
          drive->extended,
          drive->sides,
          drive->tracks
