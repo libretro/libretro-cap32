@@ -1,4 +1,6 @@
 # Future
+- DB: documented correctly RMP files
+- AUTORUN: added better code inspired by Fredouille - caprice-forever
 - DB: new games from retroachievements
 - UI: added DB icon DSK to status bar
 - DB: you could add direct tokens using $ (for joystick keybinds or cleans)
