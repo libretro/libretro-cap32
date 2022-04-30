@@ -45,6 +45,7 @@
 #include <libretro-core.h>
 #include <microui.h>
 
+#include "cart.h"
 #include "retro_ui.h"
 #include "gfx/software.h"
 #include "retro_events.h"
@@ -52,15 +53,17 @@
 #include "retro_keyboard.h"
 #include "assets/assets.h"
 
-extern PIXEL_TYPE * video_buffer;
-extern PIXEL_TYPE * temp_buffer;
+extern t_CPC CPC; 
+
+extern uint32_t * video_buffer;
+extern uint32_t * temp_buffer;
 
 extern retro_mouse_t mouse;
 extern computer_cfg_t retro_computer_cfg;
 
-PIXEL_TYPE * keyboard_surface = NULL;
-PIXEL_TYPE * keyboard_lang = NULL;
-PIXEL_TYPE * ui_surface = NULL;
+uint32_t * keyboard_surface = NULL;
+uint32_t * keyboard_lang = NULL;
+uint32_t * ui_surface = NULL;
 
 static unsigned char ui_status = 0;
 static char ui_string[32];
@@ -141,7 +144,7 @@ void _process_frame()
    mu_end(ctx);
 }
 
-void _process_commands(PIXEL_TYPE * buffer)
+void _process_commands(uint32_t * buffer)
 {
    mu_Command *cmd = NULL;
    while (mu_next_command(ctx, &cmd)) {
@@ -158,6 +161,7 @@ void _process_commands(PIXEL_TYPE * buffer)
 #define STATUSBAR_MAX_HEIGHT 11
 static int statusbar_timer = 0;
 static int statusbar_height = 0;
+static uint32_t cursor_color = 0;
 
 void _process_statusbar()
 {
@@ -195,6 +199,7 @@ void retro_show_statusbar()
 
 void retro_ui_prepare(void)
 {
+   cursor_color = retro_video_cfg.cursor_color;
    // convert KeyboardOnScreen to current video/color-depth
    convert_image(
       keyboard_surface,
@@ -247,14 +252,14 @@ void retro_ui_update_text()
       UI_STRING_Y,
       80 * EMULATION_SCALE,
       8,
-      RGB2COLOR(0x2c, 0x2c, 0x2c)
+      retro_video_cfg.rgb2color(0x2c, 0x2c, 0x2c)
       );
    draw_text(
       keyboard_surface,
       UI_STRING_X,
       UI_STRING_Y,
       ui_string,
-      RGB2COLOR(0x63, 0x63, 0x63)
+      retro_video_cfg.rgb2color(0x63, 0x63, 0x63)
    );
 }
 
@@ -270,7 +275,7 @@ void retro_ui_draw_db(void)
       UI_STRING_Y + 4,
       5 * EMULATION_SCALE,
       3,
-      RGB2COLOR(0x3f, 0x3f, 0x3f)
+      retro_video_cfg.rgb2color(0x3f, 0x3f, 0x3f)
       );
 
    draw_rect(
@@ -279,7 +284,7 @@ void retro_ui_draw_db(void)
       UI_STRING_Y + 1,
       3 * EMULATION_SCALE,
       1,
-      RGB2COLOR(0xcc, 0xcc, 0xcc)
+      retro_video_cfg.rgb2color(0xcc, 0xcc, 0xcc)
       );
 }
 
@@ -332,7 +337,7 @@ void retro_ui_set_led(bool value)
       4,
       7 * EMULATION_SCALE,
       3,
-      value ? RGB2COLOR(0xea, 0, 0x22) : RGB2COLOR(0x57, 0, 0x0d)
+      value ? retro_video_cfg.rgb2color(0xea, 0, 0x22) : retro_video_cfg.rgb2color(0x57, 0, 0x0d)
    );
 }
 
@@ -372,8 +377,7 @@ void retro_ui_process()
 
    if(ui_status & (INTERNAL_UI_STATUSBAR ^ 0xFF))
    {
-      draw_char(video_buffer, mouse.x, mouse.y, 126, CURSOR_COLOR);
+      draw_char(video_buffer, mouse.x, mouse.y, 126, cursor_color);
       ev_process_cursor();
    }
-
 }

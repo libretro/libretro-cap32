@@ -174,6 +174,7 @@ int HandleExtension(char *path,char *ext);
 #include "retro_snd.h"
 #include "retro_ui.h"
 #include "retro_utils.h"
+#include "libretro/gfx/video.h"
 
 extern void kbd_update_table(int lang);
 
@@ -285,7 +286,7 @@ double colours_green[32] = {
    0.2510, 0.3137, 0.5333, 0.5961
 };
 
-PIXEL_TYPE colours[32];
+uint32_t colours[32];
 
 static uint8_t bit_values[8] = {
    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
@@ -606,7 +607,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                GateArray.palette[GateArray.pen] =colours[colour];
                // mode 2 - 'anti-aliasing' colour
                if (GateArray.pen < 2) {
-                  video_set_palette_antialias();
+                  CPC.video_set_palette_antialias();
                }
             }
             if (CPC.mf2) { // MF2 enabled?
@@ -1360,7 +1361,7 @@ unsigned int video_monitor_colour (double r, double g, double b)
    if (blue > 255)
       blue = 255;
 
-   return RGB2COLOR(red, green, blue);
+   return CPC.rgb2color(red, green, blue);
 }
 
 // Convert RGB color to GREEN LUMA
@@ -1385,7 +1386,7 @@ unsigned int video_monitor_green(double r, double g, double b) {
    // to represent real phosphor screens we add some blue color to green conversion
    uint32_t blue = (uint32_t) green * (CPC.scr_phosphor_intensity / 100.0);
 
-   return RGB2COLOR(0, green, blue);
+   return CPC.rgb2color(0, green, blue);
 }
 
 // Convert RGB to LUMA
@@ -1399,7 +1400,7 @@ unsigned int video_monitor_grey(double r, double g, double b) {
    if (grey > 255)
       grey = 255;
 
-   return RGB2COLOR(grey, grey, grey);
+   return CPC.rgb2color(grey, grey, grey);
 }
 
 void video_update_tube() {
@@ -1414,21 +1415,6 @@ void video_update_tube() {
          CPC.video_monitor = video_monitor_grey;
          break;
    }
-}
-
-/**
- * generate antialias values using 32/16bits macros
- *
- * RGB[10] 00CE60 || CC CC 00
- * 00CE60 (10)    || C8 CC 00
- */
-void video_set_palette_antialias (void)
-{
-   uint8_t r2,g2,b2;
-   r2=RGB2RED(colours[GateArray.ink_values[0]]) + RGB2RED(colours[GateArray.ink_values[1]]);
-   g2=RGB2GREEN(colours[GateArray.ink_values[0]]) + RGB2GREEN(colours[GateArray.ink_values[1]]);
-   b2=RGB2BLUE(colours[GateArray.ink_values[0]]) + RGB2BLUE(colours[GateArray.ink_values[1]]);
-   GateArray.palette[33] = (PIXEL_TYPE) RGB2COLOR(r2/2, g2/2, b2/2);
 }
 
 int video_set_palette (void)
@@ -1493,6 +1479,9 @@ void video_set_style (void)
    switch(CPC.scr_bpp)
    {
       case 32:
+         CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_24bpp;
+         CPC.rgb2color = rgb2color_24bpp;
+         printf("TESST 32!\n");
          if(dwYScale == 2)
             CPC.scr_render = (void(*)(void))render32bpp_doubleY;
          else
@@ -1501,6 +1490,9 @@ void video_set_style (void)
       case 16:
       case 15:
       default:
+         printf("TESST 16!\n");
+         CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_16bpp;
+         CPC.rgb2color = rgb2color_16bpp;
          if(dwYScale == 2)
             CPC.scr_render = (void(*)(void))render16bpp_doubleY;
          else
@@ -1515,6 +1507,7 @@ int video_init (void)
    int error_code;
    CPC.scr_bpp = retro_getGfxBpp();
 
+   video_set_style();
    error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
    if (error_code)
       return error_code;
@@ -1523,10 +1516,9 @@ int video_init (void)
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
 
-   video_set_style();
 
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
-                     / (2 / retro_depth_cfg.bytes) ) ;
+                     / (2 / retro_video_cfg.bytes) ) ;
 
    return 0;
 }

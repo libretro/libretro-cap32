@@ -44,17 +44,19 @@
 #include <libretro.h>
 #include <libretro-core.h>
 
+#include "cap32.h"
 #include "retro_events.h"
 #include "retro_keyboard.h"
 #include "assets/assets.h"
 #include "gfx/software.h"
 
+extern t_CPC CPC;
 extern retro_mouse_t mouse;
-extern PIXEL_TYPE * keyboard_surface;
+extern uint32_t * keyboard_surface;
 
-#define COMPOSE_CLEAN_COLOR RGB2COLOR(0, 0xd5, 0x2e)
-#define COMPOSE_YELLOW_COLOR RGB2COLOR(0xe7, 0xea, 0)
-#define COMPOSE_PRESS_COLOR RGB2COLOR(0xea, 0, 0x22)
+#define COMPOSE_CLEAN_COLOR retro_video_cfg.rgb2color(0, 0xd5, 0x2e)
+#define COMPOSE_YELLOW_COLOR retro_video_cfg.rgb2color(0xe7, 0xea, 0)
+#define COMPOSE_PRESS_COLOR retro_video_cfg.rgb2color(0xea, 0, 0x22)
 
 #define BASE_X 2
 #define BASE_Y (12 + ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ))

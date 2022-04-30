@@ -1,8 +1,8 @@
+
 /****************************************************************************
  *  Caprice32 libretro port
  *
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
- *  Copyright Daniel De Matteis (2012-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -36,64 +36,22 @@
  *
  ****************************************************************************************/
 
+#ifndef GFX_VIDEO_H__
+#define GFX_VIDEO_H__
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+void video_set_palette_antialias_16bpp(void);
+void video_set_palette_antialias_24bpp(void);
 
-#include <libretro.h>
-#include <libretro-core.h>
+unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
+unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
 
-#include "gfx/software.h"
-#include "retro_render.h"
-#include "assets/assets.h"
-#include "cap32.h"
+void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
+void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
 
-//unsigned int number = 0;
-extern t_CPC CPC; 
+void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
+void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
 
-void render_rect(uint32_t * buffer, mu_Rect rect, mu_Color color)
-{
-   //printf("%u rect: %ix%i %i-%i\n", number, rect.x, rect.y, rect.w, rect.h);
-   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video_cfg.rgb2color(color.r, color.g, color.b));
-}
+void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 
-void render_text(uint32_t * buffer, const char *text, mu_Vec2 pos, mu_Color color)
-{
-   draw_text(buffer, pos.x, pos.y, text, retro_video_cfg.rgb2color(color.r, color.g, color.b));
-}
-
-void render_icon(uint32_t * buffer, int id, mu_Rect rect, mu_Color color)
-{
-   char chr = 0;
-   int x, y;
-   x = rect.x + FNT_CHAR_WIDTH / 4;
-   y = rect.y + FNT_CHAR_HEIGHT / 4;
-
-   switch (id)
-   {
-      case MU_ICON_CLOSE:		chr = 'X'; break;
-      case MU_ICON_CHECK:		chr = 'X'; break;
-      case MU_ICON_COLLAPSED:	chr = '>'; break;
-      case MU_ICON_EXPANDED:	chr = 'v'; break;
-      //case MU_ICON_RESIZE:	chr = '+'; break;
-  }
-
-  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video_cfg.rgb2color(52, 25, 52));
-  draw_char(buffer, x, y, chr, retro_video_cfg.rgb2color(color.r, color.g, color.b));
-}
-
-// unneed it
-void render_clip(uint32_t * buffer, mu_Rect rect)
-{}
-
-int text_width(mu_Font font, const char *text, int len)
-{
-  if (len == -1) { len = strlen(text); }
-  return len * 8 * EMULATION_SCALE;
-}
-
-int text_height(mu_Font font)
-{
-  return 8 * EMULATION_SCALE;
-}
+#endif

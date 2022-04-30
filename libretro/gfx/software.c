@@ -47,28 +47,7 @@
 #include "assets/assets.h"
 #include "software.h"
 
-union TPixel
-{
-   struct
-   {
-      #ifdef MSB_FIRST
-      uint8_t b;
-      uint8_t g;
-      uint8_t r;
-      #else
-      uint8_t r;
-      uint8_t g;
-      uint8_t b;
-      #endif
-   };
-   unsigned int colour;
-};
-
 union TPixel pixel;
-
-#define DATA2BLUE5(colour)       (((colour>>3) & 0x1F))
-#define DATA2GREEN6(colour)      (((colour>>2) & 0x3F) << 5)
-#define DATA2RED5(colour)        (((colour>>3) & 0x1F) << 11)
 
 #ifdef LOWRES
 #define DRAW2BUFFER(buffer, img)      *(buffer++) = *(img++);
@@ -80,85 +59,30 @@ union TPixel pixel;
 }
 #endif
 
-PIXEL_TYPE convert_color (unsigned int colour)
+void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t color)
 {
-   pixel.colour = colour;
-   #ifdef M16B
-   return (
-      DATA2RED5(pixel.r)
-      | DATA2GREEN6(pixel.g)
-      | DATA2BLUE5(pixel.b)
-   );
-   #else
-   return (
-      (pixel.r << 16)
-      | (pixel.g << 8)
-      | pixel.b
-   );
-   #endif
-}
-
-void draw_line(PIXEL_TYPE * buffer, int x, int y, int width, PIXEL_TYPE color)
-{
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
-   while (width--) {
-      *(buffer++) = color;
-   }
-}
-
-void draw_rect(PIXEL_TYPE * buffer, int x, int y, int width, int height, PIXEL_TYPE color)
-{
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
+   buffer = (buffer + (x / retro_video_cfg.raw_density)) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
    while (height--)
    {
-      int loop_width = width;
-      while (loop_width--)
-         *(buffer++) = color;
-
-      buffer += EMULATION_SCREEN_WIDTH - width;
+      retro_video_cfg.draw_line(buffer, width, color);
+      // TODO: CALCULATE EMULATION_SCREEN_WIDTH
+      buffer += (EMULATION_SCREEN_WIDTH / retro_video_cfg.raw_density);
    }
 }
 
-// M16B
-static void _draw_char(PIXEL_TYPE * buffer, const unsigned char *font_data, PIXEL_TYPE color)
+void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color)
 {
-   int height = FNT_CHAR_HEIGHT;
-   while (height--)
-   {
-      unsigned char data = *font_data; // get the bitmap information for one row
-      int loop_width = FNT_CHAR_WIDTH;
-      while (loop_width--)
-      {
-         if (data & 0x80) // is the bit set?
-         {
-            if( EMULATION_SCALE == 2)
-               *(buffer++) = color;
-            *(buffer++) = color; // draw the character pixel
-         }
-         else
-         {
-            buffer += EMULATION_SCALE;
-         }
-         data <<= 1; // advance to the next bit
-      }
-      font_data ++;
-      buffer += EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * EMULATION_SCALE);
-   }
-}
-
-void draw_char(PIXEL_TYPE * buffer, int x, int y, char chr_idx, PIXEL_TYPE color)
-{
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
+   buffer = (buffer + (x / retro_video_cfg.raw_density)) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
    chr_idx -= FNT_MIN_CHAR; // zero base the index
-   _draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
+   retro_video_cfg.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
 }
 
-void draw_text(PIXEL_TYPE * buffer, int x, int y, const char *text, PIXEL_TYPE color)
+void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color)
 {
    int len = strlen(text); // number of characters to process
    char *ptr_text = (char *) text;
 
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
+   buffer = (buffer + (x / retro_video_cfg.raw_density) ) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
    while(len--)
    {
       unsigned int chr_idx = *ptr_text;
@@ -166,60 +90,41 @@ void draw_text(PIXEL_TYPE * buffer, int x, int y, const char *text, PIXEL_TYPE c
          chr_idx = FNT_MIN_CHAR;
       }
       chr_idx -= FNT_MIN_CHAR; // zero base the index
-      _draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
+      retro_video_cfg.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
       ptr_text++;
-      buffer += FNT_CHAR_WIDTH * EMULATION_SCALE;
+      buffer += FNT_CHAR_WIDTH * (EMULATION_SCALE  / retro_video_cfg.raw_density);
    }
 }
 
 
-// base image in u_int32
-void convert_image(PIXEL_TYPE * buffer, const unsigned int * img, unsigned int size)
+void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
+   buffer = (buffer + x) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
+
+   size *= retro_video_cfg.bytes;
    while (size--)
    {
-#ifndef LOWRES
-         *(buffer++) = convert_color(*img);
-#endif
-      *(buffer++) = convert_color(*(img++));
+      *(buffer++) = *(img++);
    }
 }
 
-// create linear version ??
-void draw_image(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, int width, int height)
+
+/*
+ * Prepare UI functions
+ * images are in uint32_t mode
+ */
+
+void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size)
 {
-   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
-   while (height--)
-   {
-      int loop_width = width;
-      while (loop_width--)
-      {
-         DRAW2BUFFER(buffer, img);
-      }
-      buffer += EMULATION_SCREEN_WIDTH  - (width * EMULATION_SCALE);
-   }
+   retro_video_cfg.convert_image(buffer, img, size);
 }
 
-void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size)
+void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
-   uint32_t * buffer_ptr = (uint32_t *) (
-      (PIXEL_TYPE *) (buffer + x) + (y * EMULATION_SCREEN_WIDTH)
+   uint32_t * buffer_ptr = (
+      (uint32_t *) (buffer + x) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density)
    );
    uint32_t * img_ptr = (uint32_t *) img;
-   unsigned int loop_counter = (EMULATION_SCALE * size) / retro_depth_cfg.raw_density;
-
-   while (loop_counter--)
-   {
-      *(buffer_ptr++) = *(img_ptr++);
-   }
-}
-
-void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size)
-{
-   PIXEL_TYPE * buffer_ptr = (
-      (PIXEL_TYPE *) (buffer + x) + (y * EMULATION_SCREEN_WIDTH)
-   );
-   PIXEL_TYPE * img_ptr = img;
    unsigned int loop_counter = (EMULATION_SCALE * size);
 
    while (loop_counter--)
@@ -233,3 +138,26 @@ void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y,
    }
 
 }
+
+#ifdef UNUSED
+void draw_image(uint32_t * buffer, uint32_t * img, int x, int y, int width, int height)
+{
+   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
+   while (height--)
+   {
+      int loop_width = width;
+      while (loop_width--)
+      {
+         DRAW2BUFFER(buffer, img);
+      }
+      buffer += EMULATION_SCREEN_WIDTH  - (width * EMULATION_SCALE);
+   }
+}
+void draw_line(uint32_t * buffer, int x, int y, int width, uint32_t color)
+{
+   buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);
+   while (width--) {
+      *(buffer++) = color;
+   }
+}
+#endif

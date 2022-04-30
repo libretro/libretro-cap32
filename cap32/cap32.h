@@ -254,6 +254,8 @@ typedef struct {
    void (*scr_prerendernorm)(void);
    void (*scr_prerenderbord)(void);
    void (*scr_prerendersync)(void);
+   void (*video_set_palette_antialias)(void);
+   unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
    bool scr_is_ogl;
 
    unsigned int snd_enabled;

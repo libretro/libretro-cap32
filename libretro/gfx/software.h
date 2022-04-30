@@ -42,16 +42,33 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+union TPixel
+{
+   struct
+   {
+      #ifdef MSB_FIRST
+      uint8_t b;
+      uint8_t g;
+      uint8_t r;
+      #else
+      uint8_t r;
+      uint8_t g;
+      uint8_t b;
+      #endif
+   };
+   unsigned int colour;
+};
+
 //*****************************************************************************
 // Graph helpers functions
 
-void draw_line(PIXEL_TYPE * buffer, int x, int y, int width, PIXEL_TYPE color);
-void draw_rect(PIXEL_TYPE * buffer, int x, int y, int width, int height, PIXEL_TYPE color);
-void draw_text(PIXEL_TYPE * buffer, int x, int y, const char * text, PIXEL_TYPE color);
-void draw_char(PIXEL_TYPE * buffer, int x, int y, char chr_idx, PIXEL_TYPE color);
-void draw_image(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, int width, int height);
-void draw_image_linear(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
-void draw_image_transparent(PIXEL_TYPE * buffer, PIXEL_TYPE * img, int x, int y, unsigned int size);
-void convert_image(PIXEL_TYPE * buffer, const unsigned int * img, unsigned int size);
-PIXEL_TYPE convert_color (unsigned int color);
+void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t color);
+void draw_text(uint32_t * buffer, int x, int y, const char * text, uint32_t color);
+void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color);
+void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size);
+
+//void draw_line(uint32_t * buffer, int x, int y, int width, uint32_t color);
+//void draw_image(uint32_t * buffer, uint32_t * img, int x, int y, int width, int height);
 #endif

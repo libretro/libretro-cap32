@@ -34,5 +34,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
+#ifndef GFX_LOADER_H__
+#define GFX_LOADER_H__
 
 void loader_run (char * text);
+
+#endif

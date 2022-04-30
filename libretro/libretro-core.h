@@ -85,41 +85,24 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
 //#define LOWRES
-//#define M16B // SCREEN 16BITS
 //#define MOUSE_RELATIVE // mouse relative movement
 
-#ifdef M16B
-   #define PIXEL_TYPE unsigned short
-#else
-   #define PIXEL_TYPE unsigned int
-#endif
-
 #define PIXEL_TRANSPARENT 0x0000
-//#define PIXEL_TYPE unsigned short
-#define PIXEL_PITCH_16BIT 2
-#define PIXEL_PITCH_24BIT 4
-#define PIXEL_DEPTH_DEFAULT_SIZE PIXEL_PITCH_24BIT
+#define PIXEL_DEPTH_DEFAULT_SIZE 4
 
 typedef struct {
    uint8_t raw_density;
    uint8_t bytes;
    uint8_t pitch;
-} retro_depth_t;
-extern retro_depth_t retro_depth_cfg;
-
-#ifdef M16B
-   #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
-   #define RGB2RED(colour)       (((colour>>11)<<3) & 0xFF)
-   #define RGB2GREEN(colour)     (((colour>>5)<<2) & 0xFF)
-   #define RGB2BLUE(colour)      ((colour<<3) & 0xFF)
-   #define CURSOR_COLOR          0xCE79
-#else
-   #define RGB2COLOR(r, g, b)    (b | ((g << 8) | (r << 16)))
-   #define RGB2RED(colour)       ((colour>>16) & 0xFF)
-   #define RGB2GREEN(colour)     ((colour>>8) & 0xFF)
-   #define RGB2BLUE(colour)      (colour & 0xFF)
-   #define CURSOR_COLOR          0xCCCCCC
-#endif
+   uint8_t fmt;
+   uint32_t cursor_color;
+   void (*video_set_palette_antialias)(void);
+   unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
+   void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
+   void (*draw_line)(unsigned int * dest, int width, unsigned int color);
+   void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+} retro_video_t;
+extern retro_video_t retro_video_cfg;
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 #define EMULATION_INIT_AUTORUNDELAY 50
