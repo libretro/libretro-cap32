@@ -56,7 +56,7 @@ static union TPixel pixel;
 #define DATA2RED5(colour)        (((colour>>3) & 0x1F) << 11)
 
 /**
- * generate antialias values using 32/16bits macros
+ * generate antialias values using 16bpp macros
  *
  * RGB[10] 00CE60 || CC CC 00
  * 00CE60 (10)    || C8 CC 00
@@ -70,11 +70,19 @@ void video_set_palette_antialias_16bpp(void)
    GateArray.palette[33] = (unsigned short) RGB2COLOR(r2/2, g2/2, b2/2);
 }
 
+/**
+ * rgb2color_16bpp:
+ * convert rgb to 16bpp color (see macros)
+ **/
 unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b)
 {
    return RGB2COLOR(r, g, b);
 }
 
+/**
+ * convert_color:
+ * convert raw color to 16bpp color (see macros)
+ **/
 static INLINE unsigned int convert_color(unsigned int colour)
 {
    pixel.colour = colour;
@@ -85,6 +93,10 @@ static INLINE unsigned int convert_color(unsigned int colour)
    );
 }
 
+/**
+ * draw_pixel_16bpp:
+ * simple method to emulate a transparency, almost slow but is only used on init
+ **/
 void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img)
 {
    uint16_t * buffer_ptr = (uint16_t *) dest;
@@ -100,6 +112,10 @@ void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img)
    }
 }
 
+/**
+ * convert_image_16bpp:
+ * convert raw image to 16bpp, used on init
+ **/
 void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size)
 {
    uint16_t * buffer_ptr = (uint16_t *) dest;
@@ -112,17 +128,31 @@ void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size
    }
 }
 
-void draw_line_16bpp(unsigned int * dest, int width, unsigned int color)
+/**
+ * draw_line_16bpp:
+ * copy a 16bpp color to your dest, optimized
+ **/
+void draw_line_16bpp(unsigned int * dest, int width, unsigned int colour)
 {
-   unsigned short *buffer_ptr = (unsigned short *) dest;
+   // prepare copy using 32bits
+   colour += colour << 16;
+   width >>= 1;
 
    while (width--)
-      *(buffer_ptr++) = color;
+      *(dest++) = colour;
 }
 
-void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color)
+/**
+ * draw_char_16bpp:
+ * draw a 16bpp char to your dest, optimized
+ **/
+void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int colour)
 {
+   #ifdef LOWRES
    unsigned short *buffer_ptr = (unsigned short *) dest;
+   #else
+   unsigned int *buffer_ptr = dest;
+   #endif
 
    int height = FNT_CHAR_HEIGHT;
    while (height--)
@@ -133,18 +163,19 @@ void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsign
       {
          if (data & 0x80) // is the bit set?
          {
-            #ifndef LOWRES
-            *(buffer_ptr++) = color;
+            #ifdef LOWRES
+            *(buffer_ptr++) = colour; // draw the character pixel
+            #else
+            *(buffer_ptr++) = colour + (colour << 16);
             #endif
-            *(buffer_ptr++) = color; // draw the character pixel
          }
          else
          {
-            buffer_ptr += EMULATION_SCALE;
+            buffer_ptr ++;
          }
          data <<= 1; // advance to the next bit
       }
       font_data ++;
-      buffer_ptr += EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * EMULATION_SCALE);
+      buffer_ptr += CPC_SCREEN_WIDTH - (FNT_CHAR_WIDTH);
    }
 }

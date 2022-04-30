@@ -48,6 +48,10 @@
 #include "software.h"
 #include "video.h"
 
+/**
+ * draw_rect:
+ * draw a rectangle, used by UI and KoS
+ **/
 void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t color)
 {
    buffer = (buffer + (x >> retro_video.raw_density_byte)) + (y * retro_video.bps);
@@ -59,6 +63,10 @@ void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t 
    }
 }
 
+/**
+ * draw_char:
+ * draw a char, used by mouse cursor and text
+ **/
 void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color)
 {
    buffer = (buffer + (x >> retro_video.raw_density_byte)) + (y * retro_video.bps);
@@ -66,6 +74,10 @@ void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color)
    retro_video.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
 }
 
+/**
+ * draw_text:
+ * draw a text, used by UI and KoS
+ **/
 void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color)
 {
    int len = strlen(text); // number of characters to process
@@ -91,6 +103,11 @@ void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color
    }
 }
 
+/**
+ * draw_image_linear:
+ * simple function to draw an image that occupies the entire screen
+ * does not need to recalculate the position after each line.
+ **/
 void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
    buffer = (buffer + x) + (y * retro_video.bps);
@@ -108,11 +125,20 @@ void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, i
  * images are in uint32_t mode
  */
 
+/**
+ * convert_image:
+ * convert intenal UI images to current depth mode (using video depth driver)
+ **/
 void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size)
 {
    retro_video.convert_image(buffer, img, size);
 }
 
+/**
+ * draw_image_transparent:
+ * draw a image with full transparency or not (no blend)
+ * used by KoS letters
+ **/
 void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
    uint32_t * buffer_ptr = (

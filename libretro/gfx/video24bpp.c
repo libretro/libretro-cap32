@@ -51,6 +51,12 @@ static union TPixel pixel;
 #define RGB2GREEN(colour)     ((colour>>8) & 0xFF)
 #define RGB2BLUE(colour)      (colour & 0xFF)
 
+/**
+ * generate antialias values using 24bpp macros
+ *
+ * RGB[10] 00CE60 || CC CC 00
+ * 00CE60 (10)    || C8 CC 00
+ */
 void video_set_palette_antialias_24bpp(void)
 {
    uint8_t r2,g2,b2;
@@ -60,11 +66,19 @@ void video_set_palette_antialias_24bpp(void)
    GateArray.palette[33] = (unsigned short) RGB2COLOR(r2/2, g2/2, b2/2);
 }
 
+/**
+ * rgb2color_24bpp:
+ * convert rgb to 24bpp color (see macros)
+ **/
 unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b)
 {
    return RGB2COLOR(r, g, b);
 }
 
+/**
+ * convert_color:
+ * convert raw color to 24bpp color (see macros)
+ **/
 static INLINE unsigned int convert_color(unsigned int colour)
 {
    pixel.colour = colour;
@@ -75,6 +89,10 @@ static INLINE unsigned int convert_color(unsigned int colour)
    );
 }
 
+/**
+ * draw_pixel_24bpp:
+ * simple method to emulate a transparency
+ **/
 void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img)
 {
    if (*(img) != PIXEL_TRANSPARENT)
@@ -83,6 +101,10 @@ void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img)
    }
 }
 
+/**
+ * convert_image_24bpp:
+ * convert raw image to 24bpp, used on init
+ **/
 void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size)
 {
    while (size--)
@@ -94,12 +116,20 @@ void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size
    }
 }
 
+/**
+ * draw_line_24bpp:
+ * copy a 24bpp color to your dest
+ **/
 void draw_line_24bpp(unsigned int * dest, int width, unsigned int color)
 {
    while (width--)
       *(dest++) = color;
 }
 
+/**
+ * draw_char_24bpp:
+ * draw a 24bpp char to your dest
+ **/
 void draw_char_24bpp(unsigned int * buffer_ptr, const unsigned char *font_data, unsigned int color)
 {
    int height = FNT_CHAR_HEIGHT;

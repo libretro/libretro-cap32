@@ -40,8 +40,10 @@
 #include "video.h"
 #include "assets/assets.h"
 
-
-
+/**
+ * video_setup:
+ * setup video on core boot
+ **/
 void video_setup(retro_video_depth_t video_depth)
 {
     switch (video_depth)

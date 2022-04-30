@@ -59,6 +59,21 @@ union TPixel
    unsigned int colour;
 };
 
+union TColor
+{
+   struct
+   {
+      #ifdef MSB_FIRST
+      unsigned short high;
+      unsigned short low;
+      #else
+      unsigned short low;
+      unsigned short high;
+      #endif
+   };
+    unsigned int colour;
+};
+
 //*****************************************************************************
 // Graph helpers functions
 
