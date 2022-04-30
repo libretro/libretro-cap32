@@ -36,7 +36,10 @@
  *
  ****************************************************************************************/
 
-#include "../../cap32/cap32.h"
+#ifndef GFX_AMSDOSCATALOG_H__
+#define GFX_AMSDOSCATALOG_H__
+
+#include "cap32.h"
 
 #define CAT_MAX_ENTRY 64
 #define CAT_NAME_SIZE 20
@@ -65,3 +68,5 @@ typedef struct {
 extern catalogue_info_t catalogue;
 
 int catalog_probe(t_drive *drive, unsigned char user);
+
+#endif

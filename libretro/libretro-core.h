@@ -85,36 +85,11 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
 //#define LOWRES
-//#define M16B // SCREEN 16BITS
+//#define M16B
 //#define MOUSE_RELATIVE // mouse relative movement
 
-#ifdef M16B
-   #define PIXEL_RAW_DENSITY 2
-   #define PIXEL_BYTES 1
-   #define PIXEL_TYPE unsigned short
-   #define PIXEL_TRANSPARENT 0x0000
-   #define PITCH 2
-#else
-   #define PIXEL_RAW_DENSITY 1
-   #define PIXEL_BYTES 2
-   #define PIXEL_TYPE unsigned int
-   #define PIXEL_TRANSPARENT 0x000000
-   #define PITCH 4
-#endif
-
-#ifdef M16B
-   #define RGB2COLOR(r, g, b)    ((b>>3) | ((g>>2)<<5) | ((r>>3)<<11))
-   #define RGB2RED(colour)       (((colour>>11)<<3) & 0xFF)
-   #define RGB2GREEN(colour)     (((colour>>5)<<2) & 0xFF)
-   #define RGB2BLUE(colour)      ((colour<<3) & 0xFF)
-   #define CURSOR_COLOR          0xCE79
-#else
-   #define RGB2COLOR(r, g, b)    (b | ((g << 8) | (r << 16)))
-   #define RGB2RED(colour)       ((colour>>16) & 0xFF)
-   #define RGB2GREEN(colour)     ((colour>>8) & 0xFF)
-   #define RGB2BLUE(colour)      (colour & 0xFF)
-   #define CURSOR_COLOR          0xCCCCCC
-#endif
+#define PIXEL_TRANSPARENT 0x0000
+#define PIXEL_DEPTH_DEFAULT_SIZE 4
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 #define EMULATION_INIT_AUTORUNDELAY 50

@@ -1057,6 +1057,30 @@ void set_prerender(void)
    }
 }
 
+
+void render8bpp(void)
+{
+   register uint8_t *pbPos = (uint8_t *)CPC.scr_pos;
+   register uint8_t bCount = *RendWid++;
+   while (bCount--) {
+      *pbPos++ = GateArray.palette[*RendOut++];
+   }
+   CPC.scr_pos = (uint32_t *)pbPos;
+}
+
+void render8bpp_doubleY(void)
+{
+   register uint8_t *pbPos = (uint8_t *)CPC.scr_pos;
+   register uint16_t dwLineOffs = CPC.scr_bps;
+   register uint8_t bCount = *RendWid++;
+   while (bCount--) {
+      register uint16_t val = GateArray.palette[*RendOut++];
+      *(pbPos + dwLineOffs) = val;
+      *pbPos++ = val;
+   }
+   CPC.scr_pos = (uint32_t *)pbPos;
+}
+
 void render16bpp(void)
 {
    register uint16_t *pwPos = (uint16_t *)CPC.scr_pos;
@@ -1083,20 +1107,25 @@ void render16bpp_doubleY(void)
 
 void render32bpp(void)
 {
+   register uint32_t *pwPos = (uint32_t *)CPC.scr_pos;
    register uint8_t bCount = *RendWid++;
    while (bCount--) {
-      *CPC.scr_pos++ = GateArray.palette[*RendOut++];
+      *pwPos++ = GateArray.palette[*RendOut++];
    }
+   CPC.scr_pos = (uint32_t *)pwPos;
 }
 
 void render32bpp_doubleY(void)
 {
+   register uint32_t *pwPos = (uint32_t *)CPC.scr_pos;
+   register uint16_t dwLineOffs = CPC.scr_bps;
    register uint8_t bCount = *RendWid++;
    while (bCount--) {
       register uint32_t val = GateArray.palette[*RendOut++];
-      *(CPC.scr_pos + CPC.scr_bps) = val;
-      *CPC.scr_pos++ = val;
+      *(pwPos + dwLineOffs) = val;
+      *pwPos++ = val;
    }
+   CPC.scr_pos = (uint32_t *)pwPos;
 }
 
 void crtc_cycle(int repeat_count)

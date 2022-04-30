@@ -46,9 +46,9 @@
 //*****************************************************************************
 // helpers functions
 
-void render_rect(PIXEL_TYPE * buffer, mu_Rect rect, mu_Color color);
-void render_text(PIXEL_TYPE * buffer, const char *text, mu_Vec2 pos, mu_Color color);
-void render_icon(PIXEL_TYPE * buffer, int id, mu_Rect rect, mu_Color color);
+void render_rect(uint32_t * buffer, mu_Rect rect, mu_Color color);
+void render_text(uint32_t * buffer, const char *text, mu_Vec2 pos, mu_Color color);
+void render_icon(uint32_t * buffer, int id, mu_Rect rect, mu_Color color);
 
 int text_width(mu_Font font, const char *text, int len);
 int text_height(mu_Font font);

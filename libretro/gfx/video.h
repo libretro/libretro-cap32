@@ -1,8 +1,8 @@
+
 /****************************************************************************
  *  Caprice32 libretro port
  *
  *  Copyright David Colmenero - D_Skywalk (2019-2021)
- *  Copyright Daniel De Matteis (2012-2021)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -36,54 +36,51 @@
  *
  ****************************************************************************************/
 
-#ifndef GFX_SOFTWARE_H__
-#define GFX_SOFTWARE_H__
+#ifndef GFX_VIDEO_H__
+#define GFX_VIDEO_H__
 
-#include <stdint.h>
-#include <stdbool.h>
+typedef struct {
+   uint8_t bytes;
+   uint8_t pitch;
+   uint8_t fmt;
+   uint8_t raw_density_byte;
+   uint32_t bps;
+   uint32_t cursor_color;
+   uint32_t char_size;
+   void (*video_set_palette_antialias)(void);
+   unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
+   void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
+   void (*draw_line)(unsigned int * dest, int width, unsigned int color);
+   void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+   void (*draw_pixel)(unsigned int * dest, const unsigned int * img);
+} retro_video_t;
+extern retro_video_t retro_video;
 
-union TPixel
+typedef enum
 {
-   struct
-   {
-      #ifdef MSB_FIRST
-      uint8_t b;
-      uint8_t g;
-      uint8_t r;
-      #else
-      uint8_t r;
-      uint8_t g;
-      uint8_t b;
-      #endif
-   };
-   unsigned int colour;
-};
+   DEPTH_8BPP  = 1,
+   DEPTH_16BPP = 2,
+   DEPTH_24BPP = 3,
+} retro_video_depth_t;
 
-union TColor
-{
-   struct
-   {
-      #ifdef MSB_FIRST
-      unsigned short high;
-      unsigned short low;
-      #else
-      unsigned short low;
-      unsigned short high;
-      #endif
-   };
-    unsigned int colour;
-};
+void video_setup(retro_video_depth_t video_depth);
 
-//*****************************************************************************
-// Graph helpers functions
+void video_set_palette_antialias_16bpp(void);
+void video_set_palette_antialias_24bpp(void);
 
-void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t color);
-void draw_text(uint32_t * buffer, int x, int y, const char * text, uint32_t color);
-void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color);
-void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
-void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
-void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size);
+unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
+unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
 
-//void draw_line(uint32_t * buffer, int x, int y, int width, uint32_t color);
-//void draw_image(uint32_t * buffer, uint32_t * img, int x, int y, int width, int height);
+void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
+void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
+
+void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
+void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
+
+void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+
+void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
+void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
+
 #endif

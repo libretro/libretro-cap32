@@ -36,7 +36,10 @@
  *
  ****************************************************************************************/
 
-#include "../../cap32/cap32.h"
+#ifndef GFX_FORMAT_H__
+#define GFX_FORMAT_H__
+
+#include "cap32.h"
 
 // formats info: http://www.cpcwiki.eu/index.php/ParaDOS
 
@@ -66,3 +69,5 @@ typedef struct {
 
 retro_format_info_t* format_get (t_drive *drive);
 bool format_probe_hexagon (t_drive *drive);
+
+#endif

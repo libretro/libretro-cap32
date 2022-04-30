@@ -45,6 +45,7 @@
 
 #include "assets/assets.h"
 #include "retro_events.h"
+#include "gfx/video.h"
 #include "retro_ui.h"
 
 /**
@@ -74,7 +75,12 @@ extern void Tape_Rewind(void);
 extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
-#define MAX_CURSOR_X (EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * PIXEL_BYTES))
+// --- events code
+#define MAX_KEYSYMS 324
+#define MAX_BUTTONS 14
+#define MAX_PADCFG 4
+
+#define MAX_CURSOR_X (EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * retro_video.bytes))
 #define MAX_CURSOR_Y (EMULATION_SCREEN_HEIGHT - FNT_CHAR_HEIGHT)
 
 static uint8_t keyboard_translation[MAX_KEYSYMS];

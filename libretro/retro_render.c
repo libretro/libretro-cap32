@@ -45,23 +45,26 @@
 #include <libretro-core.h>
 
 #include "gfx/software.h"
+#include "gfx/video.h"
 #include "retro_render.h"
 #include "assets/assets.h"
+#include "cap32.h"
 
 //unsigned int number = 0;
+extern t_CPC CPC; 
 
-void render_rect(PIXEL_TYPE * buffer, mu_Rect rect, mu_Color color)
+void render_rect(uint32_t * buffer, mu_Rect rect, mu_Color color)
 {
    //printf("%u rect: %ix%i %i-%i\n", number, rect.x, rect.y, rect.w, rect.h);
-   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, RGB2COLOR(color.r, color.g, color.b));
+   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
-void render_text(PIXEL_TYPE * buffer, const char *text, mu_Vec2 pos, mu_Color color)
+void render_text(uint32_t * buffer, const char *text, mu_Vec2 pos, mu_Color color)
 {
-   draw_text(buffer, pos.x, pos.y, text, RGB2COLOR(color.r, color.g, color.b));
+   draw_text(buffer, pos.x, pos.y, text, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
-void render_icon(PIXEL_TYPE * buffer, int id, mu_Rect rect, mu_Color color)
+void render_icon(uint32_t * buffer, int id, mu_Rect rect, mu_Color color)
 {
    char chr = 0;
    int x, y;
@@ -77,12 +80,12 @@ void render_icon(PIXEL_TYPE * buffer, int id, mu_Rect rect, mu_Color color)
       //case MU_ICON_RESIZE:	chr = '+'; break;
   }
 
-  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, RGB2COLOR(52, 25, 52));
-  draw_char(buffer, x, y, chr, RGB2COLOR(color.r, color.g, color.b));
+  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video.rgb2color(52, 25, 52));
+  draw_char(buffer, x, y, chr, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
 // unneed it
-void render_clip(PIXEL_TYPE * buffer, mu_Rect rect)
+void render_clip(uint32_t * buffer, mu_Rect rect)
 {}
 
 int text_width(mu_Font font, const char *text, int len)

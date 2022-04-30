@@ -28,6 +28,9 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/dsk/format.c \
 	$(CORE_DIR)/libretro/dsk/amsdos_catalog.c \
 	$(CORE_DIR)/libretro/gfx/software.c \
+	$(CORE_DIR)/libretro/gfx/video.c \
+	$(CORE_DIR)/libretro/gfx/video16bpp.c \
+	$(CORE_DIR)/libretro/gfx/video24bpp.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_bg.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_en.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_es.c \

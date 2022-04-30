@@ -57,7 +57,6 @@ bool _loader_launch(char * key_buffer, char * filename)
    return true;
 }
 
-
 bool _loader_find_file (char * key_buffer, char * filename)
 {
    for (int idx = 0; idx < catalogue.last_entry; idx++) {
@@ -179,7 +178,6 @@ void _loader_failed (char * key_buffer, bool is_system)
    strcpy(key_buffer, "CAT");
 }
 
-
 void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *current_drive)
 {
    memset(key_buffer, 0, LOADER_MAX_SIZE);
@@ -206,7 +204,7 @@ void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *curren
       return;
 
    #ifdef LOADER_DEBUG
-   printf("[  LOADER  ] bas/bin/.\n");
+   printf("[  LOADER  ] finally trying with bas/bin/dot files\n");
    #endif
 
    if(!_loader_find(key_buffer, format))
