@@ -434,7 +434,11 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_gfx_colors",
+         #ifdef M16B
+         "Video Advanced > Color Depth; 16bit",
+         #else
          "Video Advanced > Color Depth; 16bit|24bit",
+         #endif
       },
       #if 0
       {
