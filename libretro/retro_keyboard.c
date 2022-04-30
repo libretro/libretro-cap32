@@ -55,9 +55,9 @@ extern t_CPC CPC;
 extern retro_mouse_t mouse;
 extern uint32_t * keyboard_surface;
 
-#define COMPOSE_CLEAN_COLOR retro_video_cfg.rgb2color(0, 0xd5, 0x2e)
-#define COMPOSE_YELLOW_COLOR retro_video_cfg.rgb2color(0xe7, 0xea, 0)
-#define COMPOSE_PRESS_COLOR retro_video_cfg.rgb2color(0xea, 0, 0x22)
+#define COMPOSE_CLEAN_COLOR retro_video.rgb2color(0, 0xd5, 0x2e)
+#define COMPOSE_YELLOW_COLOR retro_video.rgb2color(0xe7, 0xea, 0)
+#define COMPOSE_PRESS_COLOR retro_video.rgb2color(0xea, 0, 0x22)
 
 #define BASE_X 2
 #define BASE_Y (12 + ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ))

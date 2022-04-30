@@ -75,6 +75,14 @@ static INLINE unsigned int convert_color(unsigned int colour)
    );
 }
 
+void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img)
+{
+   if (*(img) != PIXEL_TRANSPARENT)
+   {
+      *(dest) = *(img);
+   }
+}
+
 void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size)
 {
    while (size--)

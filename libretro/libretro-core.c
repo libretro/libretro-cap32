@@ -73,7 +73,7 @@ static dc_storage* dc;
 retro_log_printf_t log_cb;
 
 computer_cfg_t retro_computer_cfg;
-retro_video_t retro_video_cfg;
+retro_video_t retro_video;
 game_cfg_t game_configuration;
 
 extern t_button_cfg btnPAD[MAX_PADCFG];
@@ -170,8 +170,8 @@ int retro_getStyle(){
 }
 
 int retro_getGfxBpp(){
-    LOGI("getBPP: %u\n", 16 * retro_video_cfg.bytes);
-    return 16 * retro_video_cfg.bytes;
+    LOGI("getBPP: %u\n", 16 * retro_video.bytes);
+    return 16 * retro_video.bytes;
 }
 
 int retro_getGfxBps(){
@@ -434,7 +434,7 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_gfx_colors",
-         "Video > Color Depth; 24bit|16bit",
+         "Video Advanced > Color Depth; 16bit|24bit",
       },
       #if 0
       {
@@ -686,27 +686,11 @@ static void update_variables(void)
    {
       if (!(emu_status & COMPUTER_READY))
       {
-         if (strcmp(var.value, "16bit") == 0)
+         if (strcmp(var.value, "24bit") == 0)
          {
-            retro_video_cfg.bytes = 1;
-            retro_video_cfg.pitch = 2;
-            retro_video_cfg.raw_density = 2;
-            retro_video_cfg.rgb2color = rgb2color_16bpp;
-            retro_video_cfg.convert_image = convert_image_16bpp;
-            retro_video_cfg.draw_line = draw_line_16bpp;
-            retro_video_cfg.draw_char = draw_char_16bpp;
-            retro_video_cfg.cursor_color = 0xCE79;
-            retro_video_cfg.fmt = RETRO_PIXEL_FORMAT_RGB565;
+            video_setup(DEPTH_24BPP);
          } else {
-            retro_video_cfg.bytes = 2;
-            retro_video_cfg.pitch = 4;
-            retro_video_cfg.raw_density = 1;
-            retro_video_cfg.rgb2color = rgb2color_24bpp;
-            retro_video_cfg.convert_image = convert_image_24bpp;
-            retro_video_cfg.draw_line = draw_line_24bpp;
-            retro_video_cfg.draw_char = draw_char_24bpp;
-            retro_video_cfg.cursor_color = 0xCCCCCC;
-            retro_video_cfg.fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+            video_setup(DEPTH_16BPP);
          }
       }
    }
@@ -1319,7 +1303,7 @@ void retro_init(void)
    #else
    retro_scr_style = 4;
    #endif
-   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * retro_video_cfg.pitch;
+   gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * retro_video.pitch;
 
    fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
          EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size);
@@ -1451,13 +1435,13 @@ void retro_run(void)
    retro_PollEvent();
    retro_ui_process();
 
-   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH<<retro_video_cfg.bytes);
+   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
 }
 
 bool retro_load_game(const struct retro_game_info *game)
 {
    // notify the frontend of the retro_pixel_format we want use.
-   enum retro_pixel_format fmt = retro_video_cfg.fmt;
+   enum retro_pixel_format fmt = retro_video.fmt;
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {

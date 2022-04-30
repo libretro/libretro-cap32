@@ -48,62 +48,55 @@
 #include "software.h"
 #include "video.h"
 
-union TPixel pixel;
-
-#ifdef LOWRES
-#define DRAW2BUFFER(buffer, img)      *(buffer++) = *(img++);
-#else
-#define DRAW2BUFFER(buffer, img) \
-{ \
-   *(buffer++) = *img; \
-   *(buffer++) = *(img++); \
-}
-#endif
-
 void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t color)
 {
-   buffer = (buffer + (x / retro_video_cfg.raw_density)) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
+   buffer = (buffer + (x >> retro_video.raw_density_byte)) + (y * retro_video.bps);
+   register uint32_t screen_width = retro_video.bps;
    while (height--)
    {
-      retro_video_cfg.draw_line(buffer, width, color);
-      // TODO: CALCULATE EMULATION_SCREEN_WIDTH
-      buffer += (EMULATION_SCREEN_WIDTH / retro_video_cfg.raw_density);
+      retro_video.draw_line(buffer, width, color);
+      buffer += screen_width;
    }
 }
 
 void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color)
 {
-   buffer = (buffer + (x / retro_video_cfg.raw_density)) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
+   buffer = (buffer + (x >> retro_video.raw_density_byte)) + (y * retro_video.bps);
    chr_idx -= FNT_MIN_CHAR; // zero base the index
-   retro_video_cfg.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
+   retro_video.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
 }
 
 void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color)
 {
    int len = strlen(text); // number of characters to process
    char *ptr_text = (char *) text;
+   unsigned int chr_idx = *ptr_text;
 
-   buffer = (buffer + (x / retro_video_cfg.raw_density) ) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
+   buffer = (buffer + (x >> retro_video.raw_density_byte) ) + (y * retro_video.bps);
    while(len--)
    {
-      unsigned int chr_idx = *ptr_text;
-      if ((chr_idx < FNT_MIN_CHAR) || (chr_idx > FNT_MAX_CHAR)) { // limit it to the range of chars in the font
+      // limit it to the range of chars in the font
+      if ((chr_idx < FNT_MIN_CHAR) || (chr_idx > FNT_MAX_CHAR))
+      {
          chr_idx = FNT_MIN_CHAR;
       }
       chr_idx -= FNT_MIN_CHAR; // zero base the index
-      retro_video_cfg.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
+
+      retro_video.draw_char(buffer, &font[chr_idx * BITS_IN_BYTE], color);
+
+      // prepare next char
       ptr_text++;
-      buffer += FNT_CHAR_WIDTH * (EMULATION_SCALE  / retro_video_cfg.raw_density);
+      buffer += FNT_CHAR_WIDTH * retro_video.scale;
+      chr_idx = *ptr_text;
    }
 }
 
-
 void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
-   buffer = (buffer + x) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density);
+   buffer = (buffer + x) + (y * retro_video.bps);
 
-   size *= retro_video_cfg.bytes;
-   while (size--)
+   register uint32_t loop = size * retro_video.bytes;
+   while (loop--)
    {
       *(buffer++) = *(img++);
    }
@@ -117,30 +110,36 @@ void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, i
 
 void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size)
 {
-   retro_video_cfg.convert_image(buffer, img, size);
+   retro_video.convert_image(buffer, img, size);
 }
 
 void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
 {
    uint32_t * buffer_ptr = (
-      (uint32_t *) (buffer + x) + ((y * EMULATION_SCREEN_WIDTH) / retro_video_cfg.raw_density)
+      (uint32_t *) (buffer + x) + (y * retro_video.bps)
    );
    uint32_t * img_ptr = (uint32_t *) img;
    unsigned int loop_counter = (EMULATION_SCALE * size);
 
    while (loop_counter--)
    {
-      uint32_t value = *(img_ptr++);
-      if (value != PIXEL_TRANSPARENT)
-      {
-         *(buffer_ptr) = value;
-      }
-      buffer_ptr++;
+      retro_video.draw_pixel(buffer_ptr++, img_ptr++);
    }
 
 }
 
 #ifdef UNUSED
+
+#ifdef LOWRES
+#define DRAW2BUFFER(buffer, img)      *(buffer++) = *(img++);
+#else
+#define DRAW2BUFFER(buffer, img) \
+{ \
+   *(buffer++) = *img; \
+   *(buffer++) = *(img++); \
+}
+#endif
+
 void draw_image(uint32_t * buffer, uint32_t * img, int x, int y, int width, int height)
 {
    buffer = (buffer + x) + (y * EMULATION_SCREEN_WIDTH);

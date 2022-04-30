@@ -85,6 +85,21 @@ static INLINE unsigned int convert_color(unsigned int colour)
    );
 }
 
+void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img)
+{
+   uint16_t * buffer_ptr = (uint16_t *) dest;
+   uint16_t * img_ptr = (uint16_t *) img;
+
+   if (*(img_ptr) != PIXEL_TRANSPARENT)
+   {
+      *(buffer_ptr) = *(img_ptr);
+   }
+   if (*(img_ptr+1) != PIXEL_TRANSPARENT)
+   {
+      *(buffer_ptr+1) = *(img_ptr+1);
+   }
+}
+
 void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size)
 {
    uint16_t * buffer_ptr = (uint16_t *) dest;

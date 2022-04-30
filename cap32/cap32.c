@@ -1518,7 +1518,7 @@ int video_init (void)
 
 
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
-                     / (2 / retro_video_cfg.bytes) ) ;
+                     / (2 / retro_video.bytes) ) ;
 
    return 0;
 }

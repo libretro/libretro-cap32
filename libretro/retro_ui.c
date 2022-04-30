@@ -200,7 +200,7 @@ void retro_show_statusbar()
 
 void retro_ui_prepare(void)
 {
-   cursor_color = retro_video_cfg.cursor_color;
+   cursor_color = retro_video.cursor_color;
    // convert KeyboardOnScreen to current video/color-depth
    convert_image(
       keyboard_surface,
@@ -253,14 +253,14 @@ void retro_ui_update_text()
       UI_STRING_Y,
       80 * EMULATION_SCALE,
       8,
-      retro_video_cfg.rgb2color(0x2c, 0x2c, 0x2c)
+      retro_video.rgb2color(0x2c, 0x2c, 0x2c)
       );
    draw_text(
       keyboard_surface,
       UI_STRING_X,
       UI_STRING_Y,
       ui_string,
-      retro_video_cfg.rgb2color(0x63, 0x63, 0x63)
+      retro_video.rgb2color(0x63, 0x63, 0x63)
    );
 }
 
@@ -276,7 +276,7 @@ void retro_ui_draw_db(void)
       UI_STRING_Y + 4,
       5 * EMULATION_SCALE,
       3,
-      retro_video_cfg.rgb2color(0x3f, 0x3f, 0x3f)
+      retro_video.rgb2color(0x3f, 0x3f, 0x3f)
       );
 
    draw_rect(
@@ -285,7 +285,7 @@ void retro_ui_draw_db(void)
       UI_STRING_Y + 1,
       3 * EMULATION_SCALE,
       1,
-      retro_video_cfg.rgb2color(0xcc, 0xcc, 0xcc)
+      retro_video.rgb2color(0xcc, 0xcc, 0xcc)
       );
 }
 
@@ -338,7 +338,9 @@ void retro_ui_set_led(bool value)
       4,
       7 * EMULATION_SCALE,
       3,
-      value ? retro_video_cfg.rgb2color(0xea, 0, 0x22) : retro_video_cfg.rgb2color(0x57, 0, 0x0d)
+      value
+         ? retro_video.rgb2color(0xea, 0, 0x22)
+         : retro_video.rgb2color(0x57, 0, 0x0d)
    );
 }
 

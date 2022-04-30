@@ -84,7 +84,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 // compile flags
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
-#define LOWRES
+//#define LOWRES
 //#define MOUSE_RELATIVE // mouse relative movement
 
 #define PIXEL_TRANSPARENT 0x0000

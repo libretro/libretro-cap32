@@ -1,4 +1,3 @@
-
 /****************************************************************************
  *  Caprice32 libretro port
  *
@@ -36,51 +35,47 @@
  *
  ****************************************************************************************/
 
-#ifndef GFX_VIDEO_H__
-#define GFX_VIDEO_H__
+#include "libretro.h"
+#include "libretro-core.h"
+#include "video.h"
 
-typedef struct {
-   uint8_t bytes;
-   uint8_t pitch;
-   uint8_t fmt;
-   uint8_t raw_density_byte;
-   uint32_t bps;
-   uint32_t scale;
-   uint32_t cursor_color;
-   void (*video_set_palette_antialias)(void);
-   unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
-   void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
-   void (*draw_line)(unsigned int * dest, int width, unsigned int color);
-   void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-   void (*draw_pixel)(unsigned int * dest, const unsigned int * img);
-} retro_video_t;
-extern retro_video_t retro_video;
 
-typedef enum
+
+void video_setup(retro_video_depth_t video_depth)
 {
-   DEPTH_8BPP  = 1,
-   DEPTH_16BPP = 2,
-   DEPTH_24BPP = 3,
-} retro_video_depth_t;
+    switch (video_depth)
+    {
+    case DEPTH_8BPP:
+        break;
 
-void video_setup(retro_video_depth_t video_depth);
+    case DEPTH_24BPP:
+        retro_video.bytes = 2;
+        retro_video.pitch = 4;
+        retro_video.raw_density_byte = 0;
+        retro_video.rgb2color = rgb2color_24bpp;
+        retro_video.convert_image = convert_image_24bpp;
+        retro_video.draw_line = draw_line_24bpp;
+        retro_video.draw_char = draw_char_24bpp;
+        retro_video.draw_pixel = draw_pixel_24bpp;
+        retro_video.cursor_color = 0xCCCCCC;
+        retro_video.fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+        break;
 
-void video_set_palette_antialias_16bpp(void);
-void video_set_palette_antialias_24bpp(void);
+    default:
+        retro_video.bytes = 1;
+        retro_video.pitch = 2;
+        retro_video.raw_density_byte = 1;
+        retro_video.rgb2color = rgb2color_16bpp;
+        retro_video.convert_image = convert_image_16bpp;
+        retro_video.draw_line = draw_line_16bpp;
+        retro_video.draw_char = draw_char_16bpp;
+        retro_video.draw_pixel = draw_pixel_16bpp;
+        retro_video.cursor_color = 0xCE79;
+        retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
+        break;
+    }
 
-unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
-unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
-
-void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
-void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
-
-void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
-void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
-
-void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-
-void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
-void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
-
-#endif
+    // cached values
+    retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
+    retro_video.scale = EMULATION_SCALE >> retro_video.raw_density_byte;
+}

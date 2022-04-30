@@ -56,12 +56,12 @@ extern t_CPC CPC;
 void render_rect(uint32_t * buffer, mu_Rect rect, mu_Color color)
 {
    //printf("%u rect: %ix%i %i-%i\n", number, rect.x, rect.y, rect.w, rect.h);
-   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video_cfg.rgb2color(color.r, color.g, color.b));
+   draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
 void render_text(uint32_t * buffer, const char *text, mu_Vec2 pos, mu_Color color)
 {
-   draw_text(buffer, pos.x, pos.y, text, retro_video_cfg.rgb2color(color.r, color.g, color.b));
+   draw_text(buffer, pos.x, pos.y, text, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
 void render_icon(uint32_t * buffer, int id, mu_Rect rect, mu_Color color)
@@ -80,8 +80,8 @@ void render_icon(uint32_t * buffer, int id, mu_Rect rect, mu_Color color)
       //case MU_ICON_RESIZE:	chr = '+'; break;
   }
 
-  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video_cfg.rgb2color(52, 25, 52));
-  draw_char(buffer, x, y, chr, retro_video_cfg.rgb2color(color.r, color.g, color.b));
+  draw_rect(buffer, rect.x, rect.y, rect.w, rect.h, retro_video.rgb2color(52, 25, 52));
+  draw_char(buffer, x, y, chr, retro_video.rgb2color(color.r, color.g, color.b));
 }
 
 // unneed it
