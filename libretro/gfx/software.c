@@ -86,7 +86,7 @@ void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color
 
       // prepare next char
       ptr_text++;
-      buffer += FNT_CHAR_WIDTH * retro_video.scale;
+      buffer += retro_video.char_size;
       chr_idx = *ptr_text;
    }
 }

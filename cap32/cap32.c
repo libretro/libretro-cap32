@@ -1445,7 +1445,6 @@ void video_set_style (void)
    {
       dwXScale = 1;
       dwYScale = 1;
-
    }
    else                    //768x272
    {
@@ -1505,39 +1504,19 @@ void video_set_style (void)
 int video_init (void)
 {
    int error_code;
+
    CPC.scr_bpp = retro_getGfxBpp();
+   CPC.scr_style     = retro_getStyle();
+   CPC.scr_bps       = retro_getGfxBps();
+   CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
 
    video_set_style();
    error_code = video_set_palette(); // init CPC colours and hardware palette (in 8bpp mode)
    if (error_code)
       return error_code;
 
-   CPC.scr_style     = retro_getStyle();
-   CPC.scr_bps       = retro_getGfxBps();
-   CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
-
-
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
                      / (2 / retro_video.bytes) ) ;
-
-   return 0;
-}
-
-void video_shutdown (void)
-{
-}
-
-void video_display (void)
-{
-}
-
-void input_swap_joy (void)
-{
-
-}
-
-int input_init (void)
-{
 
    return 0;
 }
@@ -1889,7 +1868,6 @@ void doCleanUp (void)
       free(zip_info.pchFileNames);
 
    audio_shutdown();
-   video_shutdown();
 
    #ifdef DEBUG
    fclose(pfoDebug);

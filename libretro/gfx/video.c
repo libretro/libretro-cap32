@@ -38,6 +38,7 @@
 #include "libretro.h"
 #include "libretro-core.h"
 #include "video.h"
+#include "assets/assets.h"
 
 
 
@@ -77,5 +78,5 @@ void video_setup(retro_video_depth_t video_depth)
 
     // cached values
     retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
-    retro_video.scale = EMULATION_SCALE >> retro_video.raw_density_byte;
+    retro_video.char_size = (FNT_CHAR_WIDTH >> retro_video.raw_density_byte) * EMULATION_SCALE;
 }

@@ -1326,7 +1326,6 @@ void retro_init(void)
       LOGI("AUDIO FORMAT is not supported.\n");
 }
 
-extern void main_exit();
 void retro_deinit(void)
 {
    free_retro_snd();

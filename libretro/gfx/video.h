@@ -45,8 +45,8 @@ typedef struct {
    uint8_t fmt;
    uint8_t raw_density_byte;
    uint32_t bps;
-   uint32_t scale;
    uint32_t cursor_color;
+   uint32_t char_size;
    void (*video_set_palette_antialias)(void);
    unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
    void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
