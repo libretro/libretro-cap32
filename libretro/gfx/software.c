@@ -46,6 +46,7 @@
 
 #include "assets/assets.h"
 #include "software.h"
+#include "video.h"
 
 union TPixel pixel;
 

@@ -49,6 +49,7 @@
 #include "retro_keyboard.h"
 #include "assets/assets.h"
 #include "gfx/software.h"
+#include "gfx/video.h"
 
 extern t_CPC CPC;
 extern retro_mouse_t mouse;

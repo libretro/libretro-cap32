@@ -84,25 +84,11 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 // compile flags
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
-//#define LOWRES
+#define LOWRES
 //#define MOUSE_RELATIVE // mouse relative movement
 
 #define PIXEL_TRANSPARENT 0x0000
 #define PIXEL_DEPTH_DEFAULT_SIZE 4
-
-typedef struct {
-   uint8_t raw_density;
-   uint8_t bytes;
-   uint8_t pitch;
-   uint8_t fmt;
-   uint32_t cursor_color;
-   void (*video_set_palette_antialias)(void);
-   unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
-   void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
-   void (*draw_line)(unsigned int * dest, int width, unsigned int color);
-   void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-} retro_video_t;
-extern retro_video_t retro_video_cfg;
 
 #define WINDOW_MAX_SIZE (TEX_MAX_WIDTH * TEX_MAX_HEIGHT)
 #define EMULATION_INIT_AUTORUNDELAY 50

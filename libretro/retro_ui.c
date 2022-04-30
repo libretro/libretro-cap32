@@ -48,6 +48,7 @@
 #include "cart.h"
 #include "retro_ui.h"
 #include "gfx/software.h"
+#include "gfx/video.h"
 #include "retro_events.h"
 #include "retro_render.h"
 #include "retro_keyboard.h"

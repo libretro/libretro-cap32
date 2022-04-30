@@ -45,6 +45,7 @@
 
 #include "assets/assets.h"
 #include "retro_events.h"
+#include "gfx/video.h"
 #include "retro_ui.h"
 
 /**

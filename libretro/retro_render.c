@@ -45,6 +45,7 @@
 #include <libretro-core.h>
 
 #include "gfx/software.h"
+#include "gfx/video.h"
 #include "retro_render.h"
 #include "assets/assets.h"
 #include "cap32.h"
