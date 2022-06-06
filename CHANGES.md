@@ -1,4 +1,5 @@
 # Future
+- DB: sync clean-cpc-db v1.0
 - DB: documented correctly RMP files
 - AUTORUN: added better code inspired by Fredouille - caprice-forever
 - DB: new games from retroachievements
