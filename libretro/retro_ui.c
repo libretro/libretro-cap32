@@ -266,8 +266,8 @@ void retro_ui_update_text()
 
 void retro_ui_draw_db(void)
 {
-   // darker DSK if no btn or cmd is found
-   if (game_configuration.has_btn || game_configuration.has_command)
+   // darker DSK if hash is unknown
+   if (game_configuration.is_clean)
       return;
 
    draw_rect(

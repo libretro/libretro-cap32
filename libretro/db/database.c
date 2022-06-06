@@ -1,13 +1,15 @@
 #include <libretro-core.h>
 #include <retro_events.h>
 
+#include "db-clean.h"
+#include "db-fail.h"
 #include "entries.h"
 
 // #define DEBUG_DATABASE
 
 extern t_button_cfg btnPAD[MAX_PADCFG];
 
-unsigned char get_keybind (unsigned int key, unsigned char position)
+static unsigned char get_keybind (unsigned int key, unsigned char position)
 {
    switch (key)
    {
@@ -31,7 +33,7 @@ unsigned char get_keybind (unsigned int key, unsigned char position)
    }
 }
 
-const char * string_find(const char * data, size_t data_leng, unsigned int position)
+static const char * string_find(const char * data, size_t data_leng, unsigned int position)
 {
    for(size_t n = 0; n < (data_leng - 1); n++)
    {
@@ -45,7 +47,7 @@ const char * string_find(const char * data, size_t data_leng, unsigned int posit
    return NULL;
 }
 
-void command_add(unsigned int command_position)
+static void command_add(unsigned int command_position)
 {
    const char * command = string_find(commands, sizeof(commands), command_position);
 
@@ -56,7 +58,7 @@ void command_add(unsigned int command_position)
    game_configuration.has_command = true;
 }
 
-void database_entry(t_file_entry * entry)
+static void database_entry(t_file_entry * entry)
 {
    if (entry->btn_map[0])
    {
@@ -73,16 +75,16 @@ void database_entry(t_file_entry * entry)
    }
 }
 
-bool get_database(const uint32_t hash)
+bool db_info(const uint32_t hash)
 {
-   uint32_t db_size = sizeof(database) / sizeof(t_file_entry);
+   uint32_t db_size = sizeof(dbinfo) / sizeof(t_file_entry);
    for (int n = 0; n < db_size; n++)
    {
-      for(int i = 0; database[n].hash_list[i]; i++)
+      for(int i = 0; dbinfo[n].hash_list[i]; i++)
       {
-         if (database[n].hash_list[i] == hash)
+         if (dbinfo[n].hash_list[i] == hash)
          {
-            database_entry(&database[n]);
+            database_entry(&dbinfo[n]);
             #ifdef _UNITTEST_DEBUG
             printf("[  ENTRY!  ] --- crc: 0x%x cmd: %i\n", hash, game_configuration.has_command);
             #endif
@@ -90,5 +92,33 @@ bool get_database(const uint32_t hash)
          }
       }
    }
+   return false;
+}
+
+bool db_fail(const uint32_t hash)
+{
+   uint32_t db_size = sizeof(dbfail) / sizeof(uint32_t);
+   for (int n = 0; n < db_size; n++)
+   {
+      if(dbfail[n] == hash)
+      {
+         return true;
+      }
+   }
+
+   return false;
+}
+
+bool db_clean(const uint32_t hash)
+{
+   uint32_t db_size = sizeof(dbclean) / sizeof(uint32_t);
+   for (int n = 0; n < db_size; n++)
+   {
+      if(dbclean[n] == hash)
+      {
+         return true;
+      }
+   }
+
    return false;
 }

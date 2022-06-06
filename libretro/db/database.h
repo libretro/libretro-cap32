@@ -12,4 +12,6 @@ typedef struct {
    int loader_command;
 } t_file_entry;
 
-bool get_database(const uint32_t hash);
+bool db_info(const uint32_t hash);
+bool db_fail(const uint32_t hash);
+bool db_clean(const uint32_t hash);
