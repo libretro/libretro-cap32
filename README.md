@@ -19,7 +19,7 @@ Try some CRT shaders and welcome back to the 80s on you're good old CPC.
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 
-## GameData Base
+## Game Database based on clean-cpc-db
 
 ![imagen](https://user-images.githubusercontent.com/560310/172238790-09ca924a-099c-4c45-a0be-1738b8d6fa6f.png)
 
