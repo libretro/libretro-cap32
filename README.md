@@ -21,7 +21,7 @@ Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
 ## GameData Base
 
-![imagen](https://user-images.githubusercontent.com/560310/172236445-95411928-bc25-4790-9f07-b5381de02441.png)
+![imagen](https://user-images.githubusercontent.com/560310/172238790-09ca924a-099c-4c45-a0be-1738b8d6fa6f.png)
 
 Our game database is based on [clean-cpc-db](https://github.com/clean-cpc-db). A database that [has checked every game](https://github.com/libretro/libretro-cap32/issues/112) so that you don't have to spend whole day of finding the correct and functional version of your favorite game. In clean-cpc-db you'll find **only clean versions with no weird intros or menus, just working games!**
 
