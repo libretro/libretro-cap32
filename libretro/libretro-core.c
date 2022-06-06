@@ -1116,16 +1116,20 @@ void computer_load_file() {
    uint32_t hash = get_hash(retro_content_filepath);
    if (hash)
    {
+      // check clean-cpc-db hash
       game_configuration.is_fail = db_fail(hash);
       if(!game_configuration.is_fail)
       {
+         // cleaned games appear with GREEN DSK
          game_configuration.is_clean = db_clean(hash);
          db_info(hash);
       }
       else
       {
+         // warn user is a unsupported ROM
          retro_message("ROM marked as NOT WORKING.");
       }
+
       LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
          hash,
          game_configuration.has_btn,
