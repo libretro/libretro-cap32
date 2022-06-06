@@ -29,9 +29,6 @@ Due to the creation of this database, we have started a small game mapping proje
 
 * [Contribute with your RMP files](https://github.com/libretro/libretro-cap32/wiki/%5Bcolaborate%5D-create-a-new-RMP-for-your-favorite-game!)
 
-When a game is loaded if was detected as *unknown version*, a grey disc icon appears at the bottom.
-![imagen](https://user-images.githubusercontent.com/560310/172237557-ed244c3d-78f5-41f2-92ce-4522d9491b2e.png)
-
 When a game is detected as a **clean version**, a green disc icon appears at the bottom.
 ![imagen](https://user-images.githubusercontent.com/560310/172237853-0a18ebee-be5e-4dec-90fa-e4ca7b77a2d7.png)
 
