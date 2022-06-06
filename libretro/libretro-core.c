@@ -83,7 +83,7 @@ extern int snapshot_load (char *pchFileName);
 extern int attach_disk(char *arv, int drive);
 extern int detach_disk(int drive);
 extern int tape_insert (char *pchFileName);
-extern int cart_insert (char *pchFileName);
+extern int cart_start (char *pchFileName);
 extern void enter_gui(void);
 extern int Retro_PollEvent();
 extern void retro_loop(void);
@@ -1103,11 +1103,13 @@ void computer_load_bios() {
    // cart is like a system bios
    if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CPR, 3))
    {
-      int result = cart_insert(retro_content_filepath);
+      int result = cart_start(retro_content_filepath);
       if(result != 0) {
          retro_message("Error Loading Cart...");
       }
    }
+
+   cpm_start();
 }
 
 // load content

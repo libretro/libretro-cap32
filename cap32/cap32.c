@@ -337,7 +337,7 @@ typedef enum {
 #include "rom/6128.h"
 #include "rom/6128p.h"
 #include "rom/amsdos.h"
-
+#include "rom/cpm.h"
 
 char chAppPath[_MAX_PATH + 1];
 char chROMSelected[_MAX_PATH + 1];
@@ -1260,7 +1260,7 @@ void emulator_shutdown (void)
    pbGPBuffer = NULL;
 }
 
-int cart_insert (char *pchFileName) {
+int cart_start (char *pchFileName) {
 
    if(retro_computer_cfg.model != 3) {
       fprintf(stderr, "Cartridge ERROR: Please select CPC6128+.\n");
@@ -1281,6 +1281,13 @@ int cart_insert (char *pchFileName) {
       emulator_shutdown();
       emulator_init();
    }
+
+   return 0;
+}
+
+int cpm_start (void)
+{
+   cpm_boot(CPM, "HOLA");
 
    return 0;
 }
