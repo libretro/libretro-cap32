@@ -52,6 +52,23 @@ Manic Miner (UK) (1984) (Version Basic 1.0) [Amsoft].dsk => 664
 Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
 ```
 
+# GameData Base
+
+![imagen](https://user-images.githubusercontent.com/560310/172236445-95411928-bc25-4790-9f07-b5381de02441.png)
+
+Our game database is based on [clean-cpc-db](https://github.com/clean-cpc-db). A database that [has checked every game](https://github.com/libretro/libretro-cap32/issues/112) so that you don't have to spend whole day of finding the correct and functional version of your favorite game. In clean-cpc-db you'll find **only clean versions with no weird intros or menus, just working games!**
+
+Due to the creation of this database, we have started a small game mapping project, to bring an easyest CPC plug and play experiencie! You can help us...
+
+* [Contribute with your RMP files](https://github.com/libretro/libretro-cap32/wiki/%5Bcolaborate%5D-create-a-new-RMP-for-your-favorite-game!)
+
+When a game is loaded if was detected as *unknown version*, a grey disc icon appears at the bottom.
+![imagen](https://user-images.githubusercontent.com/560310/172237557-ed244c3d-78f5-41f2-92ce-4522d9491b2e.png)
+
+When a game is detected as a **clean version**, a green disc icon appears at the bottom.
+![imagen](https://user-images.githubusercontent.com/560310/172237853-0a18ebee-be5e-4dec-90fa-e4ca7b77a2d7.png)
+
+
 # Known Bugs
 
 - [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59)
