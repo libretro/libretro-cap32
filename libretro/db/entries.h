@@ -39,7 +39,7 @@
 #include "database.h"
 
 // clean-cpc-db CRC database
-t_file_entry database[] = {
+t_file_entry dbinfo[] = {
    { // Abadia Del Crimen.rmp
       {0xaa05ed4a, 0xd37cf8e7},
       {RETROK_z, RETROK_s, DB_CLEAN, RETROK_SPACE, DB_CLEAN, DB_CLEAN, RETROK_k, RETROK_l, RETROK_a, RETROK_n, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},

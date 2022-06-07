@@ -190,6 +190,8 @@ typedef struct {
    char loader_command[LOADER_MAX_SIZE];
    bool has_command;
    bool has_btn;
+   bool is_fail;
+   bool is_clean;
 } game_cfg_t;
 extern game_cfg_t game_configuration;
 

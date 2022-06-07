@@ -10,15 +10,30 @@ You can download the caprice32 original source code [here](http://sourceforge.ne
 
 And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
-The core work pretty well and give the fantastic ability to use the RetroArch Shaders.
+The core works pretty well and give the fantastic ability to use the RetroArch Shaders.
 
-Try some CRT shaders and welcome back to the 80s on you're good old CPC.
+Try some CRT shaders and welcome back to the 80s on your good old CPC.
 
 ## Usage
 
 Launch a TAPE (cdt), DSK or M3U, and game should autostart.
 
-### Keyboard emulated layout
+
+## Game Database
+
+![imagen](https://user-images.githubusercontent.com/560310/172238790-09ca924a-099c-4c45-a0be-1738b8d6fa6f.png)
+
+Our game database is based on [clean-cpc-db](https://github.com/clean-cpc-db). A database that [has checked every game](https://github.com/libretro/libretro-cap32/issues/112) so that you don't have to spend whole day of finding the correct and functional version of your favorite game. In clean-cpc-db you'll find **only clean versions with no weird intros or menus, just working games!**
+
+Due to the creation of this database, we have started a small game mapping project, to bring an easyest CPC plug and play experiencie! You can help us...
+
+* [Contribute with your RMP files](https://github.com/libretro/libretro-cap32/wiki/%5Bcolaborate%5D-create-a-new-RMP-for-your-favorite-game!)
+
+When a game is detected as a **clean version**, a green disc icon appears at the bottom.
+![imagen](https://user-images.githubusercontent.com/560310/172237853-0a18ebee-be5e-4dec-90fa-e4ca7b77a2d7.png)
+
+
+## Keyboard emulated layout
 #### English layout
 ![keyb_en](https://user-images.githubusercontent.com/560310/54316312-abdeb180-45e0-11e9-9063-faf78fec9d6d.png)
 #### Spanish layout

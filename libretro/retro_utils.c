@@ -185,25 +185,25 @@ uint32_t crc32_calculate(uint8_t * data, uint32_t size) {
    return ~crc;
 }
 
-uint32_t get_hash(const char* pchFileName) {
+uint32_t get_hash(const char* filename) {
 
    uint32_t size;
 
-   if ((pfileObject = fopen(pchFileName, "rb")) == NULL)
+   if ((pfileObject = fopen(filename, "rb")) == NULL)
    {
-       return 0;
+      return 0;
    }
 
    size = file_size(fileno(pfileObject));
    if (!size)
-   { // the sna image should have at least the header...
+   { // the file should have at least the DSK header...
       fclose(pfileObject);
       return 0;
    }
 
    uint8_t * data = (uint8_t *) malloc(size);
 
-   if(!fread(data, size, 1, pfileObject)) { // read snapshot
+   if(!fread(data, size, 1, pfileObject)) { // read whole file
       fclose(pfileObject);
       free(data);
       return 0;
