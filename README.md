@@ -10,9 +10,9 @@ You can download the caprice32 original source code [here](http://sourceforge.ne
 
 And of course for the RetroArch/Libretro team : "http://www.libretro.com"
 
-The core work pretty well and give the fantastic ability to use the RetroArch Shaders.
+The core works pretty well and give the fantastic ability to use the RetroArch Shaders.
 
-Try some CRT shaders and welcome back to the 80s on you're good old CPC.
+Try some CRT shaders and welcome back to the 80s on your good old CPC.
 
 ## Usage
 
