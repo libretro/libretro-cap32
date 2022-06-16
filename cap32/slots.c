@@ -30,6 +30,7 @@
 #include "z80.h"
 #include "errors.h"
 #include "retro_utils.h"
+#include "rom/cpm.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -61,127 +62,17 @@ uint8_t *pbTapeImageEnd = NULL;
 uint8_t *pbSnaImage = NULL;
 
 
-int cpm_boot_f (uint8_t *cpm_buffer, char * runfile)
+int cpm_boot (char * runfile)
 {
-   reg_pair port;
-   int n;
-   uint8_t val;
-   t_SNA_header sh;
+   uint8_t* cpmROM = (uint8_t *)malloc(CPM_SIZE);
 
-   memcpy(&sh, cpm_buffer, sizeof(sh));
-   memcpy(pbRAM, (uint8_t*)(cpm_buffer + sizeof(sh)), 0x600); // read memory dump into CPC RAM
+   memset(cpmROM, 0, CPM_SIZE);
+   memcpy(cpmROM, (uint8_t*) CPM, 0x600 + sizeof(t_SNA_header)); // read memory dump into CPM ROM
+   memcpy(cpmROM + 0x9700 + sizeof(t_SNA_header), (uint8_t*) CPM_SYS, 0x27ff); // read memory dump into CPM ROM
+   strcpy((char *) &cpmROM[0xAD44 + sizeof(t_SNA_header)], runfile);
+   cpmROM[0xAD42 + sizeof(t_SNA_header)] = strlen(runfile) + 1;
 
-      // Z80
-   _A = sh.AF[1];
-   _F = sh.AF[0];
-   _B = sh.BC[1];
-   _C = sh.BC[0];
-   _D = sh.DE[1];
-   _E = sh.DE[0];
-   _H = sh.HL[1];
-   _L = sh.HL[0];
-   _R = sh.R & 0x7f;
-   _Rb7 = sh.R & 0x80; // bit 7 of R
-   _I = sh.I;
-   if (sh.IFF0)
-     _IFF1 = Pflag;
-   if (sh.IFF1)
-     _IFF2 = Pflag;
-   _IXh = sh.IX[1];
-   _IXl = sh.IX[0];
-   _IYh = sh.IY[1];
-   _IYl = sh.IY[0];
-   z80.SP.b.h = sh.SP[1];
-   z80.SP.b.l = sh.SP[0];
-   z80.PC.b.h = sh.PC[1];
-   z80.PC.b.l = sh.PC[0];
-   _IM = sh.IM; // interrupt mode
-   z80.AFx.b.h = sh.AFx[1];
-   z80.AFx.b.l = sh.AFx[0];
-   z80.BCx.b.h = sh.BCx[1];
-   z80.BCx.b.l = sh.BCx[0];
-   z80.DEx.b.h = sh.DEx[1];
-   z80.DEx.b.l = sh.DEx[0];
-   z80.HLx.b.h = sh.HLx[1];
-   z80.HLx.b.l = sh.HLx[0];
-   // Gate Array
-   port.b.h = 0x7f;
-   for (n = 0; n < 17; n++) { // loop for all colours + border
-      GateArray.pen = n;
-      val = sh.ga_ink_values[n]; // GA palette entry
-      z80_OUT_handler(port, val | (1 << 6));
-   }
-   val = sh.ga_pen; // GA pen
-   z80_OUT_handler(port, (val & 0x3f));
-   val = sh.ga_ROM_config; // GA ROM configuration
-   z80_OUT_handler(port, (val & 0x3f) | (2 << 6));
-   val = sh.ga_RAM_config; // GA RAM configuration
-   z80_OUT_handler(port, (val & 0x3f) | (3 << 6));
-   // CRTC
-   port.b.h = 0xbd;
-   for (n = 0; n < 18; n++) { // loop for all CRTC registers
-      val = sh.crtc_registers[n];
-      CRTC.reg_select = n;
-      z80_OUT_handler(port, val);
-   }
-   port.b.h = 0xbc;
-   val = sh.crtc_reg_select; // CRTC register select
-   z80_OUT_handler(port, val);
-   // ROM select
-   port.b.h = 0xdf;
-   val = sh.upper_ROM; // upper ROM number
-   z80_OUT_handler(port, val);
-   // PPI
-   port.b.h = 0xf4; // port A
-   z80_OUT_handler(port, sh.ppi_A);
-   port.b.h = 0xf5; // port B
-   z80_OUT_handler(port, sh.ppi_B);
-   port.b.h = 0xf6; // port C
-   z80_OUT_handler(port, sh.ppi_C);
-   port.b.h = 0xf7; // control
-   z80_OUT_handler(port, sh.ppi_control);
-   // PSG
-   PSG.control = PPI.portC;
-   PSG.reg_select = sh.psg_reg_select;
-   for (n = 0; n < 16; n++) // loop for all PSG registers
-      SetAYRegister(n, sh.psg_registers[n]);
-
-   FDC.motor = sh.fdc_motor;
-   driveA.current_track = sh.drvA_current_track;
-   driveB.current_track = sh.drvB_current_track;
-
-   printf("booT!\n");
-
-   FILE *fp = fopen("mem.bin", "w");
-   fwrite(pbRAM, 2048, 1, fp);
-
-   return 0; // boot ok!
-}
-
-
-int cpm_boot (uint8_t *cpm_buffer, char * runfile)
-{
-   uint32_t size;
-
-   if ((pfileObject = fopen("cpm-boot-full-128-no-rom.sna", "rb")) != NULL)
-   {
-      size = file_size(fileno(pfileObject));
-      if (size <= sizeof(t_SNA_header))
-      { // the sna image should have at least the header...
-         fclose(pfileObject);
-         return ERR_SNA_INVALID;
-      }
-
-      pbSnaImage = (uint8_t *)malloc(size);
-
-      if(!fread(pbSnaImage, size, 1, pfileObject)) { // read snapshot
-         fclose(pfileObject);
-         return ERR_SNA_INVALID;
-      }
-      return snapshot_load_mem(pbSnaImage, size);
-   }
-
-   return -1;
+   return snapshot_load_mem(cpmROM, CPM_SIZE);
 }
 
 /**

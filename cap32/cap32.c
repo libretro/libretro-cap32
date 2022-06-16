@@ -337,7 +337,6 @@ typedef enum {
 #include "rom/6128.h"
 #include "rom/6128p.h"
 #include "rom/amsdos.h"
-#include "rom/cpm.h"
 
 char chAppPath[_MAX_PATH + 1];
 char chROMSelected[_MAX_PATH + 1];
@@ -1287,9 +1286,7 @@ int cart_start (char *pchFileName) {
 
 int cpm_start (void)
 {
-   cpm_boot(CPM, "HOLA");
-
-   return 0;
+   return cpm_boot("DIR\n");
 }
 
 int printer_start (void)
