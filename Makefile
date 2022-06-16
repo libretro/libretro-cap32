@@ -452,8 +452,8 @@ db:
 	rm -f $(CORE_DIR)/libretro/db/*.o
 
 # unit test lib
-$(CORE_DIR)/unit-tests/cmocka.o:
-	@$(CC) -c -o $(CORE_DIR)/unit-tests/cmocka.o $< $(CFLAGS) -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+$(CORE_DIR)/unit-tests/cmocka.o: 
+	$(CC) -c -o $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/cmocka/src/cmocka.c $(CFLAGS) -I$(CORE_DIR)/cmocka/include $(INCDIRS)
 
 # to get more info: make clean && make unit-test DEBUG_TEST=1
 unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)

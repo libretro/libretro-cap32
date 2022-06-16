@@ -55,7 +55,7 @@ int test_dsk_hashed(char * file_path, char * result_string, uint32_t file_hash)
    int result = load_dsk(&drive, file_path);
 
    // get database info
-   get_database(hash);
+   db_info(hash);
    if (game_configuration.has_command) {
       strncpy(loader_buffer, game_configuration.loader_command, LOADER_MAX_SIZE);
    } else {
