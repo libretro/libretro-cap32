@@ -1,3 +1,4 @@
 [submodule "cmocka"]
 	path = cmocka
 	url = https://git.cryptomilk.org/projects/cmocka.git
+	shallow = true
