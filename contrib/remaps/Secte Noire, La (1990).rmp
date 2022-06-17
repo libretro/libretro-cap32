@@ -1,0 +1,9 @@
+entry_hash_1 = 95b94081 # (1990) [Original]
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]SECTE"
+

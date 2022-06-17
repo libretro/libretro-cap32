@@ -192,6 +192,7 @@ typedef struct {
    bool has_btn;
    bool is_fail;
    bool is_clean;
+   bool is_cpm;
 } game_cfg_t;
 extern game_cfg_t game_configuration;
 

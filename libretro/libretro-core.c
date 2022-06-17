@@ -1059,6 +1059,11 @@ void check_flags(const char *filename, unsigned int size)
    {
       computer_set_model(1);
    }
+
+   if (file_check_flag(filename, size, FLAG_BIOS_CPM, 5))
+   {
+      game_configuration.is_cpm = true;
+   }
 }
 
 void computer_autoload()
@@ -1079,10 +1084,16 @@ void computer_autoload()
       loader_run(loader_buffer);
    }
 
-   LOGI("[core] DSK autorun: \"%s\"\n", loader_buffer);
-
    strcat(loader_buffer, "\n");
-   ev_autorun_prepare(loader_buffer);
+   LOGI("[core] DSK autorun: %s", loader_buffer);
+   if (game_configuration.is_cpm)
+   {
+      cpm_boot(loader_buffer);
+   }
+   else
+   {
+      ev_autorun_prepare(loader_buffer);
+   }
 }
 
 void computer_reset()
@@ -1108,8 +1119,6 @@ void computer_load_bios() {
          retro_message("Error Loading Cart...");
       }
    }
-
-   cpm_start();
 }
 
 // load content
@@ -1140,6 +1149,9 @@ void computer_load_file() {
          game_configuration.is_clean
       );
    }
+
+   // check custom filename config
+   check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
    // If it's a snapshot
    if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3))
@@ -1222,9 +1234,6 @@ void computer_load_file() {
          LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
       }
    }
-
-   // check custom filename config
-   check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
    // Prepare SNA
    strncat(retro_content_filepath, "0.SNA", sizeof(retro_content_filepath) - 1);

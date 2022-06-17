@@ -62,15 +62,24 @@ uint8_t *pbTapeImageEnd = NULL;
 uint8_t *pbSnaImage = NULL;
 
 
-int cpm_boot (char * runfile)
+int cpm_boot (char * comfile)
 {
    uint8_t* cpmROM = (uint8_t *)malloc(CPM_SIZE);
+
+   if (strlen(comfile) > 4 && comfile[strlen(comfile)-5] == '.')
+   {
+      // remove ".COM" extension
+      comfile[strlen(comfile)-5] = '\n';
+      comfile[strlen(comfile)-4] = '\0';
+   }
 
    memset(cpmROM, 0, CPM_SIZE);
    memcpy(cpmROM, (uint8_t*) CPM, 0x600 + sizeof(t_SNA_header)); // read memory dump into CPM ROM
    memcpy(cpmROM + 0x9700 + sizeof(t_SNA_header), (uint8_t*) CPM_SYS, 0x27ff); // read memory dump into CPM ROM
-   strcpy((char *) &cpmROM[0xAD44 + sizeof(t_SNA_header)], runfile);
-   cpmROM[0xAD42 + sizeof(t_SNA_header)] = strlen(runfile) + 1;
+   strcpy((char *) &cpmROM[0xAD44 + sizeof(t_SNA_header)], comfile);
+   cpmROM[0xAD42 + sizeof(t_SNA_header)] = strlen(comfile);
+
+   printf("[SLOTS] [CPM] ROM boot: %s", comfile);
 
    return snapshot_load_mem(cpmROM, CPM_SIZE);
 }

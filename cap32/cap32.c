@@ -1284,11 +1284,6 @@ int cart_start (char *pchFileName) {
    return 0;
 }
 
-int cpm_start (void)
-{
-   return cpm_boot("DIR\n");
-}
-
 int printer_start (void)
 {
    if (!pfoPrinter)

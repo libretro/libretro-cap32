@@ -36,6 +36,7 @@
  *
  ****************************************************************************************/
 
+#include "libretro-core.h"
 #include "amsdos_catalog.h"
 #include "format.h"
 
@@ -135,6 +136,20 @@ bool _is_valid_ext(const char * ext)
       (GET_CHAR(ext[0]) == ' ') &&
       (GET_CHAR(ext[1]) == ' ') &&
       (GET_CHAR(ext[2]) == ' ')
+   )
+      return true;
+
+   return false;
+}
+
+bool _is_valid_cpm(const char * ext)
+{
+   // TODO: better check...
+   // "COM" Extension
+   if (
+      (GET_CHAR(ext[0]) == 'C') &&
+      (GET_CHAR(ext[1]) == 'O') &&
+      (GET_CHAR(ext[2]) == 'M')
    )
       return true;
 
@@ -348,7 +363,13 @@ void _probe_track(t_track *track, unsigned char user, int track_id)
             continue;
          }
 
-         if (!_is_valid_ext(archive_info->file.raw_ext))
+         if (game_configuration.is_cpm)
+         {
+            if (!_is_valid_cpm(archive_info->file.raw_ext))
+            {
+               continue;
+            }
+         } else if (!_is_valid_ext(archive_info->file.raw_ext))
          {
             continue;
          }
