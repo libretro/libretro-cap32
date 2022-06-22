@@ -41,7 +41,6 @@
 uint32_t dbfail[] = {
    0xea140f7f, // Antre de Gork, L' (1987)(Excalibur)(fr)(Side A)[f].dsk
    0x6a1948eb, // Antre de Gork, L' (1987)(Excalibur)(fr)(Side B)[f].dsk
-   0x4cffaa69, // Adventures de Moktar, Les (1992)(Titus).dsk
    0x50f59666, // Assault On Port Stanley (1985)(Amsoft).dsk
    0x4cffaa69, // Aventures de Moktar, Les (1992)(Titus)(fr).dsk
    0x4c35740d, // Asterix et la Potion Magique (1988)(Coktel Vision)(fr).dsk
@@ -120,8 +119,8 @@ uint32_t dbfail[] = {
    0x51e77955, // Garfield - Big, Fat, Hairy Deal (1988)(The Edge Software).dsk
    0xc8d40fe6, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side A).dsk
    0x9951e870, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side B).dsk
-   0x1a07c6cc, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side A).dsk
-   0xfbe93c98, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side B).dsk
+   0xfbe93c98, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side A).dsk
+   0x1a07c6cc, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side B).dsk
    0xb49849a5, // Glen Hoddle Soccer (1985)(Amsoft).dsk
    0xb10f45ff, // Get Dexter (1986)(ERE Informatique).dsk
    0x47f7f71f, // Hamsters en Folie (1989)(Generation 5)(fr).dsk
@@ -152,7 +151,6 @@ uint32_t dbfail[] = {
    0xd50bb5a1, // Masque (1986)(Ubi Soft)(fr)(Side B).dsk
    0x82f0d494, // Mindfighter (1988)(Activision).dsk
    0x532f7930, // Molecule Man (1986)(Mastertronic)[cr].dsk
-   0x167ea88a, // Marius Tresor Foot (1985)(Loriciels).dsk
    0x888d910d, // Macrocosmica (1986)(Datacom Publications).dsk
    0x75a53bec, // Megablasters (1994)(Radical Software)(Disk 1 Side A).dsk
    0x8f71b89c, // Megablasters (1994)(Radical Software)(Disk 1 Side B).dsk
@@ -215,6 +213,7 @@ uint32_t dbfail[] = {
    0x84e5676e, // Skateball (1989)(Ubi Soft).dsk
    0xd611e454, // SRAM 2 (1986)(ERE Informatique)(fr)(Side A).dsk
    0x2bfd2901, // SRAM 2 (1986)(ERE Informatique)(fr)(Side B).dsk
+   0xef453a52, // Sliders (1991)(Microids).dsk
    0xf2a3ca3e, // Sorcery+ (1985)(Amsoft)(de).dsk
    0xe0111415, // Sorcery+ (1985)(Amsoft)(fr).dsk
    0xd5e3633d, // Satellite Warrior (1985)(Amsoft).dsk
@@ -236,7 +235,6 @@ uint32_t dbfail[] = {
    0x0916b88a, // Trivial Pursuit II - A New Beginning (1988)(Domark)(fr)(Side B).dsk
    0x98fc3b45, // Thomas The Tank Engine's Fun With Words (1990)(Alternative Software).dsk
    0xb2ea5762, // Titus the Fox (1992)(Titus).dsk
-   0x4cffaa69, // Titus the Fox (1992)(Titus)(fr).dsk
    0x668247d3, // Trivial Pursuit - Edition Revolution (1986)(Domark)(fr)(Side A).dsk
    0x2e134ed8, // Trivial Pursuit - Edition Revolution (1986)(Domark)(fr)(Side B).dsk
    0xc1de5e93, // Top Level (1988)(MBC Informatique)(fr)(Side A).dsk
