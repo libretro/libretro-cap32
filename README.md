@@ -57,7 +57,7 @@ Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.
 
 * "[664]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
 * "BASIC 1.0": Force 464 model when you load CDT or 664 model if use DSK.
-* "[CPM]": Force load CPM BIOS first, useful for some infocom CPM games (WIP).
+* "[CPM]": Force load CPM BIOS first, useful for some infocom CPM games.
 
 Examples :
 
