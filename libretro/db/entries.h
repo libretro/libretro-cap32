@@ -94,17 +94,41 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       2,
    },
+   { // Colossus Mahjong (1987).rmp
+      {0xaf529a6a},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      3,
+   },
+   { // Cutthroats (1984).rmp
+      {0x5d21b329},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      4,
+   },
    { // Donkey Kong.rmp
       {0x9b7c1f2},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_1, RETROK_q, RETROK_a, RETROK_LEFTBRACKET, RETROK_RIGHTBRACKET, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
       {-1, -1, 20, -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Enchanter (1984).rmp
+      {0xcca0759},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      5,
+   },
    { // Gabrielle(fr).rmp
       {0x20dcbf76},
       {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, 17, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
+   },
+   { // Gnome Ranger (1987).rmp
+      {0xb0a79287},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      6,
    },
    { // Gryzor.rmp
       {0xa2b01221},
@@ -124,17 +148,41 @@ t_file_entry dbinfo[] = {
       {14, 16, -1, -1, -1, -1, -1, -1, -1, 26, 27, 27, -1, -1},
       -1,
    },
+   { // Hitchhiker's Guide to the Galaxy, The (1984).rmp
+      {0xa523527c},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      7,
+   },
    { // Ikari Warriors.rmp
       {0x36d943ea, 0xe7df0e60, 0x3e88f3f7},
       {RETROK_t, DB_KEEP, RETROK_2, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_3, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {28, -1, 29, 20, -1, -1, -1, -1, -1, 30, -1, -1, -1, -1},
-      3,
+      -1,
+   },
+   { // Infidel (1986).rmp
+      {0xdc3c19fc},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      8,
    },
    { // Klax.rmp
       {0x96b53a41},
       {RETROK_a, DB_CLEAN, DB_CLEAN, RETROK_0, DB_CLEAN, DB_CLEAN, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_q, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
       {31, -1, -1, -1, -1, -1, -1, -1, 32, 33, -1, -1, -1, -1},
       -1,
+   },
+   { // Lancelot (1988).rmp
+      {0xc5ad3e3e},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      6,
+   },
+   { // Leather Goddesses of Phobos (1986).rmp
+      {0xeb127e47},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      9,
    },
    { // Manic Miner.rmp
       {0xcd9dbf9c},
@@ -154,6 +202,12 @@ t_file_entry dbinfo[] = {
       {-1, 34, -1, -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Murder on the Atlantic (1985).rmp
+      {0xb40c5cb2},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      10,
+   },
    { // Nanako Descends to Hell.rmp
       {0x6c2cdcea},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_SPACE, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
@@ -165,6 +219,12 @@ t_file_entry dbinfo[] = {
       {RETROK_RETURN, RETROK_m, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {36, 34, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
+   },
+   { // Planetfall (1983).rmp
+      {0x9af2061b},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      11,
    },
    { // Prince of Persia.rmp
       {0xf964db5d, 0xa14a1e0f, 0xb9d14a6d, 0x18d230b1},
@@ -178,6 +238,12 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Secte Noire, La (1990).rmp
+      {0x95b94081},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      12,
+   },
    { // Shinobi.rmp
       {0x6f1e3eb0, 0xbd6c0af},
       {RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -190,11 +256,47 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Sorcerer (1984)(Infocom)[CPM].rmp
+      {0x636a30d8},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      13,
+   },
+   { // Spellbreaker (1985).rmp
+      {0xd519f3ce},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      14,
+   },
+   { // Suspended (1983).rmp
+      {0x819d6ed7},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      15,
+   },
    { // Thanatos.rmp
       {0x827e83ac, 0x8d64a322, 0xf9fce391, 0x59d6aef1},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_a, RETROK_z, RETROK_n, RETROK_m, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
       {-1, -1, -1, -1, -1, -1, -1, -1, 39, -1, -1, -1, -1, -1},
       -1,
+   },
+   { // Vera Cruz Affair, The (1986).rmp
+      {0xd5a4c3f2, 0x4f6b8ae6, 0xd276b5bc},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      0,
+   },
+   { // Wishbringer (1985).rmp
+      {0x5332c3ad},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      16,
+   },
+   { // Witness, The (1984).rmp
+      {0xb16409a2},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      17,
    },
    { // Wonderboy.rmp
       {0xb1026135},
@@ -202,13 +304,55 @@ t_file_entry dbinfo[] = {
       {-1, 34, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Zork I - The Great Underground Empire (1986).rmp
+      {0xa02c3758},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      18,
+   },
+   { // Zork II - The Wizard of Frobozz (1986).rmp
+      {0xe0240de6},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      19,
+   },
+   { // Zork III - The Dungeon Master (1986).rmp
+      {0xa3fb554f},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      20,
+   },
+   { // ungle Book (1989).rmp
+      {0xccc3a70b},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      21,
+   },
 };
 
 char commands[] = {
    "|CPM\0"
    "|CPM\n~~LOADER\0"
    "RUN\"COBRA.\0"
-   "RUN\"ELITE\0"
+   "MAHJONG\0"
+   "CUTTHROA\0"
+   "ENCHANTE\0"
+   "RUN\"MENU\0"
+   "HITCHHIK\0"
+   "INFIDEL\0"
+   "LEATHERG\0"
+   "RUN\"GAME\0"
+   "PLANETFA\0"
+   "RUN\"SECTE\0"
+   "SORCERER\0"
+   "SPELLBRE\0"
+   "SUSPENDE\0"
+   "WISHBRIN\0"
+   "WITNESS\0"
+   "ZORK1\0"
+   "ZORK2\0"
+   "ZORK3\0"
+   "RUN\"JUNGLE\0"
 };
 
 char input_names[] = {
@@ -255,5 +399,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1651236014.801458
+// gen hash: 1655493356.9106402
 

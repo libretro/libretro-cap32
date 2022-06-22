@@ -24,6 +24,8 @@
 
 #include "cap32.h"
 
+int cpm_boot (char * comfile);
+
 int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size);
 int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size);
 int snapshot_load (char *pchFileName);

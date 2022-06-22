@@ -1,0 +1,9 @@
+entry_hash_1 = e0240de6 # (1986) (CPM) [Original]
+
+# game load command
+# special commands: 
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "ZORK2"
+

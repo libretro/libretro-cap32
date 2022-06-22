@@ -41,10 +41,8 @@
 uint32_t dbfail[] = {
    0xea140f7f, // Antre de Gork, L' (1987)(Excalibur)(fr)(Side A)[f].dsk
    0x6a1948eb, // Antre de Gork, L' (1987)(Excalibur)(fr)(Side B)[f].dsk
-   0xd276b5bc, // Affaire Vera Cruz, Die  (1986)(Infogrames)(de).dsk
    0x4cffaa69, // Adventures de Moktar, Les (1992)(Titus).dsk
    0x50f59666, // Assault On Port Stanley (1985)(Amsoft).dsk
-   0xd5a4c3f2, // Affaire Vera Cruz, L' (1985)(Infogrames)(fr).dsk
    0x4cffaa69, // Aventures de Moktar, Les (1992)(Titus)(fr).dsk
    0x4c35740d, // Asterix et la Potion Magique (1988)(Coktel Vision)(fr).dsk
    0x483d8366, // Alphakhor (1989)(Loriciels)(fr)(Side A).dsk
@@ -61,12 +59,6 @@ uint32_t dbfail[] = {
    0x0c27ad3d, // Battle of the Bulge (1990)(Cases Computer Simulators).dsk
    0x7234d56e, // Big League Soccer (1985)(Viper)(es)(Hack)[cr].dsk
    0x12a094b3, // Bivouac - Chamonix Challenge (1987)(Infogrames)(fr).dsk
-   0x925bf86b, // Ballyhoo (1986)(Infocom)(Side A).dsk
-   0xa6dc3157, // Ballyhoo (1986)(Infocom)(Side B).dsk
-   0x2dc8c009, // Blueberry (1987)(Coktel Vision)(de)(Side A).dsk
-   0x49a750a5, // Blueberry (1987)(Coktel Vision)(de)(Side B).dsk
-   0xd81cd9fb, // Blueberry (1987)(Coktel Vision)(es)(Side A).dsk
-   0xf5dd8263, // Blueberry (1987)(Coktel Vision)(es)(Side B).dsk
    0x1bb90675, // Birdie (1987)(Ere Informatique).dsk
    0x925415df, // Birdie (1987)(Ere Informatique)(fr).dsk
    0x02914bd1, // Blockhaus (1986)(Amstrad Magazine)(fr)[cr].dsk
@@ -84,10 +76,8 @@ uint32_t dbfail[] = {
    0xeeb62090, // Cite Perdu, La (1987)(Excalibur)(fr)(Disk 2 Side B).dsk
    0x17d4c34e, // Crafton & Xunk (1986)(ERE Informatique)(M3).dsk
    0x95724912, // Crafton & Xunk (1986)(ERE Informatique)(es).dsk
-   0xaf529a6a, // Colossus Mahjong (1987)(CDS Software LTD)[CPM].dsk
    0x25aeae06, // Chose de Grotemburg, La (1987)(Ubi Soft)(fr)(Side A).dsk
    0x1dc4b790, // Chose de Grotemburg, La (1987)(Ubi Soft)(fr)(Side B).dsk
-   0x5d21b329, // Cutthroats (1984)(Infocom)[CPM].dsk
    0xbb2d6aff, // Clash (1987)(ERE Informatique)(fr)(Side A).dsk
    0xbef7ff31, // Clash (1987)(ERE Informatique)(fr)(Side B).dsk
    0xe894c4e9, // Cyrus II (1985)(Amsoft).dsk
@@ -99,7 +89,6 @@ uint32_t dbfail[] = {
    0x75e574cd, // Conspiration De L'An III (1988)(Ubi Soft)(fr)(Side A).dsk
    0xfc3f6c0c, // Conspiration De L'An III (1988)(Ubi Soft)(fr)(Side B).dsk
    0xe698b5f6, // Classic Invaders (1986)(Bubble Bus Software).dsk
-   0x4d4620dc, // Deadline (1982)(Infocom)[CPM].dsk
    0x1135fab1, // Druid (1986)(Firebird).dsk
    0xb2f8a240, // Dakar Moto (1987)(Coktel Vision)(fr).dsk
    0xa82993c8, // Duel 2000 (1986)(Coktel Vision)(fr).dsk
@@ -116,7 +105,6 @@ uint32_t dbfail[] = {
    0xbe2eb246, // Dark Century (1990)(Titus).dsk
    0x9bed1bbf, // Detective (1990)(News by Disc)(fr)[cr].dsk
    0xa4bcfc77, // Electric Wonderland (1986)(ERE Informatique).dsk
-   0x0cca0759, // Enchanter (1984)(Infocom)[CPM].dsk
    0x8442d3bb, // Exit (1988)(Ubi Soft)(fr)(Side A).dsk
    0x0e6de21c, // Exit (1988)(Ubi Soft)(fr)(Side B).dsk
    0xacf41d84, // E-SWAT (1990)(US Gold).dsk
@@ -130,73 +118,36 @@ uint32_t dbfail[] = {
    0xca2062f6, // Faial (1986)(Excalibur)(fr)(Side B).dsk
    0xbca5acb2, // Faial (1986)(Excalibur)(fr)(Side A).dsk
    0x51e77955, // Garfield - Big, Fat, Hairy Deal (1988)(The Edge Software).dsk
-   0xb0a79287, // Gnome Ranger (1987)(Level 9 Computing)(Side A).dsk
-   0x98aa854b, // Gnome Ranger (1987)(Level 9 Computing)(Side B).dsk
    0xc8d40fe6, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side A).dsk
    0x9951e870, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side B).dsk
    0x1a07c6cc, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side A).dsk
    0xfbe93c98, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side B).dsk
    0xb49849a5, // Glen Hoddle Soccer (1985)(Amsoft).dsk
    0xb10f45ff, // Get Dexter (1986)(ERE Informatique).dsk
-   0xa523527c, // Hitchhiker's Guide to the Galaxy, The (1984)(Infocom)[CPM].dsk
    0x47f7f71f, // Hamsters en Folie (1989)(Generation 5)(fr).dsk
-   0x045c9620, // Hollywood Hijinx (1986)(Infocom)[CPM].dsk
    0x083c9554, // Helter Skelter (1990)(Audiogenic Software)(Side A).dsk
    0xef57ba22, // Helter Skelter (1990)(Audiogenic Software)(Side B).dsk
    0xdc7e4115, // Hustler (1985)(Bubblebus Software).dsk
    0xc34b7449, // Heartland (1986)(Odin Computer Graphics).dsk
    0x1ac09f99, // Infernal House (1991)(Lankhor)(fr)(Side A).dsk
    0xce141c60, // Infernal House (1991)(Lankhor)(fr)(Side B).dsk
-   0xdc3c19fc, // Infidel (1986)(Infocom)[CPM].dsk
    0xb21fb6b0, // Jaws - Le Dernier Etalon (1988)(MBC Informatique)(fr)(Side A).dsk
    0xc874fc01, // Jaws - Le Dernier Etalon (1988)(MBC Informatique)(fr)(Side B).dsk
    0x21de51e7, // James Debug - Mystere de l'Ile Perdue (1986)(Coktel Vision).dsk
    0xfaa04721, // James Debug - El Misterio De La Isla Perdida (1986)(Coktel Vision)(es)[cr].dsk
-   0xccc3a70b, // Jungle Book (1989)(Coktel Vision)(Side A).dsk
-   0x13d90b7f, // Jungle Book (1989)(Coktel Vision)(Side B).dsk
    0xa1b3336e, // J.T 37 (1990)(Amstar & Cpc)[cr].dsk
    0x0e81f696, // Knight Force (1989)(Titus)(Side A).dsk
    0xfb10b3bb, // Knight Force (1989)(Titus)(Side B).dsk
-   0x01dab581, // Lucky Luke - Nitroglycerine (1987)(Coktel Vision)(fr)(Side A)[CPM].dsk
-   0x71a30503, // Lucky Luke - Nitroglycerine (1987)(Coktel Vision)(fr)(Side B).dsk
-   0xeb127e47, // Leather Goddesses of Phobos (1986)(Infocom)[CPM].dsk
-   0x92b6a819, // Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side A)[CPM] .dsk
-   0xe3955d4d, // Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side B).dsk
-   0xda04bc18, // Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 2 Side A).dsk
-   0xd7ad58e3, // Labyrinthe aux Cent Calculs, Le - Ecole (1989)(Retz)(fr)(Disk 2 Side B).dsk
-   0xf6943a86, // Labyrinthe aux Mille Calculs, Le - College (1989)(Retz)(fr)(Disk 1 Side A)[CPM].dsk
-   0x26239b63, // Labyrinthe aux Mille Calculs, Le - College (1989)(Retz)(fr)(Disk 1 Side B).dsk
-   0x539dfc6a, // Labyrinthe aux Mille Calculs, Le - College (1989)(Retz)(fr)(Disk 2 Side A).dsk
-   0x7c599575, // Labyrinthe aux Mille Calculs, Le - College (1989)(Retz)(fr)(Disk 2 Side B).dsk
    0xb0a1e816, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side A).dsk
    0x70021b43, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side B).dsk
-   0x342c720e, // Labyrinthe d'Orthophus, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side A)[CPM].dsk
-   0x4235f7ca, // Labyrinthe d'Orthophus, Le - Ecole (1989)(Retz)(fr)(Disk 1 Side B).dsk
-   0xe3f994f0, // Labyrinthe d'Orthophus, Le - Ecole (1989)(Retz)(fr)(Disk 2 Side A).dsk
-   0xd5555594, // Labyrinthe d'Orthophus, Le - Ecole (1989)(Retz)(fr)(Disk 2 Side B).dsk
-   0xa4f28175, // Labyrinthe d'Errare, Le - College (1989)(Retz)(fr)(Disk 1 Side A)[CPM].dsk
-   0xd096f9fd, // Labyrinthe d'Errare, Le - College (1989)(Retz)(fr)(Disk 1 Side B).dsk
-   0x77adf13c, // Labyrinthe d'Errare, Le - College (1989)(Retz)(fr)(Disk 2 Side A).dsk
-   0xcc3c59ed, // Labyrinthe d'Errare, Le - College (1989)(Retz)(fr)(Disk 2 Side B).dsk
-   0xc5ad3e3e, // Lancelot (1988)(Level 9 Computing)(Side A)[CPM].dsk
-   0x2943604c, // Lancelot (1988)(Level 9 Computing)(Side B).dsk
    0x34dc1faa, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side A).dsk
    0xb84f3627, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side B).dsk
    0x57f4d790, // Mountie Mick's Death Ride (1987)(Reaktor).dsk
    0x23af9eb4, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side A).dsk
    0xaa6728e1, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side B).dsk
-   0x05339e1d, // Mewilo (1987)(Coktel Vision)(de)(Side A)[CPM].dsk
-   0x8c14fcdd, // Mewilo (1987)(Coktel Vision)(de)(Side B).dsk
-   0x815c762b, // Mewilo (1987)(Coktel Vision)(fr)(Side A)[CPM].dsk
-   0xba4dd479, // Mewilo (1987)(Coktel Vision)(fr)(Side B).dsk
-   0xb40c5cb2, // Murder on the Atlantic (1985)(Cobra Soft)(Side A).dsk
-   0x3c816404, // Murder on the Atlantic (1985)(Cobra Soft)(Side B).dsk
    0x16c28934, // Macadam Bumper (1985)(PSS)(de)[cr].dsk
    0x65bdaadd, // Macadam Bumper (1985)(PSS).dsk
    0xaa35d5c2, // Macadam Bumper (1985)(PSS)(es)[cr].dsk
-   0x90f7f707, // Monte Cristo (1988)(Coktel Vision)(fr)(Side A)[CPM].dsk
-   0x3677d82c, // Monte Cristo (1988)(Coktel Vision)(fr)(Side B).dsk
-   0x398be600, // Moonmist (1986)(Infocom)[CPM].dsk
    0xfeb65eff, // Masque (1986)(Ubi Soft)(fr)(Side A).dsk
    0xd50bb5a1, // Masque (1986)(Ubi Soft)(fr)(Side B).dsk
    0x82f0d494, // Mindfighter (1988)(Activision).dsk
@@ -209,8 +160,6 @@ uint32_t dbfail[] = {
    0xd5fc1c36, // Megablasters (1994)(Radical Software)(Disk 2 Side B).dsk
    0x061fb016, // Moon Blaster (1990)(Loriciels).dsk
    0x3edfb68f, // Mission Delta (1985)(ERE Informatique)(fr).dsk
-   0x416d5acd, // Mascotte (1988)(Coktel Vision)(fr)(Side A)[CPM].dsk
-   0xe4175460, // Mascotte (1988)(Coktel Vision)(fr)(Side B).dsk
    0xf9bc30df, // Molecularr (1990)(Amstrad Cent Pour Cent)[cr].dsk
    0x5579ba92, // Nosferatu the Vampyre (1986)(Piranha)[b].dsk
    0x3d981755, // Necromancien, Le (1987)(Ubi Soft)(fr)(Side A).dsk
@@ -219,9 +168,6 @@ uint32_t dbfail[] = {
    0x05329e84, // Oxphar (1987)(ERE Informatique)(fr)(Side B).dsk
    0x2519a761, // Octoplex (1989)(Mastertronic)[cr].dsk
    0x1959a428, // One (1986)(D3M).dsk
-   0x9af2061b, // Planetfall (1983)(Infocom)[CPM].dsk
-   0x10548a7a, // Peter Pan (1988)(Coktel Vision)(Side A)[CPM].dsk
-   0xd6d70b73, // Peter Pan (1988)(Coktel Vision)(Side B).dsk
    0xad4e58e2, // Pepe Bequilles (1987)(Softhawk)(fr).dsk
    0x06f28d8f, // Pepe Bequilles (1987)(Softhawk)(es).dsk
    0xc09cd00c, // Peur Sur Amityville (2019)(Ubi Soft)(es)(Hack)(Side A)[cr].dsk
@@ -256,18 +202,12 @@ uint32_t dbfail[] = {
    0x75ac076d, // Rana (1990)(PC Amstrad International)(de)[cr].dsk
    0x229083cc, // Ripoux, Les (1987)(Cobra Soft)(fr)(Side A).dsk
    0x3aa1ad57, // Ripoux, Les (1987)(Cobra Soft)(fr)(Side B).dsk
-   0xd519f3ce, // Spellbreaker (1985)(Infocom)[CPM].dsk
    0xddc50888, // Scapeghost (1989)(Level 9 Computing)(Side A).dsk
    0x04b155b5, // Scapeghost (1989)(Level 9 Computing)(Side B).dsk
-   0x636a30d8, // Sorcerer (1984)(Infocom)[CPM].dsk
-   0x95b94081, // Secte Noire, La (1990)(Lankhor)(fr)(Side A).dsk
-   0x438616e4, // Secte Noire, La (1990)(Lankhor)(fr)(Side B).dsk
    0x25723968, // Scoop Senior (1990)(Generation 5)(fr)(Side A).dsk
    0x91f263de, // Scoop Senior (1990)(Generation 5)(fr)(Side B).dsk
-   0xcb3f9396, // Stationfall (1987)(Infocom)[CPM].dsk
    0xce5c2785, // Saga (1990)(Lankhor)(fr)(Side A).dsk
    0xba4c03dc, // Saga (1990)(Lankhor)(fr)(Side B).dsk
-   0x819d6ed7, // Suspended (1983)(Infocom)[CPM].dsk
    0x3f4b2026, // SRAM (1986)(ERE Informatique)(M3)(Side A).dsk
    0xbe597faa, // SRAM (1986)(ERE Informatique)(M3)(Side B).dsk
    0x8cecd42c, // Super Flippard (1987)(Free Game Blot)(fr).dsk
@@ -280,7 +220,6 @@ uint32_t dbfail[] = {
    0xd5e3633d, // Satellite Warrior (1985)(Amsoft).dsk
    0x167ea88a, // Soccer 86 (1985)(Loriciels).dsk
    0xeea7a690, // Sai Combat (1986)(Mirrorsoft)(fr).dsk
-   0x160ee8e9, // Seastalker (1984)(Infocom)[CPM].dsk
    0x600fad6d, // Scientific (1987)(Chip)(fr).dsk
    0xe94c9501, // Skweek (1989)(Loriciels)(fr).dsk
    0x1e51e321, // Skweek (1989)(Loriciels).dsk
@@ -312,14 +251,11 @@ uint32_t dbfail[] = {
    0xd36c1fdc, // They Stole a Million (1986)(39 Steps)(de).dsk
    0x0e7422d2, // Thunder Blade (1988)(US Gold).dsk
    0xb9ddb20d, // Tensions (1986)(ERE Informatique)(es).dsk
-   0x4f6b8ae6, // Vera Cruz Affair, The (1986)(Infogrames)[CPM].dsk
    0x0d34f4df, // Vuelta al Mundo en 80 Dias, La (2022)(Innelec)(es)(Hack)[cr].dsk
    0xdbce3abc, // Winchester (1988)(Chip)(fr).dsk
    0x5b80457c, // Warrior Plus (1986)(Rainbow Productions)(fr)(Side A).dsk
    0x6ce693b1, // Warrior Plus (1986)(Rainbow Productions)(fr)(Side B).dsk
    0x648dc666, // Wild Streets (1990)(Titus).dsk
-   0x5332c3ad, // Wishbringer (1985)(Infocom)[CPM].dsk
-   0xb16409a2, // Wishbringer (1985)(Infocom)[CPM].dsk
    0x04f36745, // Worm Slickers (1991)(PC Amstrad International)[cr].dsk
    0xde97e3ab, // Xanadu (2020)(-)(es)(Hack)[cr].dsk
    0xf0a1468e, // Xyphoes Fantasy (1991)(Silmarils)(Side A)(es).dsk
@@ -332,9 +268,6 @@ uint32_t dbfail[] = {
    0xe434e0db, // Zap 't' Balls (1992)(NoName EDV-Service)(Side A)[QWERTY].dsk
    0x01976725, // Zap 't' Balls (1992)(NoName EDV-Service)(Side B)[QWERTY].dsk
    0x557ae5ef, // Zania (1985)(Myrddin Software).dsk
-   0xa02c3758, // Zork I - The Great Underground Empire (1986)(Infocom)[CPM].dsk
-   0xe0240de6, // Zork II - The Wizard of Frobozz (1986)(Infocom)[CPM].dsk
-   0xa3fb554f, // Zork III - The Dungeon Master (1986)(Infocom)[CPM].dsk
    0xf4fe2bba, // Zombi (1986)(Ubi Soft)(de)(Side B).dsk
    0x777bce70, // Zombi (1986)(Ubi Soft)(de)(Side A).dsk
    0xc13903e5, // Zombi (1986)(Ubi Soft)(es)(Side A).dsk
@@ -342,7 +275,5 @@ uint32_t dbfail[] = {
    0xe4f758d3, // Zombi (1986)(Ubi Soft)(fr)(Side B).dsk
    0x6b941913, // Zombi (1986)(Ubi Soft)(fr)(Side A).dsk
    0xf23f30d4, // 3D Boxing (1985)(Amsoft).dsk
-   0x1037bc27, // 20000 Lieus sous les Mers (1988)(Coktel Vision)(fr)(Side B).dsk
-   0xb8b6a065, // 20000 Lieus sous les Mers (1988)(Coktel Vision)(fr)(Side A)[CPM].dsk
    0x638c76d0, // 3D Stunt Rider (1985)(Amsoft).dsk
 };

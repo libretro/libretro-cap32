@@ -86,7 +86,7 @@ HEADER = """/*******************************************************************
 #include "database.h"
 
 // clean-cpc-db CRC database
-t_file_entry database[] = {
+t_file_entry dbinfo[] = {
 """
 FOOTER = """
 // gen hash: %s

@@ -41,6 +41,7 @@
 #include "dsk/format.h"
 #include "dsk/amsdos_catalog.h"
 #include "loader.h"
+#include "cap32/slots.h"
 
 extern t_drive driveA;
 
@@ -48,7 +49,13 @@ extern t_drive driveA;
 
 bool _loader_launch(char * key_buffer, char * filename)
 {
-   if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", filename) < 0)
+   if (game_configuration.is_cpm)
+   {
+      // CPM ROM boot do not need >RUN< prefix
+      if(strncpy(key_buffer, filename, LOADER_MAX_SIZE) < 0)
+         return false;
+   }
+   else if(snprintf(key_buffer, LOADER_MAX_SIZE, "RUN\"%s", filename) < 0)
    {
       printf("[LOADER] !!!! _loader_run: snprintf failed\n");
       return false;
@@ -86,6 +93,10 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
       if (!scan)
          continue;
 
+      #ifdef LOADER_DEBUG
+      printf("[LOADER] CPM: %s [%u][%u]\n", catalogue.dirent[idx].filename, catalogue.dirent[idx].is_hidden, catalogue.entries_listed_found);
+      #endif
+
       if (!strcasecmp(scan + 1, "BAS"))
       {
          if (first_bas == -1) first_bas = idx;
@@ -119,7 +130,10 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
 
 bool _loader_one_listed(char * key_buffer)
 {
-   if (catalogue.entries_listed_found != 1)
+   if (!game_configuration.is_cpm && catalogue.entries_listed_found != 1)
+      return false;
+
+   if (game_configuration.is_cpm && (catalogue.entries_listed_found != 1 && catalogue.entries_hidden_found != 1))
       return false;
 
    return _loader_launch(key_buffer, catalogue.dirent[catalogue.first_listed_dirent].filename);
@@ -168,7 +182,12 @@ bool _loader_cpm(char * key_buffer, retro_format_info_t *format)
 
 void _loader_failed (char * key_buffer, bool is_system)
 {
-   if (is_system)
+   if (game_configuration.is_cpm)
+   {
+      strcpy(key_buffer, "DIR");
+      return;
+   }
+   else if (is_system)
    {
       strcpy(key_buffer, "|CPM");
       return;
