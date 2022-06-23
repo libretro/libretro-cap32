@@ -446,7 +446,7 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(HEADERS)
 	rm -f $(TARGET)
-	rm -f unit-tests/*.o autorun test-db
+	rm -f unit-tests/*.o unit-tests/autorun unit-tests/test-db
 
 db:
 	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
@@ -466,7 +466,7 @@ unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 unit-test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/cmocka/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
-	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/tests-db/db-test.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/unit-tests/test-db.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
 	@echo "Now run: $(CORE_DIR)/unit-tests/test-db <full-path-to clean-cpc-db roms>"
 
 .PHONY: $(TARGET) clean clean-objs
