@@ -191,7 +191,7 @@ bool dc_add_file(dc_storage* dc, const char* filename)
    // Get 'name' - just the filename without extension
    char tmp[512];
    tmp[0] = '\0';
-   fill_short_pathname_representation(tmp, filename, sizeof(tmp));
+   fill_pathname(tmp, path_basename(filename), "", sizeof(tmp));
 
    printf(">>> dc added ext %s - %s\n", filename, tmp);
 
@@ -274,7 +274,7 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
             char tmp[512];
             tmp[0] = '\0';
 
-            fill_short_pathname_representation(tmp, filename, sizeof(tmp));
+            fill_pathname(tmp, path_basename(filename), "", sizeof(tmp));
             image_name = strdup(tmp);
 
             // Add the file to the struct
