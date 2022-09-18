@@ -339,9 +339,12 @@ bool _events_null()
  **/
 static void _process_joy(int playerID){
 
+// evercade do not call to retro_set_controller_port_device avoid this check
+#ifndef EVERCADE
    // is disabled?
    if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
       return;
+#endif
 
    uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]].buttons;
 

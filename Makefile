@@ -67,6 +67,19 @@ else ifneq (,$(findstring rpi,$(platform)))
 	LDFLAGS += -shared -Wl,--version-script=libretro/link.T
 	fpic = -fPIC
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+# evercade armv7
+else ifneq (,$(findstring evercade,$(platform)))
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+	CC = /opt/evercade/usr/bin/arm-linux-gnueabihf-gcc
+	CC_AS = /opt/evercade/usr/bin/arm-linux-gnueabihf-as
+	AR = /opt/evercade/usr/bin/arm-linux-gnueabihf-ar
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B -DEVERCADE
+	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
+	CFLAGS += -fomit-frame-pointer -ffast-math	
+	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
+	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
 
 # OS X
 else ifeq ($(platform), osx)

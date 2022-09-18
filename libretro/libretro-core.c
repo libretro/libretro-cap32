@@ -1375,14 +1375,15 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-
+// FIXME: why evercade do not call retro_set_controller_port_device?
+//       atm, just log when this function is called with more detail
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
    if ( port < 2 )
    {
       amstrad_devices[ port ] = device;
 
-      printf(" (%d)=%d \n",port,device);
+      printf("retro_set_controller_port_device: (%d)=%d \n",port,device);
    }
 }
 
