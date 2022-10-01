@@ -274,6 +274,12 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       15,
    },
+   { // Target Renegade.rmp
+      {0xe4154a1f},
+      {DB_KEEP, DB_KEEP, RETROK_ESCAPE, RETROK_1, RETROK_q, RETROK_a, RETROK_k, RETROK_l, RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, 24, 20, -1, -1, -1, -1, 16, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Thanatos.rmp
       {0x827e83ac, 0x8d64a322, 0xf9fce391, 0x59d6aef1},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_a, RETROK_z, RETROK_n, RETROK_m, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
@@ -399,5 +405,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1655493356.9106402
+// gen hash: 1664642287.6713324
 

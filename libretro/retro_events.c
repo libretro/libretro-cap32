@@ -75,11 +75,6 @@ extern void Tape_Rewind(void);
 extern uint8_t keyboard_matrix[16];
 const uint8_t bit_values[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
-// --- events code
-#define MAX_KEYSYMS 324
-#define MAX_BUTTONS 14
-#define MAX_PADCFG 4
-
 #define MAX_CURSOR_X (EMULATION_SCREEN_WIDTH - (FNT_CHAR_WIDTH * retro_video.bytes))
 #define MAX_CURSOR_Y (EMULATION_SCREEN_HEIGHT - FNT_CHAR_HEIGHT)
 
@@ -98,7 +93,7 @@ int event_call = EV_JOY;
 void ev_toggle_call();
 
 t_button_cfg btnPAD[MAX_PADCFG] = {
-   {{ // JOYSTICK CFG
+   {{ // JOYSTICK CFG ( AUTO )
    CPC_KEY_JOY_FIRE2,   // B
    CPC_KEY_NULL,        // Y
    CPC_KEY_NULL,        // SELECT
@@ -148,6 +143,23 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    CPC_KEY_L,           // R
    CPC_KEY_R,           // L2
    CPC_KEY_U,           // R2
+   }},
+   {{ // JOYSTICK PLAYER 1 CFG
+   CPC_KEY_JOY_FIRE2,   // B
+   CPC_KEY_NULL,        // Y
+   CPC_KEY_NULL,        // SELECT
+   CPC_KEY_NULL,        // START
+   CPC_KEY_JOY_UP,      // DUP
+   CPC_KEY_JOY_DOWN,    // DDOWN
+   CPC_KEY_JOY_LEFT,    // DLEFT
+   CPC_KEY_JOY_RIGHT,   // DRIGHT
+   CPC_KEY_JOY_FIRE1,   // A
+   CPC_KEY_NULL,        // X
+   //---------------------
+   CPC_KEY_NULL,        // L
+   CPC_KEY_NULL,        // R
+   CPC_KEY_NULL,        // L2
+   CPC_KEY_NULL,        // R2
    }},
    {{ // JOYSTICK PLAYER 2 CFG
    CPC_KEY_JOY2_FIRE2,  // B

@@ -397,11 +397,11 @@ void retro_set_environment(retro_environment_t cb)
    struct retro_variable variables[] = {
       {
          "cap32_retrojoy0",
-         "Controls > User 1 Controller Config; auto|qaop|incentive",
+         "Controls > User 1 Controller Config; auto|qaop|incentive|joystick_port1",
       },
       {
          "cap32_retrojoy1",
-         "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port2",
+         "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port1|joystick_port2",
       },
       {
          "cap32_combokey",
@@ -481,8 +481,8 @@ void retro_set_environment(retro_environment_t cb)
  *
  * Query retro_environment callback to get joy values
  *
- * Returns: current user joy config (0/1/2/3),selected in GUI
- *          otherwise default config 0 (joystick)
+ * Returns: current user joy config (0/1/2/3/4),selected in GUI
+ *          otherwise default config 0 (auto)
  **/
 static int controller_port_variable(unsigned port, struct retro_variable *var)
 {
@@ -505,6 +505,8 @@ static int controller_port_variable(unsigned port, struct retro_variable *var)
          return PADCFG_QAOP;
       if(strcmp(var->value, "incentive") == 0)
          return PADCFG_INCENTIVE;
+      if(strcmp(var->value, "joystick_port1") == 0)
+         return PADCFG_JOYSTICK_1;
       if(strcmp(var->value, "joystick_port2") == 0)
          return PADCFG_JOYSTICK_2;
    }

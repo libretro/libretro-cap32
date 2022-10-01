@@ -60,7 +60,8 @@
 #define PADCFG_AUTO 0
 #define PADCFG_QAOP 1
 #define PADCFG_INCENTIVE 2
-#define PADCFG_JOYSTICK_2 3
+#define PADCFG_JOYSTICK_1 3
+#define PADCFG_JOYSTICK_2 4
 
 extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
@@ -78,7 +79,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 // --- events
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
-#define MAX_PADCFG 4
+#define MAX_PADCFG 5
 
 
 // compile flags
