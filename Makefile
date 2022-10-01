@@ -63,10 +63,32 @@ else ifneq (,$(findstring android,$(platform)))
    	CXX = arm-linux-androideabi-g++
 # Raspberry Pi
 else ifneq (,$(findstring rpi,$(platform)))
+	CFLAGS += -Wall -mword-relocations -fomit-frame-pointer -ffast-math
+	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
+
 	TARGET := $(TARGET_NAME)_libretro.so
-	LDFLAGS += -shared -Wl,--version-script=libretro/link.T
 	fpic = -fPIC
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+
+	ifneq (,$(findstring rpi1,$(platform)))
+		CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16B
+#		Raspberry Pi 1 - Model B (original)
+		ifneq (,$(findstring rpi1bo,$(platform)))
+			CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
+			CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
+			CFLAGS += -march=armv6zk -mcpu=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp
+			LDFLAGS += -march=armv6zk -mcpu=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp
+		else
+			CFLAGS += -march=armv6j -mfpu=vfp -mfloat-abi=hard -marm
+			LDFLAGS += -march=armv6j -mfpu=vfp -mfloat-abi=hard -marm
+		endif
+	else ifneq (,$(findstring rpi2,$(platform)))
+		CFLAGS += -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -marm
+		LDFLAGS += -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -marm
+	else ifneq (,$(findstring rpi3,$(platform)))
+		CFLAGS += -mcpu=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -marm
+		LDFLAGS += -mcpu=cortex-a53 -mfpu=neon-fp-armv8 -mfloat-abi=hard -marm
+	endif
 # evercade armv7
 else ifneq (,$(findstring evercade,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
@@ -75,7 +97,7 @@ else ifneq (,$(findstring evercade,$(platform)))
 	CC = /opt/evercade/usr/bin/arm-linux-gnueabihf-gcc
 	CC_AS = /opt/evercade/usr/bin/arm-linux-gnueabihf-as
 	AR = /opt/evercade/usr/bin/arm-linux-gnueabihf-ar
-	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B -DEVERCADE
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16B -DEVERCADE
 	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
 	CFLAGS += -fomit-frame-pointer -ffast-math	
 	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
@@ -461,7 +483,7 @@ clean:
 	rm -f $(TARGET)
 	rm -f unit-tests/*.o unit-tests/autorun unit-tests/test-db
 
-db:
+rmp:
 	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
 	rm -f $(CORE_DIR)/libretro/db/*.o
 
