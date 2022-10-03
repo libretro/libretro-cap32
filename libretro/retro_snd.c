@@ -91,6 +91,7 @@ static int snd_buffer_size;
 #endif
 
 retro_guisnd_t sounds[SND_LAST];
+extern retro_log_printf_t log_cb;
 
 
 /**
@@ -124,7 +125,7 @@ bool sound_load(retro_guisnd_t* snd, const void* buffer, const int buffer_size) 
    memcpy(&snd->head, buffer, 44);
 
    if (snd->head.NumChannels!=1 || snd->head.BitsPerSample!=16){
-      LOGI(" - Incompatible audio type (%dch/%dbits) (1ch/16bits req) \n", snd->head.NumChannels, snd->head.BitsPerSample);
+      LOGE("Incompatible audio type (%dch/%dbits) (1ch/16bits req) \n", snd->head.NumChannels, snd->head.BitsPerSample);
       return false;
    }
 

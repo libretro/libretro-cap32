@@ -1072,9 +1072,9 @@ int emulator_select_ROM (void)
             cpr_load(&OS_6128P[0]);
             if (pbCartridgePages[0] != NULL)
                pbROMlo = pbCartridgePages[0];
-            LOGI("used internal bios!\n");
+            printf("[cap32] used internal bios!\n");
          } else if (pbCartridgeImage != NULL) {
-            LOGI("loaded cart: %s\n", cart_name);
+            printf("[cap32] loaded cart: %s\n", cart_name);
          }
          break;
    }
