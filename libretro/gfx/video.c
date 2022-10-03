@@ -38,6 +38,7 @@
 #include "libretro.h"
 #include "libretro-core.h"
 #include "video.h"
+#include "software.h"
 #include "assets/assets.h"
 
 /**
@@ -61,6 +62,7 @@ void video_setup(retro_video_depth_t video_depth)
         retro_video.draw_char = draw_char_24bpp;
         retro_video.draw_pixel = draw_pixel_24bpp;
         retro_video.cursor_color = 0xCCCCCC;
+        retro_video.blend_mask = 0x10101;
         retro_video.fmt = RETRO_PIXEL_FORMAT_XRGB8888;
         break;
 
@@ -74,6 +76,7 @@ void video_setup(retro_video_depth_t video_depth)
         retro_video.draw_char = draw_char_16bpp;
         retro_video.draw_pixel = draw_pixel_16bpp;
         retro_video.cursor_color = 0xCE79;
+        retro_video.blend_mask = 0x08210821;
         retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
         break;
     }

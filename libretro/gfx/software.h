@@ -81,6 +81,7 @@ void draw_rect(uint32_t * buffer, int x, int y, int width, int height, uint32_t 
 void draw_text(uint32_t * buffer, int x, int y, const char * text, uint32_t color);
 void draw_char(uint32_t * buffer, int x, int y, char chr_idx, uint32_t color);
 void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+void draw_image_linear_blend(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
 void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
 void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size);
 

@@ -119,6 +119,28 @@ void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, i
    }
 }
 
+// TODO: need more work with 16bits blending 'cause fg/bg are 32bits pointers
+#define BLEND_COLOR(fg, bg, out)                    \
+{                                                       \
+   (*(out)) = ((fg + bg + ((fg ^ bg) & retro_video.blend_mask)) >> 1); \
+}
+
+/**
+ * draw_image_linear_blend:
+ * function to draw an image with blending that occupies the entire screen
+ * does not need to recalculate the position after each line.
+ **/
+void draw_image_linear_blend(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
+{
+   buffer = (buffer + x) + (y * retro_video.bps);
+
+   register uint32_t loop = size * retro_video.bytes;
+   while (loop--)
+   {
+      BLEND_COLOR(*img, *buffer, buffer);
+      img++; buffer++;
+   }
+}
 
 /*
  * Prepare UI functions

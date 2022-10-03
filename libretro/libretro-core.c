@@ -456,6 +456,10 @@ void retro_set_environment(retro_environment_t cb)
          "Status Bar; onloading|enabled|disabled",
       },
       {
+         "cap32_keyboard_transparency",
+         "Keyboard Transparency; disabled|enabled",
+      },
+      {
          "cap32_floppy_sound",
          "Floppy Sound; enabled|disabled",
       },
@@ -697,6 +701,21 @@ static void update_variables(void)
             video_setup(DEPTH_24BPP);
          } else {
             video_setup(DEPTH_16BPP);
+         }
+      }
+   }
+
+   var.key = "cap32_keyboard_transparency";
+   var.value = NULL;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!(emu_status & COMPUTER_READY))
+      {
+         if (strcmp(var.value, "enabled") == 0)
+         {
+            retro_video.draw_keyboard_func = draw_image_linear_blend;
+         } else {
+            retro_video.draw_keyboard_func = draw_image_linear;
          }
       }
    }
@@ -1175,10 +1194,10 @@ void computer_load_file() {
       dc_parse_m3u(dc, retro_content_filepath);
 
       // Some debugging
-      log_cb(RETRO_LOG_INFO, "m3u file parsed, %d file(s) found\n", dc->count);
+      LOGI("m3u file parsed, %d file(s) found\n", dc->count);
       for(int i = 0; i < dc->count; i++)
       {
-         log_cb(RETRO_LOG_INFO, "file %d: %s\n", i+1, dc->files[i]);
+         LOGI("file %d: %s\n", i+1, dc->files[i]);
       }
 
       // Init first image
@@ -1191,7 +1210,7 @@ void computer_load_file() {
       if(dc->command)
       {
          // Execute the command
-         log_cb(RETRO_LOG_INFO, "Executing the specified command: %s\n", dc->command);
+         LOGI("Executing the specified command: %s\n", dc->command);
          snprintf(loader_buffer, LOADER_MAX_SIZE - 2, "%s\n", dc->command);
          ev_autorun_prepare(loader_buffer);
       }
@@ -1388,7 +1407,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
    {
       amstrad_devices[ port ] = device;
 
-      log_cb(RETRO_LOG_INFO, "retro_set_controller_port_device: (%d)=%d \n",port,device);
+      LOGI("retro_set_controller_port_device: (%d)=%d \n",port,device);
    }
 }
 

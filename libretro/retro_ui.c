@@ -70,6 +70,9 @@ static unsigned char ui_status = 0;
 static char ui_string[32];
 static mu_Context *ctx;
 
+// VIDEO draw keyboard cached function
+static void (*draw_keyboard)(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+
 // UI INTERNAL VALUES
 #define INTERNAL_UI_KEYBOARD  2
 #define INTERNAL_UI_MENU      4
@@ -201,6 +204,7 @@ void retro_show_statusbar()
 void retro_ui_prepare(void)
 {
    cursor_color = retro_video.cursor_color;
+   draw_keyboard = retro_video.draw_keyboard_func;
    // convert KeyboardOnScreen to current video/color-depth
    convert_image(
       keyboard_surface,
@@ -357,7 +361,7 @@ void retro_ui_process()
 
    if (ui_status & INTERNAL_UI_KEYBOARD)
    {
-      draw_image_linear(
+      draw_keyboard(
          video_buffer,
          keyboard_surface,
          0,
