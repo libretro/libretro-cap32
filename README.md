@@ -72,3 +72,5 @@ Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
 - [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59) and **need 24bit color depth**.
 
 - Old3DS need some optimizations (~18fps).
+
+- [Minor CPC Bugs and FDC needs more work](https://github.com/libretro/libretro-cap32/issues/110) to accurately emulate complex protections.
