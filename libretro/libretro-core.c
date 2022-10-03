@@ -751,7 +751,7 @@ void Emu_uninit()
 
 void retro_shutdown_core(void)
 {
-   LOGI("SHUTDOWN\n");
+   LOGD("SHUTDOWN\n");
 
    //quit_cap32_emu();
 
@@ -803,7 +803,7 @@ static void retro_insert_image()
          LOGI("Tape Error (%d): %s\n", error, dc->files[dc->index]);
       }
    }
-   else
+   else if(dc->unit == DC_IMAGE_TYPE_FLOPPY)
    {
       int error = attach_disk((char *)dc->files[dc->index],0);
       if (error)
@@ -814,6 +814,10 @@ static void retro_insert_image()
       }
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       retro_computer_cfg.slot = SLOT_DSK;
+   }
+   else
+   {
+      LOGE("unsupported image-type : %u\n", dc->unit);
    }
 }
 
@@ -1114,35 +1118,39 @@ void computer_load_bios() {
    }
 }
 
-// load content
-void computer_load_file() {
-
-   uint32_t hash = get_hash(retro_content_filepath);
-   if (hash)
+void computer_hash_file(char* filepath)
+{
+   uint32_t hash = get_hash(filepath);
+   if (!hash)
    {
-      // check clean-cpc-db hash
-      game_configuration.is_fail = db_fail(hash);
-      if(!game_configuration.is_fail)
-      {
-         // cleaned games appear with GREEN DSK
-         game_configuration.is_clean = db_clean(hash);
-         db_info(hash);
-      }
-      else
-      {
-         // warn user is a unsupported ROM
-         retro_message("ROM marked as NOT WORKING.");
-      }
-
-      LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
-         hash,
-         game_configuration.has_btn,
-         game_configuration.has_command,
-         game_configuration.is_fail,
-         game_configuration.is_clean
-      );
+      return;
    }
 
+   // check clean-cpc-db hash
+   game_configuration.is_fail = db_fail(hash);
+   if(!game_configuration.is_fail)
+   {
+      // cleaned games appear with GREEN DSK
+      game_configuration.is_clean = db_clean(hash);
+      db_info(hash);
+   }
+   else
+   {
+      // warn user is a unsupported ROM
+      retro_message("ROM marked as NOT WORKING.");
+   }
+
+   LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
+      hash,
+      game_configuration.has_btn,
+      game_configuration.has_command,
+      game_configuration.is_fail,
+      game_configuration.is_clean
+   );
+}
+
+// load content
+void computer_load_file() {
    // check custom filename config
    check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
@@ -1154,7 +1162,7 @@ void computer_load_file() {
          LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
          retro_computer_cfg.slot = SLOT_SNA;
       } else {
-         LOGI("SNA Error (%d): %s", error, (char *)retro_content_filepath);
+         LOGE("SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
       return;
@@ -1176,6 +1184,7 @@ void computer_load_file() {
       // Init first image
       dc->eject_state = false;
       dc->index = 0;
+      computer_hash_file((char *)dc->files[dc->index]);
       retro_insert_image();
 
       // If command was specified
@@ -1203,11 +1212,13 @@ void computer_load_file() {
       // Init first disk
       dc->index = 0;
       dc->eject_state = false;
+      computer_hash_file((char *)dc->files[dc->index]);
+
       LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       int error = attach_disk((char *)dc->files[dc->index],0);
       if (error) {
          retro_message("Error Loading DSK...");
-         LOGI("DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+         LOGE("DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
       } else {
          computer_autoload();
          retro_computer_cfg.slot = SLOT_DSK;
@@ -1219,12 +1230,13 @@ void computer_load_file() {
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
+         computer_hash_file((char *)retro_content_filepath);
          strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
          LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
          retro_computer_cfg.slot = SLOT_TAP;
       } else {
-         LOGI("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
+         LOGE("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
       }
    }
 
@@ -1376,7 +1388,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
    {
       amstrad_devices[ port ] = device;
 
-      printf("retro_set_controller_port_device: (%d)=%d \n",port,device);
+      log_cb(RETRO_LOG_INFO, "retro_set_controller_port_device: (%d)=%d \n",port,device);
    }
 }
 

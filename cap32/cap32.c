@@ -1479,7 +1479,6 @@ void video_set_style (void)
       case 32:
          CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_24bpp;
          CPC.rgb2color = rgb2color_24bpp;
-         printf("TESST 32!\n");
          if(dwYScale == 2)
             CPC.scr_render = (void(*)(void))render32bpp_doubleY;
          else
@@ -1488,7 +1487,6 @@ void video_set_style (void)
       case 16:
       case 15:
       default:
-         printf("TESST 16!\n");
          CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_16bpp;
          CPC.rgb2color = rgb2color_16bpp;
          if(dwYScale == 2)

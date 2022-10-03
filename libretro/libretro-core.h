@@ -124,8 +124,10 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define LOG_TAG "RetroArch.Frodo"
 #define LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #else
-#define LOGI printf
+#define LOGI(...) log_cb(RETRO_LOG_INFO, __VA_ARGS__)
 #endif
+#define LOGE(...) log_cb(RETRO_LOG_ERROR, __VA_ARGS__)
+#define LOGD(...) log_cb(RETRO_LOG_DEBUG, __VA_ARGS__)
 
 // BIT OPERATIONS - MACROS
 #define BIT_SET(var, bit)    var  = 1 << bit

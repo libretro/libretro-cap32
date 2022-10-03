@@ -37,6 +37,7 @@
  *
  ****************************************************************************************/
 
+#include "libretro-core.h"
 #include "retro_disk_control.h"
 #include "retro_strings.h"
 #include "retro_utils.h"
@@ -49,6 +50,8 @@
 
 #define COMMENT "#"
 #define M3U_SPECIAL_COMMAND "#COMMAND:"
+
+extern retro_log_printf_t log_cb;
 
 // Return the directory name of 'filename' without trailing separator.
 // Allocates returned string.
@@ -120,7 +123,7 @@ void dc_reset(dc_storage* dc)
       dc->types[i] = DC_IMAGE_TYPE_NONE;
    }
 
-   dc->unit = 0;
+   dc->unit = DC_IMAGE_TYPE_NONE;
    dc->count = 0;
    dc->index = 0;
    dc->index_prev = 0;
@@ -137,7 +140,7 @@ dc_storage* dc_create(void)
 
    if((dc = (dc_storage*) malloc(sizeof(dc_storage))) != NULL)
    {
-      dc->unit        = 0;
+      dc->unit        = DC_IMAGE_TYPE_NONE;
       dc->count       = 0;
       dc->index       = 0;
       dc->eject_state = true;
@@ -172,7 +175,7 @@ bool dc_add_file_int(dc_storage* dc, char* filename, char* name)
       dc->names[dc->count-1] = !string_is_empty(name) ? strdup(name) : NULL;
       dc->types[dc->count-1]  = dc_get_image_type(filename);   
 
-      printf(">>> dc added int %s - %s\n", filename, name);
+      LOGI(">>> dc added int %s - [%s]\n", filename, name);
       return true;
    }
 
@@ -192,7 +195,7 @@ bool dc_add_file(dc_storage* dc, const char* filename)
    {
       if (!strcmp(dc->files[index], filename))
       {
-         printf("File '%s' ignored as duplicate!\n", filename);
+         LOGI("File '%s' ignored as duplicate!\n", filename);
          return true;
       }
    }
@@ -202,10 +205,24 @@ bool dc_add_file(dc_storage* dc, const char* filename)
    name[0] = '\0';
    fill_pathname(name, path_basename(filename), "", sizeof(name));
 
-   printf(">>> dc added %s - %s [%i]\n", filename, name, dc->unit);
+   if(!dc_add_file_int(dc, strdup(filename), strdup(name)))
+      return false;
 
-   // Copy and return
-   return dc_add_file_int(dc, strdup(filename), strdup(name));
+   // if dc unit-type is none, get type from first image
+   if (dc->unit == DC_IMAGE_TYPE_NONE)
+   {
+      if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_TAPE)
+         dc->unit = DC_IMAGE_TYPE_TAPE;
+      else if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_FLOPPY)
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+      else if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_MEM)
+         dc->unit = DC_IMAGE_TYPE_MEM;
+      else
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+   }
+
+   LOGI(">>> dc added %s - [%s] [unit %i]\n", filename, name, dc->unit);
+   return true;
 }
 
 bool dc_remove_file(dc_storage* dc, int index)
@@ -234,7 +251,7 @@ bool dc_remove_file(dc_storage* dc, int index)
    // Reset fliplist unit after removing last entry
    if (dc->count == 0)
    {
-      dc->unit = 0;
+      dc->unit = DC_IMAGE_TYPE_NONE;
    }
 
    return true;
@@ -273,7 +290,7 @@ bool dc_replace_file(dc_storage* dc, int index, const char* filename)
          strendswith(full_path_replace, "7z")
       )
       {
-         printf(">>> dc replace %s unsuported type.\n", filename);
+         LOGE(">>> dc replace %s unsuported type.\n", filename);
          return false;
       }
       /* Single append */
@@ -298,7 +315,7 @@ bool dc_replace_file(dc_storage* dc, int index, const char* filename)
          dc->names[index] = !string_is_empty(name) ? strdup(name) : NULL;
          dc->types[index]  = dc_get_image_type(filename);
 
-         printf(">>> dc replace %s - %s [%u].\n", filename, name, dc->types[index]);
+         LOGI(">>> dc replace %s - %s [%u].\n", filename, name, dc->types[index]);
       }
    }
 
@@ -374,10 +391,12 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
          dc->unit = DC_IMAGE_TYPE_TAPE;
       else if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_FLOPPY)
          dc->unit = DC_IMAGE_TYPE_FLOPPY;
+      else if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_MEM)
+         dc->unit = DC_IMAGE_TYPE_MEM;
       else
          dc->unit = DC_IMAGE_TYPE_FLOPPY;
 
-      printf(">>> dc unit: %i\n", dc->unit);
+      LOGI(">>> dc (m3u) unit type: %i\n", dc->unit);
    }
 
 }
