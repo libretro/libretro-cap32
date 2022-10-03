@@ -41,6 +41,7 @@
 #include "retro_strings.h"
 #include "retro_utils.h"
 #include "file/file_path.h"
+#include "string/stdstring.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,7 +123,9 @@ void dc_reset(dc_storage* dc)
    dc->unit = 0;
    dc->count = 0;
    dc->index = 0;
+   dc->index_prev = 0;
    dc->eject_state = true;
+   dc->replace     = false;
 }
 
 dc_storage* dc_create(void)
@@ -134,10 +137,12 @@ dc_storage* dc_create(void)
 
    if((dc = (dc_storage*) malloc(sizeof(dc_storage))) != NULL)
    {
-      dc->count = 0;
-      dc->index = -1;
+      dc->unit        = 0;
+      dc->count       = 0;
+      dc->index       = 0;
       dc->eject_state = true;
-      dc->command = NULL;
+      dc->replace     = false;
+      dc->command     = NULL;
       for(i = 0; i < DC_MAX_SIZE; i++)
       {
          dc->files[i] = NULL;
@@ -151,81 +156,152 @@ dc_storage* dc_create(void)
 
 bool dc_add_file_int(dc_storage* dc, char* filename, char* name)
 {
-   // Verify
-   if (filename == NULL || dc == NULL || dc->count > DC_MAX_SIZE)
-   {
-      free(filename);
-      free(name);
-
+   /* Verify */
+   if (dc == NULL)
       return false;
+
+   if (!filename || (*filename == '\0'))
+      return false;
+
+ /* If max size is not exceeded */
+   if (dc->count < DC_MAX_SIZE)
+   {
+      /* Add the file */
+      dc->count++;
+      dc->files[dc->count-1] = strdup(filename);
+      dc->names[dc->count-1] = !string_is_empty(name) ? strdup(name) : NULL;
+      dc->types[dc->count-1]  = dc_get_image_type(filename);   
+
+      printf(">>> dc added int %s - %s\n", filename, name);
+      return true;
    }
 
-   // Add the file
-   dc->count++;
-   dc->files[dc->count-1] = filename;
-   dc->names[dc->count-1]  = name;
-   dc->types[dc->count-1]  = dc_get_image_type(filename);   
-
-   printf(">>> dc added int %s - %s\n", filename, name);
-
-   return true;
+   return false;
 }
 
 bool dc_add_file(dc_storage* dc, const char* filename)
 {
-   // Verify
-   if (dc == NULL || filename == NULL)
+   unsigned index = 0;
+
+   /* Verify */
+   if (dc == NULL || !filename || (*filename == '\0'))
         return false;
 
-// Determine if tape or disk fliplist from first entry
-   if (dc->unit != -1)
+   /* Dupecheck */
+   for (index = 0; index < dc->count; index++)
    {
-      if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_TAPE)
-         dc->unit = DC_IMAGE_TYPE_TAPE;
-      else if (dc_get_image_type(dc->files[0]) == DC_IMAGE_TYPE_FLOPPY)
-         dc->unit = DC_IMAGE_TYPE_FLOPPY;
-      else
-         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+      if (!strcmp(dc->files[index], filename))
+      {
+         printf("File '%s' ignored as duplicate!\n", filename);
+         return true;
+      }
    }
 
    // Get 'name' - just the filename without extension
-   char tmp[512];
-   tmp[0] = '\0';
-   fill_pathname(tmp, path_basename(filename), "", sizeof(tmp));
+   char name[512];
+   name[0] = '\0';
+   fill_pathname(name, path_basename(filename), "", sizeof(name));
 
-   printf(">>> dc added ext %s - %s\n", filename, tmp);
+   printf(">>> dc added %s - %s [%i]\n", filename, name, dc->unit);
 
    // Copy and return
-   return dc_add_file_int(dc, strdup(filename), strdup(tmp));
+   return dc_add_file_int(dc, strdup(filename), strdup(name));
 }
 
 bool dc_remove_file(dc_storage* dc, int index)
 {
    if (dc == NULL)
-       return false;
+      return false;
 
    if (index < 0 || index >= dc->count)
-       return false;
+      return false;
 
    // "If ptr is a null pointer, no action occurs"
    free(dc->files[index]);
    dc->files[index] = NULL;
    free(dc->names[index]);
    dc->names[index] = NULL;
+   dc->types[index] = DC_IMAGE_TYPE_NONE;
 
    // Shift all entries after index one slot up
    if (index != dc->count - 1)
    {
-       memmove(dc->files + index, dc->files + index + 1, (dc->count - 1 - index) * sizeof(dc->files[0]));
-       memmove(dc->names + index, dc->names + index + 1, (dc->count - 1 - index) * sizeof(dc->names[0]));
+      memmove(dc->files + index, dc->files + index + 1, (dc->count - 1 - index) * sizeof(dc->files[0]));
+      memmove(dc->names + index, dc->names + index + 1, (dc->count - 1 - index) * sizeof(dc->names[0]));
    }
    dc->count--;
 
    // Reset fliplist unit after removing last entry
    if (dc->count == 0)
    {
-       dc->unit = 0;
+      dc->unit = 0;
    }
+
+   return true;
+}
+
+bool dc_replace_file(dc_storage* dc, int index, const char* filename)
+{
+   if (dc == NULL)
+      return false;
+
+   if (index < 0 || index >= dc->count)
+      return false;
+
+   // "If ptr is a null pointer, no action occurs"
+   free(dc->files[index]);
+   dc->files[index] = NULL;
+   free(dc->names[index]);
+   dc->names[index] = NULL;
+   dc->types[index] = DC_IMAGE_TYPE_NONE;
+
+   if (filename == NULL)
+   {
+      dc_remove_file(dc, index);
+   }
+   else
+   {
+      dc->replace = false;
+
+      char full_path_replace[RETRO_PATH_MAX] = {0};
+      strlcpy(full_path_replace, (char*)filename, sizeof(full_path_replace));
+
+      /* ZIP/M3U not implemented internally */
+      if (
+         strendswith(full_path_replace, "m3u") ||
+         strendswith(full_path_replace, "zip") ||
+         strendswith(full_path_replace, "7z")
+      )
+      {
+         printf(">>> dc replace %s unsuported type.\n", filename);
+         return false;
+      }
+      /* Single append */
+      else
+      {
+         // Get 'name' - just the filename without extension
+         char name[512];
+         name[0] = '\0';
+         fill_pathname(name, path_basename(filename), "", sizeof(name));
+
+         /* Dupecheck */
+         for (unsigned i = 0; i < dc->count - 1; i++)
+         {
+            if (!strcmp(dc->files[i], full_path_replace))
+            {
+               dc_remove_file(dc, index);
+               return true;
+            }
+         }
+
+         dc->files[index] = strdup(filename);
+         dc->names[index] = !string_is_empty(name) ? strdup(name) : NULL;
+         dc->types[index]  = dc_get_image_type(filename);
+
+         printf(">>> dc replace %s - %s [%u].\n", filename, name, dc->types[index]);
+      }
+   }
+
    return true;
 }
 
@@ -317,19 +393,23 @@ void dc_free(dc_storage* dc)
 
 enum dc_image_type dc_get_image_type(const char* filename)
 {
-	// Missing file
-	if (!filename || (*filename == '\0'))
-		return DC_IMAGE_TYPE_NONE;
+   // Missing file
+   if (!filename || (*filename == '\0'))
+      return DC_IMAGE_TYPE_NONE;
 
-	// Floppy image
-	if (strendswith(filename, "dsk"))
-	   return DC_IMAGE_TYPE_FLOPPY;
+   // Floppy image
+   if (strendswith(filename, "dsk"))
+      return DC_IMAGE_TYPE_FLOPPY;
 
-	// Tape image
-	if (strendswith(filename, "tap") ||
-	    strendswith(filename, "cdt"))
-	   return DC_IMAGE_TYPE_TAPE;
+   // Tape image
+   if (strendswith(filename, "tap") ||
+       strendswith(filename, "cdt"))
+      return DC_IMAGE_TYPE_TAPE;
 
-	// Fallback
-	return DC_IMAGE_TYPE_UNKNOWN;
+   // Cart image
+   if (strendswith(filename, "cpr"))
+      return DC_IMAGE_TYPE_MEM;
+
+   // Fallback
+   return DC_IMAGE_TYPE_UNKNOWN;
 }

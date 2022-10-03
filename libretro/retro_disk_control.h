@@ -50,6 +50,7 @@ enum dc_image_type {
    DC_IMAGE_TYPE_NONE = 0,
    DC_IMAGE_TYPE_FLOPPY,
    DC_IMAGE_TYPE_TAPE,
+   DC_IMAGE_TYPE_MEM,
    DC_IMAGE_TYPE_UNKNOWN
 };
 
@@ -62,6 +63,8 @@ struct dc_storage{
    unsigned count;
    int index;
    bool eject_state;
+   bool replace;
+   unsigned index_prev;
 };
 
 typedef struct dc_storage dc_storage;

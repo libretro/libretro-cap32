@@ -877,16 +877,20 @@ static bool retro_set_image_index(unsigned index)
    // Insert image
    if (dc)
    {
-      if (index <= dc->count)
+      if (index == dc->index)
+         return true;
+
+      if (dc->replace)
+      {
+         dc->replace = false;
+         index = 0;
+      }
+
+      if (index < dc->count && dc->files[index])
       {
          dc->index = index;
-
-         if ((index < dc->count) && (dc->files[index]))
-         {
-            int unit = get_image_unit();
-            LOGI("Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
-         }
-
+         int unit = get_image_unit();
+         LOGI("Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
          return true;
       }
    }
@@ -902,27 +906,13 @@ static unsigned retro_get_num_images(void)
    return 0;
 }
 
-/* Replaces the disk image associated with index.
- * Arguments to pass in info have same requirements as retro_load_game().
- * Virtual disk tray must be ejected when calling this.
- *
- * Replacing a disk image with info = NULL will remove the disk image
- * from the internal list.
- * As a result, calls to get_image_index() can change.
- *
- * E.g. replace_image_index(1, NULL), and previous get_image_index()
- * returned 4 before.
- * Index 1 will be removed, and the new index is 3.
- */
 static bool retro_replace_image_index(unsigned index, const struct retro_game_info *info)
 {
 if (dc)
     {
         if (info != NULL)
         {
-            //dc_replace_file(dc, index, info->path);
-            LOGI("Unimplemented disk_control_replace (%d): %s\n", index, dc->files[dc->index]);
-            return false;
+            dc_replace_file(dc, index, info->path);
         }
         else
         {
@@ -947,6 +937,7 @@ static bool retro_add_image_index(void)
       {
          dc->files[dc->count] = NULL;
          dc->names[dc->count] = NULL;
+         dc->types[dc->count] = DC_IMAGE_TYPE_NONE;
          dc->count++;
          return true;
       }
