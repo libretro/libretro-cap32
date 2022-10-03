@@ -1,0 +1,18 @@
+input_player1_key_right = "120"
+input_player1_key_right_name = "Turn Clockwise"
+input_player1_key_left = "122"
+input_player1_key_left_name = "Turn Counterclockwise"
+input_player1_key_a = "97"
+input_player1_key_a_name = "Move forward"
+input_player1_key_b = "113"
+input_player1_key_b_name = "Jump"
+input_player1_key_x = "49"
+input_player1_key_x_name = "Carry"
+input_player1_key_y = "50"
+input_player1_key_y_name = "Carry"
+input_player1_key_select = "51"
+input_player1_key_start = "48"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xa2d5c9db # (UK) (1984) [Maxit TAPE DUMP]

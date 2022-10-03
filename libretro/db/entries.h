@@ -166,10 +166,22 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       8,
    },
+   { // Jungle Book (1989).rmp
+      {0xccc3a70b},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      9,
+   },
    { // Klax.rmp
       {0x96b53a41},
       {RETROK_a, DB_CLEAN, DB_CLEAN, RETROK_0, DB_CLEAN, DB_CLEAN, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_q, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
       {31, -1, -1, -1, -1, -1, -1, -1, 32, 33, -1, -1, -1, -1},
+      -1,
+   },
+   { // Knight Lore.rmp
+      {0xa2d5c9db},
+      {RETROK_q, RETROK_2, RETROK_3, RETROK_0, DB_CLEAN, DB_CLEAN, RETROK_z, RETROK_x, RETROK_a, RETROK_1, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {18, 14, -1, -1, -1, -1, 10, 11, 12, 14, -1, -1, -1, -1},
       -1,
    },
    { // Lancelot (1988).rmp
@@ -182,7 +194,7 @@ t_file_entry dbinfo[] = {
       {0xeb127e47},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      9,
+      10,
    },
    { // Manic Miner.rmp
       {0xcd9dbf9c},
@@ -206,7 +218,7 @@ t_file_entry dbinfo[] = {
       {0xb40c5cb2},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      10,
+      11,
    },
    { // Nanako Descends to Hell.rmp
       {0x6c2cdcea},
@@ -224,7 +236,7 @@ t_file_entry dbinfo[] = {
       {0x9af2061b},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      11,
+      12,
    },
    { // Prince of Persia.rmp
       {0xf964db5d, 0xa14a1e0f, 0xb9d14a6d, 0x18d230b1},
@@ -242,7 +254,7 @@ t_file_entry dbinfo[] = {
       {0x95b94081},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      12,
+      13,
    },
    { // Shinobi.rmp
       {0x6f1e3eb0, 0xbd6c0af},
@@ -260,19 +272,19 @@ t_file_entry dbinfo[] = {
       {0x636a30d8},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      13,
+      14,
    },
    { // Spellbreaker (1985).rmp
       {0xd519f3ce},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      14,
+      15,
    },
    { // Suspended (1983).rmp
       {0x819d6ed7},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      15,
+      16,
    },
    { // Target Renegade.rmp
       {0xe4154a1f},
@@ -296,13 +308,13 @@ t_file_entry dbinfo[] = {
       {0x5332c3ad},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      16,
+      17,
    },
    { // Witness, The (1984).rmp
       {0xb16409a2},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      17,
+      18,
    },
    { // Wonderboy.rmp
       {0xb1026135},
@@ -314,22 +326,16 @@ t_file_entry dbinfo[] = {
       {0xa02c3758},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      18,
+      19,
    },
    { // Zork II - The Wizard of Frobozz (1986).rmp
       {0xe0240de6},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      19,
+      20,
    },
    { // Zork III - The Dungeon Master (1986).rmp
       {0xa3fb554f},
-      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      20,
-   },
-   { // ungle Book (1989).rmp
-      {0xccc3a70b},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       21,
@@ -346,6 +352,7 @@ char commands[] = {
    "RUN\"MENU\0"
    "HITCHHIK\0"
    "INFIDEL\0"
+   "RUN\"JUNGLE\0"
    "LEATHERG\0"
    "RUN\"GAME\0"
    "PLANETFA\0"
@@ -358,7 +365,6 @@ char commands[] = {
    "ZORK1\0"
    "ZORK2\0"
    "ZORK3\0"
-   "RUN\"JUNGLE\0"
 };
 
 char input_names[] = {
@@ -405,5 +411,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1664642287.6713324
+// gen hash: 1664829854.0398567
 
