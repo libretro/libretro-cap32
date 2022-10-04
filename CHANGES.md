@@ -1,4 +1,13 @@
 # Future
+- RMP: Knight Lore, 1942, 1943, 3D Grand Prix, Abu Simbel Profanation, Barbarian, Boloncio, Boulder Dash, Bruce Lee, Ghostbusters, Harrier Attack, Match Day II, Myth, Oh Mummy ([RMP WIP](https://github.com/libretro/libretro-cap32/wiki/RMP:-Done))
+- CORE: Keyboard Transparency Option added
+- DC/DB: Compute hash from M3U too
+- DC: Implemented replace CMD, now you can load DSK/CDT from UI
+- CORE: Fix RPI 1-B (old model)
+- RMP: Target Renegade
+- CORE: joystick fixes
+- CORE: evercade support
+- DB: added new tests, sync clean-cpc-db v1.1
 - DB: sync clean-cpc-db v1.0
 - DB: documented correctly RMP files
 - AUTORUN: added better code inspired by Fredouille - caprice-forever
