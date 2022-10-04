@@ -1,0 +1,16 @@
+input_player1_key_right = "119"
+input_player1_key_left = "113"
+input_player1_key_a = "111"
+input_player1_key_a_name = "Action / Combo"
+input_player1_key_b = "106"
+input_player1_key_b_name = "Small Jump / Kick"
+input_player1_key_y = "105"
+input_player1_key_x = "105"
+input_player1_key_x_name = "Long Jump / Punch"
+
+input_player1_key_start = "32"
+input_player1_key_start_name = "Start / Select Icon"
+
+entry_hash_1 = 0x4d8464d3 # (UK) (1987) (CPM) [Original]
+
+entry_map_type = "clean"

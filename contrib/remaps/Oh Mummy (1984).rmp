@@ -1,0 +1,5 @@
+input_player1_key_start = "112"
+input_player1_key_select = "99"
+
+entry_hash_1 = 0x2ff420da # (UK) (1984) [Tape Dump]
+entry_hash_2 = 0x6abd6ce2 # (S) (1984) [Nandsdoff]

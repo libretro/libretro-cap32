@@ -1,0 +1,9 @@
+input_player1_key_start = "13"
+input_player1_key_start_name = "Start"
+input_player1_key_b = "49"
+
+entry_hash_1 = 0x46b5fe2c # (UK) (1985) [Original]
+entry_hash_2 = 0xfed514e8 # 2 (UK) (1985) (Hack)
+entry_hash_3 = 0x474a9722 # 2 (F) (1985) (Hack)
+entry_hash_4 = 0x5ebc61a1 # 3 (UK) (1986) [Ozisoft] [Original] 
+entry_hash_5 = 0x48fcdc1e # 6 (UK) (1986) (Hack)

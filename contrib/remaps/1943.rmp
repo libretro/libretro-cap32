@@ -1,0 +1,16 @@
+input_player1_key_start = "49"
+# input_player1_key_select = "50" # Two Players same time
+input_player1_key_b = "303"
+input_player1_key_b_name = "Roll Plane"
+input_player1_key_y = "13"
+input_player1_key_y_name = "Bomb"
+input_player1_key_x = "13"
+input_player1_key_x_name = "Bomb"
+
+entry_hash_1 = 0x8769d0b1 # (UK) (1988) [Original]
+
+
+
+
+
+

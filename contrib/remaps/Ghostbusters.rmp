@@ -1,0 +1,13 @@
+input_player1_key_start = "13"
+input_player1_key_start_name = "Return / Confirm"
+input_player1_key_b = "101"
+input_player1_key_b_name = "Key E"
+input_player1_key_y = "49"
+input_player1_key_y_name = "Key 1"
+input_player1_key_x = "50"
+input_player1_key_x_name = "Key 2"
+input_player1_key_select = "51"
+input_player1_key_select_name = "Key 3"
+
+entry_hash_1 = 0xc8149ef6 # (UK) (1985) [Original - Multiload]
+entry_hash_2 = 0xe71162a4 # (UK) (1985) [v2]

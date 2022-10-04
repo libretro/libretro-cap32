@@ -1,0 +1,7 @@
+input_player1_key_start = "50"
+
+input_player1_key_b = "51"
+input_player1_key_b_name = "Roll Plane"
+
+
+entry_hash_1 = 0xab928e90 # (UK) (1986) [Original]

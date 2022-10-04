@@ -1,0 +1,10 @@
+input_player1_key_left = "257"
+input_player1_key_right = "259"
+input_player1_key_a = "32"
+input_player1_key_a_name = "Jump"
+input_player1_key_start = "115"
+input_player1_key_start_name = "S / Start"
+
+entry_hash_1 = 0x5fc8032d # (S) (1986) [Tape Dump - Kukulcan]
+
+entry_map_type = "clean"

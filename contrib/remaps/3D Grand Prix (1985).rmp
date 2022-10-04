@@ -1,0 +1,16 @@
+input_player1_key_up = "33"
+input_player1_key_down = "33"
+input_player1_key_a = "39"
+input_player1_key_a_name = "Accelerate"
+input_player1_key_b = "47"
+input_player1_key_b_name = "Break"
+input_player1_key_y = "32"
+input_player1_key_y_name = "Gear"
+input_player1_key_x = "32"
+input_player1_key_x_name = "Gear"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0xe1e61287 # (UK) (1986) [Exopal] [Original]
+
+entry_map_type = "keep"

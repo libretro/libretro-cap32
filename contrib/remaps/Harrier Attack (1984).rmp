@@ -1,0 +1,18 @@
+input_player1_key_up = "266"
+input_player1_key_down = "271"
+input_player1_key_left = "122"
+input_player1_key_left_name = "Slow"
+input_player1_key_right = "120"
+input_player1_key_right_name = "Fast"
+input_player1_key_start = "50"
+input_player1_key_start_name = "Key 2"
+input_player1_key_select = "51"
+input_player1_key_select_name = "Key 3"
+input_player1_key_a = "256"
+input_player1_key_a_name = "Fire Rocket"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Drop Bomb"
+input_player1_key_y = "13"
+input_player1_key_y_name = "Return / Confirm"
+
+entry_hash_1 = 0x762a657 # (UK) (1984) [Original]

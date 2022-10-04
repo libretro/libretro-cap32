@@ -1,0 +1,8 @@
+input_player1_key_start = "13"
+input_player1_key_start_name = "Start"
+input_player1_key_x = "32"
+
+
+entry_hash_1 = 0xc761e738 # (UK) (2 faces) (1987) [Palace Software] [Original]
+entry_hash_2 = 0x60e1f5f0
+

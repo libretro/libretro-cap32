@@ -1,0 +1,11 @@
+input_player1_key_right = "112"
+input_player1_key_left = "111"
+input_player1_key_a = "97"
+input_player1_key_a_name = "Short Jump"
+input_player1_key_b = "113"
+input_player1_key_b_name = "Long Jump"
+input_player1_key_start = "50"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x7037c06c # (S) (1984) [Tape Dump - Pablo Forcen Soler]
