@@ -27,7 +27,7 @@ Our game database is based on [clean-cpc-db](https://github.com/clean-cpc-db). A
 
 Due to the creation of this database, we have started a small game mapping project, to bring an easyest CPC plug and play experiencie! You can help us...
 
-* [Contribute with your RMP files](https://github.com/libretro/libretro-cap32/wiki/%5Bcolaborate%5D-create-a-new-RMP-for-your-favorite-game!)
+* [Contribute with your RMP files](https://github.com/libretro/libretro-cap32/wiki/%5Bcolaborate%5D-create-a-new-RMP-for-your-favorite-game!) ([Work in Progress](https://github.com/libretro/libretro-cap32/wiki/RMP:-Done)).
 
 When a game is detected as a **clean version**, a green disc icon appears at the bottom.
 ![imagen](https://user-images.githubusercontent.com/560310/172237853-0a18ebee-be5e-4dec-90fa-e4ca7b77a2d7.png)
