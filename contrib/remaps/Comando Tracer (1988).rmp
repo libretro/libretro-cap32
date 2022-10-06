@@ -1,0 +1,13 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_down_name = "Down / Use"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "48"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Shoot"
+
+entry_hash_1 = 0x261b785 # (S) (1988) (CPM) [Original]

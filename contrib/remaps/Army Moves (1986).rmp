@@ -1,0 +1,19 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "51"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Missile Air"
+input_player1_key_b = "307"
+input_player1_key_b_name = "Missile Ground"
+input_player1_key_x = "49"
+input_player1_key_x_name = "Key 1"
+input_player1_key_y = "50"
+input_player1_key_y_name = "Key 2"
+
+entry_hash_1 = 0xe49fc694 # (S) (1986) [Original]
+entry_hash_2 = 0x3db8fc89 # (UK) (1986) [Original]

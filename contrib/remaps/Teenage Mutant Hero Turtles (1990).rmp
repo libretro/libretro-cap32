@@ -1,0 +1,19 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Fire"
+input_player1_key_b = "115"
+input_player1_key_b_name = "Select Weapon"
+input_player1_key_x = "13"
+input_player1_key_x_name = "Special Features"
+input_player1_key_y = "303"
+input_player1_key_y_name = "Enter Wagon"
+
+entry_hash_1 = 0xca4f0b5 # (UK) (1990) (UK retail version) [Original - Codes]
+entry_hash_2 = 0x8dd0cf27 # (UK) (1990) (UK retail version) [Clean Crack]

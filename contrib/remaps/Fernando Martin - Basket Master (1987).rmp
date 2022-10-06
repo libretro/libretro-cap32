@@ -1,0 +1,6 @@
+input_player1_key_start = "49"
+input_player1_key_b = "51"
+input_player1_key_x = "32"
+
+entry_hash_1 = 0x708351db # (S) (1987) [Original] - Fernando Martin
+entry_hash_2 = 0x471c5eac # (UK) (1987) [Original] - Basket Master

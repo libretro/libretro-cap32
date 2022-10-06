@@ -1,0 +1,19 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "51"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Shoot"
+input_player1_key_b = "307"
+input_player1_key_b_name = "Throw Bombs"
+input_player1_key_x = "49"
+input_player1_key_x_name = "Key 1"
+input_player1_key_y = "50"
+input_player1_key_y_name = "Key 2"
+
+entry_hash_1 = 0x4d723f39 # (S) (1986) [Original]
+entry_hash_2 = 0x8d8e3122 # (UK) (1987) [Original]

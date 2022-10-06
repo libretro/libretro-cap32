@@ -1,0 +1,14 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Attack"
+
+entry_hash_1 = 0x558abe44 # (UK) (1987) (v2) [Original]
+
+entry_map_type = "clean"
