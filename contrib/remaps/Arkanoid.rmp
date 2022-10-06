@@ -1,0 +1,8 @@
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_a = "32"
+
+input_player1_key_start = "49"
+
+entry_hash_1 = 0xe4bf51 # (UK) (1987) [Original]

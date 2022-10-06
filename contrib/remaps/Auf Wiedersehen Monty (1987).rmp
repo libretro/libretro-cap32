@@ -1,0 +1,6 @@
+input_player1_key_b = "306"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0x5c74e277 # (UK) (1987) (CPM) [Original]
+entry_hash_2 = 0xa32c19fb # (UK) (1987) (CPM) [Original]

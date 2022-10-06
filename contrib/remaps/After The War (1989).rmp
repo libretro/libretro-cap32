@@ -1,0 +1,17 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Punch"
+input_player1_key_b = "307"
+input_player1_key_b_name = "Kick"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x8b94c44c # (S) (1989) (CPM) [Original]
+entry_hash_2 = 0x62d17d76 # (UK) (1989) (CPM) [Original]

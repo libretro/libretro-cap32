@@ -1,0 +1,13 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "32"
+input_player1_key_start = "49"
+
+entry_hash_1 = 0x8714bccc # (S) (1988) [Original]
+entry_hash_2 = 0x36c70444 # (UK) (1988) (CPM) [Original]
+
+entry_map_type = "clean"

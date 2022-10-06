@@ -1,0 +1,9 @@
+
+input_player1_key_y = "51"
+input_player1_key_x = "52"
+input_player1_key_b = "32"
+
+input_player1_key_start = "53"
+input_player1_key_select = "48"
+
+entry_hash_1 = 0x1fae9dcb # (UK) (1989)
