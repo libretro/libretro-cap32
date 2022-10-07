@@ -1,0 +1,11 @@
+input_player1_key_start = "97"
+
+input_player1_key_a = "32"
+input_player1_key_b = "97"
+
+input_player1_key_left = "107"
+input_player1_key_right = "108"
+
+entry_hash_1 = 0xd11aa568 # (UK) (1989) (CPM) [EDOS] [Original]
+
+entry_map_type = "clean"

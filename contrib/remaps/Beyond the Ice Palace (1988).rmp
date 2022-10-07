@@ -1,0 +1,7 @@
+input_player1_key_y = "121"
+input_player1_key_b = "32"
+input_player1_key_x = "112"
+
+input_player1_key_start = "121"
+
+entry_hash_1 = 0x2c2eb1e9 # (UK) (1988) (CPM) [Original]

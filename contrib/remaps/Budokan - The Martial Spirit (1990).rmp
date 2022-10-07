@@ -1,0 +1,8 @@
+input_player1_key_x = "49"
+input_player1_key_x_name = "Key 1"
+input_player1_key_y = "50"
+input_player1_key_y_name = "Key 2"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0x480c9e65 # (UK) (2 faces) (1990) (CPM) [Original]

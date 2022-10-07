@@ -1,0 +1,11 @@
+input_player1_key_b = "259"
+input_player1_key_start = "32"
+
+entry_hash_1 = 0x7c16d340 # (UK) (1986) (CPM) [Original] (fix)
+
+# Player 2
+# input_player2_key_up = "9"
+# input_player2_key_down = "301"
+# input_player2_key_left = "100"
+# input_player2_key_right = "102"
+# input_player2_key_a = "303"

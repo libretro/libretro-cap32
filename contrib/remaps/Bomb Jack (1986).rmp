@@ -1,0 +1,9 @@
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "110"
+input_player1_key_right = "109"
+
+input_player1_key_a = "120"
+input_player1_key_start = "49"
+
+entry_hash_1 = 0x4bf042ca # (UK) (1986) (Spain retail version) [Original]

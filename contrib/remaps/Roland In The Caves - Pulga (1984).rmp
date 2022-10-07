@@ -1,0 +1,15 @@
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_a = "122"
+input_player1_key_a_name = "Jump Left"
+input_player1_key_b = "96"
+input_player1_key_b = "Jump Right"
+
+input_player1_key_start = "103"
+input_player1_key_select = "97"
+
+entry_hash_1 = 0x371eaac1 # (UK) (1984) [Original]
+entry_hash_2 = 0xf81c4337 # (S) (1984)

@@ -1,0 +1,9 @@
+input_player1_key_up = "114"
+input_player1_key_down = "101"
+input_player1_key_left = "113"
+input_player1_key_right = "119"
+
+input_player1_key_a = "32"
+input_player1_key_start = "48"
+
+entry_hash_1 = 0x36596d2c # (UK) (1985) [Tape Conversion]

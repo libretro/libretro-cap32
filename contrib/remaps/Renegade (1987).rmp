@@ -1,0 +1,13 @@
+input_player1_key_up = "119"
+input_player1_key_down = "32"
+input_player1_key_left = "97"
+input_player1_key_right = "100"
+
+input_player1_key_a = "275"
+input_player1_key_b = "276"
+input_player1_key_y = "274"
+input_player1_key_x = "274"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0xdf16b5d3 # (UK) (1987) [Imagine Software] [Original] (Fix)

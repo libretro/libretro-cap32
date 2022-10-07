@@ -1,0 +1,14 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "48"
+
+input_player1_key_a = "109"
+input_player1_key_a_name = "Fire"
+input_player1_key_b = "110"
+input_player1_key_b_name = "Select"
+
+entry_hash_1 = 0x3a5242b9 # (S) (1986) [Original]

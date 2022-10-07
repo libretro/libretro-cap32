@@ -1,0 +1,14 @@
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_b = "109"
+input_player1_key_y = "49"
+input_player1_key_a = "32"
+input_player1_key_x = "50"
+
+input_player1_key_start = "13"
+
+entry_hash_1 = 0x39e92a63 # (S) (1989) (CPM) [Original]
+entry_hash_2 = 0x10712a0c # (UK) (128K) (1988) (Version Basic 1.1)

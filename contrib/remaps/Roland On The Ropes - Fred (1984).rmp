@@ -1,0 +1,11 @@
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_a = "307"
+
+input_player1_key_start = "53"
+
+entry_hash_1 = 0x324cfc6 # (UK) (1984) [Original]
+entry_hash_2 = 0xc3997a3d # (S) (1984) [clean-cpc-db]

@@ -1,0 +1,11 @@
+input_player1_key_up = "102"
+input_player1_key_down = "99"
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_a = "102"
+input_player1_key_b = "32"
+
+input_player1_key_start = "115"
+
+entry_hash_1 = 0x6cf1612c # (UK) (1987)

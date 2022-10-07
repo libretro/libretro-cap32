@@ -1,0 +1,15 @@
+input_player1_key_select = "301"
+input_player1_key_select_name = "Change Players"
+input_player1_key_x = "9"
+input_player1_key_x_name = "Change Control"
+
+entry_hash_1 = 0x6fda459c # (UK) (1985) (v1) [Tape Conversion]
+
+# Player 2
+# input_player2_key_up = "261"
+# input_player2_key_down = "266"
+# input_player2_key_left = "257"
+# input_player2_key_right = "259"
+#
+# input_player2_key_a = "305"
+# input_player2_key_b = "266"
