@@ -1,0 +1,14 @@
+input_player1_key_up = "50"
+input_player1_key_down = "119"
+input_player1_key_left = "57"
+input_player1_key_right = "48"
+
+input_player1_key_a = "122"
+input_player1_key_a_name = "Shoot"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Bomb"
+
+input_player1_key_start = "115"
+
+entry_hash_1 = 0x791eae64 # (UK) (1985) [Original]
+entry_hash_2 = 0x03b5ab32 # (UK) (1985)

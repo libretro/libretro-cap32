@@ -1,0 +1,21 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+input_player1_key_select = "50"
+
+input_player1_key_a = "113"
+input_player1_key_a_name = "Speed Up"
+input_player1_key_b = "97"
+input_player1_key_b_name = "Speed Down"
+input_player1_key_x = "32"
+input_player1_key_x_name = "Hand Brake"
+input_player1_key_y = "32"
+input_player1_key_y_name = "Hand Brake"
+
+entry_hash_1 = 0x1913117d # (S) (1990) (CPM) [Original]
+
+entry_map_type = "clean"

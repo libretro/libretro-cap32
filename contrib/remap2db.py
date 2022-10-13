@@ -110,6 +110,7 @@ if not os.path.isfile(lr_path):
 file_list = [
     f for f in os.listdir(current_path)
         if os.path.isfile(os.path.join(current_path, f))
+            and f[-4:] != '.off'
 ]
 
 file_list.sort()

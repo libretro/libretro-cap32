@@ -1,0 +1,31 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_start = "117"
+input_player1_key_start_name = "U Turn"
+input_player1_key_select = "105"
+input_player1_key_select_name = "Information Load/Save"
+
+input_player1_key_a = "48"
+input_player1_key_a_name = "Fire"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Change Pointer/Movement"
+input_player1_key_x = "114"
+input_player1_key_x_name = "Rest"
+input_player1_key_y = "104"
+input_player1_key_y_name = "Crouch/Walk"
+
+input_player1_key_l = "112"
+input_player1_key_l_name = "Look Up"
+input_player1_key_r = "108"
+input_player1_key_r_name = "Look Down"
+input_player1_key_l2 = "115"
+input_player1_key_l2_name = "Change Step"
+input_player1_key_r2 = "97"
+input_player1_key_r2_name = "Change Angle"
+
+entry_hash_1 = 0x41f8051c # I - (UK) (1988) (Spain retail version) [Original]
+entry_hash_2 = 0xd8e6113b # II - (UK) (1989)

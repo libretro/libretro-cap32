@@ -1,0 +1,7 @@
+input_player1_key_y = "13"
+input_player1_key_x = "13"
+input_player1_key_b = "32"
+
+input_player1_key_start = "49"
+
+entry_hash_1 = 0x9e263bd7 # (UK) (1987) (CPM) [Original]

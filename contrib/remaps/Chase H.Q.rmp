@@ -1,0 +1,14 @@
+input_player1_key_left = "107"
+input_player1_key_right = "108"
+
+input_player1_key_a = "97"
+input_player1_key_b = "110"
+input_player1_key_b_name = "Gear"
+input_player1_key_y = "122"
+input_player1_key_y_name = "Break"
+input_player1_key_x = "32"
+input_player1_key_x_name = "Turbo"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0xac748c5b # (UK) (1989) (Spain retail version) [Original]

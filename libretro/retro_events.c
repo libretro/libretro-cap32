@@ -95,7 +95,7 @@ void ev_toggle_call();
 t_button_cfg btnPAD[MAX_PADCFG] = {
    {{ // JOYSTICK CFG ( AUTO )
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_NULL,        // Y
+   CPC_KEY_SPACE,       // Y
    CPC_KEY_NULL,        // SELECT
    CPC_KEY_NULL,        // START
    CPC_KEY_JOY_UP,      // DUP

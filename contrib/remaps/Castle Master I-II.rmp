@@ -1,0 +1,31 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_start = "13"
+input_player1_key_select = "105"
+input_player1_key_select_name = "Information Load/Save"
+
+input_player1_key_a = "48"
+input_player1_key_a_name = "Fire"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Change Pointer/Movement"
+input_player1_key_x = "97"
+input_player1_key_x_name = "Action/Press"
+input_player1_key_y = "99"
+input_player1_key_y_name = "Crouch"
+
+input_player1_key_l = "112"
+input_player1_key_l_name = "Look Up"
+input_player1_key_r = "108"
+input_player1_key_r_name = "Look Down"
+input_player1_key_l2 = "114"
+input_player1_key_l2_name = "Run"
+input_player1_key_r2 = "119"
+input_player1_key_r2_name = "Walk"
+
+entry_hash_1 = 0x276db46d # (S) (1990) [Original]
+entry_hash_2 = 0x680a8d67 # (UK,F,G) (1990) [Original]
+entry_hash_3 = 0xd415b403 # (UK) (1990) [Tape conversion]

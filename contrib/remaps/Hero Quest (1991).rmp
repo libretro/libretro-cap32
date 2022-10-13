@@ -1,0 +1,23 @@
+input_player1_key_up = "111"
+input_player1_key_down = "107"
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_start = "32"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Action"
+input_player1_key_x = "51"
+input_player1_key_x_name = "Key 3 / Menu"
+input_player1_key_y = "48"
+input_player1_key_y_name = "Key 0 / Menu"
+
+entry_hash_1 = 0xec279622 # (UK) (128K) (1991) (CPM) [Original]
+entry_hash_2 = 0x257af370 # (S) (128K) (1991) (CPM) [Original] [Bugs]
+entry_hash_3 = 0xafe22434 # (F) (128K) (1991) (CPM) [Original]
+entry_hash_4 = 0x386ab47d # Extension - (S) (128K) (1991) (CPM) [Original]
+# no bootable
+# 0xf1fff06c (UK) (1991) (Extension) [Original]
+# 0x52f69491 (F) (1991) (Extension) [Original]
+
+entry_map_type = "clean"

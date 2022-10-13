@@ -1,0 +1,5 @@
+input_player1_key_start = "49"
+input_player1_key_select = "51"
+
+entry_hash_1 = 0x94d17670 # (UK) (1988) (CPM) [Original]
+entry_hash_2 = 0x2c70c790 # (UK) (1988) [Original]
