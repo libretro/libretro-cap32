@@ -31,11 +31,10 @@
 #include "errors.h"
 
 // TODO: remove log
-#ifdef DEBUG_CART
 #define ERR(x) fprintf(stderr, x "\n")
+#ifdef DEBUG_CART
 #define LOG(x, val) printf(x "\n", val)
 #else
-#define ERR(x)
 #define LOG(x, val)
 #endif
 
@@ -48,7 +47,11 @@
 #define CPR_PAGES          32
 #define CPR_PAGE_SIZE      16 * 1024
 #define CPR_FILE_MAX_SIZE 768 * 1024
-#define CPR_MAX_HEADER_SIZE (256 + CPR_HEADER_SIZE) // fix homebrew releases
+
+#define CPR_BASE_HEADER_SIZE 260
+// some homebrew utils add a custom chunk [fmt 0000] => 8
+#define CPR_MAX_HEADER_SIZE (CPR_BASE_HEADER_SIZE + 8)
+
 #define CPR_MAX_CART_SIZE (CPR_PAGES * CPR_PAGE_SIZE) + CPR_MAX_HEADER_SIZE
 
 extern uint8_t* pbROMlo;
@@ -151,9 +154,12 @@ int cpr_load(const uint8_t* pbCtBuffer)
    uint32_t totalSize = extractChunkSize(pbPtr);
    LOG("CPR size: %u", totalSize);
 
+   // This safe check can be tricking because you can add infinite chunks
+   //  with size 0, which some utilities use to create homebrew. But as it
+   //  has no proper justification and I prefer to have this safe/check.
    if (totalSize > CPR_MAX_CART_SIZE)
    {
-      LOG("Cartridge invalid size - max: %u", CPR_MAX_CART_SIZE);
+      ERR("Cartridge invalid size");
       return ERR_CPR_INVALID_SIZE;
    }
 
@@ -178,7 +184,9 @@ int cpr_load(const uint8_t* pbCtBuffer)
       chunkId[CPR_CHUNK_ID_SIZE] = '\0';
 
       chunkSize = extractChunkSize(pbPtr);
-      //printf("Chunk '%s' at offset %u of size %u \n", chunkId, offset, chunkSize);
+      #ifdef DEBUG_CART
+      printf("Chunk '%s' at offset %u of size %u\n", chunkId, offset, chunkSize);
+      #endif
 
       // pointer to CHUNK_DATA
       pbPtr += CPR_CHUNK_HEADER_SIZE;
