@@ -52,5 +52,6 @@
 #define ERR_SDUMP                31
 
 #define ERR_CPR_INVALID          32
+#define ERR_CPR_INVALID_SIZE     33
 
 #endif
