@@ -1055,6 +1055,21 @@ void computer_set_model(int model)
    computer_reset();
 }
 
+void computer_set_ram(int size)
+{
+   if (CPC.ram_size == size)
+      return;
+
+   LOGI("[computer_set_ram] RAM [%i => %i]\n", CPC.ram_size, size);
+
+   change_ram(size);
+   retro_computer_cfg.ram = CPC.ram_size;
+
+   emu_reconfigure();
+   retro_ui_update_text();
+   computer_reset();
+}
+
 void check_flags(const char *filename, unsigned int size)
 {
    if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
@@ -1079,6 +1094,21 @@ void check_flags(const char *filename, unsigned int size)
    if (file_check_flag(filename, size, FLAG_BIOS_CPM, 5))
    {
       game_configuration.is_cpm = true;
+   }
+
+   if (file_check_flag(filename, size, FLAG_MEMORY_576, 6))
+   {
+      computer_set_ram(576);
+   }
+
+   if (file_check_flag(filename, size, FLAG_MEMORY_128, 6))
+   {
+      computer_set_ram(128);
+   }
+
+   if (file_check_flag(filename, size, FLAG_MEMORY_064, 6))
+   {
+      computer_set_ram(64);
    }
 }
 

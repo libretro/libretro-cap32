@@ -58,6 +58,7 @@ Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.
 * "[664]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
 * "BASIC 1.0": Force 464 model when you load CDT or 664 model if use DSK.
 * "[CPM]": Force load CPM BIOS first, useful for some infocom CPM games.
+* "[576K]": RAM mode with 512+64KB, useful for some homebrew games. _Also allows [128K] and [064K]_.
 
 Examples :
 
@@ -65,6 +66,7 @@ Examples :
 Alive (1990)(Company)(fr)[664].dsk => 664
 Manic Miner (UK) (1984) (Version Basic 1.0) [Amsoft].dsk => 664
 Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
+Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 ```
 
 # Known Bugs

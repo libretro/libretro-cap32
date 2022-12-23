@@ -216,11 +216,16 @@ extern unsigned int * retro_getScreenPtr();
 #define EXT_FILE_SNA "sna"
 #define EXT_FILE_CPR "cpr"
 
-// allowed file flags
+// allowed file flags - BIOS
 #define FLAG_BIOS_464 "[464]"
 #define FLAG_BIOS_CPM "[CPM]"
 #define FLAG_BIOS_664 "[664]"
 #define FLAG_BIOS_B10 "Basic 1.0"
 #define FLAG_BIOS_B11 "Basic 1.1"
+
+// allowed file flags - memory
+#define FLAG_MEMORY_576 "[576K]"
+#define FLAG_MEMORY_128 "[128K]"
+#define FLAG_MEMORY_064 "[064K]"
 
 #endif
