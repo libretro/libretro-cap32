@@ -48,7 +48,7 @@
 #define CPR_PAGES          32
 #define CPR_PAGE_SIZE      16 * 1024
 #define CPR_FILE_MAX_SIZE 768 * 1024
-#define CPR_MAX_HEADER_SIZE 260
+#define CPR_MAX_HEADER_SIZE (256 + CPR_HEADER_SIZE) // fix homebrew releases
 #define CPR_MAX_CART_SIZE (CPR_PAGES * CPR_PAGE_SIZE) + CPR_MAX_HEADER_SIZE
 
 extern uint8_t* pbROMlo;
@@ -104,7 +104,7 @@ int cpr_fload (const char* pchFileName)
 
    if ((pfile = fopen(pchFileName, "rb")) == NULL)
    {
-      LOG("cpr_load, Error: file not found %s ",  pchFileName);
+      LOG("cpr_load, Error: file not found %s", pchFileName);
       return ERR_FILE_NOT_FOUND;
    }
 
@@ -122,7 +122,7 @@ int cpr_fload (const char* pchFileName)
       return ERR_CPR_INVALID;
    }
 
-   LOG("cpr_load file: %s ",  pchFileName);
+   LOG("cpr_load file: %s", pchFileName);
    fclose(pfile);
 
    int result = cpr_load(pBuffer);
@@ -149,12 +149,12 @@ int cpr_load(const uint8_t* pbCtBuffer)
    }
 
    uint32_t totalSize = extractChunkSize(pbPtr);
-   LOG("CPR size: %u ", totalSize);
+   LOG("CPR size: %u", totalSize);
 
    if (totalSize > CPR_MAX_CART_SIZE)
    {
       LOG("Cartridge invalid size - max: %u", CPR_MAX_CART_SIZE);
-      return ERR_CPR_INVALID;
+      return ERR_CPR_INVALID_SIZE;
    }
 
    // prepare new CART

@@ -1269,7 +1269,7 @@ int cart_start (char *pchFileName) {
    int result = cpr_fload(pchFileName);
 
    if(result != 0) {
-      fprintf(stderr, "Load of cartridge failed. Aborting.\n");
+      fprintf(stderr, "Load of cartridge failed. Aborting. [%u]\n", result);
       return result;
    }
 
