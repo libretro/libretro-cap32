@@ -36,36 +36,12 @@
  *
  ****************************************************************************************/
 
+#ifndef GUN_GUNSTICK_H__
+#define GUN_GUNSTICK_H__
 
-//---------------------------------------------------------------------------------
-#ifndef _assets_h_
-#define _assets_h_
-//---------------------------------------------------------------------------------
-#define IMG_KEYBOARD_WIDTH  384
-#define IMG_KEYBOARD_HEIGHT 108
+void gunstick_prepare(void);
+void gunstick_update(void);
+void gunstick_draw(void);
+void gunstick_void(void);
 
-extern const unsigned char ui_keyboard_bg[];
-extern const int ui_keyboard_bg_size;
-
-extern const unsigned char ui_keyboard_en[];
-extern const int ui_keyboard_en_size;
-
-extern const unsigned char ui_keyboard_es[];
-extern const unsigned char ui_keyboard_fr[];
-
-//--------------------------------------------------------------------
-
-#define FNT_MIN_CHAR 32
-#define FNT_MAX_CHAR 126
-#define FNT_CHAR_WIDTH 6
-#define FNT_CHAR_HEIGHT 8
-#define BITS_IN_BYTE 8
-
-#define FNT_MOUSE 126
-#define FNT_CROSS 127
-
-extern const unsigned char font[];
-
-//---------------------------------------------------------------------------------
-#endif //_ui_h_
-//---------------------------------------------------------------------------------
+#endif

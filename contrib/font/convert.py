@@ -59,6 +59,7 @@ def open(filename):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("error $> convert.py image.png")
-    open(sys.argv[1])
+    else:
+        open(sys.argv[1])
 
 

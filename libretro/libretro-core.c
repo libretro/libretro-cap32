@@ -52,6 +52,7 @@
 #include "gfx/software.h"
 #include "gfx/video.h"
 #include "assets/assets.h"
+#include "lightgun/gustick.h"
 #include "dsk/loader.h"
 #include "db/database.h"
 
@@ -152,6 +153,19 @@ static retro_audio_sample_t audio_cb;
    EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
    EMULATION_SCREEN_HEIGHT/2 + EMULATION_SCREEN_HEIGHT/4,
    0, 0, 0
+};
+
+static const struct retro_controller_description controllers[4] = {
+   { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
+   { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
+   { "Amstrad Lightgun", RETRO_DEVICE_AMSTRAD_LIGHTGUN },
+   { "None", RETRO_DEVICE_NONE },
+};
+
+static const struct retro_controller_info ports[3] = {
+   { controllers, 4 }, // port 1
+   { controllers, 4 }, // port 2
+   { NULL, 0 }
 };
 
 void retro_set_input_state(retro_input_state_t cb)
@@ -373,24 +387,6 @@ void retro_set_environment(retro_environment_t cb)
 
    bool allow_no_game = true;
    cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, &allow_no_game);
-
-   static const struct retro_controller_description p1_controllers[] = {
-      { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-      { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
-      { "None", RETRO_DEVICE_NONE },
-   };
-   static const struct retro_controller_description p2_controllers[] = {
-      { "Amstrad Joystick", RETRO_DEVICE_AMSTRAD_JOYSTICK },
-      { "Amstrad Keyboard", RETRO_DEVICE_AMSTRAD_KEYBOARD },
-      { "None", RETRO_DEVICE_NONE },
-   };
-
-
-   static const struct retro_controller_info ports[] = {
-      { p1_controllers, 2  }, // port 1
-      { p2_controllers, 2  }, // port 2
-      { NULL, 0 }
-   };
 
    environ_cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
 
@@ -1349,6 +1345,8 @@ void retro_init(void)
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
    retro_computer_cfg.statusbar = STATUSBAR_HIDE;
    retro_computer_cfg.use_internal_remap = false;
+   retro_computer_cfg.gun_draw = gunstick_void;
+   retro_computer_cfg.gun_update = gunstick_void;
 
    update_variables();
 
@@ -1403,12 +1401,25 @@ unsigned retro_api_version(void)
 //       atm, just log when this function is called with more detail
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
-   if ( port < 2 )
-   {
-      amstrad_devices[ port ] = device;
+   if ( port > 1 )
+      return;
 
-      LOGI("retro_set_controller_port_device: (%d)=%d \n",port,device);
+   switch (device)
+   {
+      case RETRO_DEVICE_AMSTRAD_LIGHTGUN:
+         gunstick_prepare();
+         retro_computer_cfg.guntype = 1;
+         retro_computer_cfg.gun_draw = gunstick_draw;
+         retro_computer_cfg.gun_update = gunstick_update;
+         amstrad_devices[ port ] = RETRO_DEVICE_AMSTRAD_LIGHTGUN;
+         break;
+
+      default:
+         amstrad_devices[ port ] = device;
+         break;
    }
+
+   LOGI("retro_set_controller_port_device: (%d)=%d \n", port, device);
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -1471,6 +1482,7 @@ void retro_audio_mix_batch()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
+   retro_computer_cfg.gun_update(); // update lightguns
    process_events();
 }
 
@@ -1488,6 +1500,7 @@ void retro_run(void)
 
    retro_PollEvent();
    retro_ui_process();
+   retro_computer_cfg.gun_draw();
 
    video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
 }

@@ -36,6 +36,7 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_es.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_fr.c \
 	$(CORE_DIR)/libretro/assets/font.c \
+	$(CORE_DIR)/libretro/lightgun/gunstick.c \
 	$(CORE_DIR)/libretro/retro_strings.c \
 	$(CORE_DIR)/libretro/retro_utils.c \
 	$(CORE_DIR)/libretro/retro_disk_control.c \

@@ -1144,6 +1144,8 @@ void crtc_cycle(int repeat_count)
          }
       }
 
+      gunstick_emulator_CRTC();
+
       CRTC.next_address = MAXlate[(CRTC.addr + CRTC.char_count) & 0x73ff] | CRTC.scr_base; // next address for PreRender
 
       flags1.dt.combined = new_dt.combined; // update the DISPTMG flags

@@ -384,7 +384,7 @@ void retro_ui_process()
 
    if(ui_status & (INTERNAL_UI_STATUSBAR ^ 0xFF))
    {
-      draw_char(video_buffer, mouse.x, mouse.y, 126, cursor_color);
+      draw_char(video_buffer, mouse.x, mouse.y, FNT_MOUSE, cursor_color);
       ev_process_cursor();
    }
 }

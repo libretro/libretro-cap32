@@ -51,7 +51,8 @@
 
 // DEVICE AMSTRAD
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
-#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
+#define RETRO_DEVICE_AMSTRAD_JOYSTICK RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD,   1)
+#define RETRO_DEVICE_AMSTRAD_LIGHTGUN RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_LIGHTGUN, 0)
 
 #define PORTS_NUMBER 2
 #define ID_PLAYER1 0
@@ -158,6 +159,10 @@ typedef struct {
    uint32_t combokey;
    uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
+   uint32_t guntype;
+   void (*gun_prepare)(void);
+   void (*gun_update)(void);
+   void (*gun_draw)(void);
    bool is_dirty;
    bool floppy_snd;
    bool autorun;

@@ -354,7 +354,7 @@ static void _process_joy(int playerID){
 // evercade do not call to retro_set_controller_port_device avoid this check
 #ifndef EVERCADE
    // is disabled?
-   if(((amstrad_devices[playerID])&RETRO_DEVICE_MASK)==RETRO_DEVICE_NONE)
+   if ( (amstrad_devices[playerID]&RETRO_DEVICE_MASK) == RETRO_DEVICE_NONE)
       return;
 #endif
 
@@ -661,6 +661,7 @@ void ev_init(){
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
+      { 0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun Trigger" },
 
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
@@ -678,6 +679,7 @@ void ev_init(){
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
+      { 1, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun Trigger" },
 
       { 0 }
    };
@@ -786,8 +788,8 @@ void ev_mouse_motion()
    if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
       return;
 
-   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xffff);
-   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xffff);
+   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xfffe);
+   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xfffe);
 
    mouse.raw_x = mouse_x;
    mouse.raw_y = mouse_y;
