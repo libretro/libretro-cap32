@@ -572,7 +572,7 @@ t_test_entry cleancpcdb[] = {
    {0xb66fe575, {"04898f3f3ae81ea0e93809a8a36b6b99"}, {"Count Duckula 2 (Alternative Software)/Count Duckula 2 (1992)(Alternative Software)[cr].dsk"} },
    {0x8564c2d7, {"c68076620e353d3feae594cc90a2f4ca"}, {"Championship Sprint (Activision)/Championship Sprint (1988)(Activision).dsk"} },
    {0xefd57b7f, {"b3a01e1d7c60ee62f13d372236ec25f8"}, {"Crazy Cars (Titus)/Crazy Cars (1987)(Titus).dsk"} },
-// {0xe698b5f6, {"7617c4718e24dcc76aa5dd129e44b70f"}, {"Classic Invaders (Bubble Bus Software)/Classic Invaders (1986)(Bubble Bus Software).dsk"} },
+   {0xe698b5f6, {"7617c4718e24dcc76aa5dd129e44b70f"}, {"Classic Invaders (Bubble Bus Software)/Classic Invaders (1986)(Bubble Bus Software).dsk"} },
    {0x329ce832, {"8e0cf02bd5cbb2038e2dbd143396577b"}, {"Caves of Doom (Mastertronic)/Caves of Doom (1985)(Mastertronic)[tape].dsk"} },
    {0x13b3edcf, {"239bb41a08aed75a2a07ff37a934eda1"}, {"Carson City (Elice) (France)/Carson City (1986)(Elice)(fr)[cr].dsk"} },
    {0xac748c5b, {"a240f90ea9c9fa4ecfe57ea643c0dd79"}, {"Chase H.Q. (Ocean)/Chase H.Q. (1989)(Ocean).dsk"} },

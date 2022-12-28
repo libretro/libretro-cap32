@@ -87,7 +87,6 @@ uint32_t dbfail[] = {
    0x4f3022bc, // Camelot Warriors (1987)(Dinamic Software).dsk
    0x75e574cd, // Conspiration De L'An III (1988)(Ubi Soft)(fr)(Side A).dsk
    0xfc3f6c0c, // Conspiration De L'An III (1988)(Ubi Soft)(fr)(Side B).dsk
-   0xe698b5f6, // Classic Invaders (1986)(Bubble Bus Software).dsk
    0x1135fab1, // Druid (1986)(Firebird).dsk
    0xb2f8a240, // Dakar Moto (1987)(Coktel Vision)(fr).dsk
    0xa82993c8, // Duel 2000 (1986)(Coktel Vision)(fr).dsk

@@ -1,0 +1,11 @@
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_a = "13"
+input_player1_key_b = "97"
+input_player1_key_start = "13"
+
+entry_map_type = "clean"
+entry_command = "|CPM"
+
+entry_hash_1 = 0xe698b5f6 # (UK) (1986) (CPM) (v2) [Original]

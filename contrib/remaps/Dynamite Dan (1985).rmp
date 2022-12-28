@@ -1,0 +1,11 @@
+input_player1_key_left = "97"
+input_player1_key_right = "115"
+
+input_player1_key_start = "13"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Jump"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x550ac9f9 # (UK) (1985) [tape]

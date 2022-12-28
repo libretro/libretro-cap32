@@ -1,0 +1,6 @@
+input_player1_key_start = "50"
+
+input_player1_key_b = "32"
+input_player1_key_b_name = "Change Speed"
+
+entry_hash_1 = 0x74458dd9 # (UK) (1988) (Spain retail version) [Original] 

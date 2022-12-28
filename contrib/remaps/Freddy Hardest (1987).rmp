@@ -1,0 +1,15 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Fire"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x7a8fe41d # (UK) (1987) [Original]
+entry_hash_2 = 0x874e9bb6 # (S) (1987) (CPM) [Original]

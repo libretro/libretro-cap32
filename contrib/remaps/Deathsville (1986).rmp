@@ -1,0 +1,10 @@
+input_player1_key_right = "120"
+input_player1_key_left = "122"
+input_player1_key_a = "13"
+input_player1_key_a_name = "Jump / Enter Room"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Pick-up/Drop Object"
+input_player1_key_start = "13"
+
+entry_map_type = "clean"
+entry_hash_1 = 0xb0dd3611 # (UK) (1986) (CPM) (v2) [Original]
