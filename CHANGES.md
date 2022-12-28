@@ -1,4 +1,8 @@
 # Future
+- GUN: Added gunstick emulation from Wiituka and new Phaser emulation from Caprice32 (check documentation).
+- AUTORUN: filename memory flags
+- CPC+: Alcon homebrew load cart fix
+- RMP: +140 classic games autoconfigured
 - RMP: Knight Lore, 1942, 1943, 3D Grand Prix, Abu Simbel Profanation, Barbarian, Boloncio, Boulder Dash, Bruce Lee, Ghostbusters, Harrier Attack, Match Day II, Myth, Oh Mummy ([RMP WIP](https://github.com/libretro/libretro-cap32/wiki/RMP:-Done))
 - CORE: Keyboard Transparency Option added
 - DC/DB: Compute hash from M3U too
