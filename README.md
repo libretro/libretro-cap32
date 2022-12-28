@@ -71,7 +71,7 @@ Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 
 # Lightgun Emulation
 
-Gunstick and Phaser (phaser code thanks to [Colin Pitrat](https://github.com/ColinPitrat/caprice32/issues/34).
+Gunstick and Phaser (phaser code thanks to [Colin Pitrat](https://github.com/ColinPitrat/caprice32/issues/34)).
 
 ## Configure your Weapon
 You need set on Options > Controls > Device Type: **Amstrad Lightgun** and on Core Options > Light Gun Input (and show cross if your want).
