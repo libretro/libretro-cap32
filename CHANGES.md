@@ -1,5 +1,5 @@
 # Future
-- GUN: Added gunstick emulation from Wiituka and new Phaser emulation from Caprice32 (check documentation).
+- GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation).
 - AUTORUN: filename memory flags
 - CPC+: Alcon homebrew load cart fix
 - RMP: +140 classic games autoconfigured
