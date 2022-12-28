@@ -77,7 +77,7 @@ Gunstick and Phaser (phaser code thanks to [Colin Pitrat](https://github.com/Col
 You need set on Options > Controls > Device Type: **Amstrad Lightgun** and on Core Options > Light Gun Input (and show cross if your want).
 
 ### Gunstick Games
-
+```
 Mike Gunner 
 Bestial Warrior
 Cosmic Sheriff
@@ -89,9 +89,9 @@ Sootland
 Space Smugglers
 Target Plus
 Trigger
-
+```
 ### Amstrad Magnum Phaser
-
+```
 Operation Wolf
 Bullseye
 Missile Ground Zero
@@ -103,12 +103,12 @@ Billy the Kid
 Bronx Street Cop
 F-16 Fighting Falcon
 Jungle Warfare
-
+```
 ### Trojan Light Phazer
-
+```
 The Enforcer
 Skee Shoot
-
+```
 # Known Bugs
 
 - [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59) and **need 24bit color depth**.
