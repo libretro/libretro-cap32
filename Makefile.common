@@ -22,6 +22,8 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/asic.c \
 	$(CORE_DIR)/cap32/z80.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
+	$(CORE_DIR)/cap32/lightgun/gunstick.c \
+	$(CORE_DIR)/cap32/lightgun/phaser.c \
 	$(CORE_DIR)/libretro/microui/microui.c \
 	$(CORE_DIR)/libretro/db/database.c \
 	$(CORE_DIR)/libretro/dsk/loader.c \
@@ -36,7 +38,6 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_es.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_fr.c \
 	$(CORE_DIR)/libretro/assets/font.c \
-	$(CORE_DIR)/libretro/lightgun/gunstick.c \
 	$(CORE_DIR)/libretro/retro_strings.c \
 	$(CORE_DIR)/libretro/retro_utils.c \
 	$(CORE_DIR)/libretro/retro_disk_control.c \
@@ -44,6 +45,7 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/retro_snd.c \
 	$(CORE_DIR)/libretro/retro_render.c \
 	$(CORE_DIR)/libretro/retro_ui.c \
+	$(CORE_DIR)/libretro/retro_gun.c \
 	$(CORE_DIR)/libretro/retro_keyboard.c
 
 ifneq ($(STATIC_LINKING), 1)

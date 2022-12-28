@@ -52,7 +52,6 @@
 #include "gfx/software.h"
 #include "gfx/video.h"
 #include "assets/assets.h"
-#include "lightgun/gustick.h"
 #include "dsk/loader.h"
 #include "db/database.h"
 
@@ -61,7 +60,7 @@ char DISKB_NAME[512]="\0";
 char cart_name[512]="\0";
 char loader_buffer[LOADER_MAX_SIZE];
 
-//TIME
+// TIME
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
@@ -69,6 +68,10 @@ char loader_buffer[LOADER_MAX_SIZE];
 // DISK CONTROL
 #include "retro_disk_control.h"
 static dc_storage* dc;
+
+// LIGHTGUN
+#include "retro_gun.h"
+extern t_lightgun_cfg lightgun_cfg;
 
 // LOG
 retro_log_printf_t log_cb;
@@ -408,6 +411,14 @@ void retro_set_environment(retro_environment_t cb)
          "Controls > Use internal Remap DB; enabled|disabled",
       },
       {
+         "cap32_lightgun_input",
+         "Light Gun > Input; disabled|phaser|gunstick",
+      },
+      {
+         "cap32_lightgun_show",
+         "Light Gun > Show Crosshair; disabled|enabled",
+      },
+      {
          "cap32_model",
          "Model; 6128|464|664|6128+ (experimental)",
       },
@@ -556,6 +567,31 @@ static void update_variables(void)
          retro_computer_cfg.use_internal_remap = false;
       else
          retro_computer_cfg.use_internal_remap = true;
+   }
+
+   var.key = "cap32_lightgun_input";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      lightgun_type val = LIGHTGUN_TYPE_NONE;
+      if (strcmp(var.value, "phaser") == 0) val = LIGHTGUN_TYPE_PHASER;
+      else if (strcmp(var.value, "gunstick") == 0) val = LIGHTGUN_TYPE_GUNSTICK;
+
+      if (lightgun_cfg.guntype != val) {
+         lightgun_cfg.guntype = val;
+      }
+   }
+
+   var.key = "cap32_lightgun_show";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "enabled") == 0)
+         lightgun_cfg.show = 1;
+      else
+         lightgun_cfg.show = 0;
    }
 
    var.key = "cap32_model";
@@ -1375,8 +1411,6 @@ void retro_init(void)
    retro_computer_cfg.padcfg[ID_PLAYER2] = 1;
    retro_computer_cfg.statusbar = STATUSBAR_HIDE;
    retro_computer_cfg.use_internal_remap = false;
-   retro_computer_cfg.gun_draw = gunstick_void;
-   retro_computer_cfg.gun_update = gunstick_void;
 
    update_variables();
 
@@ -1437,19 +1471,21 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
    switch (device)
    {
       case RETRO_DEVICE_AMSTRAD_LIGHTGUN:
-         gunstick_prepare();
-         retro_computer_cfg.guntype = 1;
-         retro_computer_cfg.gun_draw = gunstick_draw;
-         retro_computer_cfg.gun_update = gunstick_update;
-         amstrad_devices[ port ] = RETRO_DEVICE_AMSTRAD_LIGHTGUN;
+         lightgun_prepare(lightgun_cfg.guntype);
+         amstrad_devices[port] = RETRO_DEVICE_AMSTRAD_LIGHTGUN;
          break;
 
       default:
-         amstrad_devices[ port ] = device;
+         // please do not deinit the lightgun config
+         if (!lightgun_cfg.gunconfigured)
+         {
+            lightgun_prepare(LIGHTGUN_TYPE_NONE);
+         }
+         amstrad_devices[port] = device;
          break;
    }
 
-   LOGI("retro_set_controller_port_device: (%d)=%d \n", port, device);
+   LOGI("retro_set_controller_port_device: (%d)=%d\n", port, device);
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -1512,7 +1548,7 @@ void retro_audio_mix_batch()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
-   retro_computer_cfg.gun_update(); // update lightguns
+   lightgun_cfg.gun_update(); // update lightguns
    process_events();
 }
 
@@ -1530,7 +1566,7 @@ void retro_run(void)
 
    retro_PollEvent();
    retro_ui_process();
-   retro_computer_cfg.gun_draw();
+   lightgun_cfg.gun_draw();
 
    video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
 }

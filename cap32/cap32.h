@@ -258,6 +258,10 @@ typedef struct {
    unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
    bool scr_is_ogl;
 
+   unsigned char (*gun_IN)(void);
+   void (*gun_OUT)(void);
+   void (*gun_CRTC)(void);
+
    unsigned int snd_enabled;
    unsigned int snd_playback_rate;
    unsigned int snd_bits;

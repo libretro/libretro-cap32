@@ -39,7 +39,15 @@
 #ifndef GFX_VIDEO_H__
 #define GFX_VIDEO_H__
 
+typedef enum
+{
+   DEPTH_8BPP  = 1,
+   DEPTH_16BPP = 2,
+   DEPTH_24BPP = 3,
+} retro_video_depth_t;
+
 typedef struct {
+   retro_video_depth_t depth;
    uint8_t bytes;
    uint8_t pitch;
    uint8_t fmt;
@@ -57,13 +65,6 @@ typedef struct {
    void (*draw_keyboard_func)(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
 } retro_video_t;
 extern retro_video_t retro_video;
-
-typedef enum
-{
-   DEPTH_8BPP  = 1,
-   DEPTH_16BPP = 2,
-   DEPTH_24BPP = 3,
-} retro_video_depth_t;
 
 void video_setup(retro_video_depth_t video_depth);
 

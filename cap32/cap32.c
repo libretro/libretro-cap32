@@ -190,6 +190,7 @@ extern char cart_name[512];
 #include "asic.h"
 #include "slots.h"
 #include "errors.h"
+#include "lightgun/lightgun.h"
 
 #define MSG_SNA_LOAD             32
 #define MSG_SNA_SAVE             33
@@ -364,6 +365,7 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
+t_lightgun gun = { 0, 0, GUN_SLEEP, 0 };
 
 #define psg_write \
 { \
@@ -477,8 +479,6 @@ void ga_memory_manager (void)
 }
 
 
-extern unsigned char gunstick_emulator_IN();
-
 uint8_t z80_IN_handler (reg_pair port)
 {
    uint8_t ret_val;
@@ -507,8 +507,9 @@ uint8_t z80_IN_handler (reg_pair port)
                         if (!(PSG.RegisterAY.Index[7] & 0x40)) { // port A in input mode?
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
                            //printf("key_line: %x [%x]", CPC.keyboard_line, CPC.keyboard_line & 0x0f);
-                           if((CPC.keyboard_line & 0x0f) == 9) //read line 9 GunStick & state != sleep
-                              ret_val &= gunstick_emulator_IN(); //checking and return gun value
+                           if((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
+                              ret_val &= CPC.gun_IN(); //checking and return gun value
+                           }
                         } else {
                            ret_val = PSG.RegisterAY.Index[14] & (keyboard_matrix[CPC.keyboard_line & 0x0f]); // return last value w/ logic AND of input
                         }
@@ -959,11 +960,9 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       if (!(port.b.l & 0x80)) { // FDC data register?
          fdc_write_data(val);
       }
-      /*
       if (port.b.l == 0xfe) { // Amstrad Magnum Phazer
-         gunstick_emulator_OUT();
+         CPC.gun_OUT();
       }
-      */
    }
    else if ((CPC.mf2) && (port.b.h == 0xfe)) { // Multiface 2?
       if ((port.b.l == 0xe8) && (!(dwMF2Flags & MF2_INVISIBLE))) { // page in MF2 ROM?

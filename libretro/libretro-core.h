@@ -159,10 +159,6 @@ typedef struct {
    uint32_t combokey;
    uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
-   uint32_t guntype;
-   void (*gun_prepare)(void);
-   void (*gun_update)(void);
-   void (*gun_draw)(void);
    bool is_dirty;
    bool floppy_snd;
    bool autorun;

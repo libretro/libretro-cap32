@@ -1,8 +1,7 @@
 /****************************************************************************
  *  Caprice32 libretro port
  *
- *  Copyright David Colmenero - D_Skywalk (2019-2021)
- *  Copyright Daniel De Matteis (2012-2021)
+ *  Copyright David Colmenero - D_Skywalk (2019-2023)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -36,12 +35,30 @@
  *
  ****************************************************************************************/
 
-#ifndef GUN_GUNSTICK_H__
-#define GUN_GUNSTICK_H__
+#ifndef RETROGUN_H__
+#define RETROGUN_H__
 
-void gunstick_prepare(void);
-void gunstick_update(void);
-void gunstick_draw(void);
-void gunstick_void(void);
+typedef enum {
+    LIGHTGUN_TYPE_NONE,
+    LIGHTGUN_TYPE_PHASER,
+    LIGHTGUN_TYPE_GUNSTICK,
+} lightgun_type;
+
+typedef struct
+{
+   lightgun_type guntype;
+   lightgun_type gunconfigured;
+   bool show;
+   unsigned int whitecolor;
+   // TODO: prepare color (gunstick)
+
+   void (*gun_update)(void);
+   void (*gun_draw)(void);
+} t_lightgun_cfg;
+extern t_lightgun_cfg lightgun_cfg;
+
+void lightgun_prepare(lightgun_type guntype);
+void lightgun_draw(void);
+void lightgun_void(void);
 
 #endif

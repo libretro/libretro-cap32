@@ -47,6 +47,8 @@
 #include "retro_events.h"
 #include "gfx/video.h"
 #include "retro_ui.h"
+#include "lightgun/lightgun.h"
+#include "retro_gun.h"
 
 /**
  * TODO: input_state assignments just need it here,
@@ -904,4 +906,26 @@ void ev_process_cursor()
       &mouse.click,
       CURSOR_CLICKED
    );
+}
+
+void ev_lightgun()
+{
+   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN))
+   {
+      gun.state = GUN_PREPARE;
+      gun.x = 0xfff;
+      gun.y = 0xfff;
+      return;
+   }
+
+   gun.x = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X) + 0x7fff) * EMULATION_SCREEN_WIDTH) / 0xfffe;
+   gun.y = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y) + 0x7fff) * EMULATION_SCREEN_HEIGHT) / 0xfffe;
+
+   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER)
+      || (input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT)))
+   {
+      gun.pressed = true;
+   } else {
+      gun.pressed = false;
+   }
 }
