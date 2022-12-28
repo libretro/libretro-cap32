@@ -69,6 +69,46 @@ Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
 Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 ```
 
+# Lightgun Emulation
+
+Gunstick and Phaser (phaser code thanks to [Colin Pitrat](https://github.com/ColinPitrat/caprice32/issues/34).
+
+## Configure your Weapon
+You need set on Options > Controls > Device Type: **Amstrad Lightgun** and on Core Options > Light Gun Input (and show cross if your want).
+
+### Gunstick Games
+
+Mike Gunner 
+Bestial Warrior
+Cosmic Sheriff
+El Equipo A
+Guillermo Tell
+Outlaws
+Solo
+Sootland
+Space Smugglers
+Target Plus
+Trigger
+
+### Amstrad Magnum Phaser
+
+Operation Wolf
+Bullseye
+Missile Ground Zero
+Robot Attack
+Rookie
+Solar Invasion
+American Turbo-King
+Billy the Kid
+Bronx Street Cop
+F-16 Fighting Falcon
+Jungle Warfare
+
+### Trojan Light Phazer
+
+The Enforcer
+Skee Shoot
+
 # Known Bugs
 
 - [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59) and **need 24bit color depth**.
@@ -76,3 +116,5 @@ Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 - Old3DS need some optimizations (~18fps).
 
 - [Minor CPC Bugs and FDC needs more work](https://github.com/libretro/libretro-cap32/issues/110) to accurately emulate complex protections.
+
+- Gunstick emulation is not working with green phosphor or lowres modes.
