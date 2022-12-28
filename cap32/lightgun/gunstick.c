@@ -64,7 +64,7 @@ t_light light = {0,0,0};
 
 void ev_lightgun();
 
-#define GUNSTICK_FAILED        0xff
+#define GUNSTICK_NONE          0xff
 #define GUNSTICK_HIT           0xfd
 #define GUNSTICK_PREPARE_COLOR 0x0
 #define GUNSTICK_FIRE_KEYCODE  0x94
@@ -79,18 +79,17 @@ void ev_lightgun();
 
 uint32_t _gunstick_get_screen(int x, int y)
 {
-   // retro_video.raw_density_byte
-   unsigned int raw_x = retro_video.depth == DEPTH_16BPP
-      ? x / 2
-      : x;
-   return *((video_buffer + (raw_x)) + (y * retro_video.bps));
+   return *(
+      (video_buffer + (x >> retro_video.raw_density_byte)) +
+      (y * retro_video.bps)
+   );
 }
 
 bool _gunstick_check(void)
 {
    uint32_t gcolor;
 
-   if(gun.state == GUN_XYGET)
+   if (gun.state == GUN_XYGET)
    {
       light.x = gun.x;
       light.y = gun.y;
@@ -98,12 +97,14 @@ bool _gunstick_check(void)
    }
 
    gcolor = _gunstick_get_screen(light.x, light.y);
-   //printf("gunstick: 0x%X (%u,%u) [0x%X]\n", gcolor, light.x, light.y, lightgun_cfg.whitecolor);
+   #ifdef DEBUG_GUNSTICK
+   printf("gunstick: 0x%X (%u,%u) [0x%X]\n", gcolor, light.x, light.y, lightgun_cfg.whitecolor);
+   #endif
 
-   if(gcolor == GUNSTICK_PREPARE_COLOR)
+   if (gcolor == GUNSTICK_PREPARE_COLOR)
       gun.state = GUN_PREPARE;
 
-   if((gun.state != GUN_PREPARE) && (gcolor == lightgun_cfg.whitecolor))
+   if ((gun.state != GUN_PREPARE) && (gcolor == lightgun_cfg.whitecolor))
    {
       gun.state = GUN_SLEEP;
       return true;
@@ -119,7 +120,8 @@ void gunstick_emulator_update(void)
 
    ev_lightgun();
 
-   if(gun.pressed)
+   // send joy fire on gunstick pressed and update state
+   if (gun.pressed)
    {
       keyboard_matrix[GUNSTICK_FIRE_KEYCODE >> 4] &= ~GUNSTICK_FIRE_MASK;
       gun.state = GUN_SHOOT;
@@ -130,21 +132,26 @@ void gunstick_emulator_update(void)
 
 unsigned char gunstick_emulator_IN()
 {
-   if(gun.state == GUN_SLEEP)
-      return GUNSTICK_FAILED;
-    
-   if(gun.state == GUN_SHOOT)
+   if (gun.state == GUN_SLEEP)
+      return GUNSTICK_NONE;
+
+   // on shoot update current light X/Y
+   // some games prove that the light is not always on target.
+   if (gun.state == GUN_SHOOT)
    {
       light.timer = GUNSTICK_TIMER;
       gun.state = GUN_XYGET;
    }
 
-   if(!light.timer)
+   // wait timer finished
+   // TODO: after shoot maybe we need another timer (better dettection if user press long)
+   if (!light.timer)
       gun.state = GUN_SLEEP;
-   else if(_gunstick_check())
+   else if (_gunstick_check())
       return GUNSTICK_HIT;
 
-   return GUNSTICK_FAILED;
+   // need a fail answer when you have missed or in any other case
+   return GUNSTICK_NONE;
 }
 
 void gunstick_emulator_OUT(){}

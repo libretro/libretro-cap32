@@ -506,8 +506,8 @@ uint8_t z80_IN_handler (reg_pair port)
                      if (PSG.reg_select == 14) { // PSG port A?
                         if (!(PSG.RegisterAY.Index[7] & 0x40)) { // port A in input mode?
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
-                           //printf("key_line: %x [%x]", CPC.keyboard_line, CPC.keyboard_line & 0x0f);
-                           if((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
+
+                           if ((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
                               ret_val &= CPC.gun_IN(); //checking and return gun value
                            }
                         } else {
