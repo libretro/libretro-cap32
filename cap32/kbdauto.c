@@ -146,12 +146,14 @@ typedef enum {
    CPC_J0_RIGHT,
    CPC_J0_FIRE1,
    CPC_J0_FIRE2,
+   CPC_J0_FIRE3,
    CPC_J1_UP,
    CPC_J1_DOWN,
    CPC_J1_LEFT,
    CPC_J1_RIGHT,
    CPC_J1_FIRE1,
    CPC_J1_FIRE2,
+   CPC_J1_FIRE3,
    CPC_ES_NTILDE,
    CPC_ES_nTILDE,
    CPC_ES_PESETA,
@@ -460,12 +462,14 @@ int kbd_layout[KBD_MAX_ENTRIES][2] = {
        0x93,                   // CPC_J0_RIGHT
        0x94,                   // CPC_J0_FIRE1
        0x95,                   // CPC_J0_FIRE2
+       0x96,                   // CPC_J0_FIRE3
        0x60,                   // CPC_J1_UP
        0x61,                   // CPC_J1_DOWN
        0x62,                   // CPC_J1_LEFT
        0x63,                   // CPC_J1_RIGHT
        0x64,                   // CPC_J1_FIRE1
        0x65,                   // CPC_J1_FIRE2
+       0x66,                   // CPC_J1_FIRE3
        0xff,                   // CPC_ES_NTILDE
        0xff,                   // CPC_ES_nTILDE
        0xff,                   // CPC_ES_PESETA

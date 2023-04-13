@@ -97,7 +97,7 @@ void ev_toggle_call();
 t_button_cfg btnPAD[MAX_PADCFG] = {
    {{ // JOYSTICK CFG ( AUTO )
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_SPACE,       // Y
+   CPC_KEY_JOY_FIRE1,   // Y
    CPC_KEY_NULL,        // SELECT
    CPC_KEY_NULL,        // START
    CPC_KEY_JOY_UP,      // DUP
@@ -105,7 +105,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_NULL,        // X
+   CPC_KEY_JOY_FIRE3,   // X
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R
@@ -148,7 +148,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    }},
    {{ // JOYSTICK PLAYER 1 CFG
    CPC_KEY_JOY_FIRE2,   // B
-   CPC_KEY_NULL,        // Y
+   CPC_KEY_JOY_FIRE1,   // Y
    CPC_KEY_NULL,        // SELECT
    CPC_KEY_NULL,        // START
    CPC_KEY_JOY_UP,      // DUP
@@ -156,7 +156,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_NULL,        // X
+   CPC_KEY_JOY_FIRE3,   // X
    //---------------------
    CPC_KEY_NULL,        // L
    CPC_KEY_NULL,        // R
@@ -165,7 +165,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    }},
    {{ // JOYSTICK PLAYER 2 CFG
    CPC_KEY_JOY2_FIRE2,  // B
-   CPC_KEY_SPACE,       // Y
+   CPC_KEY_JOY2_FIRE1,  // Y
    CPC_KEY_S,           // SELECT
    CPC_KEY_J,           // START
    CPC_KEY_JOY2_UP,     // DUP
@@ -173,7 +173,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    CPC_KEY_JOY2_LEFT,   // DLEFT
    CPC_KEY_JOY2_RIGHT,  // DRIGHT
    CPC_KEY_JOY2_FIRE1,  // A
-   CPC_KEY_X,           // X
+   CPC_KEY_JOY2_FIRE3,  // X
    //---------------------
    CPC_KEY_NULL,        // L
    CPC_KEY_NULL,        // R
