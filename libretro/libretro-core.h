@@ -147,9 +147,11 @@ extern int emu_status;
 #define STATUSBAR_SHOW    1
 #define STATUSBAR_OFF     2
 
-#define SLOT_SNA 0
-#define SLOT_DSK 1
-#define SLOT_TAP 2
+#define SLOT_UNK 0
+#define SLOT_SNA 1
+#define SLOT_DSK 2
+#define SLOT_TAP 3
+#define SLOT_M3U 4
 
 typedef struct {
    int model;

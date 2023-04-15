@@ -846,12 +846,12 @@ static void retro_insert_image()
       {
          strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
-         LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
+         LOGI("[retro_insert_image] Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
          retro_computer_cfg.slot = SLOT_TAP;
       }
       else
       {
-         LOGI("Tape Error (%d): %s\n", error, dc->files[dc->index]);
+         LOGI("[retro_insert_image] Tape Error (%d): %s\n", error, dc->files[dc->index]);
       }
    }
    else if(dc->unit == DC_IMAGE_TYPE_FLOPPY)
@@ -860,15 +860,15 @@ static void retro_insert_image()
       if (error)
       {
          retro_message("Error Loading DSK...");
-         LOGI("Disk (%d) Error : %s\n", dc->index+1, dc->files[dc->index]);
+         LOGI("[retro_insert_image] Disk (%d) Error : %s\n", dc->index+1, dc->files[dc->index]);
          return;
       }
-      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      LOGI("[retro_insert_image] Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       retro_computer_cfg.slot = SLOT_DSK;
    }
    else
    {
-      LOGE("unsupported image-type : %u\n", dc->unit);
+      LOGE("[retro_insert_image] unsupported image-type : %u\n", dc->unit);
    }
 }
 
@@ -886,12 +886,12 @@ static bool retro_set_eject_state(bool ejected)
          if (unit == DC_IMAGE_TYPE_TAPE)
          {
             tape_eject();
-            LOGI("Tape (%d/%d) ejected %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+            LOGI("[retro_set_eject_state] Tape (%d/%d) ejected %s\n", dc->index+1, dc->count, dc->names[dc->index]);
          }
          else
          {
             detach_disk(0);
-            LOGI("Disk (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+            LOGI("[retro_set_eject_state] Disk (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
          }
       }
       else if (!ejected && dc->index < dc->count && dc->files[dc->index] != NULL)
@@ -945,7 +945,7 @@ static bool retro_set_image_index(unsigned index)
       {
          dc->index = index;
          int unit = get_image_unit();
-         LOGI("Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
+         LOGI("[retro_set_image_index] Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
          return true;
       }
    }
@@ -1148,7 +1148,7 @@ void computer_autoload()
 {
    if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
    {
-      LOGI("[DB] game remap applied.\n");
+      LOGI("[computer_autoload][DB] game remap applied.\n");
       memcpy(btnPAD[0].buttons, game_configuration.btn_config.buttons, sizeof(t_button_cfg));
    }
 
@@ -1163,7 +1163,7 @@ void computer_autoload()
    }
 
    strcat(loader_buffer, "\n");
-   LOGI("[core] DSK autorun: %s", loader_buffer);
+   LOGI("[computer_autoload] DSK autorun: %s", loader_buffer);
    if (game_configuration.is_cpm)
    {
       cpm_boot(loader_buffer);
@@ -1181,7 +1181,7 @@ void computer_reset()
    if (!retro_computer_cfg.autorun)
       return;
 
-   LOGI("[core::reset] DSK autorun: \"%s\"\n", loader_buffer);
+   LOGI("[computer_reset] DSK autorun: \"%s\"\n", loader_buffer);
    ev_autorun_prepare(loader_buffer);
 }
 
@@ -1194,7 +1194,7 @@ void computer_load_bios() {
    {
       int result = cart_start(retro_content_filepath);
       if(result != 0) {
-         retro_message("Error Loading Cart...");
+         retro_message("[computer_load_bios] Error Loading Cart...");
       }
    }
 }
@@ -1218,10 +1218,10 @@ void computer_hash_file(char* filepath)
    else
    {
       // warn user is a unsupported ROM
-      retro_message("ROM marked as NOT WORKING.");
+      retro_message("[computer_hash_file] ROM marked as NOT WORKING.");
    }
 
-   LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
+   LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
       hash,
       game_configuration.has_btn,
       game_configuration.has_command,
@@ -1236,27 +1236,27 @@ void computer_load_file() {
    check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
    // If it's a snapshot
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3))
+   if(retro_computer_cfg.slot == SLOT_SNA)
    {
       int error = snapshot_load (retro_content_filepath);
       if (!error) {
-         LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
-         retro_computer_cfg.slot = SLOT_SNA;
+         LOGI("[computer_load_file] SNA loaded: %s\n", (char *)retro_content_filepath);
+         
       } else {
-         LOGE("SNA Error (%d): %s", error, (char *)retro_content_filepath);
+         LOGE("[computer_load_file] SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
       return;
    }
 
    // If it's a m3u file
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_M3U, 3))
+   if(retro_computer_cfg.slot == SLOT_M3U)
    {
       // Parse the m3u file
       dc_parse_m3u(dc, retro_content_filepath);
 
       // Some debugging
-      LOGI("m3u file parsed, %d file(s) found\n", dc->count);
+      LOGI("[computer_load_file] m3u file parsed, %d file(s) found\n", dc->count);
       for(int i = 0; i < dc->count; i++)
       {
          LOGI("file %d: %s\n", i+1, dc->files[i]);
@@ -1272,7 +1272,7 @@ void computer_load_file() {
       if(dc->command)
       {
          // Execute the command
-         LOGI("Executing the specified command: %s\n", dc->command);
+         LOGI("[computer_load_file] Executing the specified command: %s\n", dc->command);
          snprintf(loader_buffer, LOADER_MAX_SIZE - 2, "%s\n", dc->command);
          ev_autorun_prepare(loader_buffer);
       }
@@ -1284,7 +1284,7 @@ void computer_load_file() {
    }
 
    // If it's a disk
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_DSK, 3))
+   if(retro_computer_cfg.slot == SLOT_DSK)
    {
       // Add the file to disk control context
       // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
@@ -1295,29 +1295,27 @@ void computer_load_file() {
       dc->eject_state = false;
       computer_hash_file((char *)dc->files[dc->index]);
 
-      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      LOGI("[computer_load_file] Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
       int error = attach_disk((char *)dc->files[dc->index],0);
       if (error) {
-         retro_message("Error Loading DSK...");
-         LOGE("DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+         retro_message("[computer_load_file] Error Loading DSK...");
+         LOGE("[computer_load_file] DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
       } else {
          computer_autoload();
-         retro_computer_cfg.slot = SLOT_DSK;
       }
    }
 
    // If it's a tape
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CDT, 3))
+   if(retro_computer_cfg.slot == SLOT_TAP)
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
          computer_hash_file((char *)retro_content_filepath);
          strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
-         LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
-         retro_computer_cfg.slot = SLOT_TAP;
+         LOGI("[computer_load_file] Tape inserted: %s\n", (char *)retro_content_filepath);
       } else {
-         LOGE("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
+         LOGE("[computer_load_file] Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
       }
    }
 
@@ -1559,7 +1557,7 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
    {
       update_variables();
-      retro_message("options updated, changes applied!");
+      retro_message("[retro_run] options updated, changes applied!");
    }
 
    retro_loop();
@@ -1578,25 +1576,39 @@ bool retro_load_game(const struct retro_game_info *game)
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
-      LOGI("PIXEL FORMAT is not supported (%u).\n", fmt);
+      LOGI("[retro_load_game] PIXEL FORMAT is not supported (%u).\n", fmt);
       return false;
    }
 
-   LOGI("PIXEL FORMAT selected (%u).\n", fmt);
+   LOGI("[retro_load_game] PIXEL FORMAT selected (%u).\n", fmt);
 
-   if (game){
+   if (game) {
       strcpy(retro_content_filepath, (const char *) game->path);
    } else {
       retro_content_filepath[0]='\0';
    }
 
    update_variables();
+
+   // get file type
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3)) {
+      retro_computer_cfg.slot = SLOT_SNA;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_M3U, 3)) {
+      retro_computer_cfg.slot = SLOT_M3U;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_DSK, 3)) {
+      retro_computer_cfg.slot = SLOT_DSK;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CDT, 3)) {
+      retro_computer_cfg.slot = SLOT_TAP;
+   } else {
+      retro_computer_cfg.slot = SLOT_UNK;
+   }
+   LOGI("[retro_load_game] detected file type, using slot [%i]\n", retro_computer_cfg.slot);
+
    computer_load_bios();
    computer_load_file();
    retro_ui_draw_db();
 
    return true;
-
 }
 
 void retro_unload_game(void){}
@@ -1625,7 +1637,7 @@ bool retro_serialize(void *data, size_t size)
    if(!error)
       return true;
 
-   LOGI("SNA-serialized: error %d\n", error);
+   LOGI("[retro_serialize] SNA-serialized: error %d\n", error);
    return false;
 }
 
