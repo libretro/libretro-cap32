@@ -520,6 +520,12 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       7,
    },
+   { // Ice-Breaker (1990).rmp
+      {0x55b67795},
+      {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_s, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Ikari Warriors (1986).rmp
       {0x36d943ea, 0xe7df0e60, 0x3e88f3f7},
       {RETROK_t, DB_KEEP, RETROK_2, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_3, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -574,6 +580,12 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       10,
    },
+   { // Mad Mix Game (1988).rmp
+      {0xc36d1efd, 0x97b8b3a9},
+      {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_0, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Manic Miner (1984).rmp
       {0xcd9dbf9c},
       {RETROK_RETURN, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -583,6 +595,12 @@ t_file_entry dbinfo[] = {
    { // Match Day II (1987).rmp
       {0x35c029d5},
       {RETROK_RETURN, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Mega Phoenix (1991).rmp
+      {0xbd48490a},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
@@ -955,5 +973,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1672253469.482247
+// gen hash: 1681592317.8244817
 
