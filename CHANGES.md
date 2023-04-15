@@ -1,4 +1,6 @@
 # Future
+- CORE: Fix flag file, moved slot check to init method.
+- CORE: Added joystick button Fire3, thx @revvv.
 - GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation).
 - AUTORUN: filename memory flags
 - CPC+: Alcon homebrew load cart fix
