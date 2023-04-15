@@ -105,7 +105,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
    CPC_KEY_JOY_LEFT,    // DLEFT
    CPC_KEY_JOY_RIGHT,   // DRIGHT
    CPC_KEY_JOY_FIRE1,   // A
-   CPC_KEY_NULL,        // X
+   CPC_KEY_JOY_FIRE3,   // X
    //---------------------
    CPC_KEY_CONTROL,     // L
    CPC_KEY_INTRO,       // R

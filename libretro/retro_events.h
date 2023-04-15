@@ -129,7 +129,7 @@ enum emu_key_id {
    CPC_KEY_JOY_RIGHT              = 0x93,
    CPC_KEY_JOY_FIRE1              = 0x94,
    CPC_KEY_JOY_FIRE2              = 0x95,
-   CPC_KEY_SPARE                  = 0x96,
+   CPC_KEY_JOY_FIRE3              = 0x96,
    CPC_KEY_DEL                    = 0x97,
    /* Joystick 2 using Y-CABLE */
    // http://www.cpcwiki.eu/index.php/Digital_Joysticks#Relevant_locations_in_Keyboard_Matrix
@@ -158,6 +158,8 @@ enum retro_joystick_button
    JOY_PORT2_LEFT = 209,
    JOY_PORT2_FIRE1 = 210,
    JOY_PORT2_FIRE2 = 211,
+   JOY_PORT2_FIRE3 = 212,
+   JOY_PORT1_FIRE3 = 213,
 };
 
 enum retro_events_action_type
