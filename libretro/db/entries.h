@@ -538,16 +538,22 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       8,
    },
+   { // Ivan Ironman Super Off Road (1990).rmp
+      {0xc3ce5121},
+      {DB_KEEP, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_4, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, 82, -1, -1, -1, -1, -1, -1, -1, 83, -1, -1, -1, -1},
+      -1,
+   },
    { // Jack The Nipper I (1986).rmp
       {0xb06159a2},
       {RETROK_RETURN, RETROK_2, RETROK_m, RETROK_SPACE, RETROK_o, RETROK_k, RETROK_z, RETROK_x, RETROK_0, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {82, 83, 84, -1, -1, -1, -1, -1, 54, 85, -1, -1, -1, -1},
+      {84, 85, 86, -1, -1, -1, -1, -1, 54, 87, -1, -1, -1, -1},
       -1,
    },
    { // Jack The Nipper II (1987).rmp
       {0x2bec9bd},
       {RETROK_o, DB_KEEP, RETROK_m, RETROK_SPACE, RETROK_o, RETROK_k, RETROK_z, RETROK_x, RETROK_0, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {24, -1, 84, -1, -1, 86, -1, -1, 54, -1, -1, -1, -1, -1},
+      {24, -1, 86, -1, -1, 88, -1, -1, 54, -1, -1, -1, -1, -1},
       -1,
    },
    { // Jungle Book (1989).rmp
@@ -559,7 +565,7 @@ t_file_entry dbinfo[] = {
    { // Klax (1990).rmp
       {0x96b53a41},
       {RETROK_a, DB_CLEAN, DB_CLEAN, RETROK_0, DB_CLEAN, DB_CLEAN, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_q, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {87, -1, -1, -1, -1, -1, -1, -1, 88, 39, -1, -1, -1, -1},
+      {89, -1, -1, -1, -1, -1, -1, -1, 90, 39, -1, -1, -1, -1},
       -1,
    },
    { // Knight Lore (1984).rmp
@@ -607,13 +613,31 @@ t_file_entry dbinfo[] = {
    { // Miss Input 1 (2019).rmp
       {0xe8d15029},
       {DB_CLEAN, RETROK_m, RETROK_2, RETROK_1, DB_CLEAN, DB_CLEAN, RETROK_o, RETROK_p, RETROK_q, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, 89, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, -1},
+      {-1, 91, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, -1},
       -1,
    },
    { // Miss Input 2 (2020).rmp
       {0x7c096b33},
       {DB_CLEAN, RETROK_m, RETROK_2, RETROK_1, DB_CLEAN, DB_CLEAN, RETROK_w, RETROK_e, RETROK_q, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, 89, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, -1},
+      {-1, 91, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Moon Cresta (1986).rmp
+      {0x6abcc9b6},
+      {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_6, DB_CLEAN, DB_CLEAN, RETROK_z, RETROK_x, RETROK_RSHIFT, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Motos (1987).rmp
+      {0x148447dc},
+      {DB_CLEAN, DB_CLEAN, RETROK_1, RETROK_0, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 24, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Mundial de Futbol (1990).rmp
+      {0x6f132709},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, 92, -1, -1, -1, -1},
       -1,
    },
    { // Murder on the Atlantic (1985).rmp
@@ -622,34 +646,58 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       11,
    },
+   { // Mutan Zone (1989).rmp
+      {0x62a4deae},
+      {DB_KEEP, RETROK_1, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, 93, -1, -1, -1, -1, -1, -1, -1, 94, -1, -1, -1, -1},
+      -1,
+   },
    { // Myth (1989).rmp
       {0x4d8464d3},
       {RETROK_j, RETROK_i, DB_CLEAN, RETROK_SPACE, DB_CLEAN, DB_CLEAN, RETROK_q, RETROK_w, RETROK_o, RETROK_i, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {90, -1, -1, 91, -1, -1, -1, -1, 92, 93, -1, -1, -1, -1},
+      {95, -1, -1, 96, -1, -1, -1, -1, 97, 98, -1, -1, -1, -1},
       -1,
    },
    { // Nanako Descends to Hell (2009).rmp
       {0x6c2cdcea},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_SPACE, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, -1, -1, -1, -1, -1, -1, -1, 94, -1, -1, -1, -1, -1},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 99, -1, -1, -1, -1, -1},
       -1,
    },
    { // Navy Moves (1988).rmp
       {0xacf62400, 0x9299697c},
       {RETROK_m, RETROK_2, DB_KEEP, RETROK_3, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {95, 27, -1, -1, -1, -1, -1, -1, 32, 29, -1, -1, -1, -1},
+      {100, 27, -1, -1, -1, -1, -1, -1, 32, 29, -1, -1, -1, -1},
       -1,
    },
    { // Nemesis (1987).rmp
       {0xb35ed50},
       {RETROK_RETURN, RETROK_m, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {96, 89, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      {101, 91, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Oh Mummy (1984).rmp
       {0x2ff420da, 0x6abd6ce2},
       {DB_KEEP, DB_KEEP, RETROK_c, RETROK_p, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Operation Wolf (1988).rmp
+      {0x7c6c1e2e},
+      {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_1, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 32, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Phantis (1989).rmp
+      {0xa60eba03},
+      {DB_KEEP, RETROK_1, DB_KEEP, RETROK_e, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, 93, -1, -1, -1, -1, -1, -1, 32, 94, -1, -1, -1, -1},
+      -1,
+   },
+   { // Phantomas Saga Infinity (2006).rmp
+      {0x73d96734},
+      {RETROK_DOWN, DB_CLEAN, DB_CLEAN, RETROK_s, DB_CLEAN, DB_CLEAN, RETROK_LEFT, RETROK_RIGHT, RETROK_UP, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {20, -1, -1, -1, -1, -1, -1, -1, 19, -1, -1, -1, -1, -1},
       -1,
    },
    { // Planetfall (1983).rmp
@@ -661,7 +709,13 @@ t_file_entry dbinfo[] = {
    { // Prince of Persia (1990).rmp
       {0xf964db5d, 0xa14a1e0f, 0xb9d14a6d, 0x18d230b1},
       {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_ESCAPE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, -1, -1, 50, -1, -1, -1, -1, -1, 97, -1, -1, -1, -1},
+      {-1, -1, -1, 50, -1, -1, -1, -1, -1, 102, -1, -1, -1, -1},
+      -1,
+   },
+   { // Pro Tennis (1985).rmp
+      {0x25af0923},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Rainbow Islands (1989).rmp
@@ -682,6 +736,12 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Rex (1989).rmp
+      {0x6fbe410c},
+      {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      13,
+   },
    { // Robocop (1989).rmp
       {0xb6017864, 0xda1142c4, 0xf70eee66},
       {RETROK_SPACE, DB_KEEP, DB_KEEP, RETROK_1, RETROK_q, RETROK_a, RETROK_k, RETROK_l, RETROK_x, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
@@ -691,7 +751,7 @@ t_file_entry dbinfo[] = {
    { // Roland In The Caves - Pulga (1984).rmp
       {0x371eaac1, 0xf81c4337},
       {RETROK_BACKQUOTE, DB_KEEP, RETROK_a, RETROK_g, RETROK_UP, RETROK_DOWN, RETROK_LEFT, RETROK_RIGHT, RETROK_z, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, -1, -1, -1, -1, -1, -1, -1, 98, -1, -1, -1, -1, -1},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 103, -1, -1, -1, -1, -1},
       -1,
    },
    { // Roland On The Ropes - Fred (1984).rmp
@@ -700,10 +760,16 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Roland in Time (1985).rmp
+      {0xaca0e0f},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_n, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Rygar (1987).rmp
       {0x558abe44},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_1, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, -1, -1, -1, -1, -1, -1, -1, 99, -1, -1, -1, -1, -1},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 104, -1, -1, -1, -1, -1},
       -1,
    },
    { // Sabre Wulf (1985).rmp
@@ -712,16 +778,40 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Satan (1989).rmp
+      {0xd66de504, 0xae64ea1d},
+      {DB_CLEAN, RETROK_1, RETROK_2, RETROK_1, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_2, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, 93, -1, -1, -1, -1, -1, -1, 32, 94, -1, -1, -1, -1},
+      -1,
+   },
+   { // Savage (1988).rmp
+      {0xca6ffd7a, 0xae64ea1d},
+      {DB_CLEAN, RETROK_1, DB_CLEAN, DB_CLEAN, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_2, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {-1, 82, -1, -1, -1, -1, -1, -1, 32, 105, -1, -1, -1, -1},
+      -1,
+   },
    { // Secte Noire, La (1990).rmp
       {0x95b94081},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      13,
+      14,
+   },
+   { // Sgrizam (1986).rmp
+      {0x8c8a37bd},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Shadow Dancer (1991).rmp
+      {0x20e80d12},
+      {RETROK_SPACE, DB_KEEP, DB_KEEP, RETROK_0, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {106, -1, -1, -1, -1, -1, -1, -1, -1, 107, -1, -1, -1, -1},
+      -1,
    },
    { // Shinobi (1989).rmp
       {0x6f1e3eb0, 0xbd6c0af},
       {RETROK_SPACE, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {100, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      {107, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Shinobu (2019).rmp
@@ -730,11 +820,41 @@ t_file_entry dbinfo[] = {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
+   { // Sir Fred (1986).rmp
+      {0x92345cde},
+      {RETROK_z, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_m, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+      {108, -1, -1, -1, -1, -1, -1, -1, 109, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Skate Crazy (1988).rmp
+      {0xef7871dc, 0x5ac9f3f4},
+      {RETROK_SPACE, RETROK_1, DB_KEEP, RETROK_p, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, 82, -1, 50, -1, -1, -1, -1, -1, 105, -1, -1, -1, -1},
+      -1,
+   },
+   { // Smash TV (1991).rmp
+      {0xc18a84f9},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
+   { // Sol Negro (1989).rmp
+      {0xb0540671},
+      {DB_KEEP, RETROK_1, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, 93, -1, -1, -1, -1, -1, -1, -1, 94, -1, -1, -1, -1},
+      -1,
+   },
+   { // Solomons Key (1986).rmp
+      {0x29671a87},
+      {RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {110, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
+   },
    { // Sorcerer (1984)(Infocom)[CPM].rmp
       {0x636a30d8},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      14,
+      15,
    },
    { // Space Hawks - Aguilas Del Espacio (1984).rmp
       {0xa041e903},
@@ -746,13 +866,25 @@ t_file_entry dbinfo[] = {
       {0xd519f3ce},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      15,
+      16,
+   },
+   { // Stormlord II (1990).rmp
+      {0x375d4353},
+      {RETROK_q, RETROK_1, DB_KEEP, RETROK_LALT, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_2, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {24, 82, -1, 50, -1, -1, -1, -1, -1, 105, -1, -1, -1, -1},
+      -1,
+   },
+   { // Super Skweek (1990).rmp
+      {0x1993c727, 0x7a97eed},
+      {DB_KEEP, DB_KEEP, DB_KEEP, RETROK_KP1, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
+      {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      -1,
    },
    { // Suspended (1983).rmp
       {0x819d6ed7},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      16,
+      17,
    },
    { // Target Renegade (1988).rmp
       {0xe4154a1f},
@@ -763,19 +895,19 @@ t_file_entry dbinfo[] = {
    { // Teenage Mutant Hero Turtles (1990).rmp
       {0xca4f0b5, 0x8dd0cf27},
       {RETROK_s, RETROK_RSHIFT, DB_KEEP, RETROK_1, RETROK_q, RETROK_a, RETROK_o, RETROK_p, RETROK_SPACE, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {96, 101, -1, -1, -1, -1, -1, -1, 32, 102, -1, -1, -1, -1},
+      {101, 111, -1, -1, -1, -1, -1, -1, 32, 112, -1, -1, -1, -1},
       -1,
    },
    { // Thanatos (1986).rmp
       {0x827e83ac, 0x8d64a322, 0xf9fce391, 0x59d6aef1},
       {DB_CLEAN, DB_CLEAN, DB_CLEAN, RETROK_4, RETROK_a, RETROK_z, RETROK_n, RETROK_m, RETROK_SPACE, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
-      {-1, -1, -1, -1, -1, -1, -1, -1, 103, -1, -1, -1, -1, -1},
+      {-1, -1, -1, -1, -1, -1, -1, -1, 113, -1, -1, -1, -1, -1},
       -1,
    },
    { // Total Eclipse I-II (1988).rmp
       {0x41f8051c, 0xd8e6113b},
       {RETROK_SPACE, RETROK_h, RETROK_i, RETROK_u, RETROK_UP, RETROK_DOWN, RETROK_LEFT, RETROK_RIGHT, RETROK_0, RETROK_r, RETROK_p, RETROK_l, RETROK_s, RETROK_a},
-      {40, 104, 42, 64, -1, -1, -1, -1, 32, 105, 44, 45, 106, 107},
+      {40, 114, 42, 64, -1, -1, -1, -1, 32, 115, 44, 45, 116, 117},
       -1,
    },
    { // Tres Luces de Glaurung (1986).rmp
@@ -793,44 +925,44 @@ t_file_entry dbinfo[] = {
    { // Way Of The Exploding Fist (1985).rmp
       {0x6fda459c},
       {DB_KEEP, DB_KEEP, RETROK_CAPSLOCK, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, RETROK_TAB, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, -1, 108, -1, -1, -1, -1, -1, -1, 109, -1, -1, -1, -1},
+      {-1, -1, 118, -1, -1, -1, -1, -1, -1, 119, -1, -1, -1, -1},
       -1,
    },
    { // Wishbringer (1985).rmp
       {0x5332c3ad},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      17,
+      18,
    },
    { // Witness, The (1984).rmp
       {0xb16409a2},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      18,
+      19,
    },
    { // Wonderboy (1987).rmp
       {0xb1026135},
       {204, RETROK_BACKSPACE, RETROK_ESCAPE, RETROK_1, DB_CLEAN, DB_KEEP, DB_KEEP, DB_KEEP, 200, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
-      {-1, 89, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+      {-1, 91, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
    },
    { // Zork I - The Great Underground Empire (1986).rmp
       {0xa02c3758},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      19,
+      20,
    },
    { // Zork II - The Wizard of Frobozz (1986).rmp
       {0xe0240de6},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      20,
+      21,
    },
    { // Zork III - The Dungeon Master (1986).rmp
       {0xa3fb554f},
       {DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-      21,
+      22,
    },
 };
 
@@ -848,6 +980,7 @@ char commands[] = {
    "LEATHERG\0"
    "RUN\"GAME\0"
    "PLANETFA\0"
+   "RUN\"REX\0"
    "RUN\"SECTE\0"
    "SORCERER\0"
    "SPELLBRE\0"
@@ -942,6 +1075,8 @@ char input_names[] = {
    "Toggle\0"
    "Joystick 1 Select\0"
    "Joystick 2 Select\0"
+   "Press 1\0"
+   "Press 4\0"
    "Open Door\0"
    "Take Slot 2\0"
    "Switch Music\0"
@@ -950,6 +1085,9 @@ char input_names[] = {
    "Drop Piece\0"
    "Throw Piece\0"
    "Music Toggle\0"
+   "Coach Sub\0"
+   "First Stage\0"
+   "Second Stage\0"
    "Small Jump / Kick\0"
    "Start / Select Icon\0"
    "Action / Combo\0"
@@ -960,7 +1098,12 @@ char input_names[] = {
    "Time Left\0"
    "Jump Left\0"
    "Attack\0"
+   "Press 2\0"
+   "Dog Attack\0"
    "Magic\0"
+   "Take/Select Object\0"
+   "Use Object\0"
+   "Fireball\0"
    "Enter Wagon\0"
    "Special Features\0"
    "Flame\0"
@@ -973,5 +1116,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1681592317.8244817
+// gen hash: 1681647089.3194056
 

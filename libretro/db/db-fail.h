@@ -188,7 +188,6 @@ uint32_t dbfail[] = {
    0x928f12b2, // Renaud (1987)(Infogrames)(fr).dsk
    0xeebfb943, // Raid Over Moscow (1985)(US Gold).dsk
    0x4bb21249, // Rock Hopper (1985)(Amstrad Computer User)[cr].dsk
-   0x6fbe410c, // Rex (1988)(Martech).dsk
    0x1e4269a4, // Robin of Sherlock (1986)(CRL Group)[cr].dsk
    0x1068d4af, // R-Type (1988)(Activision).dsk
    0x04ae8758, // Rodeo (1986)(Microids)(fr).dsk

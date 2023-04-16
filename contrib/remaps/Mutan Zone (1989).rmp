@@ -1,0 +1,8 @@
+input_player1_key_x = "50"
+input_player1_key_x_name = "Second Stage"
+input_player1_key_y = "49"
+input_player1_key_y_name = "First Stage"
+
+input_player1_key_start = "13"
+
+entry_hash_1 = 0x62a4deae # (S) (1988) (v2) (CPM) [Original]

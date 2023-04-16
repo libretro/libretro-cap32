@@ -1,0 +1,11 @@
+input_player1_key_right = "120"
+input_player1_key_left = "122"
+
+input_player1_key_a = "303"
+input_player1_key_a_name = "Fire"
+
+input_player1_key_start = "54"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x6abcc9b6 # (UK) (1986) [Original]

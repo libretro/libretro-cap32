@@ -1,0 +1,8 @@
+input_player1_key_b = "32"
+input_player1_key_b_name = "Dog Attack"
+input_player1_key_x = "13"
+input_player1_key_x_name = "Magic"
+
+input_player1_key_start = "48"
+
+entry_hash_1 = 0x20e80d12 # (UK) (1991) (Spain retail version) [Original]

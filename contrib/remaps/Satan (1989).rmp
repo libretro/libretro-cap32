@@ -1,0 +1,21 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Fire"
+
+input_player1_key_x = "50"
+input_player1_key_x_name = "Second Stage"
+input_player1_key_y = "49"
+input_player1_key_y_name = "First Stage"
+
+input_player1_key_start = "49"
+input_player1_key_select = "50"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xd66de504 # (S) (1989) (CPM) [Original]
+entry_hash_2 = 0xae64ea1d # (UK) (1989) (CPM) [Original]
