@@ -1,0 +1,14 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "303"
+input_player1_key_a_name = "Change Character"
+
+input_player1_key_start = "53"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xb6e80000 # (UK) (1986)

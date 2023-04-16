@@ -1,0 +1,12 @@
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_a = "307"
+
+input_player1_key_start = "304"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xa1b83838 # (UK) (1987) [Original]
