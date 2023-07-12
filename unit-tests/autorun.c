@@ -41,7 +41,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "../cmocka/include/cmocka.h"
+#include "cmocka.h"
 #include "libretro/dsk/loader.h"
 #include "test-utils.h"
 

@@ -21,6 +21,9 @@
 *.cdt
 *.m3u
 
+# external libs
+external/cmocka/cmocka-lib
+
 # tests files
 tests/
 tests-db/

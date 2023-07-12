@@ -2,3 +2,4 @@ input_player1_key_start = "13"
 input_player1_key_b = "13"
 
 entry_hash_1 = 0xcd9dbf9c # (UK) (1984) (Version Basic 1.0) [Amsoft]
+entry_hash_2 = 0x7a60b38e # (UK) (1985) (Hack - Manic Miner 2) (fix)
