@@ -82,12 +82,15 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define MAX_BUTTONS 14
 #define MAX_PADCFG 5
 
+#define MAX_FILENAME 16
 
 // compile flags
+//#define NO_EXTRA_HW // remove MF2 support
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
-//#define LOWRES
-//#define M16B
+#define LOWRES
+//#define M16BPP
+#define M8BPP
 //#define MOUSE_RELATIVE // mouse relative movement
 
 #define PIXEL_TRANSPARENT 0x0000
@@ -165,6 +168,7 @@ typedef struct {
    bool floppy_snd;
    bool autorun;
    bool use_internal_remap;
+   bool cart_loaded;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 

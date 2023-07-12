@@ -302,7 +302,6 @@ void retro_ui_init(void)
 
    // init KoS
    keyboard_init();
-   retro_ui_prepare();
    retro_ui_update_text();
 
    // Micro UI init

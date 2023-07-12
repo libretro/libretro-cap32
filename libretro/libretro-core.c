@@ -55,10 +55,13 @@
 #include "dsk/loader.h"
 #include "db/database.h"
 
-char DISKA_NAME[512]="\0";
-char DISKB_NAME[512]="\0";
-char cart_name[512]="\0";
 char loader_buffer[LOADER_MAX_SIZE];
+#if defined(PSP) || defined(PS2)
+__attribute__((aligned(16))) uint16_t retro_palette[256];
+#else
+uint16_t retro_palette[256];
+#endif
+static uint16_t* cpc_video_out;
 
 // TIME
 #include <sys/types.h>
@@ -182,18 +185,18 @@ void retro_set_input_poll(retro_input_poll_t cb)
 }
 
 int retro_getStyle(){
-    LOGI("getStyle: %u\n", retro_scr_style);
-    return retro_scr_style;
+   LOGI("getStyle: %u\n", retro_scr_style);
+   return retro_scr_style;
 }
 
 int retro_getGfxBpp(){
-    LOGI("getBPP: %u\n", 16 * retro_video.bytes);
-    return 16 * retro_video.bytes;
+   LOGI("getBPP: %u\n", 8 * retro_video.pitch);
+   return 8 * retro_video.pitch;
 }
 
 int retro_getGfxBps(){
-    LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
-    return EMULATION_SCREEN_WIDTH;
+   LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
+   return EMULATION_SCREEN_WIDTH;
 }
 
 int retro_getAudioBuffer(){
@@ -441,7 +444,9 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_gfx_colors",
-         #ifdef M16B
+         #if defined(M8BPP)
+         "Video Advanced > Color Depth; 8bit",
+         #elif defined(M16BPP)
          "Video Advanced > Color Depth; 16bit",
          #else
          "Video Advanced > Color Depth; 16bit|24bit",
@@ -728,12 +733,17 @@ static void update_variables(void)
    {
       if (!(emu_status & COMPUTER_READY))
       {
+         #ifdef M8BPP
+         video_setup(DEPTH_8BPP);
+         #else
          if (strcmp(var.value, "24bit") == 0)
          {
             video_setup(DEPTH_24BPP);
-         } else {
+         }
+         else {
             video_setup(DEPTH_16BPP);
          }
+         #endif
       }
    }
 
@@ -779,7 +789,6 @@ static void update_variables(void)
    }
 }
 
-
 void Emu_init()
 {
    audio_buffer = (int32_t*) retro_malloc(retro_getAudioBuffer());
@@ -787,6 +796,11 @@ void Emu_init()
       LOGI("emu init - audio error: when allocation mem...\n");
       return;
    }
+
+   #ifdef M8BPP
+   video_retro_palette_prepare();
+   #endif
+
    emu_status = COMPUTER_BOOTING;
    pre_main(retro_content_filepath);
 }
@@ -1424,9 +1438,11 @@ void retro_init(void)
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
+   cpc_video_out = retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
+   memset(cpc_video_out, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1449,6 +1465,7 @@ void retro_deinit(void)
       dc_free(dc);
 
    retro_free(video_buffer);
+   retro_free(cpc_video_out);
    retro_free(temp_buffer);
 
    LOGI("Retro DeInit\n");
@@ -1550,6 +1567,17 @@ void retro_PollEvent()
    process_events();
 }
 
+__attribute__((optimize("unroll-loops"))) static inline void blit_8bpp(int size){
+   uint8_t *src_row = (uint8_t *) video_buffer;
+   uint16_t *dest_row =  (uint16_t *) cpc_video_out;
+
+   while(size--)
+   {
+      //uint8_t color = *(src_row++);
+      *(dest_row++) = retro_palette[*(src_row++)];
+   }
+}
+
 void retro_run(void)
 {
    bool updated = false;
@@ -1566,13 +1594,19 @@ void retro_run(void)
    retro_ui_process();
    lightgun_cfg.gun_draw();
 
-   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+   #ifdef M8BPP
+      blit_8bpp(EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT);
+      video_cb(cpc_video_out, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+   #else
+      video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+   #endif
 }
 
 bool retro_load_game(const struct retro_game_info *game)
 {
    // notify the frontend of the retro_pixel_format we want use.
    enum retro_pixel_format fmt = retro_video.fmt;
+   //enum retro_pixel_format rgb565;
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {

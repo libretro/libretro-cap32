@@ -52,6 +52,7 @@ typedef struct {
    uint8_t pitch;
    uint8_t fmt;
    uint8_t raw_density_byte;
+   uint16_t scr_off;
    uint32_t bps;
    uint32_t cursor_color;
    uint32_t char_size;
@@ -66,24 +67,60 @@ typedef struct {
 } retro_video_t;
 extern retro_video_t retro_video;
 
-void video_setup(retro_video_depth_t video_depth);
+typedef union{
+struct {
+   uint16_t colour;
+   uint16_t idx;
+   };
+   uint32_t pal;
+} retro_palette_t;
 
+void video_setup(retro_video_depth_t video_depth);
+void video_ui_palette_8bpp(void);
+void video_retro_palette_prepare(void);
+
+void video_set_palette_antialias_8bpp(void);
 void video_set_palette_antialias_16bpp(void);
 void video_set_palette_antialias_24bpp(void);
 
+unsigned int rgb2color_8bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
 
+void convert_image_8bpp(unsigned int * dest, const unsigned int * img, int size);
 void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
 void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
 
+void draw_line_8bpp(unsigned int * dest, int width, unsigned int color);
 void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
 void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
 
+void draw_char_8bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 
+void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
+
+#define BUILD_PIXEL_RGB565(R,G,B) (((int) ((R)&0x1f) << RED_SHIFT) | ((int) ((G)&0x3f) << GREEN_SHIFT) | ((int) ((B)&0x1f) << BLUE_SHIFT))
+#ifdef FRONTEND_SUPPORTS_RGB565
+#define RED_SHIFT 11
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 0
+#define RED_EXPAND 3
+#define GREEN_EXPAND 2
+#define BLUE_EXPAND 3
+#define RED_MASK 0xF800
+#define GREEN_MASK 0x7e0
+#define BLUE_MASK 0x1f
+#else
+#define RED_SHIFT 10
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 0
+#define RED_EXPAND 3
+#define GREEN_EXPAND 3
+#define BLUE_EXPAND 3
+#endif
 
 #endif
