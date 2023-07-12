@@ -611,7 +611,7 @@ t_file_entry dbinfo[] = {
       -1,
    },
    { // Manic Miner (1984).rmp
-      {0xcd9dbf9c},
+      {0xcd9dbf9c, 0x7a60b38e},
       {RETROK_RETURN, DB_KEEP, DB_KEEP, RETROK_RETURN, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP, DB_KEEP},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       -1,
@@ -1213,5 +1213,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1681665135.9645612
+// gen hash: 1681672960.8566203
 
