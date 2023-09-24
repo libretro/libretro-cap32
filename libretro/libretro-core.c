@@ -55,13 +55,23 @@
 #include "dsk/loader.h"
 #include "db/database.h"
 
+#if defined(RENDER_GSKIT_PS2)
+#include "libretro-common/include/libretro_gskit_ps2.h"
+RETRO_HW_RENDER_INTEFACE_GSKIT_PS2 *ps2 = NULL;
+#endif
+
 char loader_buffer[LOADER_MAX_SIZE];
 #if defined(PSP) || defined(PS2)
 __attribute__((aligned(16))) uint16_t retro_palette[256];
 #else
 uint16_t retro_palette[256];
 #endif
+
+#if defined(RENDER_GSKIT_PS2)
+static uint8_t* cpc_video_out;
+#else
 static uint16_t* cpc_video_out;
+#endif
 
 // TIME
 #include <sys/types.h>
@@ -1468,6 +1478,10 @@ void retro_deinit(void)
    retro_free(cpc_video_out);
    retro_free(temp_buffer);
 
+#if defined(RENDER_GSKIT_PS2)
+   ps2 = NULL;
+#endif
+
    LOGI("Retro DeInit\n");
 }
 
@@ -1594,12 +1608,41 @@ void retro_run(void)
    retro_ui_process();
    lightgun_cfg.gun_draw();
 
-   #ifdef M8BPP
+#ifdef M8BPP
+#if defined(RENDER_GSKIT_PS2)
+   uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+
+   if (!ps2) {
+      if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
+         LOGE(" Failed to get HW rendering interface!\n");
+         return;
+      }
+
+      if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+         LOGE(" HW render interface mismatch, expected %u, got %u!\n",
+                  RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
+         return;
+      }
+
+      ps2->coreTexture->Width = EMULATION_SCREEN_WIDTH;
+      ps2->coreTexture->Height = EMULATION_SCREEN_HEIGHT;
+      ps2->coreTexture->PSM = GS_PSM_T8;
+      ps2->coreTexture->ClutPSM = GS_PSM_CT16;
+      ps2->coreTexture->Filter = GS_FILTER_LINEAR;
+      ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
+   }
+
+   ps2->coreTexture->Clut = (u32*)retro_palette;
+   ps2->coreTexture->Mem = (u32*)video_buffer;
+
+   video_cb(buf, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+#else
       blit_8bpp(EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT);
       video_cb(cpc_video_out, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-   #else
+#endif
+#else
       video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-   #endif
+#endif
 }
 
 bool retro_load_game(const struct retro_game_info *game)

@@ -104,16 +104,21 @@ void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
 
 #define BUILD_PIXEL_RGB565(R,G,B) (((int) ((R)&0x1f) << RED_SHIFT) | ((int) ((G)&0x3f) << GREEN_SHIFT) | ((int) ((B)&0x1f) << BLUE_SHIFT))
-#ifdef FRONTEND_SUPPORTS_RGB565
+
+#if defined (FRONTEND_SUPPORTS_ABGR1555)
+#define RED_SHIFT 0
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 10
+#define RED_EXPAND 3
+#define GREEN_EXPAND 3
+#define BLUE_EXPAND 3
+#elif defined (FRONTEND_SUPPORTS_RGB565)
 #define RED_SHIFT 11
 #define GREEN_SHIFT 5
 #define BLUE_SHIFT 0
 #define RED_EXPAND 3
 #define GREEN_EXPAND 2
 #define BLUE_EXPAND 3
-#define RED_MASK 0xF800
-#define GREEN_MASK 0x7e0
-#define BLUE_MASK 0x1f
 #else
 #define RED_SHIFT 10
 #define GREEN_SHIFT 5

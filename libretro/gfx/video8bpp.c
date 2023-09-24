@@ -87,7 +87,7 @@ void video_retro_palette_set(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
       }
    #endif
 
-   #ifdef FRONTEND_SUPPORTS_RGB565
+   #if defined(FRONTEND_SUPPORTS_RGB565) || defined(FRONTEND_SUPPORTS_ABGR1555)
       retro_palette[index_to_write] = BUILD_PIXEL_RGB565(r >> RED_EXPAND, g >> GREEN_EXPAND, b >> BLUE_EXPAND);
    #else
       retro_palette[index_to_write] =
