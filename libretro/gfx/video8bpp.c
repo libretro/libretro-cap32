@@ -63,36 +63,31 @@ static union TPixel pixel;
 
 void video_retro_palette_prepare()
 {
+   uint8_t index;
+   uint16_t color;
+
    // Create RGB8 to RGB565 table
    for (int i = 0; i < 256; i++)
    {
-      // RGB 8bits to RGB 565 (RRR|GGG|BB -> RRRRR|GGGGGG|BBBBB)
-      retro_palette[i] = (((i >> 5) * 31 / 7) << 11) |
+      index = i;
+      color = (((i >> 5) * 31 / 7) << 11) |
                      ((((i & 0x1C) >> 2) * 63 / 7) << 5) |
                      ((i & 0x3) * 31 / 3);
-   }
-}
-
-void video_retro_palette_set(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
-{
-   unsigned char index_to_write = index;
-
-   #ifdef RENDER_GSKIT_PS2
+#if defined(RENDER_GSKIT_PS2)
       /* Index correction for PS2 GS */
-      int modi = index & 63;
+      int modi = i & 63;
       if ((modi >= 8 && modi < 16) || (modi >= 40 && modi < 48)) {
-         index_to_write += 8;
+         index += 8;
       } else if ((modi >= 16 && modi < 24) || (modi >= 48 && modi < 56)) {
-            index_to_write -= 8;
+         index -= 8;
       }
-   #endif
 
-   #if defined(FRONTEND_SUPPORTS_RGB565) || defined(FRONTEND_SUPPORTS_ABGR1555)
-      retro_palette[index_to_write] = BUILD_PIXEL_RGB565(r >> RED_EXPAND, g >> GREEN_EXPAND, b >> BLUE_EXPAND);
-   #else
-      retro_palette[index_to_write] =
-         ((r >> RED_EXPAND) << RED_SHIFT) | ((g >> GREEN_EXPAND) << GREEN_SHIFT) | ((b >> BLUE_EXPAND) << BLUE_SHIFT);
-   #endif
+      // Transfrom from RGB565 to ABGR1555
+      color = ((color & 0xF800) >> 11) | ((color & 0x7C0) >> 1)  | ((color & 0x1F) << 10);
+#endif
+
+      retro_palette[index] = color;
+   }
 }
 
 unsigned char video_ui_palette_get(unsigned short colour)
