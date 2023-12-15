@@ -1149,6 +1149,7 @@ void emulator_reset (bool bolMF2Reset)
    // VDU
    memset(&VDU, 0, sizeof(VDU)); // clear VDU data structure
    VDU.flag_drawing = 1;
+   VDU.vertical_hold = retro_video.vertical_hold; // prepare vertical render
 
    // CRTC
    crtc_reset();

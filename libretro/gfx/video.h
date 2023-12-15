@@ -56,6 +56,13 @@ typedef struct {
    uint32_t cursor_color;
    uint32_t char_size;
    uint32_t blend_mask;
+
+   // emulation screen/blitter
+   uint16_t vertical_hold;
+   uint16_t screen_crop;
+   uint16_t screen_render_width;
+   uint16_t screen_render_height;
+
    void (*video_set_palette_antialias)(void);
    unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
    void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
@@ -63,6 +70,7 @@ typedef struct {
    void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
    void (*draw_pixel)(unsigned int * dest, const unsigned int * img);
    void (*draw_keyboard_func)(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+   void (*draw_screen)(void);
 } retro_video_t;
 extern retro_video_t retro_video;
 
