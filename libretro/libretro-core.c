@@ -109,6 +109,8 @@ extern void retro_key_up(int key);
 //VIDEO
 uint32_t * video_buffer;
 uint32_t * temp_buffer;
+uint32_t * scaler_buffer;
+static uint32_t *video_ptr, *screen_ptr;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -142,6 +144,10 @@ const char *retro_content_directory;
 char retro_system_data_directory[512];
 char retro_system_bios_directory[512];
 char retro_content_filepath[512];
+
+// software screen scaler
+void screen_null_scaler(void);
+void screen_software_scaler(void);
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -447,6 +453,10 @@ void retro_set_environment(retro_environment_t cb)
          "Video Advanced > Color Depth; 16bit|24bit",
          #endif
       },
+      {
+         "cap32_scr_crop",
+         "Video Advanced > Crop Screen Borders; disabled|enabled",
+      },
       #if 0
       {
          "cap32_resolution",
@@ -718,6 +728,24 @@ static void update_variables(void)
       if(emu_status & COMPUTER_READY) {
          CPC.scr_intensity = val;
          video_set_palette();
+      }
+   }
+
+   var.key = "cap32_scr_crop";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!(emu_status & COMPUTER_READY))
+      {
+         if (strcmp(var.value, "disabled") == 0)
+         {
+            retro_video.screen_crop = false;
+            retro_video.draw_screen = screen_null_scaler;
+         } else {
+            retro_video.screen_crop = true;
+            retro_video.draw_screen = screen_software_scaler;
+         }
       }
    }
 
@@ -1424,9 +1452,11 @@ void retro_init(void)
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
+   scaler_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
+   memset(scaler_buffer, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1450,6 +1480,7 @@ void retro_deinit(void)
 
    retro_free(video_buffer);
    retro_free(temp_buffer);
+   retro_free(scaler_buffer);
 
    LOGI("Retro DeInit\n");
 }
@@ -1501,14 +1532,18 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width = CPC_SCREEN_WIDTH;
-   info->geometry.base_height = CPC_SCREEN_HEIGHT;
+   info->geometry.base_width = retro_video.screen_crop
+      ? CPC_SCREEN_WIDTH - 64
+      : CPC_SCREEN_WIDTH;
+   info->geometry.base_height = retro_video.screen_render_height;
    info->geometry.max_width = TEX_MAX_WIDTH;
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
 
    info->timing.fps = CPC_TIMING;
    info->timing.sample_rate = 44100.0;
+
+   LOGI("[retro_get_system_av_info] %ux%u@%u\n", retro_video.screen_render_width, retro_video.screen_render_height, CPC_TIMING);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -1550,6 +1585,34 @@ void retro_PollEvent()
    process_events();
 }
 
+void screen_null_scaler(void)
+{
+   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
+void screen_software_scaler(void)
+{
+   int width;
+   int x_max = retro_video.bps - ((EMULATION_CROP * 2) >> retro_video.raw_density_byte);
+   video_ptr = video_buffer;
+   screen_ptr = scaler_buffer;
+
+   for(int y = 0; y < retro_video.screen_render_height; y++)
+   {
+      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
+      width = x_max;
+
+      do
+      {
+         *(screen_ptr++) = *(video_ptr++);
+      } while(--width);
+
+      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
+   }
+
+   video_cb(scaler_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
 void retro_run(void)
 {
    bool updated = false;
@@ -1566,7 +1629,7 @@ void retro_run(void)
    retro_ui_process();
    lightgun_cfg.gun_draw();
 
-   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+   retro_video.draw_screen();
 }
 
 bool retro_load_game(const struct retro_game_info *game)

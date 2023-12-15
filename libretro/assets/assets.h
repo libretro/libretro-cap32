@@ -45,6 +45,7 @@
 #define IMG_KEYBOARD_HEIGHT 108
 
 extern const unsigned char ui_keyboard_bg[];
+extern const unsigned char ui_keyboard_bg_crop[];
 extern const int ui_keyboard_bg_size;
 
 extern const unsigned char ui_keyboard_en[];
