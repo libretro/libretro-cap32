@@ -103,6 +103,26 @@ else ifneq (,$(findstring evercade,$(platform)))
 	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
 	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
 
+# RG35XX
+else ifeq ($(platform), rg35xx)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CROSS_COMPILE = /opt/rg35xx-toolchain/usr/bin/arm-linux-
+	CC = $(CROSS_COMPILE)gcc
+	CC_AS = $(CROSS_COMPILE)as
+	AR = $(CROSS_COMPILE)ar
+	fpic := -fPIC 
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DINLINE="inline" -DLOWRES 
+	CFLAGS += -marm -mtune=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard
+
+	CFLAGS += -flto=4 -fwhole-program -fuse-linker-plugin \
+		-fdata-sections -ffunction-sections -Wl,--gc-sections \
+		-fno-stack-protector -fno-ident -fomit-frame-pointer \
+		-falign-functions=1 -falign-jumps=1 -falign-loops=1 \
+		-fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops \
+		-fmerge-all-constants -fno-math-errno
+
 # OS X
 else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
