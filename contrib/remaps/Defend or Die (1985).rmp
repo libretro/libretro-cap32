@@ -1,0 +1,6 @@
+input_player1_key_start = "32"
+
+input_player1_key_b = "9"
+input_player1_key_b_name = "Bomb"
+
+entry_hash_1 = 0xc147e40e # (UK) (1985) [tape]
