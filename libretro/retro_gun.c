@@ -69,11 +69,11 @@ unsigned char lightgun_void_IN(void){ return 0xff; }
 void lightgun_prepare(lightgun_type guntype)
 {
    cursor_color = retro_video.cursor_color;
+   lightgun_cfg.gunconfigured = guntype;
 
    switch (guntype)
    {
       case LIGHTGUN_TYPE_GUNSTICK:
-         lightgun_cfg.gunconfigured = guntype;
          lightgun_cfg.gun_update = gunstick_emulator_update;
          CPC.gun_CRTC = gunstick_emulator_CRTC;
          CPC.gun_IN = gunstick_emulator_IN;
@@ -81,7 +81,6 @@ void lightgun_prepare(lightgun_type guntype)
          break;
 
       case LIGHTGUN_TYPE_PHASER:
-         lightgun_cfg.gunconfigured = guntype;
          lightgun_cfg.gun_update = phaser_emulator_update;
          CPC.gun_CRTC = phaser_emulator_CRTC;
          CPC.gun_IN = phaser_emulator_IN;

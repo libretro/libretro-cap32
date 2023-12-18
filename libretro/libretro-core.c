@@ -1490,9 +1490,13 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-// FIXME: why evercade do not call retro_set_controller_port_device?
-//       atm, just log when this function is called with more detail
 void retro_set_controller_port_device( unsigned port, unsigned device )
+{
+
+}
+
+// NOTE: Some third-party retroarch UI do not call retro_set_controller_port_device
+void retro_set_controller_port_device_( unsigned port, unsigned device )
 {
    if ( port > 1 )
       return;
@@ -1506,7 +1510,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
 
       default:
          // please do not deinit the lightgun config
-         if (!lightgun_cfg.gunconfigured)
+         if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
          {
             lightgun_prepare(LIGHTGUN_TYPE_NONE);
          }
@@ -1670,6 +1674,13 @@ bool retro_load_game(const struct retro_game_info *game)
    computer_load_bios();
    computer_load_file();
    retro_ui_draw_db();
+
+   // NOTE: Some third-party retroarch UI do not call retro_set_controller_port_device
+   if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
+   {
+      LOGE("[retro_load_game] missing retro_set_controller_port_device call, forced call: (%d)=%d\n", 0, RETRO_DEVICE_JOYPAD);
+      retro_set_controller_port_device_(0, RETRO_DEVICE_JOYPAD);
+   }
 
    return true;
 }
