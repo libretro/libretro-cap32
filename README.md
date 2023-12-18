@@ -57,7 +57,7 @@ Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.
 
 For small screens you can now enable software screen crop to remove most of the on-screen border.
 
-![imagen](https://github.com/libretro/libretro-cap32/assets/560310/e41f65ba-2e66-4a92-ba44-4be9af126649)
+![imagen](https://github.com/libretro/libretro-cap32/assets/560310/fcb56297-9957-441b-ad92-5750ce67eed6)
 
 
 ### New filename flags (case insensitive)
