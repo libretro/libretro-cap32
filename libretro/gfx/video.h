@@ -103,24 +103,35 @@ void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
 
-#define BUILD_PIXEL_RGB565(R,G,B) (((int) ((R)&0x1f) << RED_SHIFT) | ((int) ((G)&0x3f) << GREEN_SHIFT) | ((int) ((B)&0x1f) << BLUE_SHIFT))
-#ifdef FRONTEND_SUPPORTS_RGB565
+// Index color CLUT config RRRGGGBB
+#define EXTRACT_RED(i) (((i) >> 5) & 0x111)
+#define EXTRACT_GREEN(i) (((i) >> 2) & 0x111)
+#define EXTRACT_BLUE(i) (((i) >> 0) & 0x11)
+
+#if defined (FRONTEND_SUPPORTS_ABGR1555)
+#define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_GREEN(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_BLUE(c) ((c << 3) | (c << 1) | (c >> 1)) // From 2 to 5 bits
+
+#define RED_SHIFT 0
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 10
+
+#else // RGB565
+
+#define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_GREEN(c) ((c << 3) | (c << 1) | (c >> 1)) // From 3 to 6 bits
+#define EXPAND_BLUE(c) ((c << 3) | (c << 1) | (c >> 1)) // From 2 to 5 bits
+
 #define RED_SHIFT 11
 #define GREEN_SHIFT 5
 #define BLUE_SHIFT 0
-#define RED_EXPAND 3
-#define GREEN_EXPAND 2
-#define BLUE_EXPAND 3
-#define RED_MASK 0xF800
-#define GREEN_MASK 0x7e0
-#define BLUE_MASK 0x1f
-#else
-#define RED_SHIFT 10
-#define GREEN_SHIFT 5
-#define BLUE_SHIFT 0
-#define RED_EXPAND 3
-#define GREEN_EXPAND 3
-#define BLUE_EXPAND 3
+
 #endif
+
+#define BUILD_CLUT_COLOR_FOR_INDEX(i) \
+   (EXPAND_RED(EXTRACT_RED(i)) << RED_SHIFT) | \
+   (EXPAND_GREEN(EXTRACT_GREEN(i)) << GREEN_SHIFT) | \
+   (EXPAND_BLUE(EXTRACT_BLUE(i)) << BLUE_SHIFT)
 
 #endif
