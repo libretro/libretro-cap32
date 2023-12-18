@@ -112,7 +112,7 @@ void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, i
 {
    buffer = (buffer + x) + (y * retro_video.bps);
 
-   register uint32_t loop = size * retro_video.bytes;
+   register uint32_t loop = size / retro_video.scr_off;
    while (loop--)
    {
       *(buffer++) = *(img++);
@@ -134,7 +134,7 @@ void draw_image_linear_blend(unsigned int * buffer, const unsigned int * img, in
 {
    buffer = (buffer + x) + (y * retro_video.bps);
 
-   register uint32_t loop = size * retro_video.bytes;
+   register uint32_t loop = size / retro_video.scr_off;
    while (loop--)
    {
       BLEND_COLOR(*img, *buffer, buffer);

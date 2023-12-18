@@ -50,6 +50,7 @@ typedef enum
 
 void retro_ui_init(void);
 void retro_ui_free(void);
+void retro_ui_prepare(void);
 
 void retro_ui_set_status(retro_commands_ui_t cmd, bool value);
 void retro_ui_toggle_status(retro_commands_ui_t cmd);

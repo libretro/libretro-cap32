@@ -52,6 +52,7 @@ typedef struct {
    uint8_t pitch;
    uint8_t fmt;
    uint8_t raw_density_byte;
+   uint16_t scr_off;
    uint32_t bps;
    uint32_t cursor_color;
    uint32_t char_size;
@@ -66,24 +67,71 @@ typedef struct {
 } retro_video_t;
 extern retro_video_t retro_video;
 
-void video_setup(retro_video_depth_t video_depth);
+typedef union{
+struct {
+   uint16_t colour;
+   uint16_t idx;
+   };
+   uint32_t pal;
+} retro_palette_t;
 
+void video_setup(retro_video_depth_t video_depth);
+void video_ui_palette_8bpp(void);
+void video_retro_palette_prepare(void);
+
+void video_set_palette_antialias_8bpp(void);
 void video_set_palette_antialias_16bpp(void);
 void video_set_palette_antialias_24bpp(void);
 
+unsigned int rgb2color_8bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
 
+void convert_image_8bpp(unsigned int * dest, const unsigned int * img, int size);
 void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
 void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
 
+void draw_line_8bpp(unsigned int * dest, int width, unsigned int color);
 void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
 void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
 
+void draw_char_8bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
 
+void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
 void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
+
+// Index color CLUT config RRRGGGBB
+#define EXTRACT_RED(i) (((i) >> 5) & 0x111)
+#define EXTRACT_GREEN(i) (((i) >> 2) & 0x111)
+#define EXTRACT_BLUE(i) (((i) >> 0) & 0x11)
+
+#if defined (FRONTEND_SUPPORTS_ABGR1555)
+#define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_GREEN(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_BLUE(c) ((c << 3) | (c << 1) | (c >> 1)) // From 2 to 5 bits
+
+#define RED_SHIFT 0
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 10
+
+#else // RGB565
+
+#define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
+#define EXPAND_GREEN(c) ((c << 3) | (c << 1) | (c >> 1)) // From 3 to 6 bits
+#define EXPAND_BLUE(c) ((c << 3) | (c << 1) | (c >> 1)) // From 2 to 5 bits
+
+#define RED_SHIFT 11
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 0
+
+#endif
+
+#define BUILD_CLUT_COLOR_FOR_INDEX(i) \
+   (EXPAND_RED(EXTRACT_RED(i)) << RED_SHIFT) | \
+   (EXPAND_GREEN(EXTRACT_GREEN(i)) << GREEN_SHIFT) | \
+   (EXPAND_BLUE(EXTRACT_BLUE(i)) << BLUE_SHIFT)
 
 #endif
