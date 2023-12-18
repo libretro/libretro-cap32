@@ -53,6 +53,13 @@ Caprice brings some default keymaps confings, these configs are detailed at libr
 
 Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.0 games and DSK
 
+ * Crop Screen Borders: [cap32_scr_crop] (disabled | enabled)
+
+For small screens you can now enable software screen crop to remove most of the on-screen border.
+
+![imagen](https://github.com/libretro/libretro-cap32/assets/560310/e41f65ba-2e66-4a92-ba44-4be9af126649)
+
+
 ### New filename flags (case insensitive)
 
 * "[664]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
