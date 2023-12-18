@@ -1,7 +1,13 @@
 # Future
-- CORE: Fix flag file, moved slot check to init method.
-- CORE: Added joystick button Fire3, thx @revvv.
-- GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation).
+
+# 4.5.4
+- FIX: Check retro_set_controller_port_device to avoid third-party UI problems
+- VIDEO: Added software crop-scaler
+- CORE: RG35XX support
+- RMP: +250 games configured and tested!!
+- CORE: Fix flag file, moved slot check to init method
+- CORE: Added joystick button Fire3, thx @revvv
+- GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation)
 - AUTORUN: filename memory flags
 - CPC+: Alcon homebrew load cart fix
 - RMP: +140 classic games autoconfigured
