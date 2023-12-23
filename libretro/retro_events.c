@@ -790,8 +790,8 @@ void ev_mouse_motion()
    if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
       return;
 
-   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xfffe);
-   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xfffe);
+   int px=(int) ((mouse_x + 0x7fff) * retro_video.screen_render_width / 0xfffe) + (64 * retro_video.screen_crop);
+   int py=(int) ((mouse_y + 0x7fff) * retro_video.screen_render_height / 0xfffe);
 
    mouse.raw_x = mouse_x;
    mouse.raw_y = mouse_y;

@@ -1547,7 +1547,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->timing.fps = CPC_TIMING;
    info->timing.sample_rate = 44100.0;
 
-   LOGI("[retro_get_system_av_info] %ux%u@%u\n", retro_video.screen_render_width, retro_video.screen_render_height, CPC_TIMING);
+   LOGI("[retro_get_system_av_info] %ux%u snd: %i\n", retro_video.screen_render_width, retro_video.screen_render_height, (int) info->timing.sample_rate);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
