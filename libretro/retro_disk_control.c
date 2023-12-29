@@ -119,7 +119,6 @@ void dc_reset(dc_storage* dc)
       dc->files[i] = NULL;
       free(dc->names[i]);
       dc->names[i] = NULL;
-
       dc->types[i] = DC_IMAGE_TYPE_NONE;
    }
 
@@ -407,7 +406,6 @@ void dc_free(dc_storage* dc)
    dc_reset(dc);
    free(dc);
    dc = NULL;
-   return;
 }
 
 enum dc_image_type dc_get_image_type(const char* filename)

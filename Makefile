@@ -391,6 +391,7 @@ else ifeq ($(platform), wincross64)
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
+	CFLAGS += -D__WIN32__
 	CC ?= gcc
 	CC_AS ?= gcc
 	CXX ?= g++

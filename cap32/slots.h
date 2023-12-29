@@ -35,6 +35,8 @@ void dsk_eject (t_drive *drive);
 int dsk_load (char *pchFileName, t_drive *drive, char chID);
 int dsk_save (char *pchFileName, t_drive *drive, char chID);
 int dsk_format (t_drive *drive, int iFormat);
+int dsk_diff (char *pchFileName, t_drive *altered, t_drive *org);
+int dsk_diff_load (char *pchFileName, t_drive *drive);
 
 void tape_eject (void);
 void play_tape(void);

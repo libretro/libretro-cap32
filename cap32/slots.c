@@ -61,6 +61,9 @@ uint8_t *pbTapeImage = NULL;
 uint8_t *pbTapeImageEnd = NULL;
 uint8_t *pbSnaImage = NULL;
 
+//#define DEBUG_SLOTS
+#define DSK_DIFF_HEADER "LIBRETRO DSKDIFF"
+#define DSK_DIFF_VERSION "DIFVER0000"
 
 int cpm_boot (char * comfile)
 {
@@ -519,6 +522,230 @@ int snapshot_save (char *pchFileName)
    return 0;
 }
 
+int dsk_diff_track(t_drive *altered, t_drive *org, uint32_t track, uint32_t side)
+{
+   if (altered->track[track][side].size != org->track[track][side].size)
+   {
+      #ifdef DEBUG_SLOTS
+      printf("[DEBUG] [slots::dsk_diff_track] [%u/%u] Size changed (new: %u, org: %u)\n",
+         track, side, altered->track[track][side].size, org->track[track][side].size
+      );
+      #endif
+      return true;
+   }
+
+   if (altered->track[track][side].sectors != org->track[track][side].sectors)
+   {
+      #ifdef DEBUG_SLOTS
+      printf("[DEBUG] [slots::dsk_diff_track] [%u/%u] Sectors changed (new: %u, org: %u)\n",
+         track, side, altered->track[track][side].sectors, org->track[track][side].sectors
+      );
+      #endif
+      return true;
+   }
+
+   if (memcmp(altered->track[track][side].data, org->track[track][side].data, altered->track[track][side].size) != 0)
+   {
+      #ifdef DEBUG_SLOTS
+      printf("[DEBUG] [slots::dsk_diff_track] [%u/%u] Data changed.\n", track, side);
+      #endif
+      return true;
+   }
+
+   return false;
+}
+
+int dsk_diff (char *pchFileName, t_drive *altered, t_drive *org)
+{
+   t_DSK_header dh;
+   t_track_header th;
+   uint32_t track, side, pos, sector;
+
+   if ((pfileObject = fopen(pchFileName, "wb")) != NULL) {
+      memset(&dh, 0, sizeof(dh));
+      memcpy(dh.id, DSK_DIFF_HEADER " File\r\nDisk-Diff\r\n", sizeof(dh.id));
+      strcpy(dh.unused1, DSK_DIFF_VERSION "\r\n");
+      dh.tracks = altered->tracks;
+      dh.sides = (altered->sides+1) | (altered->random_DEs); // correct side count and indicate random DEs, if necessary
+      #ifdef DEBUG_SLOTS
+      printf("[DEBUG] [slots::dsk_diff] HEAD [tracks %u, sides %u]\n", dh.tracks, altered->sides+1);
+      #endif
+      pos = 0;
+
+      for (track = 0; track < altered->tracks; track++)
+      { // loop for all tracks
+         for (side = 0; side <= altered->sides; side++)
+         { // loop for all sides
+            if (altered->track[track][side].size) // track is formatted?
+               dh.track_size[pos] = (altered->track[track][side].size + 0x100) >> 8; // track size + header in bytes
+            pos++;
+         }
+      }
+
+      if (!fwrite(&dh, sizeof(dh), 1, pfileObject))
+      { // write header to file
+         fclose(pfileObject);
+         return ERR_DSK_WRITE;
+      }
+
+      memset(&th, 0, sizeof(th));
+      memcpy(th.id, "Track-Info\r\n", sizeof(th.id));
+      for (track = 0; track < altered->tracks; track++) { // loop for all tracks
+         for (side = 0; side <= altered->sides; side++) { // loop for all sides
+            if (!dsk_diff_track(altered, org, track, side))
+               continue;
+
+            if (altered->track[track][side].size) { // track is formatted?
+               th.track = track;
+               th.side = side;
+               th.bps = 2;
+               th.sectors = altered->track[track][side].sectors;
+               th.gap3 = 0x4e;
+               th.filler = 0xe5;
+               for (sector = 0; sector < th.sectors; sector++) {
+                  memcpy(&th.sector[sector][0], altered->track[track][side].sector[sector].CHRN.data, 4); // copy CHRN
+                  memcpy(&th.sector[sector][4], altered->track[track][side].sector[sector].flags, 2); // copy ST1 & ST2
+                  th.sector[sector][6] = altered->track[track][side].sector[sector].total_size & 0xff;
+                  th.sector[sector][7] = (altered->track[track][side].sector[sector].total_size >> 8) & 0xff; // sector size in bytes
+               }
+
+               if (!fwrite(&th, sizeof(th), 1, pfileObject)) { // write track header
+                  fclose(pfileObject);
+                  return ERR_DSK_WRITE;
+               }
+               if (!fwrite(altered->track[track][side].data, altered->track[track][side].size, 1, pfileObject)) { // write track data
+                  fclose(pfileObject);
+                  return ERR_DSK_WRITE;
+               }
+               #ifdef DEBUG_SLOTS
+               printf("[DEBUG] [slots::dsk_diff] track: %u/%u, side %u/%u, sectors: %u, size: %u\n",
+                  th.track, altered->tracks, th.side, altered->sides, th.sectors, altered->track[track][side].size
+               );
+               #endif
+            }
+         }
+      }
+
+      fclose(pfileObject);
+      printf("[INFO] [slots::dsk_diff] DSK changes saved: %s\n", pchFileName);
+   }
+   else
+      return ERR_DSK_WRITE; // write attempt failed
+
+   return 0;
+}
+
+int dsk_diff_load (char *pchFileName, t_drive *drive)
+{
+   int iRetCode = 0;
+   uint32_t dwTrackSize, sector, dwSides, dwTracks, dwSectorSize;
+   uint8_t *pbPtr, *pbDataPtr, *pbTempPtr, *pbTrackSizeTable;
+   t_track_header th;
+
+   if (!drive->tracks)
+      return 0;
+
+   if ((pfileObject = fopen(pchFileName, "rb")) != NULL)
+   {
+      printf("[INFO] [slots::dsk_diff_load] Loading DSK changes saved at: %s\n", pchFileName);
+
+      if(!fread(pbGPBuffer, 0x100, 1, pfileObject)) { // read DSK header
+         iRetCode = ERR_DSK_INVALID;
+         goto exit;
+      }
+      pbPtr = pbGPBuffer;
+
+      if (memcmp(pbPtr, DSK_DIFF_HEADER, 16) != 0) { // DSK libretro diff image?
+         iRetCode = ERR_DSK_INVALID;
+         goto exit;
+      }
+
+      dwTracks = *(pbPtr + 0x30); // number of tracks
+      if (drive->tracks > DSK_TRACKMAX) {  // limit to maximum possible
+         drive->tracks = DSK_TRACKMAX;
+      }
+
+      dwSides = *(pbPtr + 0x31); // grab number of sides
+      if (drive->sides > DSK_SIDEMAX) { // abort if more than maximum
+         iRetCode = ERR_DSK_SIDES;
+         goto exit;
+      }
+      dwSides--; // zero base number of sides
+
+      if (drive->tracks != dwTracks || drive->sides != dwSides) {
+         printf("[ERROR] [slots::dsk_diff_load] Wrong tracks/sides detected.\n");
+         iRetCode = ERR_DSK_INVALID;
+         goto exit;
+      }
+
+      pbTrackSizeTable = pbPtr + 0x34; // pointer to track size table in DSK header
+
+      while(fread(&th, sizeof(th), 1, pfileObject))
+      {
+         pbPtr = pbGPBuffer + sizeof(th);
+
+         if (memcmp(th.id, "Track-Info", 10) != 0) { // valid track header?
+            iRetCode = ERR_DSK_INVALID;
+            goto exit;
+         }
+
+         dwTrackSize = (*(pbTrackSizeTable + (th.track * (dwSides + 1))) << 8);
+         if (dwTrackSize == 0) {
+            printf("[ERROR] [slots::dsk_diff_load] Invalid header, empty size.\n");
+            goto exit;
+         }
+         dwTrackSize -= 0x100;
+         t_track* track = &drive->track[th.track][th.side];
+
+         #ifdef DEBUG_SLOTS
+         printf("[DEBUG] [slots::dsk_diff_load] track: %u/%u, side %u/%u, sectors: %u, size: %u\n",
+            th.track, dwTracks, th.side, dwSides, th.sectors, dwTrackSize
+         );
+         #endif
+
+         if (track->sectors != th.sectors) {
+            printf("[ERROR] [slots::dsk_diff_load] Invalid header, sectors changed.\n");
+            goto exit;
+         }
+
+         if (track->size != dwTrackSize) {
+            printf("[ERROR] [slots::dsk_diff_load] Invalid header, size changed (org: %u, new: %u).\n", track->size, dwTrackSize);
+            goto exit;
+         }
+
+         pbDataPtr = track->data; // pointer to start of memory buffer
+         pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
+
+         if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
+            printf("[ERROR] [slots::dsk_diff_load] Missing data (trying read %u bytes).\n", dwTrackSize);
+            iRetCode = ERR_DSK_INVALID;
+            goto exit;
+         }
+
+         for (sector = 0; sector < th.sectors; sector++) { // loop for all sectors
+            memcpy(track->sector[sector].CHRN.data, &th.sector[sector][0], 4); // copy CHRN
+            memcpy(track->sector[sector].flags, &th.sector[sector][4], 2); // copy ST1 & ST2
+
+            uint32_t dwRealSize = 0x80 << *(pbPtr + 0x1b);
+            dwSectorSize = th.sector[sector][6] + (th.sector[sector][7] << 8); // sector size in bytes
+            sector_set_sizes(&track->sector[sector], dwRealSize, dwSectorSize); // weak sectors support
+            track->sector[sector].data = pbDataPtr; // store pointer to sector data
+
+            // prepare next loop
+            pbDataPtr += dwSectorSize;
+            pbPtr += 8;
+         }
+      }
+
+      exit:
+         if (iRetCode) {
+            printf("[ERROR] [slots::dsk_diff_load] Invalid DSK diff, error (%u).\n", iRetCode);
+         }
+         fclose(pfileObject);
+   }
+
+   return iRetCode;
+}
 
 /**
  * DSK handlers

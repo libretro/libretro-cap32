@@ -178,9 +178,10 @@ int HandleExtension(char *path,char *ext);
 
 extern void kbd_update_table(int lang);
 
-extern char DISKA_NAME[512];
-extern char DISKB_NAME[512];
-extern char cart_name[512];
+extern char diskA_name[RETRO_PATH_MAX];
+extern char diskB_name[RETRO_PATH_MAX];
+extern char savdif_name[RETRO_PATH_MAX+16];
+extern char cart_name[RETRO_PATH_MAX];
 
 #include "cap32.h"
 #include "crtc.h"
@@ -357,6 +358,7 @@ t_VDU VDU;
 
 t_drive driveA;
 t_drive driveB;
+t_drive driveSAV;
 
 t_zip_info zip_info;
 
@@ -1946,25 +1948,6 @@ int skel_main(int argc, char *argv[])
    return 0;
 }
 
-int InitOSGLU(void)
-{
-
-   return 0;
-}
-
-int  UnInitOSGLU(void)
-{
-   doCleanUp();
-   return 0;
-}
-
-// TO BE REMOVED
-//#define OLD_LOADER
-#ifdef OLD_LOADER
-//AUTOBOOT TAKEN FROM CPCDROID
-#include "cpc_cat.h"
-#endif
-
 int attach_disk(char *arv, int drive)
 {
    int result = 1;
@@ -1972,12 +1955,13 @@ int attach_disk(char *arv, int drive)
    if(!drive) {
       if((result = dsk_load( arv, &driveA, 'A')) == 0)
       {
-         sprintf(DISKA_NAME,"%s",arv);
+         dsk_diff_load(savdif_name, &driveA);
+         snprintf(diskA_name, RETRO_PATH_MAX, "%s",arv);
       }
    } else {
       if((result = dsk_load( arv, &driveB, 'B')) == 0)
       {
-         sprintf(DISKB_NAME,"%s",arv);
+         snprintf(diskB_name, RETRO_PATH_MAX,"%s",arv);
       }
    }
    return result;
@@ -1987,13 +1971,23 @@ int detach_disk(int drive)
 {
    if(!drive)
    {
+      if(driveA.altered)
+      {
+         if(dsk_load(diskA_name, &driveSAV, 'T') == 0)
+         {
+            dsk_diff(savdif_name, &driveA, &driveSAV);
+            dsk_eject(&driveSAV);
+         }
+      }
+
       dsk_eject(&driveA);
-      DISKA_NAME[0] = '\0';
+
+      diskA_name[0] = '\0';
    }
    else
    {
       dsk_eject(&driveB);
-      DISKB_NAME[0] = '\0';
+      diskB_name[0] = '\0';
    }
 
    return 0;
@@ -2066,6 +2060,7 @@ int capmain (int argc, char **argv)
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
+   memset(&driveSAV, 0, sizeof(t_drive));
 
    dwTicksOffset     = (int)(FRAME_PERIOD_MS / (double)(CPC.speed/CPC_BASE_FREQUENCY_MHZ));
 

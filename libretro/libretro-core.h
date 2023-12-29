@@ -221,6 +221,8 @@ extern unsigned int * retro_getScreenPtr();
 #define EXT_FILE_SNA "sna"
 #define EXT_FILE_CPR "cpr"
 
+#define EXT_DIFF_DSK "sav"
+
 // allowed file flags - BIOS
 #define FLAG_BIOS_464 "[464]"
 #define FLAG_BIOS_CPM "[CPM]"

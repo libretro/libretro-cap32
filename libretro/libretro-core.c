@@ -55,9 +55,10 @@
 #include "dsk/loader.h"
 #include "db/database.h"
 
-char DISKA_NAME[512]="\0";
-char DISKB_NAME[512]="\0";
-char cart_name[512]="\0";
+char diskA_name[RETRO_PATH_MAX]="\0";
+char diskB_name[RETRO_PATH_MAX]="\0";
+char savdif_name[RETRO_PATH_MAX+16]="\0";
+char cart_name[RETRO_PATH_MAX]="\0";
 char loader_buffer[LOADER_MAX_SIZE];
 
 // TIME
@@ -92,8 +93,7 @@ extern void enter_gui(void);
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
-extern int InitOSGLU(void);
-extern int  UnInitOSGLU(void);
+extern void doCleanUp (void);
 extern void emu_reset(void);
 extern void emu_reconfigure(void);
 extern void change_ram(int val);
@@ -865,6 +865,12 @@ static int get_image_unit()
    return unit;
 }
 
+static int retro_attach_disk(char * filename)
+{
+   snprintf(savdif_name, RETRO_PATH_MAX+16, "%s%s%s." EXT_DIFF_DSK, retro_save_directory, PATH_DEFAULT_SLASH(), path_basename(filename));
+   return attach_disk(filename, 0);
+}
+
 static void retro_insert_image()
 {
    if(dc->unit == DC_IMAGE_TYPE_TAPE)
@@ -884,19 +890,19 @@ static void retro_insert_image()
    }
    else if(dc->unit == DC_IMAGE_TYPE_FLOPPY)
    {
-      int error = attach_disk((char *)dc->files[dc->index],0);
+      int error = retro_attach_disk((char *)dc->files[dc->index]);
       if (error)
       {
          retro_message("Error Loading DSK...");
-         LOGI("[retro_insert_image] Disk (%d) Error : %s\n", dc->index+1, dc->files[dc->index]);
+         LOGI("[retro_insert_image] Disk (%d) Error: %s\n", dc->index+1, dc->files[dc->index]);
          return;
       }
-      LOGI("[retro_insert_image] Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
+      LOGI("[retro_insert_image] Disk (%d) Inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
       retro_computer_cfg.slot = SLOT_DSK;
    }
    else
    {
-      LOGE("[retro_insert_image] unsupported image-type : %u\n", dc->unit);
+      LOGE("[retro_insert_image] Unsupported image-type: %u\n", dc->unit);
    }
 }
 
@@ -914,7 +920,7 @@ static bool retro_set_eject_state(bool ejected)
          if (unit == DC_IMAGE_TYPE_TAPE)
          {
             tape_eject();
-            LOGI("[retro_set_eject_state] Tape (%d/%d) ejected %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+            LOGI("[retro_set_eject_state] Tape (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
          }
          else
          {
@@ -1323,8 +1329,8 @@ void computer_load_file() {
       dc->eject_state = false;
       computer_hash_file((char *)dc->files[dc->index]);
 
-      LOGI("[computer_load_file] Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-      int error = attach_disk((char *)dc->files[dc->index],0);
+      LOGI("[computer_load_file] Disk (%d) inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
+      int error = retro_attach_disk((char *)dc->files[dc->index]);
       if (error) {
          retro_message("[computer_load_file] Error Loading DSK...");
          LOGE("[computer_load_file] DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
@@ -1468,11 +1474,14 @@ void retro_init(void)
 
 void retro_deinit(void)
 {
+   // disk diff before clean up
+   detach_disk(0);
+
    free_retro_snd();
    Emu_uninit();
    retro_ui_free();
 
-   UnInitOSGLU();
+   doCleanUp();
 
    // Clean the m3u storage
    if(dc)
@@ -1677,10 +1686,7 @@ bool retro_load_game(const struct retro_game_info *game)
 
    // NOTE: Some third-party retroarch UI do not call retro_set_controller_port_device
    if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
-   {
-      LOGE("[retro_load_game] missing retro_set_controller_port_device call, forced call: (%d)=%d\n", 0, RETRO_DEVICE_JOYPAD);
       retro_set_controller_port_device_(0, RETRO_DEVICE_JOYPAD);
-   }
 
    return true;
 }
