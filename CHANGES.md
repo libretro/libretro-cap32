@@ -1,4 +1,5 @@
 # Future
+- DSK: New save game DSK diff support. Allows save games and do not modify original DSK file, reported by @Jamiras.
 
 # 4.5.4
 - FIX: Check retro_set_controller_port_device to avoid third-party UI problems
