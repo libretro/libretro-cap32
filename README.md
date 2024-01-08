@@ -48,6 +48,9 @@ Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ and **User 1/2 config dif
 Caprice brings some default keymaps confings, these configs are detailed at libretro docs: https://docs.libretro.com/library/caprice32/
 
 ## Features not covered in docs
+ * Swap disk using [Combo Button](https://docs.libretro.com/library/caprice32/#combo-list) + L / R.
+
+If you are using a game that has multiple disks loaded using an M3U for example. You can switch between the loaded discs simply by pressing the **combo button** and the **L** button *(to switch to the previous disc)* or the **R** button *(to switch to the next disc)*.
 
  * New Model: [cap32_model] (6128 | 464 | 664 | 6128+)
 
