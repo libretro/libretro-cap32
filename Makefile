@@ -106,7 +106,6 @@ else ifneq (,$(findstring evercade,$(platform)))
 # RG35XX
 else ifeq ($(platform), rg35xx)
 	TARGET := $(TARGET_NAME)_libretro.so
-	CROSS_COMPILE = /opt/rg35xx-toolchain/usr/bin/arm-linux-
 	CC = $(CROSS_COMPILE)gcc
 	CC_AS = $(CROSS_COMPILE)as
 	AR = $(CROSS_COMPILE)ar
