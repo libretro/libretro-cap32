@@ -1,4 +1,7 @@
 # Future
+- DB: sync clean-cpc-db v1.2
+- RMP: Added Amsoft loader fixes and new classics and puzzle games.
+- KBD: allow autorun commands without press return at the end.
 - DSK: New save game DSK diff support. Allows save games and do not modify original DSK file, reported by @Jamiras.
 - DSK: Added disk swap functionality using Combo and L/R buttons. Partially based on @madcock [work](https://github.com/libretro/libretro-cap32/commit/a7f6f74c0467051a67e6203e200213658173a08a), thx!
 
