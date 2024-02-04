@@ -1,0 +1,12 @@
+input_player1_key_x = "32"
+input_player1_key_y_name = "Select Object"
+
+input_player1_key_y = "32"
+input_player1_key_y_name = "Select Object"
+
+input_player1_key_b = "13"
+input_player1_key_b_name = "Select Weapon"
+
+input_player1_key_start = "115"
+
+entry_hash_1 = 0xdfb023f8 # (UK) (1990) (UK retail version) [Original]

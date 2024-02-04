@@ -1,0 +1,17 @@
+# QAOP
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "113"
+input_player1_key_a_name = "Jump"
+input_player1_key_b = "32"
+input_player1_key_b_name = "Kick / Action"
+
+input_player1_key_start = "113"
+
+entry_hash_1 = 0x51e77955 # (UK) (1988) (CPM) [Original] 
+
+entry_command = "RUN[quote]GARFIELD"
+
+entry_map_type = "clean"

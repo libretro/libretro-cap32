@@ -1,0 +1,6 @@
+input_player1_key_select = "100"
+input_player1_key_select_name = "Password"
+
+entry_hash_1 = 0x083c9554 # (UK) (2 faces) (1990) [Original]
+
+entry_command = "RUN[quote]HELTER"

@@ -1,0 +1,6 @@
+input_player1_key_start = "48"
+
+entry_hash_1 = 0xdb70571b # (F) (128K) (2 faces) (1991) (CPM) [Original]
+entry_hash_2 = 0xf0a1468e # (S) (128K) (2 faces) (1991) (CPM) [Original]
+
+entry_command = "|CPM"

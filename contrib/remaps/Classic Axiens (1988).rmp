@@ -1,0 +1,16 @@
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_a = "109"
+input_player1_key_a_name = "Fire"
+
+input_player1_key_start = "49"
+
+entry_hash_1 = 0x84e1c9fe #  (UK) (1986) [Original] (CPM)
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]HIRISE"
+
+entry_map_type = "clean"

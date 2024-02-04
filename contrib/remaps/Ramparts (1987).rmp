@@ -1,0 +1,7 @@
+input_player1_key_x = "49"
+input_player1_key_x_name = "Press 1"
+
+input_player1_key_start = "115"
+input_player1_key_select = "49"
+
+entry_hash_1 = 0x31f0ac5b # (UK) (1987) [Original]

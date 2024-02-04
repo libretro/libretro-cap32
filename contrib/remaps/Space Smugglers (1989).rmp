@@ -1,0 +1,5 @@
+input_player1_key_start = "51"
+
+entry_hash_1 = 0x99821ea9 # (S) (1989) (LightGun) (CPM) [Original]
+
+entry_command = "|CPM"

@@ -1,0 +1,7 @@
+
+entry_hash_1 = 0x0d34f4df # (S) (2022) (Version Basic 1.1) (Hack)
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]80DIAS"

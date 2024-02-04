@@ -1,0 +1,9 @@
+
+entry_hash_1 = 0xeebfb943 # Raid (UK) (1985) [Amsoft] [Original]
+entry_hash_2 = 0xf2a3ca3e # Sorcery+ (G) (1985) [Amsoft] [Original]
+entry_hash_3 = 0xe0111415 # Sorcery+ (F) (1985) [Amsoft] [Original]
+entry_hash_4 = 0x50f59666 # Assault On Port Stanley (UK) (1985) [Original]
+entry_hash_5 = 0xb49849a5 # Glen Hoddle Soccer (UK) (1985) [Original]
+entry_hash_6 = 0xc48122b1 # Tombstowne (UK) (1986) [Original]
+
+entry_command = "RUN[quote]DISC"
