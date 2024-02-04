@@ -545,6 +545,10 @@ bool kbd_buf_update() {
       kbd_feedbuf_pos++;
 
    }
+   else if( kbd_feedbuf[kbd_feedbuf_pos]=='`' ) {
+      kbd_buf_clean();
+      return true;
+   }
    // handle emulated keyboard
    else if( (kbd_feedbuf[kbd_feedbuf_pos]!=0) && old==0) {
       int cpc_key = cpc_kbd[cpc_get_key_from_ascii(kbd_feedbuf[kbd_feedbuf_pos])];
