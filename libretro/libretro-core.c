@@ -1240,6 +1240,10 @@ void retro_init(void)
 
    if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
       LOGI("AUDIO FORMAT is not supported.\n");
+
+   // Some third-party retroarch UI do not call retro_set_controller_port_device
+   // by defaylt, setup gun as disabled as part of emulator startup.
+   lightgun_prepare(LIGHTGUN_TYPE_NONE);
 }
 
 void retro_deinit(void)
@@ -1270,12 +1274,6 @@ unsigned retro_api_version(void)
 }
 
 void retro_set_controller_port_device( unsigned port, unsigned device )
-{
-
-}
-
-// NOTE: Some third-party retroarch UI do not call retro_set_controller_port_device
-void retro_set_controller_port_device_( unsigned port, unsigned device )
 {
    if ( port > 1 )
       return;
@@ -1453,10 +1451,6 @@ bool retro_load_game(const struct retro_game_info *game)
    computer_load_bios();
    computer_load_file();
    retro_ui_draw_db();
-
-   // NOTE: Some third-party retroarch UI do not call retro_set_controller_port_device
-   if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
-      retro_set_controller_port_device_(0, RETRO_DEVICE_JOYPAD);
 
    return true;
 }
