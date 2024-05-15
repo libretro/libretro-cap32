@@ -1240,6 +1240,7 @@ void crtc_cycle(int repeat_count)
             RendPos = RendStart;
             HorzChar--;
          } else {
+            val = val & ~3; // fix misaligned access
             RendPos = (uint32_t *)&RendBuff[val];
             int tmp = (uint8_t*)RendStart - (uint8_t*)RendPos;
             HorzPix[48] = (uint8_t)tmp;
