@@ -1,4 +1,5 @@
 # Future
+- GUN: Fixed gunstick init.
 - DB: sync clean-cpc-db v1.2
 - RMP: Added Amsoft loader fixes and new classics and puzzle games.
 - KBD: allow autorun commands without press return at the end.

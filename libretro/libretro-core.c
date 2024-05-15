@@ -1242,7 +1242,7 @@ void retro_init(void)
       LOGI("AUDIO FORMAT is not supported.\n");
 
    // Some third-party retroarch UI do not call retro_set_controller_port_device
-   // by defaylt, setup gun as disabled as part of emulator startup.
+   // by default, setup gun as disabled as part of emulator startup.
    lightgun_prepare(LIGHTGUN_TYPE_NONE);
 }
 
