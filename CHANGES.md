@@ -1,5 +1,19 @@
 # Future
-- GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation).
+- GUN: Fixed gunstick init.
+- DB: sync clean-cpc-db v1.2
+- RMP: Added Amsoft loader fixes and new classics and puzzle games.
+- KBD: allow autorun commands without press return at the end.
+- DSK: New save game DSK diff support. Allows save games and do not modify original DSK file, reported by @Jamiras.
+- DSK: Added disk swap functionality using Combo and L/R buttons. Partially based on @madcock [work](https://github.com/libretro/libretro-cap32/commit/a7f6f74c0467051a67e6203e200213658173a08a), thx!
+
+# 4.5.4
+- FIX: Check retro_set_controller_port_device to avoid third-party UI problems
+- VIDEO: Added software crop-scaler
+- CORE: RG35XX support
+- RMP: +250 games configured and tested!!
+- CORE: Fix flag file, moved slot check to init method
+- CORE: Added joystick button Fire3, thx @revvv
+- GUN: Added gunstick emulation from Wiituka and ported new Phaser emulation from Caprice32 (check documentation)
 - AUTORUN: filename memory flags
 - CPC+: Alcon homebrew load cart fix
 - RMP: +140 classic games autoconfigured

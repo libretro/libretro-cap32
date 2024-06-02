@@ -71,7 +71,7 @@ else ifneq (,$(findstring rpi,$(platform)))
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
 
 	ifneq (,$(findstring rpi1,$(platform)))
-		CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16B
+		CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16BPP
 #		Raspberry Pi 1 - Model B (original)
 		ifneq (,$(findstring rpi1bo,$(platform)))
 			CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
@@ -97,11 +97,30 @@ else ifneq (,$(findstring evercade,$(platform)))
 	CC = /opt/evercade/usr/bin/arm-linux-gnueabihf-gcc
 	CC_AS = /opt/evercade/usr/bin/arm-linux-gnueabihf-as
 	AR = /opt/evercade/usr/bin/arm-linux-gnueabihf-ar
-	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16B -DEVERCADE
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DLOWRES -DINLINE="inline" -DM16BPP -DEVERCADE
 	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
 	CFLAGS += -fomit-frame-pointer -ffast-math	
 	CFLAGS += -funsafe-math-optimizations -fsingle-precision-constant -fexpensive-optimizations
 	CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops
+
+# RG35XX
+else ifeq ($(platform), rg35xx)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = $(CROSS_COMPILE)gcc
+	CC_AS = $(CROSS_COMPILE)as
+	AR = $(CROSS_COMPILE)ar
+	fpic := -fPIC 
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DINLINE="inline" -DLOWRES 
+	CFLAGS += -marm -mtune=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard
+
+	CFLAGS += -flto=4 -fwhole-program -fuse-linker-plugin \
+		-fdata-sections -ffunction-sections -Wl,--gc-sections \
+		-fno-stack-protector -fno-ident -fomit-frame-pointer \
+		-falign-functions=1 -falign-jumps=1 -falign-loops=1 \
+		-fno-unwind-tables -fno-asynchronous-unwind-tables -fno-unroll-loops \
+		-fmerge-all-constants -fno-math-errno
 
 # OS X
 else ifeq ($(platform), osx)
@@ -236,7 +255,7 @@ else ifeq ($(platform), ctr)
 	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DARM11 -D_3DS -DNO_UNALIGNED_ACCESS -DM16B -DLOWRES
+	PLATFORM_DEFINES := -DARM11 -D_3DS -DNO_UNALIGNED_ACCESS -DM16BPP -DLOWRES
 	PLATFORM_DEFINES += -march=armv6k -mtune=mpcore -mfloat-abi=hard
 	PLATFORM_DEFINES += -Wall -mword-relocations
 	PLATFORM_DEFINES += -fomit-frame-pointer -ffast-math
@@ -332,7 +351,7 @@ else ifeq ($(platform), retrofw)
 	AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
 	fpic := -fPIC
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
-	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16BPP
 	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
 	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
 	CFLAGS += -fomit-frame-pointer -ffast-math	
@@ -348,7 +367,7 @@ else ifeq ($(platform), miyoo)
    	AR = /opt/miyoo/usr/bin/arm-linux-ar
 	fpic := -fPIC
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
-	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16B
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565  -DLOWRES -DINLINE="inline" -DM16BPP
 	CFLAGS += -ffast-math -march=armv5te -mtune=arm926ej-s
 	CFLAGS += -falign-functions=1 -falign-jumps=1 -falign-loops=1
 	CFLAGS += -fomit-frame-pointer -ffast-math	
@@ -372,6 +391,7 @@ else ifeq ($(platform), wincross64)
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
+	CFLAGS += -D__WIN32__
 	CC ?= gcc
 	CC_AS ?= gcc
 	CXX ?= g++
@@ -490,17 +510,17 @@ rmp:
 
 # unit test lib
 $(CORE_DIR)/unit-tests/cmocka.o: 
-	$(CC) -c -o $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/cmocka/src/cmocka.c $(CFLAGS) -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+	$(CC) -c -o $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/external/cmocka/cmocka-lib/src/cmocka.c $(CFLAGS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
 
 # to get more info: make clean && make unit-test DEBUG_TEST=1
 unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
-	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/cmocka/include
+	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
 	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
 	$(CORE_DIR)/unit-tests/autorun
 
 unit-test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
-	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/cmocka/include
+	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
 	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/unit-tests/test-db.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
 	@echo "Now run: $(CORE_DIR)/unit-tests/test-db <full-path-to clean-cpc-db roms>"

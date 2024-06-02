@@ -1,0 +1,8 @@
+input_player1_key_start = "49"
+input_player1_key_start_name = "Game 1"
+input_player1_key_select = "50"
+input_player1_key_select_name = "Game 2"
+
+entry_hash_1 = 0xe460536c # (UK) (1985) (CPM) [Original]
+
+entry_command = "|CPM"

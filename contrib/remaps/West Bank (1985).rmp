@@ -1,0 +1,11 @@
+input_player1_key_left = "49"
+input_player1_key_right = "51"
+
+input_player1_key_a = "50"
+input_player1_key_b = "50"
+
+input_player1_key_start = "48"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x361c4a1e # (S) (1986) [Original]

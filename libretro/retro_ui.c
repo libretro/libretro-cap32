@@ -80,7 +80,7 @@ static void (*draw_keyboard)(unsigned int * buffer, const unsigned int * img, in
 #define INTERNAL_UI_LED       16
 
 // UI STRING POSITION ON KEYBOARD
-#define UI_STRING_X 75 * EMULATION_SCALE
+#define UI_STRING_X 107 * EMULATION_SCALE
 #define UI_STRING_Y 2
 
 void _render_window()
@@ -173,7 +173,7 @@ void _process_statusbar()
          video_buffer,
          keyboard_surface,
          0,
-         EMULATION_SCREEN_HEIGHT - statusbar_height,
+         retro_video.screen_render_height - statusbar_height,
          IMG_KEYBOARD_WIDTH * statusbar_height
    );
 
@@ -208,7 +208,9 @@ void retro_ui_prepare(void)
    // convert KeyboardOnScreen to current video/color-depth
    convert_image(
       keyboard_surface,
-      (const unsigned int *) ui_keyboard_bg,
+      retro_video.screen_crop
+         ? (const unsigned int *) ui_keyboard_bg_crop
+         : (const unsigned int *) ui_keyboard_bg,
       IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
    );
 
@@ -253,7 +255,9 @@ void retro_ui_update_text()
 
    draw_rect(
       keyboard_surface,
-      UI_STRING_X,
+      retro_video.screen_crop
+         ? 107 * EMULATION_SCALE
+         : 75 * EMULATION_SCALE,
       UI_STRING_Y,
       80 * EMULATION_SCALE,
       8,
@@ -261,7 +265,9 @@ void retro_ui_update_text()
       );
    draw_text(
       keyboard_surface,
-      UI_STRING_X,
+      retro_video.screen_crop
+         ? 107 * EMULATION_SCALE
+         : 75 * EMULATION_SCALE,
       UI_STRING_Y,
       ui_string,
       retro_video.rgb2color(0x63, 0x63, 0x63)
@@ -276,7 +282,9 @@ void retro_ui_draw_db(void)
 
    draw_rect(
       keyboard_surface,
-      8,
+      retro_video.screen_crop
+         ? 34 * EMULATION_SCALE
+         : 4 * EMULATION_SCALE,
       UI_STRING_Y + 4,
       5 * EMULATION_SCALE,
       3,
@@ -338,7 +346,9 @@ void retro_ui_set_led(bool value)
 
    draw_rect(
       keyboard_surface,
-      EMULATION_SCREEN_WIDTH - (15 * EMULATION_SCALE),
+      retro_video.screen_crop
+         ? EMULATION_SCREEN_WIDTH - (41 * EMULATION_SCALE)
+         : EMULATION_SCREEN_WIDTH - (15 * EMULATION_SCALE),
       4,
       7 * EMULATION_SCALE,
       3,
@@ -365,7 +375,7 @@ void retro_ui_process()
          video_buffer,
          keyboard_surface,
          0,
-         EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT,
+         retro_video.screen_render_height - IMG_KEYBOARD_HEIGHT,
          IMG_KEYBOARD_WIDTH * IMG_KEYBOARD_HEIGHT
       );
    }

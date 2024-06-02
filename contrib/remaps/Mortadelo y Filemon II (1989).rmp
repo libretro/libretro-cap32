@@ -1,0 +1,17 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "48"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Attack"
+input_player1_key_x = "49"
+input_player1_key_x_name = "1"
+input_player1_key_y = "50"
+input_player1_key_y_name = "2"
+
+
+entry_hash_1 = 0x0eeae24a # (S) (1989) [Original]

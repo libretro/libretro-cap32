@@ -1,0 +1,8 @@
+input_player1_key_x = "32"
+input_player1_key_x_name = "Push a classmate"
+input_player1_key_b = "13"
+input_player1_key_b_name = "Catch multiple hearts"
+
+input_player1_key_start = "115"
+
+entry_hash_1 = 0x48684cf4 # (UK) (1986)

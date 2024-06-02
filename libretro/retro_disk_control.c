@@ -37,7 +37,9 @@
  *
  ****************************************************************************************/
 
+#include "slots.h"
 #include "libretro-core.h"
+#include "retro_events.h"
 #include "retro_disk_control.h"
 #include "retro_strings.h"
 #include "retro_utils.h"
@@ -51,7 +53,252 @@
 #define COMMENT "#"
 #define M3U_SPECIAL_COMMAND "#COMMAND:"
 
+extern int attach_disk(char *arv, int drive);
+extern int detach_disk(int drive);
+
 extern retro_log_printf_t log_cb;
+extern char savdif_name[RETRO_PATH_MAX+16];
+extern char loader_buffer[LOADER_MAX_SIZE];
+extern char *retro_save_directory;
+
+dc_storage* dc;
+
+//*****************************************************************************
+//*****************************************************************************
+// Disk control
+
+int get_image_unit()
+{
+   int unit = dc->unit;
+   if (dc->index < dc->count)
+   {
+      if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_TAPE)
+         dc->unit = DC_IMAGE_TYPE_TAPE;
+      else if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_FLOPPY)
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+      else
+         dc->unit = DC_IMAGE_TYPE_FLOPPY;
+   }
+   else
+      unit = DC_IMAGE_TYPE_FLOPPY;
+
+   return unit;
+}
+
+int retro_attach_disk(char * filename)
+{
+   snprintf(savdif_name, RETRO_PATH_MAX+16, "%s%s%s." EXT_DIFF_DSK, retro_save_directory, PATH_DEFAULT_SLASH(), path_basename(filename));
+   return attach_disk(filename, 0);
+}
+
+void retro_insert_image()
+{
+   if(dc->unit == DC_IMAGE_TYPE_TAPE)
+   {
+      int error = tape_insert ((char *) dc->files[dc->index]);
+      if (!error)
+      {
+         strcpy(loader_buffer, LOADER_TAPE_STR);
+         ev_autorun_prepare(loader_buffer);
+         LOGI("[retro_insert_image] Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
+         retro_computer_cfg.slot = SLOT_TAP;
+      }
+      else
+      {
+         LOGI("[retro_insert_image] Tape Error (%d): %s\n", error, dc->files[dc->index]);
+      }
+   }
+   else if(dc->unit == DC_IMAGE_TYPE_FLOPPY)
+   {
+      int error = retro_attach_disk((char *)dc->files[dc->index]);
+      if (error)
+      {
+         retro_message("Error Loading DSK...");
+         LOGI("[retro_insert_image] Disk (%d) Error: %s\n", dc->index+1, dc->files[dc->index]);
+         return;
+      }
+      LOGI("[retro_insert_image] Disk (%d) Inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
+      retro_computer_cfg.slot = SLOT_DSK;
+   }
+   else
+   {
+      LOGE("[retro_insert_image] Unsupported image-type: %u\n", dc->unit);
+   }
+}
+
+bool retro_set_eject_state(bool ejected)
+{
+   if (dc)
+   {
+      int unit = get_image_unit();
+
+      if (dc->eject_state == ejected)
+         return true;
+
+      if (ejected && dc->index <= dc->count && dc->files[dc->index] != NULL)
+      {
+         if (unit == DC_IMAGE_TYPE_TAPE)
+         {
+            tape_eject();
+            LOGI("[retro_set_eject_state] Tape (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+         }
+         else
+         {
+            detach_disk(0);
+            LOGI("[retro_set_eject_state] Disk (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
+         }
+      }
+      else if (!ejected && dc->index < dc->count && dc->files[dc->index] != NULL)
+      {
+         retro_insert_image();
+      }
+
+      dc->eject_state = ejected;
+      return true;
+   }
+
+   return false;
+}
+
+/* Gets current eject state. The initial state is 'not ejected'. */
+bool retro_get_eject_state(void)
+{
+   if (dc)
+      return dc->eject_state;
+
+   return true;
+}
+
+unsigned retro_get_image_index(void)
+{
+   if (dc)
+      return dc->index;
+
+   return 0;
+}
+
+/* Sets image index. Can only be called when disk is ejected.
+ * The implementation supports setting "no disk" by using an
+ * index >= get_num_images().
+ */
+bool retro_set_image_index(unsigned index)
+{
+   // Insert image
+   if (dc)
+   {
+      if (index == dc->index)
+         return true;
+
+      if (dc->replace)
+      {
+         dc->replace = false;
+         index = 0;
+      }
+
+      if (index < dc->count && dc->files[index])
+      {
+         dc->index = index;
+         int unit = get_image_unit();
+         LOGI("[retro_set_image_index] Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
+         return true;
+      }
+   }
+
+   return false;
+}
+
+unsigned retro_get_num_images(void)
+{
+   if (dc)
+      return dc->count;
+
+   return 0;
+}
+
+bool retro_replace_image_index(unsigned index, const struct retro_game_info *info)
+{
+if (dc)
+    {
+        if (info != NULL)
+        {
+            dc_replace_file(dc, index, info->path);
+        }
+        else
+        {
+            dc_remove_file(dc, index);
+        }
+        return true;
+    }
+
+    return false;	
+    
+}
+
+/* Adds a new valid index (get_num_images()) to the internal disk list.
+ * This will increment subsequent return values from get_num_images() by 1.
+ * This image index cannot be used until a disk image has been set
+ * with replace_image_index. */
+bool retro_add_image_index(void)
+{
+   if (dc)
+   {
+      if (dc->count <= DC_MAX_SIZE)
+      {
+         dc->files[dc->count] = NULL;
+         dc->names[dc->count] = NULL;
+         dc->types[dc->count] = DC_IMAGE_TYPE_NONE;
+         dc->count++;
+         return true;
+      }
+   }
+
+   return false;
+}
+
+bool retro_get_image_path(unsigned index, char *path, size_t len)
+{
+   if (len < 1)
+      return false;
+
+   if (dc)
+   {
+      if (index < dc->count)
+      {
+         if (!string_is_empty(dc->files[index]))
+         {
+            strlcpy(path, dc->files[index], len);
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+bool retro_get_image_label(unsigned index, char *label, size_t len)
+{
+   if (len < 1)
+      return false;
+
+   if (dc)
+   {
+      if (index < dc->count)
+      {
+         if (!string_is_empty(dc->names[index]))
+         {
+            strlcpy(label, dc->names[index], len);
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+
+//*****************************************************************************
+//*****************************************************************************
+// Disk control internal functions
 
 // Return the directory name of 'filename' without trailing separator.
 // Allocates returned string.
@@ -119,7 +366,6 @@ void dc_reset(dc_storage* dc)
       dc->files[i] = NULL;
       free(dc->names[i]);
       dc->names[i] = NULL;
-
       dc->types[i] = DC_IMAGE_TYPE_NONE;
    }
 
@@ -407,7 +653,6 @@ void dc_free(dc_storage* dc)
    dc_reset(dc);
    free(dc);
    dc = NULL;
-   return;
 }
 
 enum dc_image_type dc_get_image_type(const char* filename)

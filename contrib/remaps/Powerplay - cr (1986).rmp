@@ -1,0 +1,13 @@
+
+input_player1_key_b = "13"
+input_player1_key_b_name = "Return"
+
+input_player1_key_x = "27"
+input_player1_key_x_name = "Esc"
+input_player1_key_y = "32"
+input_player1_key_y_name = "Space"
+
+input_player1_key_start = "108"
+input_player1_key_select = "50"
+
+entry_hash_1 = 0xf49d6612 # (UK) (1986)

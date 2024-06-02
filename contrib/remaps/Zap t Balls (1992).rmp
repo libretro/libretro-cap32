@@ -1,0 +1,11 @@
+input_player1_key_b = "32"
+input_player1_key_x = "120"
+input_player1_key_y = "121"
+
+
+input_player1_key_start = "49"
+
+entry_hash_1 = 0xe434e0db # (UK) (128K) (2 faces) (1992) (Serial 0058 - Qwerty) (CPM) [Original]
+entry_hash_2 = 0x8559909a # (UK) (128K) (2 faces) (1992) (Serial 0999 - Azerty) (CPM) [Original]
+
+entry_command = "|CPM"

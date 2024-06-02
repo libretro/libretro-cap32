@@ -1,0 +1,8 @@
+
+input_player1_key_b = "32"
+input_player1_key_b_name = "Jump"
+
+input_player1_key_start = "50"
+
+entry_hash_1 = 0x77c7c536 # (S) (1988) (CPM) [Original]
+entry_hash_2 = 0x1e737e6c # (UK) (1988)

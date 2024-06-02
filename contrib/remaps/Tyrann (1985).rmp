@@ -1,0 +1,22 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_right = "275"
+input_player1_key_left = "276"
+
+input_player1_key_a = "308"
+input_player1_key_a_name = "Open Door"
+input_player1_key_b = "99"
+input_player1_key_b_name = "Camp / Rest"
+
+input_player1_key_x = "110"
+input_player1_key_x_name = "No"
+input_player1_key_y = "111"
+input_player1_key_y_name = "Oui / Yes"
+
+input_player1_key_start = "13"
+input_player1_key_select = "32"
+
+entry_hash_1 = 0x1a6f0fff # (F) (2 faces) (1986) [Original]
+
+entry_command = "RUN[quote]TYRANN"

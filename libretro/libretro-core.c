@@ -55,9 +55,10 @@
 #include "dsk/loader.h"
 #include "db/database.h"
 
-char DISKA_NAME[512]="\0";
-char DISKB_NAME[512]="\0";
-char cart_name[512]="\0";
+char diskA_name[RETRO_PATH_MAX]="\0";
+char diskB_name[RETRO_PATH_MAX]="\0";
+char savdif_name[RETRO_PATH_MAX+16]="\0";
+char cart_name[RETRO_PATH_MAX]="\0";
 char loader_buffer[LOADER_MAX_SIZE];
 
 // TIME
@@ -67,7 +68,7 @@ char loader_buffer[LOADER_MAX_SIZE];
 
 // DISK CONTROL
 #include "retro_disk_control.h"
-static dc_storage* dc;
+extern dc_storage* dc;
 
 // LIGHTGUN
 #include "retro_gun.h"
@@ -84,16 +85,13 @@ extern t_button_cfg btnPAD[MAX_PADCFG];
 
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
-extern int attach_disk(char *arv, int drive);
 extern int detach_disk(int drive);
-extern int tape_insert (char *pchFileName);
 extern int cart_start (char *pchFileName);
 extern void enter_gui(void);
 extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
-extern int InitOSGLU(void);
-extern int  UnInitOSGLU(void);
+extern void doCleanUp (void);
 extern void emu_reset(void);
 extern void emu_reconfigure(void);
 extern void change_ram(int val);
@@ -109,6 +107,8 @@ extern void retro_key_up(int key);
 //VIDEO
 uint32_t * video_buffer;
 uint32_t * temp_buffer;
+uint32_t * scaler_buffer;
+static uint32_t *video_ptr, *screen_ptr;
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -142,6 +142,10 @@ const char *retro_content_directory;
 char retro_system_data_directory[512];
 char retro_system_bios_directory[512];
 char retro_content_filepath[512];
+
+// software screen scaler
+void screen_null_scaler(void);
+void screen_software_scaler(void);
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -447,6 +451,10 @@ void retro_set_environment(retro_environment_t cb)
          "Video Advanced > Color Depth; 16bit|24bit",
          #endif
       },
+      {
+         "cap32_scr_crop",
+         "Video Advanced > Crop Screen Borders; disabled|enabled",
+      },
       #if 0
       {
          "cap32_resolution",
@@ -721,6 +729,24 @@ static void update_variables(void)
       }
    }
 
+   var.key = "cap32_scr_crop";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!(emu_status & COMPUTER_READY))
+      {
+         if (strcmp(var.value, "disabled") == 0)
+         {
+            retro_video.screen_crop = false;
+            retro_video.draw_screen = screen_null_scaler;
+         } else {
+            retro_video.screen_crop = true;
+            retro_video.draw_screen = screen_software_scaler;
+         }
+      }
+   }
+
    var.key = "cap32_gfx_colors";
    var.value = NULL;
 
@@ -818,228 +844,6 @@ void retro_reset(void)
 //*****************************************************************************
 //*****************************************************************************
 // Disk control
-
-static int get_image_unit()
-{
-   int unit = dc->unit;
-   if (dc->index < dc->count)
-   {
-      if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_TAPE)
-         dc->unit = DC_IMAGE_TYPE_TAPE;
-      else if (dc_get_image_type(dc->files[dc->index]) == DC_IMAGE_TYPE_FLOPPY)
-         dc->unit = DC_IMAGE_TYPE_FLOPPY;
-      else
-         dc->unit = DC_IMAGE_TYPE_FLOPPY;
-   }
-   else
-      unit = DC_IMAGE_TYPE_FLOPPY;
-
-   return unit;
-}
-
-static void retro_insert_image()
-{
-   if(dc->unit == DC_IMAGE_TYPE_TAPE)
-   {
-      int error = tape_insert ((char *) dc->files[dc->index]);
-      if (!error)
-      {
-         strcpy(loader_buffer, LOADER_TAPE_STR);
-         ev_autorun_prepare(loader_buffer);
-         LOGI("Tape (%d) inserted: %s\n", dc->index+1, dc->names[dc->index]);
-         retro_computer_cfg.slot = SLOT_TAP;
-      }
-      else
-      {
-         LOGI("Tape Error (%d): %s\n", error, dc->files[dc->index]);
-      }
-   }
-   else if(dc->unit == DC_IMAGE_TYPE_FLOPPY)
-   {
-      int error = attach_disk((char *)dc->files[dc->index],0);
-      if (error)
-      {
-         retro_message("Error Loading DSK...");
-         LOGI("Disk (%d) Error : %s\n", dc->index+1, dc->files[dc->index]);
-         return;
-      }
-      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-      retro_computer_cfg.slot = SLOT_DSK;
-   }
-   else
-   {
-      LOGE("unsupported image-type : %u\n", dc->unit);
-   }
-}
-
-static bool retro_set_eject_state(bool ejected)
-{
-   if (dc)
-   {
-      int unit = get_image_unit();
-
-      if (dc->eject_state == ejected)
-         return true;
-      
-      if (ejected && dc->index <= dc->count && dc->files[dc->index] != NULL)
-      {
-         if (unit == DC_IMAGE_TYPE_TAPE)
-         {
-            tape_eject();
-            LOGI("Tape (%d/%d) ejected %s\n", dc->index+1, dc->count, dc->names[dc->index]);
-         }
-         else
-         {
-            detach_disk(0);
-            LOGI("Disk (%d/%d) ejected: %s\n", dc->index+1, dc->count, dc->names[dc->index]);
-         }
-      }
-      else if (!ejected && dc->index < dc->count && dc->files[dc->index] != NULL)
-      {
-         retro_insert_image();
-      }
-
-      dc->eject_state = ejected;
-      return true;
-   }
-
-   return false;
-}
-
-/* Gets current eject state. The initial state is 'not ejected'. */
-static bool retro_get_eject_state(void)
-{
-   if (dc)
-      return dc->eject_state;
-
-   return true;
-}
-
-static unsigned retro_get_image_index(void)
-{
-   if (dc)
-      return dc->index;
-
-   return 0;
-}
-
-/* Sets image index. Can only be called when disk is ejected.
- * The implementation supports setting "no disk" by using an
- * index >= get_num_images().
- */
-static bool retro_set_image_index(unsigned index)
-{
-   // Insert image
-   if (dc)
-   {
-      if (index == dc->index)
-         return true;
-
-      if (dc->replace)
-      {
-         dc->replace = false;
-         index = 0;
-      }
-
-      if (index < dc->count && dc->files[index])
-      {
-         dc->index = index;
-         int unit = get_image_unit();
-         LOGI("Unit (%d) image (%d/%d) inserted: %s\n", dc->index+1, unit,  dc->count, dc->files[dc->index]);
-         return true;
-      }
-   }
-
-   return false;
-}
-
-static unsigned retro_get_num_images(void)
-{
-   if (dc)
-      return dc->count;
-
-   return 0;
-}
-
-static bool retro_replace_image_index(unsigned index, const struct retro_game_info *info)
-{
-if (dc)
-    {
-        if (info != NULL)
-        {
-            dc_replace_file(dc, index, info->path);
-        }
-        else
-        {
-            dc_remove_file(dc, index);
-        }
-        return true;
-    }
-
-    return false;	
-    
-}
-
-/* Adds a new valid index (get_num_images()) to the internal disk list.
- * This will increment subsequent return values from get_num_images() by 1.
- * This image index cannot be used until a disk image has been set
- * with replace_image_index. */
-static bool retro_add_image_index(void)
-{
-   if (dc)
-   {
-      if (dc->count <= DC_MAX_SIZE)
-      {
-         dc->files[dc->count] = NULL;
-         dc->names[dc->count] = NULL;
-         dc->types[dc->count] = DC_IMAGE_TYPE_NONE;
-         dc->count++;
-         return true;
-      }
-   }
-
-   return false;
-}
-
-static bool retro_get_image_path(unsigned index, char *path, size_t len)
-{
-   if (len < 1)
-      return false;
-
-   if (dc)
-   {
-      if (index < dc->count)
-      {
-         if (!string_is_empty(dc->files[index]))
-         {
-            strlcpy(path, dc->files[index], len);
-            return true;
-         }
-      }
-   }
-
-   return false;
-}
-
-static bool retro_get_image_label(unsigned index, char *label, size_t len)
-{
-   if (len < 1)
-      return false;
-
-   if (dc)
-   {
-      if (index < dc->count)
-      {
-         if (!string_is_empty(dc->names[index]))
-         {
-            strlcpy(label, dc->names[index], len);
-            return true;
-         }
-      }
-   }
-
-   return false;
-}
 
 static struct retro_disk_control_callback disk_interface = {
    retro_set_eject_state,
@@ -1148,7 +952,7 @@ void computer_autoload()
 {
    if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
    {
-      LOGI("[DB] game remap applied.\n");
+      LOGI("[computer_autoload][DB] game remap applied.\n");
       memcpy(btnPAD[0].buttons, game_configuration.btn_config.buttons, sizeof(t_button_cfg));
    }
 
@@ -1163,7 +967,7 @@ void computer_autoload()
    }
 
    strcat(loader_buffer, "\n");
-   LOGI("[core] DSK autorun: %s", loader_buffer);
+   LOGI("[computer_autoload] DSK autorun: %s", loader_buffer);
    if (game_configuration.is_cpm)
    {
       cpm_boot(loader_buffer);
@@ -1181,7 +985,7 @@ void computer_reset()
    if (!retro_computer_cfg.autorun)
       return;
 
-   LOGI("[core::reset] DSK autorun: \"%s\"\n", loader_buffer);
+   LOGI("[computer_reset] DSK autorun: \"%s\"\n", loader_buffer);
    ev_autorun_prepare(loader_buffer);
 }
 
@@ -1194,7 +998,7 @@ void computer_load_bios() {
    {
       int result = cart_start(retro_content_filepath);
       if(result != 0) {
-         retro_message("Error Loading Cart...");
+         retro_message("[computer_load_bios] Error Loading Cart...");
       }
    }
 }
@@ -1218,10 +1022,10 @@ void computer_hash_file(char* filepath)
    else
    {
       // warn user is a unsupported ROM
-      retro_message("ROM marked as NOT WORKING.");
+      retro_message("[computer_hash_file] ROM marked as NOT WORKING.");
    }
 
-   LOGI("[DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
+   LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
       hash,
       game_configuration.has_btn,
       game_configuration.has_command,
@@ -1236,27 +1040,27 @@ void computer_load_file() {
    check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
    // If it's a snapshot
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3))
+   if(retro_computer_cfg.slot == SLOT_SNA)
    {
       int error = snapshot_load (retro_content_filepath);
       if (!error) {
-         LOGI("SNA loaded: %s\n", (char *)retro_content_filepath);
-         retro_computer_cfg.slot = SLOT_SNA;
+         LOGI("[computer_load_file] SNA loaded: %s\n", (char *)retro_content_filepath);
+         
       } else {
-         LOGE("SNA Error (%d): %s", error, (char *)retro_content_filepath);
+         LOGE("[computer_load_file] SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
       return;
    }
 
    // If it's a m3u file
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_M3U, 3))
+   if(retro_computer_cfg.slot == SLOT_M3U)
    {
       // Parse the m3u file
       dc_parse_m3u(dc, retro_content_filepath);
 
       // Some debugging
-      LOGI("m3u file parsed, %d file(s) found\n", dc->count);
+      LOGI("[computer_load_file] m3u file parsed, %d file(s) found\n", dc->count);
       for(int i = 0; i < dc->count; i++)
       {
          LOGI("file %d: %s\n", i+1, dc->files[i]);
@@ -1272,7 +1076,7 @@ void computer_load_file() {
       if(dc->command)
       {
          // Execute the command
-         LOGI("Executing the specified command: %s\n", dc->command);
+         LOGI("[computer_load_file] Executing the specified command: %s\n", dc->command);
          snprintf(loader_buffer, LOADER_MAX_SIZE - 2, "%s\n", dc->command);
          ev_autorun_prepare(loader_buffer);
       }
@@ -1284,7 +1088,7 @@ void computer_load_file() {
    }
 
    // If it's a disk
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_DSK, 3))
+   if(retro_computer_cfg.slot == SLOT_DSK)
    {
       // Add the file to disk control context
       // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
@@ -1295,29 +1099,27 @@ void computer_load_file() {
       dc->eject_state = false;
       computer_hash_file((char *)dc->files[dc->index]);
 
-      LOGI("Disk (%d) inserted into drive A : %s\n", dc->index+1, dc->files[dc->index]);
-      int error = attach_disk((char *)dc->files[dc->index],0);
+      LOGI("[computer_load_file] Disk (%d) inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
+      int error = retro_attach_disk((char *)dc->files[dc->index]);
       if (error) {
-         retro_message("Error Loading DSK...");
-         LOGE("DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+         retro_message("[computer_load_file] Error Loading DSK...");
+         LOGE("[computer_load_file] DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
       } else {
          computer_autoload();
-         retro_computer_cfg.slot = SLOT_DSK;
       }
    }
 
    // If it's a tape
-   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CDT, 3))
+   if(retro_computer_cfg.slot == SLOT_TAP)
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
          computer_hash_file((char *)retro_content_filepath);
          strcpy(loader_buffer, LOADER_TAPE_STR);
          ev_autorun_prepare(loader_buffer);
-         LOGI("Tape inserted: %s\n", (char *)retro_content_filepath);
-         retro_computer_cfg.slot = SLOT_TAP;
+         LOGI("[computer_load_file] Tape inserted: %s\n", (char *)retro_content_filepath);
       } else {
-         LOGE("Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
+         LOGE("[computer_load_file] Tape Error (%d): %s\n", error, (char *)retro_content_filepath);
       }
    }
 
@@ -1426,9 +1228,11 @@ void retro_init(void)
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
+   scaler_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
+   memset(scaler_buffer, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1436,15 +1240,22 @@ void retro_init(void)
 
    if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
       LOGI("AUDIO FORMAT is not supported.\n");
+
+   // Some third-party retroarch UI do not call retro_set_controller_port_device
+   // by default, setup gun as disabled as part of emulator startup.
+   lightgun_prepare(LIGHTGUN_TYPE_NONE);
 }
 
 void retro_deinit(void)
 {
+   // disk diff before clean up
+   detach_disk(0);
+
    free_retro_snd();
    Emu_uninit();
    retro_ui_free();
 
-   UnInitOSGLU();
+   doCleanUp();
 
    // Clean the m3u storage
    if(dc)
@@ -1452,6 +1263,7 @@ void retro_deinit(void)
 
    retro_free(video_buffer);
    retro_free(temp_buffer);
+   retro_free(scaler_buffer);
 
    LOGI("Retro DeInit\n");
 }
@@ -1461,8 +1273,6 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-// FIXME: why evercade do not call retro_set_controller_port_device?
-//       atm, just log when this function is called with more detail
 void retro_set_controller_port_device( unsigned port, unsigned device )
 {
    if ( port > 1 )
@@ -1477,7 +1287,7 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
 
       default:
          // please do not deinit the lightgun config
-         if (!lightgun_cfg.gunconfigured)
+         if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
          {
             lightgun_prepare(LIGHTGUN_TYPE_NONE);
          }
@@ -1503,14 +1313,18 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width = CPC_SCREEN_WIDTH;
-   info->geometry.base_height = CPC_SCREEN_HEIGHT;
+   info->geometry.base_width = retro_video.screen_crop
+      ? CPC_SCREEN_WIDTH - 64
+      : CPC_SCREEN_WIDTH;
+   info->geometry.base_height = retro_video.screen_render_height;
    info->geometry.max_width = TEX_MAX_WIDTH;
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
 
    info->timing.fps = CPC_TIMING;
    info->timing.sample_rate = 44100.0;
+
+   LOGI("[retro_get_system_av_info] %ux%u snd: %i\n", retro_video.screen_render_width, retro_video.screen_render_height, (int) info->timing.sample_rate);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -1552,6 +1366,34 @@ void retro_PollEvent()
    process_events();
 }
 
+void screen_null_scaler(void)
+{
+   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
+void screen_software_scaler(void)
+{
+   int width;
+   int x_max = retro_video.bps - ((EMULATION_CROP * 2) >> retro_video.raw_density_byte);
+   video_ptr = video_buffer;
+   screen_ptr = scaler_buffer;
+
+   for(int y = 0; y < retro_video.screen_render_height; y++)
+   {
+      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
+      width = x_max;
+
+      do
+      {
+         *(screen_ptr++) = *(video_ptr++);
+      } while(--width);
+
+      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
+   }
+
+   video_cb(scaler_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
 void retro_run(void)
 {
    bool updated = false;
@@ -1559,7 +1401,7 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
    {
       update_variables();
-      retro_message("options updated, changes applied!");
+      retro_message("[retro_run] options updated, changes applied!");
    }
 
    retro_loop();
@@ -1568,7 +1410,7 @@ void retro_run(void)
    retro_ui_process();
    lightgun_cfg.gun_draw();
 
-   video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+   retro_video.draw_screen();
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -1578,25 +1420,39 @@ bool retro_load_game(const struct retro_game_info *game)
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
-      LOGI("PIXEL FORMAT is not supported (%u).\n", fmt);
+      LOGI("[retro_load_game] PIXEL FORMAT is not supported (%u).\n", fmt);
       return false;
    }
 
-   LOGI("PIXEL FORMAT selected (%u).\n", fmt);
+   LOGI("[retro_load_game] PIXEL FORMAT selected (%u).\n", fmt);
 
-   if (game){
+   if (game) {
       strcpy(retro_content_filepath, (const char *) game->path);
    } else {
       retro_content_filepath[0]='\0';
    }
 
    update_variables();
+
+   // get file type
+   if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_SNA, 3)) {
+      retro_computer_cfg.slot = SLOT_SNA;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_M3U, 3)) {
+      retro_computer_cfg.slot = SLOT_M3U;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_DSK, 3)) {
+      retro_computer_cfg.slot = SLOT_DSK;
+   } else if(file_check_extension(retro_content_filepath, sizeof(retro_content_filepath), EXT_FILE_CDT, 3)) {
+      retro_computer_cfg.slot = SLOT_TAP;
+   } else {
+      retro_computer_cfg.slot = SLOT_UNK;
+   }
+   LOGI("[retro_load_game] detected file type, using slot [%i]\n", retro_computer_cfg.slot);
+
    computer_load_bios();
    computer_load_file();
    retro_ui_draw_db();
 
    return true;
-
 }
 
 void retro_unload_game(void){}
@@ -1625,7 +1481,7 @@ bool retro_serialize(void *data, size_t size)
    if(!error)
       return true;
 
-   LOGI("SNA-serialized: error %d\n", error);
+   LOGI("[retro_serialize] SNA-serialized: error %d\n", error);
    return false;
 }
 

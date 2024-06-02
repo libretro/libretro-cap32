@@ -1,0 +1,18 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Fire"
+
+input_player1_key_x = "50"
+input_player1_key_x_name = "Press 2"
+input_player1_key_y = "49"
+input_player1_key_y_name = "Press 1"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xca6ffd7a # (UK) (face a - lvl 1) (1988) [Original] 
+entry_hash_2 = 0xae64ea1d # (UK) (face b - lvl 2,3) (1988) [Original] 

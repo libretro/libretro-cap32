@@ -48,10 +48,20 @@ Choose **AMSTRAD KEYBOARD** in _Quick Menu > Controls_ and **User 1/2 config dif
 Caprice brings some default keymaps confings, these configs are detailed at libretro docs: https://docs.libretro.com/library/caprice32/
 
 ## Features not covered in docs
+ * Swap disk using [Combo Button](https://docs.libretro.com/library/caprice32/#combo-list) + L / R.
+
+If you are using a game that has multiple disks loaded using an M3U for example. You can switch between the loaded discs simply by pressing the **combo button** and the **L** button *(to switch to the previous disc)* or the **R** button *(to switch to the next disc)*.
 
  * New Model: [cap32_model] (6128 | 464 | 664 | 6128+)
 
 Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.0 games and DSK
+
+ * Crop Screen Borders: [cap32_scr_crop] (disabled | enabled)
+
+For small screens you can now enable software screen crop to remove most of the on-screen border.
+
+![imagen](https://github.com/libretro/libretro-cap32/assets/560310/fcb56297-9957-441b-ad92-5750ce67eed6)
+
 
 ### New filename flags (case insensitive)
 

@@ -1,0 +1,8 @@
+
+input_player1_key_y = "97"
+
+input_player1_key_start = "13"
+input_player1_key_select = "303"
+
+entry_hash_1 = 0xba91af38 # (UK) (2 faces) (1986) (v2) [Original]
+entry_hash_2 = 0x4794cfb0

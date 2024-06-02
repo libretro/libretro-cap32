@@ -1,0 +1,18 @@
+input_player1_key_up = "111"
+input_player1_key_down = "107"
+input_player1_key_left = "122"
+input_player1_key_right = "120"
+
+input_player1_key_a = "112"
+input_player1_key_a_name = "Fire"
+
+input_player1_key_x = "101"
+input_player1_key_x_name = "Menu: Expert"
+input_player1_key_y = "97"
+input_player1_key_y_name = "Menu: Arcade"
+
+input_player1_key_start = "115"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0xb699edb3 # (UK) (1986)

@@ -1,0 +1,14 @@
+# CURSORS
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_a = "273"
+input_player1_key_a_name = "Long Jump"
+input_player1_key_b = "274"
+input_player1_key_b_name = "Short Jump"
+
+input_player1_key_start = "115"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x73d96734 # (UK) (2006) [Original]

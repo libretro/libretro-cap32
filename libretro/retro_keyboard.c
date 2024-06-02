@@ -60,7 +60,7 @@ extern uint32_t * keyboard_surface;
 #define COMPOSE_PRESS_COLOR retro_video.rgb2color(0xea, 0, 0x22)
 
 #define BASE_X 2
-#define BASE_Y (12 + ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ))
+#define BASE_Y (12 + ( retro_video.screen_render_height - IMG_KEYBOARD_HEIGHT ))
 #define KEY_HEIGHT 16
 #define KEY_WIDTH 18
 #define KEY_GAP 3
@@ -170,7 +170,8 @@ static base_keyboard_t keyboard_positions [KEYBOARD_MAX_KEYS] = {
 
 void keyboard_init()
 {
-   int x = BASE_X * EMULATION_SCALE, y = BASE_Y;
+   int x = BASE_X * EMULATION_SCALE;
+   int y = BASE_Y;
    for (int key = 0; key < KEYBOARD_MAX_KEYS; key++)
    {
       if( keyboard_positions[key].value == CPC_KEY_NULL)
@@ -237,7 +238,7 @@ static void _draw_compose_led (unsigned char key, bool clicked)
       draw_rect(
          keyboard_surface,
          kbd_data[keys].left + (2 * EMULATION_SCALE),
-         kbd_data[keys].top - ( EMULATION_SCREEN_HEIGHT - IMG_KEYBOARD_HEIGHT ) + 3,
+         kbd_data[keys].top - ( retro_video.screen_render_height - IMG_KEYBOARD_HEIGHT ) + 3,
          KEYBOARD_LED_SIZE * EMULATION_SCALE,
          KEYBOARD_LED_SIZE,
          clicked ? COMPOSE_PRESS_COLOR : COMPOSE_CLEAN_COLOR

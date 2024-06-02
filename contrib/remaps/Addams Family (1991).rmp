@@ -1,0 +1,5 @@
+input_player1_key_start = "50"
+input_player1_key_y = "52"
+input_player1_key_y_name = "Menu: Difficulty"
+
+entry_hash_1 = 0x4c117ec5 # (UK) (128K) (1992) [Original]

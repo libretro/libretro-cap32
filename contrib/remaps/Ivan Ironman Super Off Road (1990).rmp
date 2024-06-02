@@ -1,0 +1,6 @@
+input_player1_key_x = "52"
+input_player1_key_x_name = "Press 4"
+input_player1_key_y = "49"
+input_player1_key_y_name = "Press 1"
+
+entry_hash_1 = 0xc3ce5121 # (UK) (1990) (UK retail version) [Original]

@@ -1,0 +1,18 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "32"
+input_player1_key_a_name = "Attack"
+input_player1_key_b = "53"
+input_player1_key_b_name = "Captain"
+input_player1_key_x = "54"
+input_player1_key_x_name = "Crispin"
+input_player1_key_y = "55"
+input_player1_key_y_name = "Goliat"
+
+entry_hash_1 = 0x0823ac51 # (S) (1989) (CPM) [Original]

@@ -1,0 +1,8 @@
+
+input_player1_key_a = "49"
+input_player1_key_b = "122"
+input_player1_key_x = "96"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0xcbdafd77 # (UK) (1988) [Original]

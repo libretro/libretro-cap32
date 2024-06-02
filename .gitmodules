@@ -1,6 +1,0 @@
-[submodule "cmocka"]
-	path = cmocka
-	url = https://git.cryptomilk.org/projects/cmocka.git
-	branch = stable-1.1
-	shallow = true
-	

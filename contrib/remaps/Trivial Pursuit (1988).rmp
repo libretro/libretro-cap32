@@ -1,0 +1,6 @@
+
+entry_hash_1 = 0xc46c46de # A New Beginning (UK) (2 faces) (1988) (CPM) [Original]
+entry_hash_2 = 0x23c7634e # Nouvelle Generation (F) (2 faces) (1988) (CPM) [Original]
+entry_hash_3 = 0x668247d3 # La Revolution Francaise (F) (2 faces) (1989) (CPM) [Original]
+
+entry_command = "|CPM"

@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <stdint.h>
-#include "../cmocka/include/cmocka.h"
+#include "cmocka.h"
 #include "libretro-common/include/utils/md5.h"
 
 #include "cap32/slots.h"

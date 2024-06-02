@@ -1,0 +1,14 @@
+
+input_player1_key_x = "106"
+input_player1_key_x_name = "Joystick Select"
+
+
+input_player1_key_start = "49"
+input_player1_key_select = "106"
+
+entry_hash_1 = 0x7724c437 # (UK,F,G) (1987) [Original]
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]BLOOD"

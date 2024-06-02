@@ -182,7 +182,8 @@ def file_get_entry(l_File):
         command = command.upper() \
             .replace('[ENTER]', '\\n') \
             .replace('[QUOTE]', '\\"') \
-            .replace('[WAIT]', '~')
+            .replace('[WAIT]', '~') \
+            .replace('[END]', '`')
         if not command in commands:
             commands.append(command)
         command = commands.index(command)

@@ -40,6 +40,10 @@
 #include "video.h"
 #include "software.h"
 #include "assets/assets.h"
+#include "cap32.h"
+#include "crtc.h"
+
+extern t_VDU VDU;
 
 /**
  * video_setup:
@@ -85,4 +89,15 @@ void video_setup(retro_video_depth_t video_depth)
     retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
     retro_video.char_size = (FNT_CHAR_WIDTH >> retro_video.raw_density_byte) * EMULATION_SCALE;
     retro_video.depth = video_depth;
+
+    // crop screen borders
+    retro_video.vertical_hold = retro_video.screen_crop
+        ? MIN_VHOLD_CROP
+        : MIN_VHOLD;
+    retro_video.screen_render_width = retro_video.screen_crop
+        ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
+        : EMULATION_SCREEN_WIDTH;
+    retro_video.screen_render_height = retro_video.screen_crop
+        ? CPC_SCREEN_HEIGHT - 32
+        : CPC_SCREEN_HEIGHT;
 }
