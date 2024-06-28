@@ -290,6 +290,7 @@ else ifeq ($(platform), wiiu)
        CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
        AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
        COMMONFLAGS += -DGEKKO -DWIIU -DHW_RVL -mcpu=750 -meabi -mhard-float
+	   COMMONFLAGS += -ffunction-sections -fdata-sections -D__wiiu__ -D__wut__
        STATIC_LINKING = 1
        PLATFORM_DEFINES += $(COMMONFLAGS) -Iutils/zlib
        HAVE_COMPAT = 1
