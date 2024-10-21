@@ -174,6 +174,7 @@ else
 	MINVERSION = -miphoneos-version-min=5.0
 endif
 	PLATFORM_DEFINES := $(MINVERSION)
+	LDFLAGS += $(MINVERSION)
 
 # tvOS
 else ifeq ($(platform), tvos-arm64)
@@ -188,6 +189,10 @@ else ifeq ($(platform), tvos-arm64)
 	CC    = cc -arch arm64 -isysroot $(IOSSDK)
 	CC_AS = perl ./tools/gas-preprocessor.pl $(CC)
 	CXX   = c++ -arch arm64 -isysroot $(IOSSDK)
+
+	MINVERSION = -mappletvos-version-min=11.0
+	PLATFORM_DEFINES := $(MINVERSION)
+	LDFLAGS += $(MINVERSION)
 
 # Theos
 else ifeq ($(platform), theos_ios)
