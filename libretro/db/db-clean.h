@@ -240,6 +240,7 @@ uint32_t dbclean[] = {
    0xf3f06148, // Alien Highway - Encounter 2 (1986)(Vortex Software).dsk
    0xe8b02164, // Amsoccer (1986)(Amsoft)[tape].dsk
    0x394bbc01, // Abracadabra et les Voleurs de Temps (1988)(Carraz Editions)(fr).dsk
+   0x854bc73e, // Assault Tribute 2600 (2024)(PD)(M5)[cr].dsk
    0x392fbb50, // Asterix En La India (1988)(Coktel Vision)(es)(Side A).dsk
    0x9c7a44e8, // Asterix En La India (1988)(Coktel Vision)(es)(Side B).dsk
    0x219d1cc5, // Arkanoid II - Revenge of Doh (1988)(Imagine Software).dsk
@@ -405,6 +406,7 @@ uint32_t dbclean[] = {
    0xd10b4b49, // Bridge It (1984)(Amsoft)[cr].dsk
    0x48edfc14, // Bride Of Frankenstein (1987)(Ariolasoft)[tape].dsk
    0xf0dd6d74, // Blood Brothers (1988)(Gremlin Graphics Software)(v2).dsk
+   0x0cbfd92f, // Builderland (1991)(Loriciels)[f].dsk
    0x424afa2f, // BIAT (1988)(Microfutur)(fr)(Side B)[b].dsk
    0xcfccf0cf, // BIAT (1988)(Microfutur)(fr)(Side A)[b].dsk
    0xfea7e2a7, // Batman The Movie (1989)(Ocean Software).dsk
@@ -702,6 +704,7 @@ uint32_t dbclean[] = {
    0xcb1fb4a2, // Cubemeleon (1986)(CPC)(fr)(v3)[cr].dsk
    0x84e1c9fe, // Classic Axiens (1988)(Bubble Bus Software).dsk
    0x4a8fb3d4, // Caverns of Mars (1985)(-)[cr].dsk
+   0x6ea26817, // Coloco (2024)(Nape Games)[cr].dsk
    0xa89233ab, // Comando Quatro (1989)(Zigurat Software)(es).dsk
    0x11b9e71d, // Chuckie Egg II (1985)(A&F Software).dsk
    0x32e80769, // Chicago 90 (1989)(Mircroids)(fr).dsk
@@ -861,6 +864,7 @@ uint32_t dbclean[] = {
    0x2c302745, // Dents de sa Mere, La (1986)(Transoft)(fr)[tape].dsk
    0x68f975d7, // Duet - Commando '86 (1987)(Elite Systems)[cr].dsk
    0xd50d3b34, // Deadly Evil (1990)(Players Premier Software)(v2)[cr].dsk
+   0x035e8c94, // Dungeons Of Gomilandia (2024)(Retroworks)[cr].dsk
    0x4ac6467e, // Danger Street (1987)(Chip)(fr).dsk
    0xe9bc89c8, // Desperado 2 (1989)(Topo Soft)(es).dsk
    0x791127ee, // Dracula (1986)(CRL Group).dsk
@@ -886,6 +890,7 @@ uint32_t dbclean[] = {
    0x4d6eb9ba, // Darkman (1991)(Ocean)(Side B).dsk
    0xd60d7d79, // Darkman (1991)(Ocean)(Side A).dsk
    0x8b845864, // Defenders of the Earth (1990)(Enigma Variations)(en-fr).dsk
+   0xd77b1197, // Dark Knight Shadow Of Madness, The (2024)(Mananuk)[cr].dsk
    0x098afd20, // Double Dragon (1988)(Virgin Mastertronic).dsk
    0xfe44dc2a, // Danger Adventurer at Work Two (1991)(WoW Software)[tape].dsk
    0x7ea86998, // Dr. Doom's Revenge (1989)(Empire Software)(M4)(Side B)[codes].dsk
@@ -1022,6 +1027,7 @@ uint32_t dbclean[] = {
    0x81ec6b2e, // Fighting Soccer (1989)(Activision).dsk
    0x0b09c221, // Feud (1987)(Mastertronic)[cr].dsk
    0x17726e14, // Forestland (1986)(Supersoft).dsk
+   0xc8a4ab8e, // Foggy's Quest To Narg And Back Again! (2024)(Amstradiens)[cr].dsk
    0xf8bb19be, // Fres Fighter II Turbo v1.5 (1999)(Bollaware)(PD)(Disk 1 Side B)[cr].dsk
    0x58e3e90c, // Fres Fighter II Turbo v1.5 (1999)(Bollaware)(PD)(Disk 2 Side B)[cr].dsk
    0x56eff60d, // Fres Fighter II Turbo v1.5 (1999)(Bollaware)(PD)(Disk 2 Side A)[cr].dsk
@@ -1105,11 +1111,13 @@ uint32_t dbclean[] = {
    0xc6d8fd83, // Grand Prix Driver (1984)(Amsoft)[tape].dsk
    0x17258623, // Guerrilla War (1988)(Ocean Software).dsk
    0x8960a2c9, // Gauntlet - Deeper Dungeon (1987)(US Gold)(Extension).dsk
+   0x4313001b, // Gommy Medieval Defender (2024)(Retroworks)[cr].dsk
    0x067924d3, // Gary Lineker's Super Skills (1988)(Gremlin Graphics Software).dsk
    0xd4279f25, // Galaxy Force (1989)(Activision).dsk
    0xe3862c26, // Gauntlet (1985)(Micro Power)[cr].dsk
    0x39dbbb77, // Guadalcanal (1987)(Activision).dsk
    0x7a636b5b, // Good Moon (1990)(Micro Mag)[cr].dsk
+   0x932633e9, // Ghostship Delgado (2024)(Tony KINGSMILL)(v1.0)[cr].dsk
    0xde622d6e, // Gutter (1985)(ERE Informatique)[tape].dsk
    0x43d7ece6, // Gunship (1988)(Microprose Software)(fr)(v3)(Side B).dsk
    0x648096f9, // Gunship (1988)(Microprose Software)(Side B).dsk
@@ -1145,6 +1153,7 @@ uint32_t dbclean[] = {
    0xdad8d078, // Grand Prix 500cc (1986)(Microids)(es)[cr].dsk
    0x6e0e3657, // Grand Prix 500cc (1986)(Microids)[cr].dsk
    0x2ed04f45, // Guardians (1991)(Loriciels).dsk
+   0x43e1db69, // Gommy Defensor Medieval (2024)(Retroworks)(es)[cr].dsk
    0x31b561e4, // Get Dexter 2 (1988)(ERE Informatique).dsk
    0x6d45f398, // Galivan (1986)(Ocean).dsk
    0xe7c2bbbb, // Gremlins (1985)(Adventure International)(de)[cr].dsk
@@ -1307,6 +1316,7 @@ uint32_t dbclean[] = {
    0xc48ea9ad, // Hexenkueche II - Cauldron II (1986)(Palace Software)(de).dsk
    0xa20e5157, // Hal (1992)(CPC Infos)(fr)[cr].dsk
    0xc613efa0, // Head over Heels (1987)(Ocean Software).dsk
+   0xd04ca14a, // Heart Of Salamanderland, The (2024)(usebox.net)(v1.03)[cr].dsk
    0xa8d83e1a, // Hardball (1986)(Accolade)(Side B).dsk
    0x357e7b6e, // Hardball (1986)(Accolade)(Side A).dsk
    0x94340e6f, // Hostages - Operation Jupiter (1990)(Infogrames)(v2)(Side B).dsk
@@ -1504,6 +1514,10 @@ uint32_t dbclean[] = {
    0x6ca93012, // Karnov (1988)(Activision)(Side A).dsk
    0x96b53a41, // Klax (1990)(Domark).dsk
    0x81cf1945, // Kick Off (1990)(Anco Software)(M5).dsk
+   0x4cb2d727, // Key, The (2024)(Pakete Soft)(es).dsk
+   0xa4f3c3ba, // Key, The (2024)(Pakete Soft)(it).dsk
+   0x875a2abc, // Key, The (2024)(Pakete Soft)(fr).dsk
+   0x60e4cbdd, // Key, The (2024)(Pakete Soft).dsk
    0x33220da8, // Kat Trap (1987)(Domark).dsk
    0x872b06fa, // Kick Off 2 (1990)(Anco Software)(Side B).dsk
    0xc6737857, // Kick Off 2 (1990)(Anco Software)(es)[cr].dsk
@@ -1580,6 +1594,7 @@ uint32_t dbclean[] = {
    0x1f6b8c98, // Last Ninja 2 Remix (1990)(System 3)(Side B).dsk
    0x2ebe385f, // Livingstone Supongo II (1989)(Opera Soft).dsk
    0xb2837f6d, // Lifeterm (1987)(Alternative Software)[cr].dsk
+   0x7801de1a, // Leon Marchand's Olympic Challenge (2024)(Praline)(v1.1).dsk
    0x71a30503, // Lucky Luke - Nitroglycerine (1987)(Coktel Vision)(fr)(Side B).dsk
    0x01dab581, // Lucky Luke - Nitroglycerine (1987)(Coktel Vision)(fr)(Side A)[CPM].dsk
    0x33a4f4d3, // Laserwarp (1985)(Amsoft)[tape].dsk
@@ -1588,6 +1603,7 @@ uint32_t dbclean[] = {
    0xc319fe69, // Light Force (1986)(FTL).dsk
    0xeb127e47, // Leather Goddesses of Phobos (1986)(Infocom)[CPM].dsk
    0xef801dfc, // Loogaroo (1988)(Top Ten)[cr].dsk
+   0x21740220, // Locomotion (1985)(Mastertronic)[cr].dsk
    0xd22c323c, // Labyrinthe des Pharaons, Le (1990)(Retz)(fr)(Disk 2 Side B).dsk
    0x695b81d3, // Labyrinthe des Pharaons, Le (1990)(Retz)(fr)(Disk 1 Side A).dsk
    0xd3d374ee, // Labyrinthe des Pharaons, Le (1990)(Retz)(fr)(Disk 2 Side A).dsk
@@ -1721,6 +1737,7 @@ uint32_t dbclean[] = {
    0x3677d82c, // Monte Cristo (1988)(Coktel Vision)(fr)(Side B).dsk
    0x41332486, // Moontorc (1991)(Atlantis Software)[cr][f].dsk
    0xff082b39, // Munch-it (1984)(Tynesoft)[cr].dsk
+   0xb2afa3a3, // Mystery Isles (2024)(Oz Realms).dsk
    0x398be600, // Moonmist (1986)(Infocom)[CPM].dsk
    0x789e6383, // Mines (1994)(CRCT)(PD)[cr].dsk
    0x0eae7e77, // Milk Race (1987)(Mastertronic)[cr].dsk
@@ -1778,6 +1795,7 @@ uint32_t dbclean[] = {
    0x671e3957, // Moto Driver (1986)(Loriciels)(fr)[cr].dsk
    0x18dcb1b4, // Mega-Apocalypse (1988)(Martech).dsk
    0xf59da67d, // Master of the Lamps (1985)(Activision)[cr].dsk
+   0xebc33da8, // Midnight Streets (2024)(GGP).dsk
    0xb40c5cb2, // Murder on the Atlantic (1985)(Cobra Soft)(Side A).dsk
    0x3c816404, // Murder on the Atlantic (1985)(Cobra Soft)(Side B).dsk
    0xdfeb8592, // Mega Chess (1988)(CP Software)(es)[cr].dsk
@@ -1832,6 +1850,7 @@ uint32_t dbclean[] = {
    0x2dce1a57, // Monty Pythons Flying Circus (1990)(Virgin Games)[codes].dsk
    0x55dc54ee, // Mahjong (1986)(Liffsoft)[cr].dsk
    0xd77ef6ed, // Moto Cross Simulator (1989)(Codemasters Software)[cr].dsk
+   0x5323f1cf, // Monster Mayhem (2024)(Mananuk)[cr].dsk
    0xc0334b8e, // Mantis 2 (1990)(MCM Software)(es)[cr].dsk
    0x48adf9cf, // Molecularr 2 (1991)(Amstrad Cent Pour Cent)[cr].dsk
    0xc14e1245, // Mambo (1989)(Positive)(es).dsk
@@ -1866,6 +1885,7 @@ uint32_t dbclean[] = {
    0xc82e3009, // Masters of Space, The - X Levels (1994)(Radical Software)[cr].dsk
    0x8deb606e, // Mission Genocide (1987)(Firebird)[cr].dsk
    0x77c57e31, // Mig Busters (1990)(Players Premier)[128K][cr].dsk
+   0xb76ba752, // Mine Escape (2024)(PD)(M2)[cr].dsk
    0xc3e4ab94, // Mr Wong's Loopy Laundry (1984)(Amsoft)[cr].dsk
    0x801969a5, // Mandragore (1985)(Infogrames)(Side B).dsk
    0x5d037c5c, // Mandragore (1985)(Infogrames)(Side A).dsk
@@ -1901,6 +1921,7 @@ uint32_t dbclean[] = {
    0x6761ee78, // Night Hunter (1990)(Ubi Soft)(es)(Side A).dsk
    0xe63d8282, // Night Hunter (1990)(Ubi Soft)(es)(Side B).dsk
    0x159d5a2c, // Night Hunter (1990)(Ubi Soft)(fr)(Side A).dsk
+   0x80bb73f4, // Ninja Spirit (1990)(Activision)(v2).dsk
    0x7807f952, // Nervous Break Down (1985)(Hebdogiciel)(fr)[cr].dsk
    0xd6f36850, // Nita (2023)(PD)[cr].dsk
    0x380c424f, // Nibbler (1984)(Mosaik Software)[cr].dsk
@@ -1913,6 +1934,14 @@ uint32_t dbclean[] = {
    0xa816b717, // Nigel Mansell's World Championship (1992)(Gremlin Graphics Software)(Side A).dsk
    0xa43eb279, // Night Gunner (1989)(Digital Integration)(M3)[cr].dsk
    0x5867c8e4, // Night Gunner (1989)(Digital Integration)(M3)[codes].dsk
+   0x7a07488b, // Ninja Carnage (2021)(Resistance)(v1.2)(Side B).dsk
+   0x6b003182, // Ninja Carnage (2021)(Resistance)(v1.2)(Side A).dsk
+   0xf635a1d7, // Ninja Carnage (2021)(Resistance)(fr)(v1.2)(Side A).dsk
+   0xa537adb8, // Ninja Carnage (2021)(Resistance)(de)(v1.2)(Side A).dsk
+   0xfc5f3476, // Ninja Carnage (2021)(Resistance)(es)(v1.2)(Side B).dsk
+   0xb6f1c2ec, // Ninja Carnage (2021)(Resistance)(es)(v1.2)(Side A).dsk
+   0x0d3de26b, // Ninja Carnage (2021)(Resistance)(de)(v1.2)(Side B).dsk
+   0x60aa3e3c, // Ninja Carnage (2021)(Resistance)(fr)(v1.2)(Side B).dsk
    0x5ebefb4b, // Not a Penny More, Not a Penny Less (1987)(Domark)(Side A).dsk
    0x22d4030a, // Not a Penny More, Not a Penny Less (1987)(Domark)(Side B).dsk
    0x2d67b1d6, // Nick Faldo Plays the Open (1985)(Mind Games).dsk
@@ -1962,6 +1991,7 @@ uint32_t dbclean[] = {
    0x5c2b72fd, // Night Breed (1990)(Ocean Software)(Side B).dsk
    0xf048d226, // Nonamed (1986)(Dinamic Software)(es)[cr].dsk
    0x47cd9774, // Nonamed (1986)(Dinamic Software)[cr][f].dsk
+   0x614a4f2c, // Octopus Deluxe (2023)(cpc-power.com).dsk
    0xa1a20c53, // OPQA vs QAOP - The Final Battle (2018)(cpcretrodev.byterealms)(v3)[cr].dsk
    0xb9d5e5e3, // Operation Gunship (1989)(Codemasters Software)[cr].dsk
    0xfce7fa16, // On Cue (1987)(Mastertronic)[cr].dsk
@@ -1970,6 +2000,7 @@ uint32_t dbclean[] = {
    0x1d3ce902, // Outlaws Reloaded (2017)(cpcretrodev.byterealms)[cr].dsk
    0x3c1c3d56, // Olaf (1992)(Amstrad Cent pour Cent)(fr)[cr].dsk
    0x28dfb62b, // Ormuz (1988)(Iber Soft)(es)[tape].dsk
+   0x4a24e744, // Osotos (2024)(PD)[cr].dsk
    0x2519a761, // Octoplex (1989)(Mastertronic)[cr].dsk
    0xd77dde4b, // Off Shore Warrior (1989)(Titus).dsk
    0x4be97fcf, // Orion (Jasap Software)(Spain)[cr].dsk
@@ -2042,6 +2073,7 @@ uint32_t dbclean[] = {
    0xc8c547d0, // Prince de Perse (1990)(Broderbund Software)(fr)[codes].dsk
    0x4ebc8925, // Profanation 2 - Escape from Abu Simbel (2017)(4Mhz).dsk
    0x0ddda48d, // Profanation 2 - Escape from Abu Simbel (2017)(4Mhz)(es).dsk
+   0xbfd9ab2c, // Paulina's Potions (2024)(PD)[cr].dsk
    0xcd719517, // Postman's Destiny (1989)(PC Amstrad International)[cr].dsk
    0xd1c258d1, // Passagers du Vent 2 (1987)(Infogrames)(Side A).dsk
    0x2475b163, // Passagers du Vent 2 (1987)(Infogrames)(Side B).dsk
@@ -2063,6 +2095,7 @@ uint32_t dbclean[] = {
    0xd6318ce3, // Pipeline (1991)(PC Amstrad International)(fr)[cr].dsk
    0x0a96fed4, // Predator 2 (1991)(Image Works).dsk
    0xe2c87660, // Postman Pat 3 - To the Rescue (1992)(Alternative Software)[cr].dsk
+   0xefdddfcd, // Peral (2023)(PD)(M2)[cr].dsk
    0x259559b5, // Pinball Power (1989)(Mastertronic Plus).dsk
    0x9298d89e, // Power and Magic (1990)(Zigurat Software)(es).dsk
    0x1df0ab01, // Pool (1989)(Micro Mag)[cr].dsk
@@ -2098,6 +2131,7 @@ uint32_t dbclean[] = {
    0x9af2061b, // Planetfall (1983)(Infocom)[CPM].dsk
    0x5dce5c79, // Pinball Magic (1990)(Loriciels)(M2)(v2)(Side A).dsk
    0xf5e8002e, // Pinball Magic (1990)(Loriciels)(M2)(v2)(Side B).dsk
+   0xd80213f6, // Pulzar (2024)(PD)[cr].dsk
    0xc5a3ce66, // Project-X - The Microman (1986)(Global Software)[cr].dsk
    0xa4c910f5, // Plate-Forme (1988)(MBC Informatique)(fr)[cr].dsk
    0x9a8b051f, // Paws (1985)(Artic Computing)[cr].dsk
@@ -2167,6 +2201,7 @@ uint32_t dbclean[] = {
    0x0c0ba704, // Pyjamarama (1984)(Mikrogen).dsk
    0xd4892cab, // Pogostick Olympics (1987)(Firebird)[cr].dsk
    0x5ce924ba, // Professional Ski Simulator (1987)(Codemasters Software)[o].dsk
+   0xba60ec01, // Pirka (2023)(Crazy Piri)[cr].dsk
    0x3baa8f66, // Paragliding Simulation (1991)(Loriciels)(fr).dsk
    0xc071d82b, // Panza Kick Boxing (1990)(Loriciels)(fr).dsk
    0x71d99b9e, // Panza Kick Boxing (1990)(Loriciels).dsk
@@ -2253,6 +2288,7 @@ uint32_t dbclean[] = {
    0x920d4d8e, // Rig Attack (1985)(Tynesoft)[cr].dsk
    0xa53ffbf8, // Robbbot (1986)(ERE Informatique)(M3).dsk
    0x3f3f84de, // Red Arrows, The (1985)(Database Educational Software).dsk
+   0xf4408d78, // Renegade Reloaded (2023)(Geco)(Hack)[cr].dsk
    0xf98b1b3b, // Rescate (1987)(Sygran)[cr].dsk
    0xa0eb703d, // Rebel Planet (1986)(US Gold)[cr].dsk
    0x23b750e8, // Rogue (1987)(Mastertronic)[tape].dsk
@@ -2402,12 +2438,13 @@ uint32_t dbclean[] = {
    0x0e430e36, // Space Ace (1987)(Players)[tape].dsk
    0x32baf3a8, // Silent Shadow (1988)(Topo Soft)(es).dsk
    0xfcb65dde, // Solar Invasion (1989)(Mastertronic)(LightGun)[cr].dsk
-   0x0bd6c0af, // Shinobi - Remaster (1989)(Fmtrx)(v1.02)(Hack)[cr][f].dsk
+   0x0bd6c0af, // Shinobi - Remaster (2020)(Fmtrx)(v1.02)(Hack)[cr][f].dsk
    0x7434b021, // Star Wars - Return Of The Jedi (1989)(Domark).dsk
    0x6e1d7ad5, // Skate or Die (1989)(Electronic Arts)(Side A).dsk
    0x6d19167a, // Skate or Die (1989)(Electronic Arts)(Side B).dsk
    0x6a653770, // Super Cars (1990)(Gremlin Graphics Software).dsk
    0xe04c8351, // Space Froggy 2 (19xx)(Glenco)[cr].dsk
+   0x2884d7b0, // Saboteur 2 Thealfest Mod (2024)(Thealfest)(Hack)[cr].dsk
    0x9a407cf0, // Space Mania (1986)(Amstrad Computer User)[cr].dsk
    0xbe401909, // Strike Force Cobra (1986)(Piranha).dsk
    0x167d042d, // Sandman, The (1995)(TGS)(PD)(Disk 2 Side B).dsk
@@ -2579,6 +2616,8 @@ uint32_t dbclean[] = {
    0x6ae1bd8b, // Superman - The Man of Steel (1989)(Tynesoft)(Side B).dsk
    0x04090355, // Strip Poker Anime, Le (1985)(Knight Soft)(fr)[cr].dsk
    0x0ab6f33f, // Spaced Out (1987)(Firebird)[tape].dsk
+   0x30f33e46, // Sauvez Yurk (1991)(Ubi Soft)(fr)(Side B).dsk
+   0x375d3a28, // Sauvez Yurk (1991)(Ubi Soft)(fr)(Side A).dsk
    0x49586e15, // Space Moves (2020)(Retrobytes Productions)(v2.2).dsk
    0x29c80cbd, // Star Avenger (1984)(Kuma Computers).dsk
    0xaf81d0ad, // Seas of Blood (1985)(Adventure International)(v2)[cr].dsk
@@ -2880,6 +2919,7 @@ uint32_t dbclean[] = {
    0x6a652828, // Times of Lore (1988)(Origin Systems)(Side B).dsk
    0x361b6f38, // Times of Lore (1988)(Origin Systems)(Side A).dsk
    0xafbe272a, // Tank Invader (1987)(Logipresse)(fr)[cr].dsk
+   0xc83e68ff, // Transversion (2024)(PD)[cr].dsk
    0x55ebca5d, // Tau Ceti - Special Edition (1986)(CRL Group).dsk
    0x680c59c5, // Terrormolinos (1985)(Melbourne House)[cr].dsk
    0xf4f79188, // Tai-Pan (1987)(Ocean Software)[f].dsk
@@ -2928,6 +2968,7 @@ uint32_t dbclean[] = {
    0xbe71d9f4, // Train, The - Escape to Normandy (1988)(Electronic Arts).dsk
    0x298e5492, // Train, The - Escape to Normandy (1988)(Electronic Arts)(es)[cr].dsk
    0x60a4a40f, // Three Weeks in Paradise (1985)(Mikrogen)[cr].dsk
+   0x2f9bc663, // Trasgo (2024)(PD)[cr].dsk
    0xc373f7ff, // Talisman d'Osiris, Le (1987)(Chip)(fr).dsk
    0x6bfe99c9, // Tank Command (1986)(Amsoft).dsk
    0xb14db43d, // Trap Door, The (1986)(Piranha)[f].dsk
@@ -3090,6 +3131,7 @@ uint32_t dbclean[] = {
    0xb2bd3040, // Winter Sports (1985)(Activision)(Side B).dsk
    0x6d6f9783, // Willy Wino's Stag Night (1988)(Silverbird)[cr].dsk
    0x06153c44, // World Cup (1991)(Videoplay SL)(es)[cr].dsk
+   0xedce8779, // World War Simulator Part II, The (2018)(Retrobytes Productions)(es).dsk
    0xd2d93aa9, // Way of the Tiger, The (1986)(Gremlin Graphics Software).dsk
    0x6fda459c, // Way of Exploding Fist, The (1985)(Melbourne House)[tape].dsk
    0xadf6c176, // Wriggler (1985)(Romantic Robot)[codes].dsk
@@ -3148,6 +3190,7 @@ uint32_t dbclean[] = {
    0x6dcaf69d, // Xeno (1986)(A&F Software).dsk
    0x8fbd4fc2, // X-Out (1990)(Rainbow Arts).dsk
    0x4308d8cf, // Xanagrams (1984)(Amsoft)[cr][f].dsk
+   0xf465a58d, // Xlaloc (2024)(PD)[cr].dsk
    0xd634c814, // Xybots (1989)(Domark).dsk
    0xbadd5079, // Xcel (1987)(Mastertronic)[cr].dsk
    0x5dfd5142, // Xenophobe (1989)(Micro Style).dsk
@@ -3166,7 +3209,7 @@ uint32_t dbclean[] = {
    0x31468e60, // Yie Ar Kung-Fu II (1986)(Ocean Software).dsk
    0x0fdaa611, // Yabba Dabba Doo! - Flintstones (1986)(Quicksilva)[cr].dsk
    0x8948e0ba, // Yahtzee (1989)(John Packham)(PD)[cr].dsk
-   0x651cd158, // Yie Ar Kung-Fu II (1986)(Ocean Software).dsk
+   0x651cd158, // Yie Ar Kung-Fu (1986)(Ocean Software).dsk
    0xd7a00940, // Yahtzee (1985)(L'Abominable)(PD)(fr)[cr].dsk
    0x66fb5d06, // Yogi Bear (1987)(Piranha)[cr].dsk
    0xddde36c9, // Yes Prime Minister (1985)(Mosaic Publishing)(Side B).dsk

@@ -113,6 +113,8 @@ uint32_t dbfail[] = {
    0x1a07c6cc, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side B).dsk
    0xc8d40fe6, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side A).dsk
    0x9951e870, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side B).dsk
+   0x44998f95, // Golden Eagle (1991)(Loriciels)(es)(Side B).dsk
+   0x5256b156, // Golden Eagle (1991)(Loriciels)(es)(Side A).dsk
    0x47f7f71f, // Hamsters en Folie (1989)(Generation 5)(fr).dsk
    0x1ac09f99, // Infernal House (1991)(Lankhor)(fr)(Side A).dsk
    0xce141c60, // Infernal House (1991)(Lankhor)(fr)(Side B).dsk
@@ -122,6 +124,8 @@ uint32_t dbfail[] = {
    0x21de51e7, // James Debug - Mystere de l'Ile Perdue (1986)(Coktel Vision).dsk
    0x0e81f696, // Knight Force (1989)(Titus)(Side A).dsk
    0xfb10b3bb, // Knight Force (1989)(Titus)(Side B).dsk
+   0x5ca0fd3c, // L'Aigle D'Or Le Retour (1991)(Loriciels)(fr)(Side A)[codes].dsk
+   0xb91dc1a9, // L'Aigle D'Or Le Retour (1991)(Loriciels)(fr)(Side B).dsk
    0x70021b43, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side B).dsk
    0xb0a1e816, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side A).dsk
    0xaa6728e1, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side B).dsk
