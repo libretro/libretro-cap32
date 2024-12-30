@@ -93,7 +93,7 @@ static INLINE unsigned int convert_color(unsigned int colour)
  * draw_pixel_24bpp:
  * simple method to emulate a transparency
  **/
-void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img)
+void draw_pixel_24bpp(uint32_t * dest, const uint32_t * img)
 {
    if (*(img) != PIXEL_TRANSPARENT)
    {
@@ -105,7 +105,7 @@ void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img)
  * convert_image_24bpp:
  * convert raw image to 24bpp, used on init
  **/
-void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size)
+void convert_image_24bpp(uint32_t * dest, const uint32_t * img, int size)
 {
    while (size--)
    {
@@ -120,7 +120,7 @@ void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size
  * draw_line_24bpp:
  * copy a 24bpp color to your dest
  **/
-void draw_line_24bpp(unsigned int * dest, int width, unsigned int color)
+void draw_line_24bpp(uint32_t * dest, int width, unsigned int color)
 {
    while (width--)
       *(dest++) = color;
@@ -130,7 +130,7 @@ void draw_line_24bpp(unsigned int * dest, int width, unsigned int color)
  * draw_char_24bpp:
  * draw a 24bpp char to your dest
  **/
-void draw_char_24bpp(unsigned int * buffer_ptr, const unsigned char *font_data, unsigned int color)
+void draw_char_24bpp(uint32_t * buffer_ptr, const unsigned char *font_data, unsigned int color)
 {
    int height = FNT_CHAR_HEIGHT;
    while (height--)

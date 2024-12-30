@@ -206,7 +206,7 @@ static INLINE unsigned int convert_color(unsigned int colour)
  * draw_pixel_8bpp:
  * simple method to emulate a transparency, almost slow but is only used on init
  **/
-void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img)
+void draw_pixel_8bpp(uint32_t * dest, const uint32_t * img)
 {
    uint8_t * buffer_ptr = (uint8_t *) dest;
    uint8_t * img_ptr = (uint8_t *) img;
@@ -233,7 +233,7 @@ void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img)
  * convert_image_8bpp:
  * convert raw image to 8bpp, used on init
  **/
-void convert_image_8bpp(unsigned int * dest, const unsigned int * img, int size)
+void convert_image_8bpp(uint32_t * dest, const uint32_t * img, int size)
 {
    uint8_t * buffer_ptr = (uint8_t *) dest;
    while (size--)
@@ -249,7 +249,7 @@ void convert_image_8bpp(unsigned int * dest, const unsigned int * img, int size)
  * draw_line_8bpp:
  * copy a 8bpp color to your dest, optimized
  **/
-void draw_line_8bpp(unsigned int * dest, int width, unsigned int colour)
+void draw_line_8bpp(uint32_t * dest, int width, unsigned int colour)
 {
    // prepare copy using 32bits
    //printf("line: base: 0x%04x [%u]", colour, width);
@@ -270,7 +270,7 @@ void draw_line_8bpp(unsigned int * dest, int width, unsigned int colour)
  * draw_char_8bpp:
  * draw a 8bpp char to your dest, optimized
  **/
-void draw_char_8bpp(unsigned int * dest, const unsigned char *font_data, unsigned int colour)
+void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned int colour)
 {
    #ifdef LOWRES
    unsigned char *buffer_ptr = (unsigned char *) dest;

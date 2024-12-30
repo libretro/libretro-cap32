@@ -214,7 +214,7 @@ extern int retro_getStyle();
 extern int retro_getGfxBpp();
 extern int retro_getGfxBps();
 extern int retro_getAudioBuffer();
-extern unsigned int * retro_getScreenPtr();
+extern uint32_t * retro_getScreenPtr();
 
 // allowed file types
 #define EXT_FILE_CDT "cdt"

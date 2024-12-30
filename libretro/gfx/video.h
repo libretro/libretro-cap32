@@ -59,11 +59,11 @@ typedef struct {
    uint32_t blend_mask;
    void (*video_set_palette_antialias)(void);
    unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
-   void (*convert_image)(unsigned int * dest, const unsigned int * img, int size);
-   void (*draw_line)(unsigned int * dest, int width, unsigned int color);
-   void (*draw_char)(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-   void (*draw_pixel)(unsigned int * dest, const unsigned int * img);
-   void (*draw_keyboard_func)(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+   void (*convert_image)(uint32_t * dest, const uint32_t * img, int size);
+   void (*draw_line)(uint32_t * dest, int width, unsigned int color);
+   void (*draw_char)(uint32_t * dest, const unsigned char *font_data, unsigned int color);
+   void (*draw_pixel)(uint32_t * dest, const uint32_t * img);
+   void (*draw_keyboard_func)(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size);
 } retro_video_t;
 extern retro_video_t retro_video;
 
@@ -87,21 +87,21 @@ unsigned int rgb2color_8bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_16bpp(unsigned int r, unsigned int g, unsigned int b);
 unsigned int rgb2color_24bpp(unsigned int r, unsigned int g, unsigned int b);
 
-void convert_image_8bpp(unsigned int * dest, const unsigned int * img, int size);
-void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size);
-void convert_image_24bpp(unsigned int * dest, const unsigned int * img, int size);
+void convert_image_8bpp(uint32_t * dest, const uint32_t * img, int size);
+void convert_image_16bpp(uint32_t * dest, const uint32_t * img, int size);
+void convert_image_24bpp(uint32_t * dest, const uint32_t * img, int size);
 
-void draw_line_8bpp(unsigned int * dest, int width, unsigned int color);
-void draw_line_16bpp(unsigned int * dest, int width, unsigned int color);
-void draw_line_24bpp(unsigned int * dest, int width, unsigned int color);
+void draw_line_8bpp(uint32_t * dest, int width, unsigned int color);
+void draw_line_16bpp(uint32_t * dest, int width, unsigned int color);
+void draw_line_24bpp(uint32_t * dest, int width, unsigned int color);
 
-void draw_char_8bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
-void draw_char_24bpp(unsigned int * dest, const unsigned char *font_data, unsigned int color);
+void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned int color);
+void draw_char_16bpp(uint32_t * dest, const unsigned char *font_data, unsigned int color);
+void draw_char_24bpp(uint32_t * dest, const unsigned char *font_data, unsigned int color);
 
-void draw_pixel_8bpp(unsigned int * dest, const unsigned int * img);
-void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img);
-void draw_pixel_24bpp(unsigned int * dest, const unsigned int * img);
+void draw_pixel_8bpp(uint32_t * dest, const uint32_t * img);
+void draw_pixel_16bpp(uint32_t * dest, const uint32_t * img);
+void draw_pixel_24bpp(uint32_t * dest, const uint32_t * img);
 
 // Index color CLUT config RRRGGGBB
 #define EXTRACT_RED(i) (((i) >> 5) & 0x111)

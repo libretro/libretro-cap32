@@ -223,8 +223,8 @@ int retro_getAudioBuffer(){
    return audio_buffer_size; // return the closest match as 2^n
 }
 
-INLINE unsigned int * retro_getScreenPtr(){
-    return (unsigned int *) video_buffer;
+INLINE uint32_t * retro_getScreenPtr(){
+    return video_buffer;
 }
 
 #include <ctype.h>
