@@ -1256,10 +1256,12 @@ void retro_init(void)
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
    scaler_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
+   cpc_video_out = retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
    memset(scaler_buffer, 0, gfx_buffer_size);
+   memset(cpc_video_out, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1411,7 +1413,42 @@ __attribute__((optimize("unroll-loops"))) static inline void blit_8bpp(int size)
 
 void screen_null_scaler(void)
 {
-   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+
+#ifdef M8BPP
+#if defined(RENDER_GSKIT_PS2)
+   uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+
+   if (!ps2) {
+      if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
+         LOGE(" Failed to get HW rendering interface!\n");
+         return;
+      }
+
+      if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+         LOGE(" HW render interface mismatch, expected %u, got %u!\n",
+                  RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
+         return;
+      }
+
+      ps2->coreTexture->Width = EMULATION_SCREEN_WIDTH;
+      ps2->coreTexture->Height = EMULATION_SCREEN_HEIGHT;
+      ps2->coreTexture->PSM = GS_PSM_T8;
+      ps2->coreTexture->ClutPSM = GS_PSM_CT16;
+      ps2->coreTexture->Filter = GS_FILTER_LINEAR;
+      ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
+   }
+
+   ps2->coreTexture->Clut = (u32*)retro_palette;
+   ps2->coreTexture->Mem = (u32*)video_buffer;
+
+   video_cb(buf, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
+#else
+      blit_8bpp(retro_video.screen_render_width * retro_video.screen_render_height);
+      video_cb(cpc_video_out, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+#endif
+#else
+      video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+#endif
 }
 
 void screen_software_scaler(void)
@@ -1452,43 +1489,6 @@ void retro_run(void)
    retro_PollEvent();
    retro_ui_process();
    lightgun_cfg.gun_draw();
-
-#ifdef M8BPP
-#if defined(RENDER_GSKIT_PS2)
-   uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
-
-   if (!ps2) {
-      if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
-         LOGE(" Failed to get HW rendering interface!\n");
-         return;
-      }
-
-      if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
-         LOGE(" HW render interface mismatch, expected %u, got %u!\n",
-                  RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
-         return;
-      }
-
-      ps2->coreTexture->Width = EMULATION_SCREEN_WIDTH;
-      ps2->coreTexture->Height = EMULATION_SCREEN_HEIGHT;
-      ps2->coreTexture->PSM = GS_PSM_T8;
-      ps2->coreTexture->ClutPSM = GS_PSM_CT16;
-      ps2->coreTexture->Filter = GS_FILTER_LINEAR;
-      ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
-   }
-
-   ps2->coreTexture->Clut = (u32*)retro_palette;
-   ps2->coreTexture->Mem = (u32*)video_buffer;
-
-   video_cb(buf, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-#else
-      blit_8bpp(EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT);
-      video_cb(cpc_video_out, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-#endif
-#else
-      video_cb(video_buffer, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-#endif
-   // FIX
    retro_video.draw_screen();
 }
 

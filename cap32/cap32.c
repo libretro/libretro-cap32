@@ -1967,6 +1967,8 @@ int attach_disk(char *arv, int drive)
          snprintf(diskB_name, RETRO_PATH_MAX,"%s",arv);
       }
    }
+
+   return result;
 }
 
 void detach_disk(int drive)
