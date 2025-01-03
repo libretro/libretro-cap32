@@ -49,6 +49,7 @@
 #include "retro_ui.h"
 #include "lightgun/lightgun.h"
 #include "retro_gun.h"
+#include "retro_disk_control.h"
 
 /**
  * TODO: input_state assignments just need it here,
@@ -184,7 +185,7 @@ t_button_cfg btnPAD[MAX_PADCFG] = {
 
 // ---------------------------------------------
 
-#define MAX_JOY_EVENT 9
+#define MAX_JOY_EVENT 11
 static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
 {
    { RETRO_DEVICE_ID_JOYPAD_B,            // if you change this position, update JOY_EVENT_ID_B
@@ -205,6 +206,10 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
       { EVENT_WRITE, "4\nS\n", "PRESSED => 4/S" } },
    { RETRO_DEVICE_ID_JOYPAD_RIGHT,
       { EVENT_WRITE, "3\nJ\n", "PRESSED => 3/J" } },
+   { RETRO_DEVICE_ID_JOYPAD_L,
+     { EVENT_DISK_PREV, "PREV", NULL} },
+   { RETRO_DEVICE_ID_JOYPAD_R,
+     { EVENT_DISK_NEXT, "NEXT", NULL} },
 };
 
 /**
@@ -263,6 +268,36 @@ void ev_cursorjoy() {
    }
 }
 
+void ev_swap_media(int type) {
+   unsigned int imagetotal = retro_get_num_images();
+   unsigned int imageindex = retro_get_image_index();
+
+   // need at least two disks inserted.
+   if (imagetotal < 2)
+      return;
+
+   if ((type == EVENT_DISK_PREV) && imageindex == 0)
+      return;
+   if ((type == EVENT_DISK_NEXT) && imageindex == (imagetotal - 1))
+      return;
+
+   if (!retro_set_eject_state(true))
+      return;
+
+   imageindex += type == EVENT_DISK_PREV
+      ? -1
+      : +1;
+
+   if (!retro_set_image_index(imageindex))
+      return;
+
+   retro_set_eject_state(false);
+
+   char msg[64];
+   snprintf(msg, 64, "DISK #%u", imageindex);
+   retro_message(msg);
+}
+
 /**
  * do_action:
  * @return: the retro_events_action_type.
@@ -294,6 +329,10 @@ static unsigned do_action(const retro_action_t* action)
          break;
       case EVENT_CURSOR_JOY:
          ev_cursorjoy();
+         break;
+      case EVENT_DISK_NEXT:
+      case EVENT_DISK_PREV:
+         ev_swap_media(action->type);
          break;
    }
 
@@ -790,8 +829,8 @@ void ev_mouse_motion()
    if ((mouse.raw_x - mouse_x) == 0 && (mouse.raw_y - mouse_y) == 0)
       return;
 
-   int px=(int) ((mouse_x + 0x7fff) * EMULATION_SCREEN_WIDTH / 0xfffe);
-   int py=(int) ((mouse_y + 0x7fff) * EMULATION_SCREEN_HEIGHT / 0xfffe);
+   int px=(int) ((mouse_x + 0x7fff) * retro_video.screen_render_width / 0xfffe) + (64 * retro_video.screen_crop);
+   int py=(int) ((mouse_y + 0x7fff) * retro_video.screen_render_height / 0xfffe);
 
    mouse.raw_x = mouse_x;
    mouse.raw_y = mouse_y;

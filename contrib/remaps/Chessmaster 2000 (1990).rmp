@@ -1,0 +1,12 @@
+input_player1_key_x = "110"
+input_player1_key_x_name = "No"
+input_player1_key_y = "121"
+input_player1_key_y_name = "Yes"
+
+
+entry_hash_1 = 0x87cce8 # (UK) (1990) [Original]
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]CHESS"

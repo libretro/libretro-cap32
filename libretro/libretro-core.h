@@ -47,7 +47,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define VERSION_STRING "4.5.3"
+#define VERSION_STRING "4.5.4"
 
 // DEVICE AMSTRAD
 #define RETRO_DEVICE_AMSTRAD_KEYBOARD RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_KEYBOARD, 0)
@@ -102,6 +102,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #ifdef LOWRES
 #define SCREENMODE_STR " LO"
 #define EMULATION_SCALE 1
+#define EMULATION_CROP 32
 #define EMULATION_SCREEN_WIDTH CPC_SCREEN_WIDTH
 #define EMULATION_SCREEN_HEIGHT CPC_SCREEN_HEIGHT
 #define CURSOR_MOVEMENT_X 2
@@ -109,6 +110,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #else
 #define SCREENMODE_STR " HI"
 #define EMULATION_SCALE 2
+#define EMULATION_CROP 64
 #define EMULATION_SCREEN_WIDTH CPC_SCREEN_WIDTH * 2
 #define EMULATION_SCREEN_HEIGHT CPC_SCREEN_HEIGHT
 #define CURSOR_MOVEMENT_X 4
@@ -222,6 +224,8 @@ extern uint32_t * retro_getScreenPtr();
 #define EXT_FILE_M3U "m3u"
 #define EXT_FILE_SNA "sna"
 #define EXT_FILE_CPR "cpr"
+
+#define EXT_DIFF_DSK "sav"
 
 // allowed file flags - BIOS
 #define FLAG_BIOS_464 "[464]"

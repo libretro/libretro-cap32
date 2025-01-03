@@ -1,0 +1,6 @@
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0x4f36745 # (UK) (1991) [PC Amstrad International]
+
+entry_command = "RUN[quote]WORM"

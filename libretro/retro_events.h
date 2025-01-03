@@ -168,6 +168,8 @@ enum retro_events_action_type
    EVENT_WRITE,
    EVENT_VKEYB,
    EVENT_GUI,
+   EVENT_DISK_PREV,
+   EVENT_DISK_NEXT,
    EVENT_TAPE_ON,
    EVENT_TAPE_OFF,
    EVENT_TAPE_REWIND,

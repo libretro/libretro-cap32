@@ -178,6 +178,11 @@ int HandleExtension(char *path,char *ext);
 
 extern void kbd_update_table(int lang);
 
+extern char diskA_name[RETRO_PATH_MAX];
+extern char diskB_name[RETRO_PATH_MAX];
+extern char savdif_name[RETRO_PATH_MAX+16];
+extern char cart_name[RETRO_PATH_MAX];
+
 #include "cap32.h"
 #include "crtc.h"
 #include "tape.h"
@@ -358,6 +363,7 @@ t_VDU VDU;
 
 t_drive driveA;
 t_drive driveB;
+t_drive driveSAV;
 
 t_zip_info zip_info;
 
@@ -1150,6 +1156,7 @@ void emulator_reset (bool bolMF2Reset)
    // VDU
    memset(&VDU, 0, sizeof(VDU)); // clear VDU data structure
    VDU.flag_drawing = 1;
+   VDU.vertical_hold = retro_video.vertical_hold; // prepare vertical render
 
    // CRTC
    crtc_reset();
@@ -1944,34 +1951,21 @@ int skel_main(int argc, char *argv[])
    return 0;
 }
 
-int InitOSGLU(void)
-{
-
-   return 0;
-}
-
-int  UnInitOSGLU(void)
-{
-   doCleanUp();
-   return 0;
-}
-
-// TO BE REMOVED
-//#define OLD_LOADER
-#ifdef OLD_LOADER
-//AUTOBOOT TAKEN FROM CPCDROID
-#include "cpc_cat.h"
-#endif
-
 int attach_disk(char *arv, int drive)
 {
-   if(drive == 0)
-   {
-      return dsk_load( arv, &driveA, 'A');
-   }
-   else
-   {
-      return dsk_load( arv, &driveB, 'B');
+   int result = 1;
+
+   if(!drive) {
+      if((result = dsk_load( arv, &driveA, 'A')) == 0)
+      {
+         dsk_diff_load(savdif_name, &driveA);
+         snprintf(diskA_name, RETRO_PATH_MAX, "%s",arv);
+      }
+   } else {
+      if((result = dsk_load( arv, &driveB, 'B')) == 0)
+      {
+         snprintf(diskB_name, RETRO_PATH_MAX,"%s",arv);
+      }
    }
 }
 
@@ -1979,11 +1973,23 @@ void detach_disk(int drive)
 {
    if(drive == 0)
    {
+      if(driveA.altered)
+      {
+         if(dsk_load(diskA_name, &driveSAV, 'T') == 0)
+         {
+            dsk_diff(savdif_name, &driveA, &driveSAV);
+            dsk_eject(&driveSAV);
+         }
+      }
+
       dsk_eject(&driveA);
+
+      diskA_name[0] = '\0';
    }
    else
    {
       dsk_eject(&driveB);
+      diskB_name[0] = '\0';
    }
 }
 
@@ -2054,6 +2060,7 @@ int capmain (int argc, char **argv)
 
    memset(&driveA, 0, sizeof(t_drive)); // clear disk drive A data structure
    memset(&driveB, 0, sizeof(t_drive)); // clear disk drive B data structure
+   memset(&driveSAV, 0, sizeof(t_drive));
 
    dwTicksOffset     = (int)(FRAME_PERIOD_MS / (double)(CPC.speed/CPC_BASE_FREQUENCY_MHZ));
 

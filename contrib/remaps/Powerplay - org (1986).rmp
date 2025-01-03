@@ -1,0 +1,18 @@
+
+input_player1_key_b = "13"
+input_player1_key_b_name = "Return"
+
+input_player1_key_x = "27"
+input_player1_key_x_name = "Esc"
+input_player1_key_y = "32"
+input_player1_key_y_name = "Space"
+
+input_player1_key_start = "50"
+input_player1_key_select = "51"
+
+entry_hash_1 = 0x3ea9bb91 # (S) (1986) [Original]
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]ARCANA[enter][wait][wait][wait][wait][wait][wait][wait][wait][wait][wait][wait][wait][wait]L[wait]QUIZ1[end]"

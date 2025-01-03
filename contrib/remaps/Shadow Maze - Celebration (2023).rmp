@@ -1,0 +1,11 @@
+# QAOP
+input_player1_key_up = "113"
+input_player1_key_down = "97"
+input_player1_key_left = "111"
+input_player1_key_right = "112"
+
+input_player1_key_a = "32"
+
+entry_hash_1 = 0x82d52c01 # (UK) (2023)
+
+entry_command = "RUN[quote]INTRO"

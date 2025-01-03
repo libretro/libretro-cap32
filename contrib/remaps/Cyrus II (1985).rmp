@@ -1,0 +1,31 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_right = "275"
+input_player1_key_left = "276"
+
+
+input_player1_key_a = "13"
+input_player1_key_a_name = "Select / Place"
+input_player1_key_b = "98"
+input_player1_key_b_name = "Back"
+
+input_player1_key_x = "27"
+input_player1_key_x_name = "2D / 3D"
+input_player1_key_y = "105"
+input_player1_key_y_name = "Invert Board"
+
+input_player1_key_start = "32"
+input_player1_key_start_name = "Menu"
+
+input_player1_key_select = "109"
+input_player1_key_select_name = "Move First - Black Pieces"
+
+entry_hash_1 = 0xe894c4e9 # (UK) (1990) [Original]
+entry_hash_1 = 0x859433b0 # (F) (1985) [Original]
+entry_hash_1 = 0xe480fbec # (G) (1985) [Original]
+
+#    [enter] => \n
+#    [quote] => "
+#    [wait] => wait 5 seconds
+entry_command = "RUN[quote]DISC"

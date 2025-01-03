@@ -63,7 +63,6 @@ extern FILE *pfoDebug;
 
 #define MAX_DRAWN 272
 
-#define MIN_VHOLD 250
 #define MAX_VHOLD 380
 #define MID_VHOLD 295
 #define MIN_VHOLD_RANGE 46
@@ -776,7 +775,7 @@ void frame_finished(void)
       }
    }
 */   VDU.frame_completed = 1; // emulation loop exit condition met
-   VDU.scrln = -(((VDU.scanline - MIN_VHOLD) + 1) >> 1);
+   VDU.scrln = -(((VDU.scanline - VDU.vertical_hold) + 1) >> 1);
    VDU.scanline = 0;
    VDU.flag_drawing = 0;
 }
@@ -1510,6 +1509,6 @@ void crtc_reset(void)
    CRTC.interrupt_sl = 0;
 
    MinVSync = MID_VHOLD;
-   MaxVSync = MinVSync + MIN_VHOLD_RANGE + (int)ceil((float)((MinVSync - MIN_VHOLD) *
-    (MAX_VHOLD_RANGE - MIN_VHOLD_RANGE) / (MAX_VHOLD - MIN_VHOLD)));
+   MaxVSync = MinVSync + MIN_VHOLD_RANGE + (int)ceil((float)((MinVSync - VDU.vertical_hold) *
+    (MAX_VHOLD_RANGE - MIN_VHOLD_RANGE) / (MAX_VHOLD - VDU.vertical_hold)));
 }

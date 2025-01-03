@@ -1,0 +1,6 @@
+input_player1_key_b = "49"
+input_player1_key_b_name = "Fire / Use Bed"
+
+entry_hash_1 = 0xc34b7449 # (UK) (1986) [Original]
+
+entry_command = "RUN[quote]HEART"

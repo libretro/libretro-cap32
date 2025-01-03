@@ -1,0 +1,21 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_right = "275"
+input_player1_key_left = "276"
+
+input_player1_key_a = "308"
+input_player1_key_a_name = "Open Door"
+input_player1_key_b = "99"
+input_player1_key_b_name = "Camp"
+
+input_player1_key_x = "110"
+input_player1_key_x_name = "No"
+input_player1_key_y = "115"
+input_player1_key_y_name = "Si"
+
+input_player1_key_start = "32"
+
+entry_hash_1 = 0x9ba80f9d # (S) (1985) (Hack)
+
+entry_command = "RUN[quote]TYRANN"

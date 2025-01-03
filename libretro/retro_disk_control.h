@@ -41,6 +41,7 @@
 #define RETRO_DISK_CONTROL_H__
 
 #include <stdbool.h>
+#include <libretro.h>
 
 //*****************************************************************************
 // Disk control structure and functions
@@ -66,6 +67,19 @@ struct dc_storage{
    bool replace;
    unsigned index_prev;
 };
+
+int get_image_unit();
+int retro_attach_disk(char * filename);
+void retro_insert_image();
+bool retro_set_eject_state(bool ejected);
+bool retro_get_eject_state(void);
+unsigned retro_get_image_index(void);
+bool retro_set_image_index(unsigned index);
+unsigned retro_get_num_images(void);
+bool retro_replace_image_index(unsigned index, const struct retro_game_info *info);
+bool retro_add_image_index(void);
+bool retro_get_image_path(unsigned index, char *path, size_t len);
+bool retro_get_image_label(unsigned index, char *label, size_t len);
 
 typedef struct dc_storage dc_storage;
 dc_storage* dc_create(void);

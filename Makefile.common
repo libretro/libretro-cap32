@@ -34,6 +34,7 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/gfx/video8bpp.c \
 	$(CORE_DIR)/libretro/gfx/video16bpp.c \
 	$(CORE_DIR)/libretro/gfx/video24bpp.c \
+	$(CORE_DIR)/libretro/assets/ui_keyboard_bg_crop.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_bg.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_en.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_es.c \

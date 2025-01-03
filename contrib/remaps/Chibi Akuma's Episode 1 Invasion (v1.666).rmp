@@ -1,7 +1,9 @@
+# CURSORS
 input_player1_key_up = "273"
 input_player1_key_down = "274"
 input_player1_key_right = "275"
 input_player1_key_left = "276"
+
 input_player1_key_b = "105"
 input_player1_key_b_name = "Fire Left"
 input_player1_key_a = "111"

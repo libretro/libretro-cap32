@@ -443,6 +443,7 @@ typedef struct
 typedef struct {
    int scrln;
    int scanline;
+   unsigned int vertical_hold;
    unsigned int flag_drawing;
    unsigned int frame_completed;
 } t_VDU;

@@ -1,0 +1,7 @@
+input_player1_key_x = "49"
+input_player1_key_x_name = "Press 1"
+
+input_player1_key_start = "49"
+input_player1_key_select = "50"
+
+entry_hash_1 = 0xaae46015 # (UK) (1990) (UK retail version) [Original]
