@@ -780,6 +780,11 @@ static void update_variables(void)
       }
    }
 
+   if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
+   {
+      retro_message("[Option] Model 6128+ only working on 24bpp modes, IGNORED!");
+   }
+
    var.key = "cap32_keyboard_transparency";
    var.value = NULL;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -791,6 +796,7 @@ static void update_variables(void)
             if (retro_video.depth != DEPTH_24BPP)
             {
                LOGI("[update_variables::warn] keyboard transparency only working on 24bpp modes.\n");
+               retro_message("[Option] Keyboard transparency only working on 24bpp modes, IGNORED!");
                retro_video.draw_keyboard_func = draw_image_linear;
             }
             else {
@@ -1444,7 +1450,6 @@ bool retro_load_game(const struct retro_game_info *game)
 {
    // notify the frontend of the retro_pixel_format we want use.
    enum retro_pixel_format fmt = retro_video.fmt;
-   //enum retro_pixel_format rgb565;
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
