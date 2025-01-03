@@ -187,18 +187,18 @@ void retro_set_input_poll(retro_input_poll_t cb)
 }
 
 int retro_getStyle(){
-   LOGI("getStyle: %u\n", retro_scr_style);
-   return retro_scr_style;
+    LOGI("getStyle: %u\n", retro_scr_style);
+    return retro_scr_style;
 }
 
 int retro_getGfxBpp(){
-   LOGI("getBPP: %u\n", 8 * retro_video.pitch);
-   return 8 * retro_video.pitch;
+    LOGI("getBPP: %u\n", 8 * retro_video.pitch);
+    return 8 * retro_video.pitch;
 }
 
 int retro_getGfxBps(){
-   LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
-   return EMULATION_SCREEN_WIDTH;
+    LOGI("getBPS: %u\n", EMULATION_SCREEN_WIDTH);
+    return EMULATION_SCREEN_WIDTH;
 }
 
 int retro_getAudioBuffer(){
@@ -448,7 +448,7 @@ void retro_set_environment(retro_environment_t cb)
          "cap32_gfx_colors",
          #if defined (M16BPP)
          "Video Advanced > Color Depth; 16bit",
-         #elif defined (RENDER_GSKIT_PS2)
+         #elif defined (M8BPP)
          "Video Advanced > Color Depth; 8bit",
          #else
          "Video Advanced > Color Depth; 16bit|24bit|8bit",
@@ -772,9 +772,7 @@ static void update_variables(void)
          else if (strcmp(var.value, "24bit") == 0)
          {
             video_setup(DEPTH_24BPP);
-         }
-         else
-         {
+         } else {
             video_setup(DEPTH_16BPP);
          }
       }
@@ -842,7 +840,6 @@ void Emu_init()
       LOGI("emu init - audio error: when allocation mem...\n");
       return;
    }
-
    emu_status = COMPUTER_BOOTING;
    pre_main(retro_content_filepath);
 }
@@ -1261,15 +1258,16 @@ void retro_init(void)
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
+   memset(video_buffer, 0, gfx_buffer_size);
+   memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
+
    #ifdef RENDER_GSKIT_PS2
    render_buffer = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
    #else
    render_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
+   memset(render_buffer, 0, gfx_buffer_size);
    #endif
 
-   memset(video_buffer, 0, gfx_buffer_size);
-   memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
-   memset(render_buffer, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1443,6 +1441,7 @@ void retro_run(void)
    retro_PollEvent();
    retro_ui_process();
    lightgun_cfg.gun_draw();
+
    retro_video.draw_screen();
 }
 

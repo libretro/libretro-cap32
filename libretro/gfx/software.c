@@ -173,6 +173,7 @@ void draw_image_transparent(uint32_t * buffer, const uint32_t * img, int x, int 
    {
       retro_video.draw_pixel(buffer_ptr++, img_ptr++);
    }
+
 }
 
 #ifdef UNUSED

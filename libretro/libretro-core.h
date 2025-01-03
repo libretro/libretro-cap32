@@ -171,7 +171,6 @@ typedef struct {
    bool floppy_snd;
    bool autorun;
    bool use_internal_remap;
-   bool cart_loaded;
 } computer_cfg_t;
 extern computer_cfg_t retro_computer_cfg;
 

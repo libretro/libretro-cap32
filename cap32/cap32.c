@@ -246,11 +246,6 @@ uint8_t keyboard_matrix[16];
 
 uint8_t *membank_config[8][4];
 
-static uint8_t GPBuffer[16 * 1024 * sizeof(uint8_t)];
-static uint8_t RAM[CPC_MAX_RAM * 1024 * sizeof(uint8_t)];
-static uint8_t ROM[32 * 1024 * sizeof(uint8_t)];
-static uint8_t RegisterPage[16 * 1024 * sizeof(uint8_t)];
-
 FILE *pfileObject;
 FILE *pfoPrinter;
 
@@ -1086,13 +1081,13 @@ int emulator_select_ROM (void)
          memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_PLUS:
-         if(!retro_computer_cfg.cart_loaded) {
+         if(cart_name[0] == '\0') {
             cpr_load(&OS_6128P[0]);
             if (pbCartridgePages[0] != NULL)
                pbROMlo = pbCartridgePages[0];
             printf("[cap32] used internal bios!\n");
          } else if (pbCartridgeImage != NULL) {
-            printf("[cap32] loaded cart: %s\n", pbCartridgeImage);
+            printf("[cap32] loaded cart: %s\n", cart_name);
          }
          break;
    }
@@ -1110,7 +1105,7 @@ int emulator_select_ROM (void)
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
          case CPC_MODEL_PLUS:
-            if(!retro_computer_cfg.cart_loaded)
+            if(cart_name[0] == '\0')
                pbPtr += 0x1eef; // Only patch system cartridge
             break;
       }
@@ -1219,10 +1214,10 @@ int emulator_init (void)
    (void)iRomNum;
    (void)iErr;
 
-   pbGPBuffer     = GPBuffer; // general purpose buffer
-   pbRAM          = RAM;
-   pbROM          = ROM;
-   pbRegisterPage = RegisterPage; // asic buffer
+   pbGPBuffer     = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
+   pbRAM          = (uint8_t*) retro_malloc(CPC_MAX_RAM * 1024 * sizeof(uint8_t)); // allocate memory for desired amount of RAM
+   pbROM          = (uint8_t*) retro_malloc(32 * 1024 * sizeof(uint8_t));
+   pbRegisterPage = (uint8_t*) malloc(16 * 1024 * sizeof(uint8_t));
 
    if (!pbGPBuffer || !pbRAM || !pbROM || !pbRegisterPage)
       return ERR_OUT_OF_MEMORY;
@@ -1249,6 +1244,8 @@ void emulator_shutdown (void)
 
    int iRomNum;
 
+   if(pbRegisterPage)
+      free(pbRegisterPage);
    pbRegisterPage = NULL;
 
    if (pbMF2ROMbackup)
@@ -1264,6 +1261,12 @@ void emulator_shutdown (void)
    }
 
    pbROMlo = pbROMhi = pbExpansionROM = NULL;
+   if (pbROM)
+      retro_free(pbROM);
+   if (pbRAM)
+      retro_free(pbRAM);
+   if (pbGPBuffer)
+      free(pbGPBuffer);
 
    pbROM = NULL;
    pbRAM = NULL;
@@ -1284,7 +1287,7 @@ int cart_start (char *pchFileName) {
       return result;
    }
 
-   retro_computer_cfg.cart_loaded = true;
+   sprintf(cart_name,"%s",pchFileName);
 
    /* Restart emulator if initiated */
    if(emu_status & COMPUTER_READY) {
@@ -1429,6 +1432,7 @@ void video_update_tube() {
 
 int video_set_palette (void)
 {
+
    int n;
    video_update_tube();
 
@@ -1530,6 +1534,7 @@ int video_init (void)
    if (error_code)
       return error_code;
 
+   // created new offset video param for 8bit depth.
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
                      / retro_video.scr_off);
    return 0;
@@ -1967,13 +1972,12 @@ int attach_disk(char *arv, int drive)
          snprintf(diskB_name, RETRO_PATH_MAX,"%s",arv);
       }
    }
-
    return result;
 }
 
-void detach_disk(int drive)
+int detach_disk(int drive)
 {
-   if(drive == 0)
+   if(!drive)
    {
       if(driveA.altered)
       {
@@ -1993,6 +1997,8 @@ void detach_disk(int drive)
       dsk_eject(&driveB);
       diskB_name[0] = '\0';
    }
+
+   return 0;
 }
 
 void retro_loop(void)
