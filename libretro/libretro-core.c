@@ -65,17 +65,6 @@ char diskB_name[RETRO_PATH_MAX]="\0";
 char savdif_name[RETRO_PATH_MAX+16]="\0";
 char cart_name[RETRO_PATH_MAX]="\0";
 char loader_buffer[LOADER_MAX_SIZE];
-#if defined(PSP) || defined(PS2)
-__attribute__((aligned(16))) uint16_t retro_palette[256];
-#else
-uint16_t retro_palette[256];
-#endif
-
-#if defined(RENDER_GSKIT_PS2)
-static uint8_t* cpc_video_out;
-#else
-static uint16_t* cpc_video_out;
-#endif
 
 // TIME
 #include <sys/types.h>
@@ -125,6 +114,7 @@ uint32_t * video_buffer;
 uint32_t * temp_buffer;
 uint32_t * scaler_buffer;
 static uint32_t *video_ptr, *screen_ptr;
+__attribute__((aligned(16))) uint16_t retro_palette[256];
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -160,8 +150,10 @@ char retro_system_bios_directory[512];
 char retro_content_filepath[512];
 
 // software screen scaler
-void screen_null_scaler(void);
-void screen_software_scaler(void);
+static inline void screen_null_scaler(void);
+static inline void screen_software_scaler(void);
+static inline void screen_null_scaler_8bpp(void);
+static inline void screen_software_scaler_8bpp(void);
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -757,10 +749,18 @@ static void update_variables(void)
          if (strcmp(var.value, "disabled") == 0)
          {
             retro_video.screen_crop = false;
+            #ifndef M8BPP
             retro_video.draw_screen = screen_null_scaler;
+            #else
+            retro_video.draw_screen = screen_null_scaler_8bpp;
+            #endif
          } else {
             retro_video.screen_crop = true;
+            #ifndef M8BPP
             retro_video.draw_screen = screen_software_scaler;
+            #else
+            retro_video.draw_screen = screen_software_scaler_8bpp;
+            #endif
          }
       }
    }
@@ -1256,12 +1256,10 @@ void retro_init(void)
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
    scaler_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
-   cpc_video_out = retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
 
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
    memset(scaler_buffer, 0, gfx_buffer_size);
-   memset(cpc_video_out, 0, gfx_buffer_size);
 
    retro_ui_init();
 
@@ -1291,7 +1289,6 @@ void retro_deinit(void)
       dc_free(dc);
 
    retro_free(video_buffer);
-   retro_free(cpc_video_out);
    retro_free(temp_buffer);
    retro_free(scaler_buffer);
 
@@ -1400,22 +1397,9 @@ void retro_PollEvent()
    process_events();
 }
 
-__attribute__((optimize("unroll-loops"))) static inline void blit_8bpp(int size){
-   uint8_t *src_row = (uint8_t *) video_buffer;
-   uint16_t *dest_row =  (uint16_t *) cpc_video_out;
-
-   while(size--)
-   {
-      //uint8_t color = *(src_row++);
-      *(dest_row++) = retro_palette[*(src_row++)];
-   }
-}
-
-void screen_null_scaler(void)
-{
-
-#ifdef M8BPP
 #if defined(RENDER_GSKIT_PS2)
+static inline void screen_null_scaler_8bpp()
+{
    uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
 
    if (!ps2) {
@@ -1430,8 +1414,8 @@ void screen_null_scaler(void)
          return;
       }
 
-      ps2->coreTexture->Width = EMULATION_SCREEN_WIDTH;
-      ps2->coreTexture->Height = EMULATION_SCREEN_HEIGHT;
+      ps2->coreTexture->Width = retro_video.screen_render_width;
+      ps2->coreTexture->Height = retro_video.screen_render_height;
       ps2->coreTexture->PSM = GS_PSM_T8;
       ps2->coreTexture->ClutPSM = GS_PSM_CT16;
       ps2->coreTexture->Filter = GS_FILTER_LINEAR;
@@ -1441,20 +1425,63 @@ void screen_null_scaler(void)
    ps2->coreTexture->Clut = (u32*)retro_palette;
    ps2->coreTexture->Mem = (u32*)video_buffer;
 
-   video_cb(buf, EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, EMULATION_SCREEN_WIDTH << retro_video.bytes);
-#else
-      blit_8bpp(retro_video.screen_render_width * retro_video.screen_render_height);
-      video_cb(cpc_video_out, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
-#endif
-#else
-      video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
-#endif
+   video_cb(buf, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
-void screen_software_scaler(void)
+// TODO
+static inline void screen_software_scaler_8bpp(void) {}
+
+#else
+static inline void screen_null_scaler_8bpp(void)
+{
+   uint8_t *src_row = (uint8_t *) video_buffer;
+   uint16_t *dest_row = (uint16_t *) scaler_buffer;
+   int size = retro_video.screen_render_width * retro_video.screen_render_height;
+
+   while(size--)
+   {
+      //uint8_t color = *(src_row++);
+      *(dest_row++) = retro_palette[*(src_row++)];
+   }
+
+   video_cb(scaler_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
+static inline void screen_software_scaler_8bpp(void)
 {
    int width;
-   int x_max = retro_video.bps - ((EMULATION_CROP * 2) >> retro_video.raw_density_byte);
+   int x_max = retro_video.screen_render_width;
+
+   uint8_t *src_row = (uint8_t *) video_buffer;
+   uint16_t *dest_row = (uint16_t *) scaler_buffer;
+
+   for(int y = 0; y < retro_video.screen_render_height; y++)
+   {
+      src_row += EMULATION_CROP;
+      width = x_max;
+
+      do
+      {
+         *(dest_row++) = retro_palette[*(src_row++)];
+      } while(--width);
+
+      src_row += EMULATION_CROP;
+   }
+   //         printf(">>>>>>>>>>> %ix%i bps(%i)\n", retro_video.screen_render_width, retro_video.screen_render_height, retro_video.bps);
+
+   video_cb(scaler_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+#endif // RENDER_GSKIT_PS2
+
+static inline void screen_null_scaler(void)
+{
+   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+}
+
+static inline void screen_software_scaler(void)
+{
+   int width;
+   int x_max = retro_video.screen_render_width >> retro_video.raw_density_byte;
    video_ptr = video_buffer;
    screen_ptr = scaler_buffer;
 

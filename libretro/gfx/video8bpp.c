@@ -288,9 +288,9 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
          if (data & 0x80) // is the bit set?
          {
             #ifdef LOWRES
-            *(buffer_ptr++) = 0xfddf; // draw the character pixel
+            *(buffer_ptr++) = 0xdf; // draw the character pixel
             #else
-            *(buffer_ptr++) = 0xFFFF;
+            *(buffer_ptr++) = 0xff;
             #endif
          }
          else
