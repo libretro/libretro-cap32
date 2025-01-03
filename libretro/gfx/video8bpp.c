@@ -73,6 +73,7 @@ void video_retro_palette_prepare()
       color = (((i >> 5) * 31 / 7) << 11) |
                      ((((i & 0x1C) >> 2) * 63 / 7) << 5) |
                      ((i & 0x3) * 31 / 3);
+
 #if defined(RENDER_GSKIT_PS2)
       /* Index correction for PS2 GS */
       int modi = i & 63;
@@ -275,7 +276,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
    #ifdef LOWRES
    unsigned char *buffer_ptr = (unsigned char *) dest;
    #else
-   unsigned short *buffer_ptr = dest;
+   unsigned short *buffer_ptr = (uint16_t *) dest;
    #endif
 
    int height = FNT_CHAR_HEIGHT;
@@ -290,7 +291,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
             #ifdef LOWRES
             *(buffer_ptr++) = 0xdf; // draw the character pixel
             #else
-            *(buffer_ptr++) = 0xff;
+            *(buffer_ptr++) = 0xffff;
             #endif
          }
          else
@@ -303,3 +304,66 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
       buffer_ptr += CPC_SCREEN_WIDTH - (FNT_CHAR_WIDTH);
    }
 }
+
+
+
+#ifndef RENDER_GSKIT_PS2
+/**
+ * screen_blit_full_8bpp:
+ * crop a 8bpp screen to your dest render, optimized
+ **/
+ __attribute__((optimize("unroll-loops"))) void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer)
+{
+   uint8_t *src_row = (uint8_t *) video_buffer;
+   uint16_t *dest_row = (uint16_t *) dest_buffer;
+   int size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT;
+
+   while(size--)
+   {
+      *(dest_row++) = retro_palette[*(src_row++)];
+   }
+}
+
+/**
+ * screen_blit_crop_8bpp:
+ * crop a 8bpp screen to your dest render, optimized
+ **/
+void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height)
+{
+   int width;
+   int x_max = EMULATION_SCREEN_WIDTH - (EMULATION_CROP * 2);
+   int y_max = EMULATION_SCREEN_HEIGHT - (EMULATION_CROP / EMULATION_SCALE);
+
+   uint8_t *src = (uint8_t *) video_buffer;
+   uint16_t *dest = (uint16_t *) dest_buffer;
+
+   while(y_max--)
+   {
+      src += EMULATION_CROP;
+      width = x_max;
+
+      do
+      {
+         *(dest++) = retro_palette[*(src++)];
+      } while(--width);
+
+      src += EMULATION_CROP;
+   }
+}
+
+#else // RENDER_GSKIT_PS2
+static inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer, const u_int16_t render_width, u_int16_t render_height)
+{
+   // uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+
+   ps2->coreTexture->Clut = (uint32_t *) retro_palette;
+   ps2->coreTexture->Mem = (uint32_t *) video_buffer;
+
+   // video_cb(buf, render_width, render_height, render_width << retro_video.bytes);
+}
+
+// TODO
+static inline void void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t _width, u_int16_t _height)
+{}
+
+#endif

@@ -88,10 +88,11 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 //#define NO_EXTRA_HW // remove MF2 support
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
-#define LOWRES
-//#define M16BPP
-#define M8BPP
 //#define MOUSE_RELATIVE // mouse relative movement
+
+//#define LOWRES // use lowres mode 384x272 (320x240 with crop)
+//#define M16BPP // force only 16bpps
+//#define M8BPP // force only 8bpps
 
 #define PIXEL_TRANSPARENT 0x0000
 #define PIXEL_DEPTH_DEFAULT_SIZE 4

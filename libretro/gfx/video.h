@@ -39,6 +39,10 @@
 #ifndef GFX_VIDEO_H__
 #define GFX_VIDEO_H__
 
+#ifdef RENDER_GSKIT_PS2
+#include "libretro-common/include/libretro_gskit_ps2.h"
+#endif
+
 typedef enum
 {
    DEPTH_8BPP  = 1,
@@ -72,6 +76,14 @@ typedef struct {
    void (*draw_pixel)(uint32_t * dest, const uint32_t * img);
    void (*draw_keyboard_func)(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size);
    void (*draw_screen)(void);
+
+   void (*screen_blit_crop)(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
+   void (*screen_blit_full)(uint32_t * video_buffer, uint32_t * dest_buffer);
+
+   #ifdef RENDER_GSKIT_PS2
+   RETRO_HW_RENDER_INTEFACE_GSKIT_PS2* ps2;
+   #endif
+
 } retro_video_t;
 extern retro_video_t retro_video;
 
@@ -110,6 +122,12 @@ void draw_char_24bpp(uint32_t * dest, const unsigned char *font_data, unsigned i
 void draw_pixel_8bpp(uint32_t * dest, const uint32_t * img);
 void draw_pixel_16bpp(uint32_t * dest, const uint32_t * img);
 void draw_pixel_24bpp(uint32_t * dest, const uint32_t * img);
+
+void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
+void screen_blit_crop(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
+
+void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer);
+void screen_blit_full(uint32_t * video_buffer, uint32_t * dest_buffer);
 
 // Index color CLUT config RRRGGGBB
 #define EXTRACT_RED(i) (((i) >> 5) & 0x111)
