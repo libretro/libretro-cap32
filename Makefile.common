@@ -31,6 +31,7 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/dsk/amsdos_catalog.c \
 	$(CORE_DIR)/libretro/gfx/software.c \
 	$(CORE_DIR)/libretro/gfx/video.c \
+	$(CORE_DIR)/libretro/gfx/video8bpp.c \
 	$(CORE_DIR)/libretro/gfx/video16bpp.c \
 	$(CORE_DIR)/libretro/gfx/video24bpp.c \
 	$(CORE_DIR)/libretro/assets/ui_keyboard_bg_crop.c \

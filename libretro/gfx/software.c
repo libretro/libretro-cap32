@@ -108,7 +108,7 @@ void draw_text(uint32_t * buffer, int x, int y, const char *text, uint32_t color
  * simple function to draw an image that occupies the entire screen
  * does not need to recalculate the position after each line.
  **/
-void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
+void draw_image_linear(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size)
 {
    buffer = (buffer + x) + (y * retro_video.bps);
 
@@ -130,7 +130,7 @@ void draw_image_linear(unsigned int * buffer, const unsigned int * img, int x, i
  * function to draw an image with blending that occupies the entire screen
  * does not need to recalculate the position after each line.
  **/
-void draw_image_linear_blend(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
+void draw_image_linear_blend(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size)
 {
    buffer = (buffer + x) + (y * retro_video.bps);
 
@@ -151,7 +151,7 @@ void draw_image_linear_blend(unsigned int * buffer, const unsigned int * img, in
  * convert_image:
  * convert intenal UI images to current depth mode (using video depth driver)
  **/
-void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int size)
+void convert_image(uint32_t * buffer, const uint32_t * img, unsigned int size)
 {
    retro_video.convert_image(buffer, img, size);
 }
@@ -161,7 +161,7 @@ void convert_image(unsigned int * buffer, const unsigned int * img, unsigned int
  * draw a image with full transparency or not (no blend)
  * used by KoS letters
  **/
-void draw_image_transparent(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size)
+void draw_image_transparent(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size)
 {
    uint32_t * buffer_ptr = (
       (uint32_t *) (buffer + x) + (y * retro_video.bps)

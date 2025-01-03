@@ -1498,6 +1498,14 @@ void video_set_style (void)
          else
             CPC.scr_render = (void(*)(void))render32bpp;
          break;
+      case 8:
+         CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_8bpp;
+         CPC.rgb2color = rgb2color_8bpp;
+         if(dwYScale == 2)
+            CPC.scr_render = (void(*)(void))render8bpp_doubleY;
+         else
+            CPC.scr_render = (void(*)(void))render8bpp;
+         break;
       case 16:
       case 15:
       default:
@@ -1526,9 +1534,9 @@ int video_init (void)
    if (error_code)
       return error_code;
 
+   // created new offset video param for 8bit depth.
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
-                     / (2 / retro_video.bytes) ) ;
-
+                     / retro_video.scr_off);
    return 0;
 }
 

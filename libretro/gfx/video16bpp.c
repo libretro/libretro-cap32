@@ -97,7 +97,7 @@ static INLINE unsigned int convert_color(unsigned int colour)
  * draw_pixel_16bpp:
  * simple method to emulate a transparency, almost slow but is only used on init
  **/
-void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img)
+void draw_pixel_16bpp(uint32_t * dest, const uint32_t * img)
 {
    uint16_t * buffer_ptr = (uint16_t *) dest;
    uint16_t * img_ptr = (uint16_t *) img;
@@ -116,7 +116,7 @@ void draw_pixel_16bpp(unsigned int * dest, const unsigned int * img)
  * convert_image_16bpp:
  * convert raw image to 16bpp, used on init
  **/
-void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size)
+void convert_image_16bpp(uint32_t * dest, const uint32_t * img, int size)
 {
    uint16_t * buffer_ptr = (uint16_t *) dest;
    while (size--)
@@ -132,7 +132,7 @@ void convert_image_16bpp(unsigned int * dest, const unsigned int * img, int size
  * draw_line_16bpp:
  * copy a 16bpp color to your dest, optimized
  **/
-void draw_line_16bpp(unsigned int * dest, int width, unsigned int colour)
+void draw_line_16bpp(uint32_t * dest, int width, unsigned int colour)
 {
    // prepare copy using 32bits
    colour += colour << 16;
@@ -146,7 +146,7 @@ void draw_line_16bpp(unsigned int * dest, int width, unsigned int colour)
  * draw_char_16bpp:
  * draw a 16bpp char to your dest, optimized
  **/
-void draw_char_16bpp(unsigned int * dest, const unsigned char *font_data, unsigned int colour)
+void draw_char_16bpp(uint32_t * dest, const unsigned char *font_data, unsigned int colour)
 {
    #ifdef LOWRES
    unsigned short *buffer_ptr = (unsigned short *) dest;
