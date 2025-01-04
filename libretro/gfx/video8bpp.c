@@ -355,8 +355,8 @@ __attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * 
 #else // RENDER_GSKIT_PS2
 inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer)
 {
-   ps2->coreTexture->Clut = (uint32_t *) retro_palette;
-   ps2->coreTexture->Mem = (uint32_t *) video_buffer;
+   retro_video.ps2->coreTexture->Clut = (uint32_t *) retro_palette;
+   retro_video.ps2->coreTexture->Mem = (uint32_t *) video_buffer;
 }
 
 // TODO
