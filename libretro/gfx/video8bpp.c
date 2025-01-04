@@ -360,7 +360,7 @@ inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buff
 }
 
 // TODO
-inline void void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t _width, uint16_t _height)
+inline void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t _width, uint16_t _height)
 {}
 
 #endif
