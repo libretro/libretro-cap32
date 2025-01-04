@@ -1276,6 +1276,26 @@ void retro_init(void)
    // Some third-party retroarch UI do not call retro_set_controller_port_device
    // by default, setup gun as disabled as part of emulator startup.
    lightgun_prepare(LIGHTGUN_TYPE_NONE);
+
+   #ifdef RENDER_GSKIT_PS2
+   if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&retro_video.ps2) || !retro_video.ps2) {
+      LOGE(" Failed to get HW rendering interface!\n");
+      return;
+   }
+
+   if (retro_video.ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+      LOGE(" HW render interface mismatch, expected %u, got %u!\n",
+               RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, retro_video.ps2->interface_version);
+      return;
+   }
+
+   retro_video.ps2->coreTexture->Width = retro_video.screen_render_width;
+   retro_video.ps2->coreTexture->Height = retro_video.screen_render_height;
+   retro_video.ps2->coreTexture->PSM = GS_PSM_T8;
+   retro_video.ps2->coreTexture->ClutPSM = GS_PSM_CT16;
+   retro_video.ps2->coreTexture->Filter = GS_FILTER_LINEAR;
+   retro_video.ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
+   #endif
 }
 
 void retro_deinit(void)
@@ -1365,28 +1385,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->timing.sample_rate = 44100.0;
 
    LOGI("[retro_get_system_av_info] %ux%u snd: %i\n", retro_video.screen_render_width, retro_video.screen_render_height, (int) info->timing.sample_rate);
-
-
-   #ifdef RENDER_GSKIT_PS2
-   if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&retro_video.ps2) || !retro_video.ps2) {
-      LOGE(" Failed to get HW rendering interface!\n");
-      return;
-   }
-
-   if (retro_video.ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
-      LOGE(" HW render interface mismatch, expected %u, got %u!\n",
-               RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, retro_video.ps2->interface_version);
-      return;
-   }
-
-   retro_video.ps2->coreTexture->Width = retro_video.screen_render_width;
-   retro_video.ps2->coreTexture->Height = retro_video.screen_render_height;
-   retro_video.ps2->coreTexture->PSM = GS_PSM_T8;
-   retro_video.ps2->coreTexture->ClutPSM = GS_PSM_CT16;
-   retro_video.ps2->coreTexture->Filter = GS_FILTER_LINEAR;
-   retro_video.ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
-   #endif
-
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
