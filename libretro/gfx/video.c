@@ -44,6 +44,10 @@
 #include "crtc.h"
 
 extern t_VDU VDU;
+#ifdef RENDER_GSKIT_PS2
+extern retro_environment_t environ_cb;
+extern retro_log_printf_t log_cb;
+#endif
 
 /**
  * video_setup:
@@ -51,6 +55,18 @@ extern t_VDU VDU;
  **/
 void video_setup(retro_video_depth_t video_depth)
 {
+    // crop screen borders
+    retro_video.vertical_hold = retro_video.screen_crop
+        ? MIN_VHOLD_CROP
+        : MIN_VHOLD;
+    retro_video.screen_render_width = retro_video.screen_crop
+        ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
+        : EMULATION_SCREEN_WIDTH;
+    retro_video.screen_render_height = retro_video.screen_crop
+        ? CPC_SCREEN_HEIGHT - 32
+        : CPC_SCREEN_HEIGHT;
+
+    // per video depth configuration
     switch (video_depth)
     {
     case DEPTH_8BPP:
@@ -82,8 +98,8 @@ void video_setup(retro_video_depth_t video_depth)
             return;
         }
 
-        retro_video.ps2->coreTexture->Width = render_width;
-        retro_video.ps2->coreTexture->Height = render_height;
+        retro_video.ps2->coreTexture->Width = retro_video.screen_render_width;
+        retro_video.ps2->coreTexture->Height = retro_video.screen_render_height;
         retro_video.ps2->coreTexture->PSM = GS_PSM_T8;
         retro_video.ps2->coreTexture->ClutPSM = GS_PSM_CT16;
         retro_video.ps2->coreTexture->Filter = GS_FILTER_LINEAR;
@@ -134,23 +150,15 @@ void video_setup(retro_video_depth_t video_depth)
     retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
     retro_video.depth = video_depth;
 
-    // crop screen borders
-    retro_video.vertical_hold = retro_video.screen_crop
-        ? MIN_VHOLD_CROP
-        : MIN_VHOLD;
-    retro_video.screen_render_width = retro_video.screen_crop
-        ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
-        : EMULATION_SCREEN_WIDTH;
-    retro_video.screen_render_height = retro_video.screen_crop
-        ? CPC_SCREEN_HEIGHT - 32
-        : CPC_SCREEN_HEIGHT;
+   // by default no blending
+   retro_video.draw_keyboard_func = draw_image_linear;
 }
 
 /**
  * screen_blit_crop:
  * Blits video when screen is cropped. Works for 16/24bits.
  **/
-void screen_blit_crop(uint32_t * src, uint32_t * dest, const u_int16_t render_width, u_int16_t render_height)
+void screen_blit_crop(uint32_t * src, uint32_t * dest, const uint16_t render_width, uint16_t render_height)
 {
    int width;
    int x_max = render_width >> retro_video.raw_density_byte;

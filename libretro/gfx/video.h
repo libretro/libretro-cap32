@@ -77,7 +77,7 @@ typedef struct {
    void (*draw_keyboard_func)(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size);
    void (*draw_screen)(void);
 
-   void (*screen_blit_crop)(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
+   void (*screen_blit_crop)(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t render_width, uint16_t render_height);
    void (*screen_blit_full)(uint32_t * video_buffer, uint32_t * dest_buffer);
 
    #ifdef RENDER_GSKIT_PS2
@@ -123,8 +123,8 @@ void draw_pixel_8bpp(uint32_t * dest, const uint32_t * img);
 void draw_pixel_16bpp(uint32_t * dest, const uint32_t * img);
 void draw_pixel_24bpp(uint32_t * dest, const uint32_t * img);
 
-void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
-void screen_blit_crop(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height);
+void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t render_width, uint16_t render_height);
+void screen_blit_crop(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t render_width, uint16_t render_height);
 
 void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer);
 void screen_blit_full(uint32_t * video_buffer, uint32_t * dest_buffer);

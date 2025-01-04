@@ -329,7 +329,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
  * screen_blit_crop_8bpp:
  * crop a 8bpp screen to your dest render, optimized
  **/
-__attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height)
+__attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t render_width, uint16_t render_height)
 {
    int width;
    int x_max = EMULATION_SCREEN_WIDTH - (EMULATION_CROP * 2);
@@ -353,18 +353,14 @@ __attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * 
 }
 
 #else // RENDER_GSKIT_PS2
-static inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer, const u_int16_t render_width, u_int16_t render_height)
+inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer)
 {
-   // uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
-
    ps2->coreTexture->Clut = (uint32_t *) retro_palette;
    ps2->coreTexture->Mem = (uint32_t *) video_buffer;
-
-   // video_cb(buf, render_width, render_height, render_width << retro_video.bytes);
 }
 
 // TODO
-static inline void void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t _width, u_int16_t _height)
+inline void void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t _width, uint16_t _height)
 {}
 
 #endif

@@ -1241,9 +1241,6 @@ void retro_init(void)
    retro_computer_cfg.statusbar = STATUSBAR_HIDE;
    retro_computer_cfg.use_internal_remap = false;
 
-   // by default no blending
-   retro_video.draw_keyboard_func = draw_image_linear;
-
    update_variables();
 
    #ifdef LOWRES
