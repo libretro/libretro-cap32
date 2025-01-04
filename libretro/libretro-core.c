@@ -1484,13 +1484,13 @@ bool retro_load_game(const struct retro_game_info *game)
    #ifdef RENDER_GSKIT_PS2
    if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&retro_video.ps2) || !retro_video.ps2) {
       LOGE(" Failed to get HW rendering interface!\n");
-      return;
+      return false;
    }
 
    if (retro_video.ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
       LOGE(" HW render interface mismatch, expected %u, got %u!\n",
                RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, retro_video.ps2->interface_version);
-      return;
+      return false;
    }
 
    retro_video.ps2->coreTexture->Width = retro_video.screen_render_width;
