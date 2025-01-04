@@ -150,6 +150,7 @@ void video_ui_palette_8bpp()
    ui_palette[13].idx = 242;
    ui_palette[14].idx = 25;
    ui_palette[15].idx = 73;
+   ui_palette[16].idx = 52; // fix crop keyb_bg
    ui_palette[20].idx = 38;
    ui_palette[21].idx = 51;
    ui_palette[22].idx = 0;
@@ -328,7 +329,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
  * screen_blit_crop_8bpp:
  * crop a 8bpp screen to your dest render, optimized
  **/
-void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height)
+__attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const u_int16_t render_width, u_int16_t render_height)
 {
    int width;
    int x_max = EMULATION_SCREEN_WIDTH - (EMULATION_CROP * 2);
