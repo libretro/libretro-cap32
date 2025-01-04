@@ -55,18 +55,6 @@ extern retro_log_printf_t log_cb;
  **/
 void video_setup(retro_video_depth_t video_depth)
 {
-    // crop screen borders
-    retro_video.vertical_hold = retro_video.screen_crop
-        ? MIN_VHOLD_CROP
-        : MIN_VHOLD;
-    retro_video.screen_render_width = retro_video.screen_crop
-        ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
-        : EMULATION_SCREEN_WIDTH;
-    retro_video.screen_render_height = retro_video.screen_crop
-        ? CPC_SCREEN_HEIGHT - 32
-        : CPC_SCREEN_HEIGHT;
-
-    // per video depth configuration
     switch (video_depth)
     {
     case DEPTH_8BPP:
@@ -85,26 +73,6 @@ void video_setup(retro_video_depth_t video_depth)
         retro_video.blend_mask = 0x08210821;
         retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
         retro_video.char_size = 2;
-
-        #ifdef RENDER_GSKIT_PS2
-        if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&retro_video.ps2) || !retro_video.ps2) {
-            LOGE(" Failed to get HW rendering interface!\n");
-            return;
-        }
-
-        if (retro_video.ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
-            LOGE(" HW render interface mismatch, expected %u, got %u!\n",
-                    RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, retro_video.ps2->interface_version);
-            return;
-        }
-
-        retro_video.ps2->coreTexture->Width = retro_video.screen_render_width;
-        retro_video.ps2->coreTexture->Height = retro_video.screen_render_height;
-        retro_video.ps2->coreTexture->PSM = GS_PSM_T8;
-        retro_video.ps2->coreTexture->ClutPSM = GS_PSM_CT16;
-        retro_video.ps2->coreTexture->Filter = GS_FILTER_LINEAR;
-        retro_video.ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
-        #endif
 
         video_ui_palette_8bpp();
         break;
@@ -149,6 +117,17 @@ void video_setup(retro_video_depth_t video_depth)
     // cached values
     retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
     retro_video.depth = video_depth;
+
+    // crop screen borders
+    retro_video.vertical_hold = retro_video.screen_crop
+        ? MIN_VHOLD_CROP
+        : MIN_VHOLD;
+    retro_video.screen_render_width = retro_video.screen_crop
+        ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
+        : EMULATION_SCREEN_WIDTH;
+    retro_video.screen_render_height = retro_video.screen_crop
+        ? CPC_SCREEN_HEIGHT - 32
+        : CPC_SCREEN_HEIGHT;
 
    // by default no blending
    retro_video.draw_keyboard_func = draw_image_linear;
