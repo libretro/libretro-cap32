@@ -313,7 +313,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
  * screen_blit_full_8bpp:
  * crop a 8bpp screen to your dest render, optimized
  **/
- __attribute__((optimize("unroll-loops"))) void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer)
+ __attribute__((optimize("unroll-loops"))) void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t _width, uint16_t _height)
 {
    uint8_t *src_row = (uint8_t *) video_buffer;
    uint16_t *dest_row = (uint16_t *) dest_buffer;
@@ -329,7 +329,7 @@ void draw_char_8bpp(uint32_t * dest, const unsigned char *font_data, unsigned in
  * screen_blit_crop_8bpp:
  * crop a 8bpp screen to your dest render, optimized
  **/
-__attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t render_width, uint16_t render_height)
+__attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t _width, uint16_t _height)
 {
    int width;
    int x_max = EMULATION_SCREEN_WIDTH - (EMULATION_CROP * 2);
@@ -353,15 +353,20 @@ __attribute__((optimize("unroll-loops"))) void screen_blit_crop_8bpp(uint32_t * 
 }
 
 #else // RENDER_GSKIT_PS2
-void init_ps2_hw_render(void)
+
+/**
+ * init_ps2_hw_render:
+ * PS2 interface is not ready until retro_run was called.
+ **/
+void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t width, uint16_t height)
 {
    if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&retro_video.ps2) || !retro_video.ps2) {
-      LOGE(" Failed to get HW rendering interface!\n");
+      LOGE("Failed to get HW rendering interface!\n");
       return;
    }
 
    if (retro_video.ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
-      LOGE(" HW render interface mismatch, expected %u, got %u!\n",
+      LOGE("HW render interface mismatch, expected %u, got %u!\n",
                RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, retro_video.ps2->interface_version);
       return;
    }
@@ -372,19 +377,29 @@ void init_ps2_hw_render(void)
    retro_video.ps2->coreTexture->ClutPSM = GS_PSM_CT16;
    retro_video.ps2->coreTexture->Filter = GS_FILTER_LINEAR;
    retro_video.ps2->padding = (struct retro_hw_ps2_insets){ 0.0f, 0.0f, 0.0f, 0.0f};
+
+   // configure the correct blitter.
+   retro_video.screen_blit = retro_video.screen_crop
+      ? screen_blit_crop_8bpp
+      : screen_blit_full_8bpp;
+
+   // call blit manually this time.
+   retro_video.screen_blit(video_buffer, dest_buffer, width, height);
+
+   LOGI("HW render interface completed v(%u)\n", retro_video.ps2->interface_version);
 }
 
-inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer)
+inline void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * _dest_buffer, uint16_t _width, uint16_t _height)
 {
-   if (!retro_video.ps2)
-      init_ps2_hw_render();
+   // if (!retro_video.ps2)
+   //    init_ps2_hw_render();
 
    retro_video.ps2->coreTexture->Clut = (u32 *) retro_palette; // Even being both `uint32_t` the types are defined as `u32` in the PS2 gsKit
    retro_video.ps2->coreTexture->Mem = (u32 *) video_buffer; // Even being both `uint32_t` the types are defined as `u32` in the PS2 gsKit
 }
 
 // TODO
-inline void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, const uint16_t _width, uint16_t _height)
+inline void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t _width, uint16_t _height)
 {}
 
 #endif

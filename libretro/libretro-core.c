@@ -145,8 +145,6 @@ char retro_content_filepath[512];
 
 // software screen scaler
 static inline void screen_draw(void);
-static inline void screen_draw_8bpp(void);
-static inline void screen_draw_crop(void);
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -742,10 +740,8 @@ static void update_variables(void)
          if (strcmp(var.value, "disabled") == 0)
          {
             retro_video.screen_crop = false;
-            retro_video.draw_screen = screen_draw;
          } else {
             retro_video.screen_crop = true;
-            retro_video.draw_screen = screen_draw_crop;
          }
       }
    }
@@ -761,13 +757,6 @@ static void update_variables(void)
          {
             video_setup(DEPTH_8BPP);
             video_retro_palette_prepare();
-
-            // FIXME: atm we need set the custom 8bpp draw.
-            if (!retro_video.screen_crop)
-            {
-               retro_video.draw_screen = screen_draw_8bpp;
-            }
-
          }
          else if (strcmp(var.value, "24bit") == 0)
          {
@@ -1408,19 +1397,8 @@ void retro_PollEvent()
 
 static inline void screen_draw(void)
 {
+   retro_video.screen_blit(video_buffer, render_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
    video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
-}
-
-static inline void screen_draw_8bpp(void)
-{
-   retro_video.screen_blit_full(video_buffer, render_buffer);
-   video_cb(render_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
-}
-
-static inline void screen_draw_crop(void)
-{
-   retro_video.screen_blit_crop(video_buffer, render_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
-   video_cb(render_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
 void retro_run(void)
@@ -1439,7 +1417,7 @@ void retro_run(void)
    retro_ui_process();
    lightgun_cfg.gun_draw();
 
-   retro_video.draw_screen();
+   screen_draw();
 }
 
 bool retro_load_game(const struct retro_game_info *game)
