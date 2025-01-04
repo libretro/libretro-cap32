@@ -44,10 +44,6 @@
 #include "crtc.h"
 
 extern t_VDU VDU;
-#ifdef RENDER_GSKIT_PS2
-extern retro_environment_t environ_cb;
-extern retro_log_printf_t log_cb;
-#endif
 
 /**
  * video_setup:
