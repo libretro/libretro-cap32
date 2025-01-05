@@ -103,7 +103,7 @@ extern void play_tape();
 uint32_t * video_buffer;
 uint32_t * draw_buffer;
 uint32_t * temp_buffer;
-uint32_t * render_buffer;
+uint32_t * work_buffer;
 __attribute__((aligned(16))) uint16_t retro_palette[256];
 
 int32_t* audio_buffer = NULL;
@@ -1157,7 +1157,7 @@ void retro_init(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
       // if defined, use the system directory
-      retro_system_directory=system_dir;
+      retro_system_directory = system_dir;
    }
 
    const char *content_dir = NULL;
@@ -1165,7 +1165,7 @@ void retro_init(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_CONTENT_DIRECTORY, &content_dir) && content_dir)
    {
       // if defined, use the system directory
-      retro_content_directory=content_dir;
+      retro_content_directory = content_dir;
    }
 
    const char *save_dir = NULL;
@@ -1178,7 +1178,7 @@ void retro_init(void)
    else
    {
       // make retro_save_directory the same in case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY is not implemented by the frontend
-      retro_save_directory=retro_system_directory;
+      retro_save_directory = retro_system_directory;
    }
 
    if(retro_system_directory == NULL)
@@ -1244,15 +1244,16 @@ void retro_init(void)
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
 
    #ifdef RENDER_GSKIT_PS2
-   render_buffer = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+   // set work_buffer pointing to the hardware PS2 internal buffer.
+   work_buffer = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
    #else
-   render_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
-   memset(render_buffer, 0, gfx_buffer_size);
+   work_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
+   memset(work_buffer, 0, gfx_buffer_size);
    #endif
 
    // set draw_buffer for libretro rendering.
    draw_buffer = (retro_video.depth == DEPTH_8BPP || retro_video.screen_crop )
-      ? render_buffer
+      ? work_buffer
       : video_buffer;
 
    retro_ui_init();
@@ -1291,7 +1292,7 @@ void retro_deinit(void)
 
    // PS2 render buffer is internal
    #ifndef RENDER_GSKIT_PS2
-   retro_free(render_buffer);
+   retro_free(work_buffer);
    #endif
 
    LOGI("Retro DeInit\n");
@@ -1397,7 +1398,7 @@ void retro_PollEvent()
 
 static inline void screen_draw(void)
 {
-   retro_video.screen_blit(video_buffer, render_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
+   retro_video.screen_blit(video_buffer, work_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
    video_cb(draw_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
