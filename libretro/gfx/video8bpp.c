@@ -390,7 +390,7 @@ void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_
    retro_video.ps2->coreTexture->Clut = (u32 *) retro_palette; // Even being both `uint32_t` the types are defined as `u32` in the PS2 gsKit
    retro_video.ps2->coreTexture->Mem = (u32 *) video_buffer; // Even being both `uint32_t` the types are defined as `u32` in the PS2 gsKit
 
-   LOGI("HW render interface completed v(%u)\n", retro_video.ps2->interface_version);
+   LOGI("HW render interface initialization complete (v%u)\n", retro_video.ps2->interface_version);
 }
 
 // TODO

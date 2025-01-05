@@ -123,19 +123,9 @@ void draw_pixel_16bpp(uint32_t * dest, const uint32_t * img);
 void draw_pixel_24bpp(uint32_t * dest, const uint32_t * img);
 
 void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
+void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
 void screen_blit_crop(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
 
-void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
-void screen_blit_full(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
-
-#if defined (RENDER_GSKIT_PS2)
-void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t width, uint16_t height);
-#endif
-
-// Index color CLUT config RRRGGGBB
-#define EXTRACT_RED(i) (((i) >> 5) & 0x111)
-#define EXTRACT_GREEN(i) (((i) >> 2) & 0x111)
-#define EXTRACT_BLUE(i) (((i) >> 0) & 0x11)
 
 #if defined (FRONTEND_SUPPORTS_ABGR1555)
 #define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
@@ -158,9 +148,18 @@ void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_
 
 #endif
 
+#if defined (RENDER_GSKIT_PS2)
+void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t width, uint16_t height);
+
+// Index color CLUT config RRRGGGBB
+#define EXTRACT_RED(i) (((i) >> 5) & 0x111)
+#define EXTRACT_GREEN(i) (((i) >> 2) & 0x111)
+#define EXTRACT_BLUE(i) (((i) >> 0) & 0x11)
+
 #define BUILD_CLUT_COLOR_FOR_INDEX(i) \
    (EXPAND_RED(EXTRACT_RED(i)) << RED_SHIFT) | \
    (EXPAND_GREEN(EXTRACT_GREEN(i)) << GREEN_SHIFT) | \
    (EXPAND_BLUE(EXTRACT_BLUE(i)) << BLUE_SHIFT)
+#endif // RENDER_GSKIT_PS2
 
-#endif
+#endif // GFX_VIDEO_H__
