@@ -1,0 +1,6 @@
+input_player1_key_start = "50"
+
+input_player1_key_b = "51"
+input_player1_key_b_name = "2 Players"
+
+entry_hash_1 = 0x90b13e33 # (UK) (1986)

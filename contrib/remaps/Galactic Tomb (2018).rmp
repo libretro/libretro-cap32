@@ -1,0 +1,18 @@
+# CURSORS
+input_player1_key_up = "273"
+input_player1_key_down = "274"
+input_player1_key_left = "276"
+input_player1_key_right = "275"
+
+input_player1_key_start = "49"
+
+input_player1_key_a = "273"
+input_player1_key_a_name = "Jump"
+input_player1_key_b = "122"
+input_player1_key_b_name = "Fire"
+input_player1_key_x = "121"
+input_player1_key_x_name = "Fire 2"
+input_player1_key_y = "115"
+input_player1_key_y_name = "Music / Sfx"
+
+entry_hash_1 = 0xfe13c50 # (S) (2018) v1.4 [Original]
