@@ -1,4 +1,6 @@
 # Future
+- VIDEO: Added 8bpp mode thx @fjtrujy for your help.
+- DB: sync clean-cpc-db v1.3
 - GUN: Fixed gunstick init.
 - DB: sync clean-cpc-db v1.2
 - RMP: Added Amsoft loader fixes and new classics and puzzle games.
