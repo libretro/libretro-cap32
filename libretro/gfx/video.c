@@ -90,7 +90,7 @@ void video_setup(retro_video_depth_t video_depth)
         retro_video.draw_pixel = draw_pixel_24bpp;
         retro_video.screen_blit = retro_video.screen_crop
             ? screen_blit_crop
-            : screen_blit_full;
+            : NULL;
         retro_video.cursor_color = 0xCCCCCC;
         retro_video.blend_mask = 0x10101;
         retro_video.fmt = RETRO_PIXEL_FORMAT_XRGB8888;
@@ -109,7 +109,7 @@ void video_setup(retro_video_depth_t video_depth)
         retro_video.draw_pixel = draw_pixel_16bpp;
         retro_video.screen_blit = retro_video.screen_crop
             ? screen_blit_crop
-            : screen_blit_full;
+            : NULL;
         retro_video.cursor_color = 0xCE79;
         retro_video.blend_mask = 0x08210821;
         retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
@@ -158,6 +158,3 @@ void screen_blit_crop(uint32_t * src, uint32_t * dest, uint16_t render_width, ui
       src += EMULATION_CROP >> retro_video.raw_density_byte;
    }
 }
-
-void screen_blit_full(uint32_t * _src, uint32_t * _dest, uint16_t _width, uint16_t _height)
-{}

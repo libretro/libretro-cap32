@@ -1398,7 +1398,9 @@ void retro_PollEvent()
 
 static inline void screen_draw(void)
 {
-   retro_video.screen_blit(video_buffer, work_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
+   if (retro_video.screen_blit)
+      retro_video.screen_blit(video_buffer, work_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
+
    video_cb(draw_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
