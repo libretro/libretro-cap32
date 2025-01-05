@@ -63,9 +63,6 @@ t_lightgun_cfg lightgun_cfg;
 
 static uint32_t cursor_color = 0;
 
-void lightgun_void(void){}
-unsigned char lightgun_void_IN(void){ return 0xff; }
-
 void lightgun_prepare(lightgun_type guntype)
 {
    cursor_color = retro_video.cursor_color;
@@ -88,11 +85,11 @@ void lightgun_prepare(lightgun_type guntype)
          break;
 
       default:
-         lightgun_cfg.gun_draw = lightgun_void;
-         lightgun_cfg.gun_update = lightgun_void;
-         CPC.gun_CRTC = lightgun_void;
-         CPC.gun_IN = lightgun_void_IN;
-         CPC.gun_OUT = lightgun_void;
+         lightgun_cfg.gun_draw = NULL;
+         lightgun_cfg.gun_update = NULL;
+         CPC.gun_CRTC = NULL;
+         CPC.gun_IN = NULL;
+         CPC.gun_OUT = NULL;
          break;
    }
 

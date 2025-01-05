@@ -510,7 +510,10 @@ uint8_t z80_IN_handler (reg_pair port)
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
 
                            if ((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
-                              ret_val &= CPC.gun_IN(); //checking and return gun value
+                              //checking and return gun value
+                              ret_val &= CPC.gun_IN
+                                 ? CPC.gun_IN()
+                                 : 0xff;
                            }
                         } else {
                            ret_val = PSG.RegisterAY.Index[14] & (keyboard_matrix[CPC.keyboard_line & 0x0f]); // return last value w/ logic AND of input
@@ -962,7 +965,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       if (!(port.b.l & 0x80)) { // FDC data register?
          fdc_write_data(val);
       }
-      if (port.b.l == 0xfe) { // Amstrad Magnum Phazer
+      if ((port.b.l == 0xfe) && (CPC.gun_OUT)) { // Amstrad Magnum Phazer
          CPC.gun_OUT();
       }
    }
@@ -1498,6 +1501,14 @@ void video_set_style (void)
          else
             CPC.scr_render = (void(*)(void))render32bpp;
          break;
+      case 8:
+         CPC.video_set_palette_antialias = (void(*)(void)) video_set_palette_antialias_8bpp;
+         CPC.rgb2color = rgb2color_8bpp;
+         if(dwYScale == 2)
+            CPC.scr_render = (void(*)(void))render8bpp_doubleY;
+         else
+            CPC.scr_render = (void(*)(void))render8bpp;
+         break;
       case 16:
       case 15:
       default:
@@ -1526,9 +1537,9 @@ int video_init (void)
    if (error_code)
       return error_code;
 
+   // created new offset video param for 8bit depth.
    CPC.scr_line_offs = ((CPC.scr_bps * (dwYScale)) // because is double height
-                     / (2 / retro_video.bytes) ) ;
-
+                     / retro_video.scr_off);
    return 0;
 }
 

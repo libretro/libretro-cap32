@@ -71,7 +71,7 @@ static char ui_string[32];
 static mu_Context *ctx;
 
 // VIDEO draw keyboard cached function
-static void (*draw_keyboard)(unsigned int * buffer, const unsigned int * img, int x, int y, unsigned int size);
+static void (*draw_keyboard)(uint32_t * buffer, const uint32_t * img, int x, int y, unsigned int size);
 
 // UI INTERNAL VALUES
 #define INTERNAL_UI_KEYBOARD  2
@@ -209,8 +209,8 @@ void retro_ui_prepare(void)
    convert_image(
       keyboard_surface,
       retro_video.screen_crop
-         ? (const unsigned int *) ui_keyboard_bg_crop
-         : (const unsigned int *) ui_keyboard_bg,
+         ? (const uint32_t *) ui_keyboard_bg_crop
+         : (const uint32_t *) ui_keyboard_bg,
       IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
    );
 
@@ -225,7 +225,7 @@ void retro_ui_prepare(void)
    // and blit to keyboard_surface to optimize draw KoS
    convert_image(
       keyboard_lang,
-      (const unsigned int *) ui_keyboard_lang,
+      (const uint32_t *) ui_keyboard_lang,
       IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH
    );
    draw_image_transparent(keyboard_surface, keyboard_lang, 0, 0, IMG_KEYBOARD_HEIGHT * IMG_KEYBOARD_WIDTH);
@@ -310,7 +310,6 @@ void retro_ui_init(void)
 
    // init KoS
    keyboard_init();
-   retro_ui_prepare();
    retro_ui_update_text();
 
    // Micro UI init

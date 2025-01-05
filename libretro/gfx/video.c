@@ -54,40 +54,71 @@ void video_setup(retro_video_depth_t video_depth)
     switch (video_depth)
     {
     case DEPTH_8BPP:
+        retro_video.bytes = 1;
+        retro_video.pitch = 1;
+        retro_video.raw_density_byte = 2;
+        retro_video.scr_off = 4;
+        retro_video.rgb2color = rgb2color_8bpp;
+        retro_video.convert_image = convert_image_8bpp;
+        retro_video.draw_line = draw_line_8bpp;
+        retro_video.draw_char = draw_char_8bpp;
+        retro_video.draw_pixel = draw_pixel_8bpp;
+        #ifndef RENDER_GSKIT_PS2
+        retro_video.screen_blit = retro_video.screen_crop
+            ? screen_blit_crop_8bpp
+            : screen_blit_full_8bpp;
+        #else
+        retro_video.screen_blit = init_ps2_hw_render;
+        #endif
+        retro_video.cursor_color = 0xFFFF;
+        retro_video.blend_mask = 0x08210821;
+        retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
+        retro_video.char_size = 2;
+
+        video_ui_palette_8bpp();
         break;
 
     case DEPTH_24BPP:
         retro_video.bytes = 2;
         retro_video.pitch = 4;
         retro_video.raw_density_byte = 0;
+        retro_video.scr_off = 1;
         retro_video.rgb2color = rgb2color_24bpp;
         retro_video.convert_image = convert_image_24bpp;
         retro_video.draw_line = draw_line_24bpp;
         retro_video.draw_char = draw_char_24bpp;
         retro_video.draw_pixel = draw_pixel_24bpp;
+        retro_video.screen_blit = retro_video.screen_crop
+            ? screen_blit_crop
+            : NULL;
         retro_video.cursor_color = 0xCCCCCC;
         retro_video.blend_mask = 0x10101;
         retro_video.fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+        retro_video.char_size = (FNT_CHAR_WIDTH >> retro_video.raw_density_byte) * EMULATION_SCALE;
         break;
 
     case DEPTH_16BPP:
         retro_video.bytes = 1;
         retro_video.pitch = 2;
         retro_video.raw_density_byte = 1;
+        retro_video.scr_off = 2;
         retro_video.rgb2color = rgb2color_16bpp;
         retro_video.convert_image = convert_image_16bpp;
         retro_video.draw_line = draw_line_16bpp;
         retro_video.draw_char = draw_char_16bpp;
         retro_video.draw_pixel = draw_pixel_16bpp;
+        retro_video.screen_blit = retro_video.screen_crop
+            ? screen_blit_crop
+            : NULL;
         retro_video.cursor_color = 0xCE79;
         retro_video.blend_mask = 0x08210821;
         retro_video.fmt = RETRO_PIXEL_FORMAT_RGB565;
+        retro_video.char_size = (FNT_CHAR_WIDTH >> retro_video.raw_density_byte) * EMULATION_SCALE;
         break;
     }
 
     // cached values
     retro_video.bps = (EMULATION_SCREEN_WIDTH) >> retro_video.raw_density_byte;
-    retro_video.char_size = (FNT_CHAR_WIDTH >> retro_video.raw_density_byte) * EMULATION_SCALE;
     retro_video.depth = video_depth;
 
     // crop screen borders
@@ -100,4 +131,30 @@ void video_setup(retro_video_depth_t video_depth)
     retro_video.screen_render_height = retro_video.screen_crop
         ? CPC_SCREEN_HEIGHT - 32
         : CPC_SCREEN_HEIGHT;
+
+   // by default no blending
+   retro_video.draw_keyboard_func = draw_image_linear;
+}
+
+/**
+ * screen_blit_crop:
+ * Blits video when screen is cropped. Works for 16/24bits.
+ **/
+void screen_blit_crop(uint32_t * src, uint32_t * dest, uint16_t render_width, uint16_t render_height)
+{
+   int width;
+   int x_max = render_width >> retro_video.raw_density_byte;
+
+   while(render_height--)
+   {
+      src += EMULATION_CROP >> retro_video.raw_density_byte;
+      width = x_max;
+
+      do
+      {
+         *(dest++) = *(src++);
+      } while(--width);
+
+      src += EMULATION_CROP >> retro_video.raw_density_byte;
+   }
 }

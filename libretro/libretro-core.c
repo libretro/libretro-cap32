@@ -87,8 +87,6 @@ extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
 extern int detach_disk(int drive);
 extern int cart_start (char *pchFileName);
-extern void enter_gui(void);
-extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
 extern void doCleanUp (void);
@@ -100,15 +98,13 @@ extern size_t get_ram_size();
 extern void change_lang(int val);
 extern int snapshot_save (char *pchFileName);
 extern void play_tape();
-extern void retro_joy0(unsigned char joy0);
-extern void retro_key_down(int key);
-extern void retro_key_up(int key);
 
 //VIDEO
 uint32_t * video_buffer;
+uint32_t * draw_buffer;
 uint32_t * temp_buffer;
-uint32_t * scaler_buffer;
-static uint32_t *video_ptr, *screen_ptr;
+uint32_t * work_buffer;
+__attribute__((aligned(16))) uint16_t retro_palette[256];
 
 int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
@@ -144,8 +140,7 @@ char retro_system_bios_directory[512];
 char retro_content_filepath[512];
 
 // software screen scaler
-void screen_null_scaler(void);
-void screen_software_scaler(void);
+static inline void screen_draw(void);
 
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
@@ -191,8 +186,8 @@ int retro_getStyle(){
 }
 
 int retro_getGfxBpp(){
-    LOGI("getBPP: %u\n", 16 * retro_video.bytes);
-    return 16 * retro_video.bytes;
+    LOGI("getBPP: %u\n", 8 * retro_video.pitch);
+    return 8 * retro_video.pitch;
 }
 
 int retro_getGfxBps(){
@@ -214,8 +209,8 @@ int retro_getAudioBuffer(){
    return audio_buffer_size; // return the closest match as 2^n
 }
 
-INLINE unsigned int * retro_getScreenPtr(){
-    return (unsigned int *) video_buffer;
+INLINE uint32_t * retro_getScreenPtr(){
+    return video_buffer;
 }
 
 #include <ctype.h>
@@ -445,10 +440,12 @@ void retro_set_environment(retro_environment_t cb)
       },
       {
          "cap32_gfx_colors",
-         #ifdef M16B
+         #if defined (M16BPP)
          "Video Advanced > Color Depth; 16bit",
+         #elif defined (M8BPP)
+         "Video Advanced > Color Depth; 8bit",
          #else
-         "Video Advanced > Color Depth; 16bit|24bit",
+         "Video Advanced > Color Depth; 16bit|24bit|8bit",
          #endif
       },
       {
@@ -739,10 +736,8 @@ static void update_variables(void)
          if (strcmp(var.value, "disabled") == 0)
          {
             retro_video.screen_crop = false;
-            retro_video.draw_screen = screen_null_scaler;
          } else {
             retro_video.screen_crop = true;
-            retro_video.draw_screen = screen_software_scaler;
          }
       }
    }
@@ -754,13 +749,23 @@ static void update_variables(void)
    {
       if (!(emu_status & COMPUTER_READY))
       {
-         if (strcmp(var.value, "24bit") == 0)
+         if (strcmp(var.value, "8bit") == 0)
+         {
+            video_setup(DEPTH_8BPP);
+            video_retro_palette_prepare();
+         }
+         else if (strcmp(var.value, "24bit") == 0)
          {
             video_setup(DEPTH_24BPP);
          } else {
             video_setup(DEPTH_16BPP);
          }
       }
+   }
+
+   if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
+   {
+      retro_message("[Option] Model 6128+ only working on 24bpp modes, IGNORED!");
    }
 
    var.key = "cap32_keyboard_transparency";
@@ -771,7 +776,15 @@ static void update_variables(void)
       {
          if (strcmp(var.value, "enabled") == 0)
          {
-            retro_video.draw_keyboard_func = draw_image_linear_blend;
+            if (retro_video.depth != DEPTH_24BPP)
+            {
+               LOGI("[update_variables::warn] keyboard transparency only working on 24bpp modes.\n");
+               retro_message("[Option] Keyboard transparency only working on 24bpp modes, IGNORED!");
+               retro_video.draw_keyboard_func = draw_image_linear;
+            }
+            else {
+               retro_video.draw_keyboard_func = draw_image_linear_blend;
+            }
          } else {
             retro_video.draw_keyboard_func = draw_image_linear;
          }
@@ -804,7 +817,6 @@ static void update_variables(void)
       computer_reset();
    }
 }
-
 
 void Emu_init()
 {
@@ -1145,7 +1157,7 @@ void retro_init(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
    {
       // if defined, use the system directory
-      retro_system_directory=system_dir;
+      retro_system_directory = system_dir;
    }
 
    const char *content_dir = NULL;
@@ -1153,7 +1165,7 @@ void retro_init(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_CONTENT_DIRECTORY, &content_dir) && content_dir)
    {
       // if defined, use the system directory
-      retro_content_directory=content_dir;
+      retro_content_directory = content_dir;
    }
 
    const char *save_dir = NULL;
@@ -1166,7 +1178,7 @@ void retro_init(void)
    else
    {
       // make retro_save_directory the same in case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY is not implemented by the frontend
-      retro_save_directory=retro_system_directory;
+      retro_save_directory = retro_system_directory;
    }
 
    if(retro_system_directory == NULL)
@@ -1228,11 +1240,21 @@ void retro_init(void)
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    temp_buffer = (uint32_t *) retro_malloc(WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE);
-   scaler_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
-
    memset(video_buffer, 0, gfx_buffer_size);
    memset(temp_buffer, 0, WINDOW_MAX_SIZE * PIXEL_DEPTH_DEFAULT_SIZE); // buffer UI
-   memset(scaler_buffer, 0, gfx_buffer_size);
+
+   #ifdef RENDER_GSKIT_PS2
+   // set work_buffer pointing to the hardware PS2 internal buffer.
+   work_buffer = (uint32_t *) RETRO_HW_FRAME_BUFFER_VALID;
+   #else
+   work_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
+   memset(work_buffer, 0, gfx_buffer_size);
+   #endif
+
+   // set draw_buffer for libretro rendering.
+   draw_buffer = (retro_video.depth == DEPTH_8BPP || retro_video.screen_crop )
+      ? work_buffer
+      : video_buffer;
 
    retro_ui_init();
 
@@ -1251,6 +1273,10 @@ void retro_deinit(void)
    // disk diff before clean up
    detach_disk(0);
 
+   #ifdef RENDER_GSKIT_PS2
+   retro_video.ps2 = NULL;
+   #endif
+
    free_retro_snd();
    Emu_uninit();
    retro_ui_free();
@@ -1263,7 +1289,11 @@ void retro_deinit(void)
 
    retro_free(video_buffer);
    retro_free(temp_buffer);
-   retro_free(scaler_buffer);
+
+   // PS2 render buffer is internal
+   #ifndef RENDER_GSKIT_PS2
+   retro_free(work_buffer);
+   #endif
 
    LOGI("Retro DeInit\n");
 }
@@ -1362,36 +1392,17 @@ void retro_audio_mix_batch()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
-   lightgun_cfg.gun_update(); // update lightguns
+   if (lightgun_cfg.gun_update)
+      lightgun_cfg.gun_update(); // update lightguns
    process_events();
 }
 
-void screen_null_scaler(void)
+static inline void screen_draw(void)
 {
-   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
-}
+   if (retro_video.screen_blit)
+      retro_video.screen_blit(video_buffer, work_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
 
-void screen_software_scaler(void)
-{
-   int width;
-   int x_max = retro_video.bps - ((EMULATION_CROP * 2) >> retro_video.raw_density_byte);
-   video_ptr = video_buffer;
-   screen_ptr = scaler_buffer;
-
-   for(int y = 0; y < retro_video.screen_render_height; y++)
-   {
-      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
-      width = x_max;
-
-      do
-      {
-         *(screen_ptr++) = *(video_ptr++);
-      } while(--width);
-
-      video_ptr += EMULATION_CROP >> retro_video.raw_density_byte;
-   }
-
-   video_cb(scaler_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+   video_cb(draw_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
 void retro_run(void)
@@ -1408,9 +1419,11 @@ void retro_run(void)
 
    retro_PollEvent();
    retro_ui_process();
-   lightgun_cfg.gun_draw();
 
-   retro_video.draw_screen();
+   if (lightgun_cfg.gun_draw)
+      lightgun_cfg.gun_draw();
+
+   screen_draw();
 }
 
 bool retro_load_game(const struct retro_game_info *game)

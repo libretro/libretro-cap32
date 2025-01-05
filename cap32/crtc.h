@@ -70,6 +70,8 @@ void crtc_cycle(int repeat_count);
 void crtc_init(void);
 void crtc_reset(void);
 
+void render8bpp(void);
+void render8bpp_doubleY(void);
 void render16bpp(void);
 void render16bpp_doubleY(void);
 void render32bpp(void);

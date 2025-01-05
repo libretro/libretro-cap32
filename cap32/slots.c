@@ -709,7 +709,7 @@ int dsk_diff_load (char *pchFileName, t_drive *drive)
          }
 
          if (track->size != dwTrackSize) {
-            printf("[ERROR] [slots::dsk_diff_load] Invalid header, size changed (org: %u, new: %u).\n", track->size, dwTrackSize);
+            printf("[ERROR] [slots::dsk_diff_load] Invalid header, size changed (org: %u, new: %"PRIu32").\n", track->size, dwTrackSize);
             goto exit;
          }
 
@@ -717,7 +717,7 @@ int dsk_diff_load (char *pchFileName, t_drive *drive)
          pbTempPtr = pbDataPtr; // keep a pointer to the beginning of the buffer for the current track
 
          if (!fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
-            printf("[ERROR] [slots::dsk_diff_load] Missing data (trying read %u bytes).\n", dwTrackSize);
+            printf("[ERROR] [slots::dsk_diff_load] Missing data (trying read %"PRIu32" bytes).\n", dwTrackSize);
             iRetCode = ERR_DSK_INVALID;
             goto exit;
          }

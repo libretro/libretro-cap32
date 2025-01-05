@@ -60,6 +60,5 @@ extern t_lightgun_cfg lightgun_cfg;
 
 void lightgun_prepare(lightgun_type guntype);
 void lightgun_draw(void);
-void lightgun_void(void);
 
 #endif

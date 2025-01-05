@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -248,8 +249,8 @@ typedef struct {
    unsigned int scr_bpp;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
-   unsigned int *scr_base;
-   unsigned int *scr_pos;
+   uint32_t *scr_base;
+   uint32_t *scr_pos;
    void (*scr_render)(void);
    void (*scr_prerendernorm)(void);
    void (*scr_prerenderbord)(void);
