@@ -1143,7 +1143,9 @@ void crtc_cycle(int repeat_count)
          }
       }
 
-      CPC.gun_CRTC();
+      // if necessary, process gunsticks
+      if (CPC.gun_CRTC)
+         CPC.gun_CRTC();
 
       CRTC.next_address = MAXlate[(CRTC.addr + CRTC.char_count) & 0x73ff] | CRTC.scr_base; // next address for PreRender
 
