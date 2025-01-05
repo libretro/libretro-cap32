@@ -1309,8 +1309,13 @@ void crtc_cycle(int repeat_count)
          match_hsw();
       }
 
-      CRTC.CharInstSL(); // if necessary, process vertical total delay
-      CRTC.CharInstMR(); // if necessary, process maximum raster count delay
+      // if necessary, process vertical total delay
+      if (CRTC.CharInstSL)
+         CRTC.CharInstSL();
+
+      // if necessary, process maximum raster count delay
+      if (CRTC.CharInstMR)
+         CRTC.CharInstMR(); 
 
       if (CRTC.flag_newscan) { // scanline change requested?
          CRTC.flag_newscan = 0;
