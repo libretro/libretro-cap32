@@ -84,12 +84,12 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define MAX_FILENAME 16
 
-// compile flags
+// compile flags (unused)
 //#define NO_EXTRA_HW // remove MF2 support
 //#define NO_FLOPPY_SND
 //#define NO_BORDER
-//#define MOUSE_RELATIVE // mouse relative movement
 
+//#define MOUSE_RELATIVE // test mouse relative movement
 //#define LOWRES // use lowres mode 384x272 (320x240 with crop)
 //#define M16BPP // force only 16bpps
 //#define M8BPP // force only 8bpps

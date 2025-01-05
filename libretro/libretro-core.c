@@ -87,8 +87,6 @@ extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
 extern int detach_disk(int drive);
 extern int cart_start (char *pchFileName);
-extern void enter_gui(void);
-extern int Retro_PollEvent();
 extern void retro_loop(void);
 extern int video_set_palette (void);
 extern void doCleanUp (void);
@@ -100,12 +98,10 @@ extern size_t get_ram_size();
 extern void change_lang(int val);
 extern int snapshot_save (char *pchFileName);
 extern void play_tape();
-extern void retro_joy0(unsigned char joy0);
-extern void retro_key_down(int key);
-extern void retro_key_up(int key);
 
 //VIDEO
 uint32_t * video_buffer;
+uint32_t * draw_buffer;
 uint32_t * temp_buffer;
 uint32_t * render_buffer;
 __attribute__((aligned(16))) uint16_t retro_palette[256];
@@ -1254,6 +1250,10 @@ void retro_init(void)
    memset(render_buffer, 0, gfx_buffer_size);
    #endif
 
+   // set draw_buffer for libretro rendering.
+   draw_buffer = (retro_video.depth == DEPTH_8BPP || retro_video.screen_crop )
+      ? render_buffer
+      : video_buffer;
 
    retro_ui_init();
 
@@ -1398,7 +1398,7 @@ void retro_PollEvent()
 static inline void screen_draw(void)
 {
    retro_video.screen_blit(video_buffer, render_buffer, retro_video.screen_render_width, retro_video.screen_render_height);
-   video_cb(video_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
+   video_cb(draw_buffer, retro_video.screen_render_width, retro_video.screen_render_height, retro_video.screen_render_width << retro_video.bytes);
 }
 
 void retro_run(void)
