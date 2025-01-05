@@ -393,7 +393,7 @@ void init_ps2_hw_render(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_
    LOGI("HW render interface initialization complete (v%u)\n", retro_video.ps2->interface_version);
 }
 
-// TODO
+// TODO PS2 CROP
 inline void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t _width, uint16_t _height)
 {}
 

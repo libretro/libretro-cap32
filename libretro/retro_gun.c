@@ -88,8 +88,8 @@ void lightgun_prepare(lightgun_type guntype)
          break;
 
       default:
-         lightgun_cfg.gun_draw = lightgun_void;
-         lightgun_cfg.gun_update = lightgun_void;
+         lightgun_cfg.gun_draw = NULL;
+         lightgun_cfg.gun_update = NULL;
          CPC.gun_CRTC = lightgun_void;
          CPC.gun_IN = lightgun_void_IN;
          CPC.gun_OUT = lightgun_void;

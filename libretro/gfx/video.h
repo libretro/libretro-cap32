@@ -126,7 +126,6 @@ void screen_blit_crop_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint
 void screen_blit_full_8bpp(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
 void screen_blit_crop(uint32_t * video_buffer, uint32_t * dest_buffer, uint16_t render_width, uint16_t render_height);
 
-
 #if defined (FRONTEND_SUPPORTS_ABGR1555)
 #define EXPAND_RED(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits
 #define EXPAND_GREEN(c) ((c << 2) | (c >> 1)) // From 3 to 5 bits

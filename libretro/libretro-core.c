@@ -1245,7 +1245,7 @@ void retro_init(void)
 
    #ifdef RENDER_GSKIT_PS2
    // set work_buffer pointing to the hardware PS2 internal buffer.
-   work_buffer = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+   work_buffer = (uint32_t *) RETRO_HW_FRAME_BUFFER_VALID;
    #else
    work_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
    memset(work_buffer, 0, gfx_buffer_size);
@@ -1392,7 +1392,8 @@ void retro_audio_mix_batch()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
-   lightgun_cfg.gun_update(); // update lightguns
+   if (lightgun_cfg.gun_update)
+      lightgun_cfg.gun_update(); // update lightguns
    process_events();
 }
 
@@ -1418,7 +1419,9 @@ void retro_run(void)
 
    retro_PollEvent();
    retro_ui_process();
-   lightgun_cfg.gun_draw();
+
+   if (lightgun_cfg.gun_draw)
+      lightgun_cfg.gun_draw();
 
    screen_draw();
 }
