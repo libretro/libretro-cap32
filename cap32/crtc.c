@@ -712,17 +712,10 @@ static INLINE void match_hsw(void)
 
 
 
-void NoChar(void)
-{
-   // nothing to do
-}
-
-
-
 void CharSL2(void)
 {
    CRTC.reg5 = CRTC.registers[5];
-   CRTC.CharInstSL = (void(*)(void))NoChar;
+   CRTC.CharInstSL = NULL;
 }
 
 
@@ -743,7 +736,7 @@ void CharMR2(void)
          }
       }
    }
-   CRTC.CharInstMR = (void(*)(void))NoChar;
+   CRTC.CharInstMR = NULL;
 }
 
 
@@ -1506,8 +1499,8 @@ void crtc_reset(void)
    flags1.dt.HDSPTIMG = 0x03;
    new_dt.NewDISPTIMG = 0xff;
    new_dt.NewHDSPTIMG = 0x03;
-   CRTC.CharInstSL = (void(*)(void))NoChar;
-   CRTC.CharInstMR = (void(*)(void))NoChar;
+   CRTC.CharInstSL = NULL;
+   CRTC.CharInstMR = NULL;
 
    // ASIC vars - split screens and raster interrupt
    CRTC.split_addr = 0;

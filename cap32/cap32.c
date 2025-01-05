@@ -510,7 +510,10 @@ uint8_t z80_IN_handler (reg_pair port)
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
 
                            if ((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
-                              ret_val &= CPC.gun_IN(); //checking and return gun value
+                              //checking and return gun value
+                              ret_val &= CPC.gun_IN
+                                 ? CPC.gun_IN()
+                                 : 0xff;
                            }
                         } else {
                            ret_val = PSG.RegisterAY.Index[14] & (keyboard_matrix[CPC.keyboard_line & 0x0f]); // return last value w/ logic AND of input
@@ -962,7 +965,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       if (!(port.b.l & 0x80)) { // FDC data register?
          fdc_write_data(val);
       }
-      if (port.b.l == 0xfe) { // Amstrad Magnum Phazer
+      if ((port.b.l == 0xfe) && (CPC.gun_OUT)) { // Amstrad Magnum Phazer
          CPC.gun_OUT();
       }
    }
