@@ -776,11 +776,11 @@ static void update_variables(void)
       {
          if (strcmp(var.value, "enabled") == 0)
          {
-            if (retro_video.depth != DEPTH_24BPP)
+            if (retro_video.depth == DEPTH_8BPP)
             {
-               LOGI("[update_variables::warn] keyboard transparency only working on 24bpp modes.\n");
-               retro_message("[Option] Keyboard transparency only working on 24bpp modes, IGNORED!");
-               retro_video.draw_keyboard_func = draw_image_linear;
+               LOGI("[update_variables::warn] keyboard transparency only working on 16/24bpp modes.\n");
+               retro_message("[Option] Keyboard transparency only working on 16/24bpp modes, IGNORED!");
+               retro_video.draw_keyboard_func = draw_image_linear_blend;
             }
             else {
                retro_video.draw_keyboard_func = draw_image_linear_blend;
