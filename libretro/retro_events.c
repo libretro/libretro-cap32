@@ -95,8 +95,10 @@ static int wait_computer = 1;
 int event_call = EV_JOY;
 void ev_toggle_call();
 
-t_button_cfg btnPAD[MAX_PADCFG] = {
-   {{ // JOYSTICK CFG ( AUTO )
+t_button_cfg btnPAD[MAX_PADPLAYERS];
+
+const t_button_cfg cfgPAD[MAX_PADCFG] = {
+   {{ // DEFAULT CFG ( AUTO )
    CPC_KEY_JOY_FIRE2,   // B
    CPC_KEY_SPACE,       // Y
    CPC_KEY_NULL,        // SELECT
@@ -399,7 +401,7 @@ static void _process_joy(int playerID){
       return;
 #endif
 
-   uint8_t * pad = (uint8_t*) &btnPAD[retro_computer_cfg.padcfg[playerID]].buttons;
+   uint8_t * pad = (uint8_t*) &btnPAD[playerID].buttons;
 
    int i;
    for (i = 0; i < MAX_BUTTONS; i++) {

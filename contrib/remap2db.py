@@ -24,8 +24,8 @@ import os, sys, time
 db = {}
 retro_key = {}
 
-commands = []
-input_names = []
+commands = ['nul']
+input_names = ['nul']
 
 input_prefix = 'input_player%i_key_%s'
 hash_prefix = 'entry_hash_%i'
@@ -115,25 +115,30 @@ file_list = [
 
 file_list.sort()
 
-def map2text(o_Entry):
+def map2text(o_Entry, i_Player):
     map_text = ''
     for key in KEYS_MAP:
+        # player pattern
+        key_id = key + f'-{i_Player}'
         # clean / keep
-        if not o_Entry[key]:
+        if not o_Entry[key_id]:
             map_text += o_Entry['current_mode']
         # custom key/joy internal code
-        elif o_Entry[key][0] == '$':
-            map_text += o_Entry[key][1:]
+        elif o_Entry[key_id][0] == '$':
+            map_text += o_Entry[key_id][1:]
         # retroarch keyboard code
         else:
-            map_text += retro_key[o_Entry[key]]
+            map_text += retro_key[o_Entry[key_id]]
         map_text += ', '
     return map_text[:-2]
 
-def name2text(o_Entry):
+def name2text(o_Entry, i_Player):
     map_text = ''
     for key in KEYS_MAP:
-        map_text += o_Entry[key + '_name'] if o_Entry[key + '_name'] else '-1'
+        # player pattern
+        key_id = key + f'_name-{i_Player}'
+
+        map_text += o_Entry[key_id] if o_Entry[key_id] else '0'
         map_text += ', '
     return map_text[:-2]
 
@@ -155,18 +160,28 @@ def file_get_value(l_File, s_Key):
         if s_Key + '=' in line:
             return clean_value(line.split('=')[1])
 
-def file_get_entry(l_File):
-    entry = {}
-    # get user player1 remap keys
+def file_get_player_entry(o_Entry, l_File, i_Player):
+    binded = False
     for key in KEYS_MAP:
-        entry[key] = file_get_value(l_File, input_prefix % (1, key))
-        name = file_get_value(l_File, input_prefix % (1, key) + '_name')
+        # get user player% remap keys
+        o_Entry[key + f'-{i_Player}'] = file_get_value(l_File, input_prefix % (i_Player, key))
+        name = file_get_value(l_File, input_prefix % (i_Player, key) + '_name')
         if name:
             name = name.title()
             if not name in input_names:
                 input_names.append(name)
             name = str(input_names.index(name))
-        entry[key + '_name'] = name
+            binded = True
+        o_Entry[key + f'_name-{i_Player}'] = name
+    
+    # is player binded?
+    o_Entry[f'player_{i_Player}-binded'] = binded
+
+def file_get_entry(l_File):
+    # fill player keys
+    entry = {}
+    file_get_player_entry(entry, l_File, 1)
+    file_get_player_entry(entry, l_File, 2)
 
     # get file CRC
     hash_list = []
@@ -218,9 +233,23 @@ for (key, entry) in db.items():
     # first line
     text += '   { // ' + key + '\n'
     text += '      {' + ', '.join(entry['hash_list']) + '},\n'
-    text += '      {' + map2text(entry) + '},\n'
-    text += '      {' + name2text(entry) + '},\n'
-    text += '      ' + ( str(entry['loader_command']) if entry['loader_command'] != None else '-1') + ',\n'
+    text += '      {\n'
+    if entry[f'player_1-binded']:
+        text += '         {' + map2text(entry, 1) + '},\n'
+        text += '         {' + name2text(entry, 1) + '},\n'
+    else:
+        text += '         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},\n'
+        text += '         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},\n'
+    text += '      },\n'
+    text += '      {\n'
+    if entry[f'player_2-binded']:
+        text += '         {' + map2text(entry, 2) + '},\n'
+        text += '         {' + name2text(entry, 2) + '},\n'
+    else:
+        text += '         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},\n'
+        text += '         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},\n'
+    text += '      },\n'
+    text += '      ' + ( str(entry['loader_command']) if entry['loader_command'] != None else '0') + ',\n'
 
     text += '   },\n'
 text += '};\n\n'
