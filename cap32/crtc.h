@@ -26,7 +26,7 @@ extern "C" {
 #include "z80.h"
 
 #define MIN_VHOLD_CROP 208
-#define MIN_VHOLD 250
+#define MIN_VHOLD_FULL 250
 
 // The next 4 bytes must remain together
 typedef union

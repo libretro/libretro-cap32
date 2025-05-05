@@ -65,6 +65,7 @@ extern FILE *pfoDebug;
 
 #define MAX_VHOLD 380
 #define MID_VHOLD 295
+#define MIN_VHOLD 290
 #define MIN_VHOLD_RANGE 46
 #define MAX_VHOLD_RANGE 74
 
@@ -1508,7 +1509,7 @@ void crtc_reset(void)
    CRTC.sl_count = 0;
    CRTC.interrupt_sl = 0;
 
-   MinVSync = MID_VHOLD;
-   MaxVSync = MinVSync + MIN_VHOLD_RANGE + (int)ceil((float)((MinVSync - VDU.vertical_hold) *
+   MinVSync = MIN_VHOLD;
+   MaxVSync = MID_VHOLD + MIN_VHOLD_RANGE + (int)ceil((float)((MID_VHOLD - VDU.vertical_hold) *
     (MAX_VHOLD_RANGE - MIN_VHOLD_RANGE) / (MAX_VHOLD - VDU.vertical_hold)));
 }

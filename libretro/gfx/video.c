@@ -124,7 +124,7 @@ void video_setup(retro_video_depth_t video_depth)
     // crop screen borders
     retro_video.vertical_hold = retro_video.screen_crop
         ? MIN_VHOLD_CROP
-        : MIN_VHOLD;
+        : MIN_VHOLD_FULL;
     retro_video.screen_render_width = retro_video.screen_crop
         ? EMULATION_SCREEN_WIDTH - (64 * EMULATION_SCALE)
         : EMULATION_SCREEN_WIDTH;
