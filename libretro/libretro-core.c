@@ -1068,6 +1068,7 @@ void computer_load_file() {
          LOGE("[computer_load_file] SNA Error (%d): %s", error, (char *)retro_content_filepath);
       }
 
+      // to avoid change SNA filenam, check on the bottom.
       return;
    }
 
@@ -1106,7 +1107,7 @@ void computer_load_file() {
    }
 
    // If it's a disk
-   if(retro_computer_cfg.slot == SLOT_DSK)
+   else if(retro_computer_cfg.slot == SLOT_DSK)
    {
       // Add the file to disk control context
       // Maybe, in a later version of retroarch, we could add disk on the fly (didn't find how to do this)
@@ -1128,7 +1129,7 @@ void computer_load_file() {
    }
 
    // If it's a tape
-   if(retro_computer_cfg.slot == SLOT_TAP)
+   else if(retro_computer_cfg.slot == SLOT_TAP)
    {
       int error = tape_insert ((char *)retro_content_filepath);
       if (!error) {
