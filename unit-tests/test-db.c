@@ -41,14 +41,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "../cmocka/include/cmocka.h"
+#include "cmocka.h"
 #include "libretro/dsk/loader.h"
 #include "../unit-tests/test-utils.h"
 #include "test-db.h"
 
 char * basedir = NULL;
 char rompath[RETRO_PATH_MAX];
-game_cfg_t game_configuration;
+extern game_cfg_t game_configuration;
 
 
 static void cleancpcdb_tests(void **state) {
