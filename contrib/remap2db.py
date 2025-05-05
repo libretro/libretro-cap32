@@ -164,14 +164,22 @@ def file_get_player_entry(o_Entry, l_File, i_Player):
     binded = False
     for key in KEYS_MAP:
         # get user player% remap keys
-        o_Entry[key + f'-{i_Player}'] = file_get_value(l_File, input_prefix % (i_Player, key))
-        name = file_get_value(l_File, input_prefix % (i_Player, key) + '_name')
+        key_name = key + f'-{i_Player}'
+        key_prefix = input_prefix % (i_Player, key)
+        value = file_get_value(l_File, key_prefix)
+        name = file_get_value(l_File, key_prefix + '_name')
+
         if name:
             name = name.title()
             if not name in input_names:
                 input_names.append(name)
             name = str(input_names.index(name))
+
+        # on any bind set as binded
+        if value:
             binded = True
+
+        o_Entry[key_name] = value
         o_Entry[key + f'_name-{i_Player}'] = name
     
     # is player binded?
