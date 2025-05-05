@@ -1,23 +1,29 @@
 input_player1_key_start = "49"
 input_player1_key_start_name = "Start One Player"
+
 input_player1_key_select = "50"
 input_player1_key_select_name = "Joystick 1 Select"
+
 input_player1_key_b = "105"
-input_player1_key_b_name = "[I] Toggle"
+input_player1_key_b_name = "Magic"
+input_player1_key_x = "121"
+input_player1_key_x_name = "[Y]" # YES
+input_player1_key_y = "121"
+input_player1_key_y_name = "[Y]" # YES
 
 input_player2_key_start = "50"
 input_player2_key_start_name = "Start Two Players"
+
 input_player2_key_select = "51"
 input_player2_key_select_name = "Joystick 2 Select"
+
 input_player2_key_up = "$206" # JOY2 UP [6]
 input_player2_key_down = "$207" # JOY2 DOWN [5]
 input_player2_key_right = "$208" # JOY2 RIGHT [R]
 input_player2_key_left = "$209" # JOY2 LEFT [T]
 input_player2_key_a = "$210" # JOY2 FIRE1 [G]
-input_player2_key_a_name = "Fire / Bomb"
-input_player2_key_b = "107"
-input_player2_key_b_name = "[K] Toggle"
+input_player2_key_a_name = "Slash"
+input_player2_key_b = "$211" # JOY2 FIRE2 [F]
+input_player2_key_b_name = "Magic"
 
-entry_hash_1 = 36d943ea # (UK) (1986) (v2) [Original]
-entry_hash_2 = e7df0e60 # (UK) (1986) (Spain retail version) [Original]
-entry_hash_3 = 3e88f3f7 # (UK) (1986) [Original]
+entry_hash_1 = 0xad37a08f # (UK) (1986) [Original]

@@ -2,5 +2,15 @@ input_player1_key_start = "49"
 input_player1_key_b = "51"
 input_player1_key_x = "32"
 
+# Player 2
+input_player2_key_up = "263" # KP 7
+input_player2_key_down = "260" # KP 4
+input_player2_key_left = "258" # KP 2
+input_player2_key_right = "259" # KP 3
+input_player2_key_a = "256" # KP 0
+
+input_player2_key_start = "50"
+
+
 entry_hash_1 = 0x708351db # (S) (1987) [Original] - Fernando Martin
 entry_hash_2 = 0x471c5eac # (UK) (1987) [Original] - Basket Master

@@ -1,0 +1,19 @@
+input_player1_key_left = "97"
+input_player1_key_right = "115"
+input_player1_key_start = "115"
+input_player1_key_start_name = "Start"
+input_player1_key_a = "13"
+input_player1_key_a_name = "Release / Fire"
+
+
+input_player2_key_right = "275" # CURSOR RIGHT
+input_player2_key_left = "276" # CURSOR LEFT
+input_player2_key_a = "32" # SPACE
+input_player2_key_a_name = "Release / Fire"
+
+input_player2_key_start = "50"
+input_player2_key_start_name = "Select Two Players"
+
+entry_map_type = "clean"
+
+entry_hash_1 = 0x9beae974 # (UK) (1987)

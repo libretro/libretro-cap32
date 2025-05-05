@@ -1,4 +1,13 @@
 input_player1_key_start = "13"
 input_player1_key_b = "13"
 
+input_player2_key_up = "97"
+input_player2_key_down = "122"
+input_player2_key_left = "111"
+input_player2_key_right = "112"
+input_player2_key_a = "32"
+input_player2_key_a_name = "Kick"
+
+input_player2_key_start = "50"
+
 entry_hash_1 = 0x35c029d5 # (UK) (1987) (CPM) [Original]
