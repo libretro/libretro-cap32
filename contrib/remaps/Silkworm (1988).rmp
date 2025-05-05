@@ -1,0 +1,13 @@
+input_player1_key_start = "48"
+
+# Player 2
+# QAOP
+input_player2_key_up = "113"
+input_player2_key_down = "97"
+input_player2_key_left = "111"
+input_player2_key_right = "112"
+input_player2_key_a = "32" # SPACE
+
+input_player2_key_start = "48"
+
+entry_hash_1 = 0x75b52a3b # [Original]

@@ -1,3 +1,5 @@
+input_player1_key_left = "111"
+input_player1_key_right = "112"
 input_player1_key_start = "49"
 input_player1_key_start_name = "Start One Player"
 input_player1_key_a = "113"
@@ -7,8 +9,19 @@ input_player1_key_b_name = "Bubble"
 input_player1_key_x = "97"
 input_player1_key_x_name = "[A]"
 
-input_player1_key_left = "111"
-input_player1_key_right = "112"
+
+input_player2_key_down = "$201" # JOY DOWN
+input_player2_key_right = "$202" # JOY RIGHT
+input_player2_key_left = "$203" # JOY LEFT
+input_player2_key_a = "$200" # JOY UP
+input_player2_key_a_name = "Jump"
+input_player2_key_b = "$204" # JOY FIRE
+input_player2_key_b_name = "Bubble"
+input_player2_key_x = "98"
+input_player2_key_x_name = "[B]"
+
+input_player2_key_start = "50"
+input_player2_key_start_name = "Start Two Players"
 
 entry_map_type = "clean"
 

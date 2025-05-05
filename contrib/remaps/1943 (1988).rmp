@@ -7,10 +7,20 @@ input_player1_key_y_name = "Bomb"
 input_player1_key_x = "13"
 input_player1_key_x_name = "Bomb"
 
+
+input_player2_key_up = "113" # Q
+input_player2_key_down = "97" # A
+input_player2_key_right = "46" # COMMA
+input_player2_key_left = "44" # DOT
+input_player2_key_a = "32" # SPACE
+input_player2_key_b = "306" # CTRL
+input_player2_key_b_name = "Roll Plane"
+input_player2_key_y = "9"
+input_player2_key_y_name = "Bomb"
+input_player2_key_x = "9"
+input_player2_key_x_name = "Bomb"
+
+input_player2_key_start = "50"
+input_player2_key_start_name = "Select Two Players"
+
 entry_hash_1 = 0x8769d0b1 # (UK) (1988) [Original]
-
-
-
-
-
-

@@ -81,7 +81,8 @@ computer_cfg_t retro_computer_cfg;
 retro_video_t retro_video;
 game_cfg_t game_configuration;
 
-extern t_button_cfg btnPAD[MAX_PADCFG];
+extern t_button_cfg btnPAD[MAX_PADPLAYERS];
+extern t_button_cfg cfgPAD[MAX_PADCFG];
 
 extern void change_model(int val);
 extern int snapshot_load (char *pchFileName);
@@ -538,6 +539,10 @@ static void update_variables(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
    retro_computer_cfg.padcfg[ID_PLAYER2] = controller_port_variable(ID_PLAYER2, &var);
 
+   LOGI("[update_variables] default CFG applied p1(%i) p2(%i).\n", retro_computer_cfg.padcfg[ID_PLAYER1], retro_computer_cfg.padcfg[ID_PLAYER2]);
+   memcpy(btnPAD[ID_PLAYER1].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER1]].buttons, sizeof(t_button_cfg));
+   memcpy(btnPAD[ID_PLAYER2].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER2]].buttons, sizeof(t_button_cfg));
+
    var.key = "cap32_autorun";
    var.value = NULL;
 
@@ -965,7 +970,8 @@ void computer_autoload()
    if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
    {
       LOGI("[computer_autoload][DB] game remap applied.\n");
-      memcpy(btnPAD[0].buttons, game_configuration.btn_config.buttons, sizeof(t_button_cfg));
+      memcpy(btnPAD[ID_PLAYER1].buttons, game_configuration.btn_config_player_1.buttons, sizeof(t_button_cfg));
+      memcpy(btnPAD[ID_PLAYER2].buttons, game_configuration.btn_config_player_2.buttons, sizeof(t_button_cfg));
    }
 
    if (!retro_computer_cfg.autorun)
@@ -1037,7 +1043,7 @@ void computer_hash_file(char* filepath)
       retro_message("[computer_hash_file] ROM marked as NOT WORKING.");
    }
 
-   LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ b=%u, l=%u, f=%u, c=%u ]\n",
+   LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ btn=%u, cmd=%u, bad=%u, clean=%u ]\n",
       hash,
       game_configuration.has_btn,
       game_configuration.has_command,

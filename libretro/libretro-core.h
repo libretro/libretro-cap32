@@ -81,6 +81,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 #define MAX_KEYSYMS 324
 #define MAX_BUTTONS 14
 #define MAX_PADCFG 5
+#define MAX_PADPLAYERS 2
 
 #define MAX_FILENAME 16
 
@@ -198,7 +199,8 @@ typedef struct {
 
 typedef struct {
    uint32_t hash;
-   t_button_cfg btn_config;
+   t_button_cfg btn_config_player_1;
+   t_button_cfg btn_config_player_2;
    char loader_command[LOADER_MAX_SIZE];
    bool has_command;
    bool has_btn;

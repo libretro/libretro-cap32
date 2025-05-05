@@ -9,4 +9,14 @@ input_player1_key_start_name = "Start One Player"
 input_player1_key_select = "27"
 input_player1_key_select_name = "Pause"
 
+input_player2_key_up = "$200" # JOY UP
+input_player2_key_down = "$201" # JOY DOWN
+input_player2_key_right = "$202" # JOY RIGHT
+input_player2_key_left = "$203" # JOY LEFT
+input_player2_key_a = "$204" # JOY FIRE
+input_player2_key_a_name = "Fire"
+input_player2_key_start = "50"
+input_player2_key_start_name = "Start Two Players"
+
+
 entry_hash_1 = 0xe4154a1f # (UK) (1988) (CPM) [Original] (Weak Sectors)

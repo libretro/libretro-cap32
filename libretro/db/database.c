@@ -7,27 +7,28 @@
 
 // #define DEBUG_DATABASE
 
-extern t_button_cfg btnPAD[MAX_PADCFG];
+extern t_button_cfg btnPAD[MAX_PADPLAYERS];
+extern t_button_cfg cfgPAD[MAX_PADCFG];
 
-static unsigned char get_keybind (unsigned int key, unsigned char position)
+static unsigned char get_keybind (unsigned int key, unsigned char position, unsigned char joy_id)
 {
    switch (key)
    {
       case DB_CLEAN:
          #ifdef DEBUG_DATABASE
-         printf("[keybind-clean] k:%u p:%u = %u\n", key, position, btnPAD[0].buttons[position]);
+         printf("[J:%i][keybind-clean] k:%u p:%u = %u\n", joy_id, key, position, cfgPAD[0].buttons[position]);
          #endif
          return 0xff;
 
       case DB_KEEP:
          #ifdef DEBUG_DATABASE
-         printf("[keybind-keep] k:%u p:%u = %u\n", key, position, btnPAD[0].buttons[position]);
+         printf("[J:%i][keybind-keep] k:%u p:%u = %u\n", joy_id, key, position, cfgPAD[0].buttons[position]);
          #endif
-         return btnPAD[0].buttons[position];
+         return cfgPAD[0].buttons[position];
 
       default:
          #ifdef DEBUG_DATABASE
-         printf("[keybind-cfg] k:%u p:%u = %u\n", key, position, get_cpckey(key));
+         printf("[J:%i][keybind-cfg] k:%u p:%u = %u\n", joy_id, key, position, get_cpckey(key));
          #endif
          return get_cpckey(key);
    }
@@ -58,15 +59,25 @@ static void command_add(unsigned int command_position)
    game_configuration.has_command = true;
 }
 
+static void database_entry_btn(t_player_btn * player, t_button_cfg * bind, char joy_id)
+{
+   for (int n = 0; n < MAX_BUTTONS; n++)
+   {
+      bind->buttons[n] = get_keybind(player->btn_map[n], n, joy_id);
+   }
+   game_configuration.has_btn = true;
+}
+
 static void database_entry(t_file_entry * entry)
 {
-   if (entry->btn_map[0])
+   if (entry->player_1.btn_map[0])
    {
-      for (int n = 0; n < MAX_BUTTONS; n++)
-      {
-         game_configuration.btn_config.buttons[n] = get_keybind(entry->btn_map[n], n);
-      }
-      game_configuration.has_btn = true;
+      database_entry_btn(&entry->player_1, &game_configuration.btn_config_player_1, 1);
+   }
+
+   if (entry->player_2.btn_map[0])
+   {
+      database_entry_btn(&entry->player_2, &game_configuration.btn_config_player_2, 2);
    }
 
    if (entry->loader_command != COMMAND_EMPTY)
