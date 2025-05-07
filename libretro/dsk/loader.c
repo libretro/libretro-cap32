@@ -126,7 +126,7 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
       cur_name_id = first_bas;
 
       #ifdef LOADER_DEBUG
-      printf("[LOADER] FIND: first BAT EXT found at [%i] filename: %s \n", first_bas, catalogue.dirent[first_bas].filename);
+      printf("[LOADER] FIND: first BAS EXT found at [%i] filename: %s \n", first_bas, catalogue.dirent[first_bas].filename);
       #endif
    }else if (first_spc != -1) {
       cur_name_id = first_spc;
@@ -147,6 +147,11 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
 
 bool _loader_one_listed(char * key_buffer)
 {
+
+   #ifdef LOADER_DEBUG
+   printf("ONE: CPM:%i, ENTRIES:%i, HIDDEN:%i\n", game_configuration.is_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found);
+   #endif
+
    if (!game_configuration.is_cpm && catalogue.entries_listed_found != 1)
       return false;
 
@@ -224,10 +229,13 @@ void _loader_run(char * key_buffer, retro_format_info_t *format, t_drive *curren
       return;
 
    // first we try to find classic run filenames
-   if (_loader_find_file(key_buffer, "DISC"))
+   if (_loader_find_file(key_buffer, "DISC.")) // DISC.*
       return;
 
-   if (_loader_find_file(key_buffer, "DISK"))
+   if (_loader_find_file(key_buffer, "DISC")) // DISC*.*
+      return;
+
+   if (_loader_find_file(key_buffer, "DISK.")) // DISK.*
       return;
 
    if (_loader_find_file(key_buffer, "JEU.BAS"))

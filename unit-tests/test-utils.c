@@ -12,6 +12,8 @@
 #include "libretro/db/database.h"
 #include "test-utils.h"
 
+//#define TEST_DEBUG
+
 void test_loader(t_drive * drive, char * format_expected, char * loader_buffer)
 {
    retro_format_info_t* test_format = NULL;
@@ -38,7 +40,17 @@ void test_cmd(char * cmd, char * hash)
    MD5_Init(&ctx);
    MD5_Update(&ctx, cmd, strlen(cmd));
    MD5_Final(output, &ctx);
+
+   #ifdef TEST_DEBUG
+   printf("MD5: ");
+
    for (int o = 0, c = 0; o < 16; o++, c+=2)
+      printf("%02x", output[o]);
+
+   printf("\n");
+   #endif
+
+      for (int o = 0, c = 0; o < 16; o++, c+=2)
    {
       unsigned short n = hextoi(&hash[c]);
       assert_int_equal(output[o], n);
@@ -53,6 +65,10 @@ int load_dsk(t_drive * drive, char * filename_dsk)
 
    int result = dsk_load(filename_dsk, drive, 'A');
    assert_int_equal(result, 0);
+
+   #ifdef TEST_DEBUG
+   printf("DSK: %s\n", filename_dsk);
+   #endif
 
    return result;
 }
