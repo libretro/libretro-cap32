@@ -342,10 +342,12 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
       int y = ((addr & 0xF0) >> 4);
       int x = (addr & 0xF);
       uint8_t color = (val & 0xF);
+      pbRegisterPage[(addr & 0x3FFF)] = color;
       if(color)
          color += 16;
       asic.sprites[id][x][y] = color;
       //LOG("Received sprite %u data", id);
+      return false;
    } else if (addr >= 0x5000 && addr < 0x6000) {
       // 0x5000 --- unused
    }
@@ -368,6 +370,7 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 1: // X position LO
+            val = val & 0x3;
             asic.sprites_x[id] = (asic.sprites_x[id] & 0x00FF) | (val << 8);
             // Mirrored in RAM image 4 bytes after
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
@@ -378,6 +381,7 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
             pbRegisterPage[(addr & 0x3FFF) + 4] = val;
             break;
          case 3: // Y position LO
+            val = val & 0x1;
             asic.sprites_y[id] = ((asic.sprites_y[id] & 0x00FF) | (val << 8));
             // Affect RAM image
             // Mirrored in RAM image 4 bytes after
