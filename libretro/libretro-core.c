@@ -480,8 +480,8 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "light_gun",
       {
-         { "disabled", NULL },
          { "enabled",  NULL },
+         { "disabled", NULL },
          { NULL, NULL },
       },
       "disabled"
@@ -494,9 +494,9 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "system",
       {
-         { "6128",                NULL },
-         { "464",                 NULL },
-         { "664",                 NULL },
+         { "464",                  NULL },
+         { "664",                  NULL },
+         { "6128",                 NULL },
          { "6128+ (experimental)", NULL },
          { NULL, NULL },
       },
@@ -525,8 +525,8 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "advanced",
       {
-         { "128", NULL },
          { "64",  NULL },
+         { "128", NULL },
          { "192", NULL },
          { "576", NULL },
          { NULL, NULL },
@@ -541,11 +541,11 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "video",
       {
+         { "5",  NULL },
+         { "10", NULL },
          { "15", NULL },
          { "20", NULL },
          { "30", NULL },
-         { "5",  NULL },
-         { "10", NULL },
          { NULL, NULL },
       },
       "15"
@@ -558,6 +558,9 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "video",
       {
+         { "5",  NULL },
+         { "6",  NULL },
+         { "7",  NULL },
          { "8",  NULL },
          { "9",  NULL },
          { "10", NULL },
@@ -566,9 +569,6 @@ static struct retro_core_option_v2_definition option_definitions[] = {
          { "13", NULL },
          { "14", NULL },
          { "15", NULL },
-         { "5",  NULL },
-         { "6",  NULL },
-         { "7",  NULL },
          { NULL, NULL },
       },
       "8"
@@ -586,9 +586,9 @@ static struct retro_core_option_v2_definition option_definitions[] = {
 #elif defined (M8BPP)
          { "8bit", NULL },
 #else
+         { "8bit",  NULL },
          { "16bit", NULL },
          { "24bit", NULL },
-         { "8bit",  NULL },
 #endif
          { NULL, NULL },
       },
@@ -608,8 +608,8 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "video",
       {
-         { "disabled", NULL },
          { "enabled",  NULL },
+         { "disabled", NULL },
          { NULL, NULL },
       },
       "disabled"
@@ -637,8 +637,8 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       "system",
       {
-         { "disabled", NULL },
          { "enabled",  NULL },
+         { "disabled", NULL },
          { NULL, NULL },
       },
       "disabled"
