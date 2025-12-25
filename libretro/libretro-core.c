@@ -283,7 +283,7 @@ int pre_main(const char *argv)
 
 void parse_cmdline(const char *argv)
 {
-   char *p,*p2,*start_of_word;
+   char *p,*p2,*start_of_word = NULL;
    int c,c2;
    static char buffer[512*4];
    enum states { DULL, IN_WORD, IN_STRING } state = DULL;
@@ -770,7 +770,7 @@ static void update_variables(void)
 
    if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
    {
-      retro_message("[Option] Model 6128+ only working on 24bpp modes, IGNORED!");
+      retro_message("Model 6128+ only working on 24bpp modes, IGNORED!");
    }
 
    var.key = "cap32_keyboard_transparency";
@@ -784,7 +784,7 @@ static void update_variables(void)
             if (retro_video.depth == DEPTH_8BPP)
             {
                LOGI("[update_variables::warn] keyboard transparency only working on 16/24bpp modes.\n");
-               retro_message("[Option] Keyboard transparency only working on 16/24bpp modes, IGNORED!");
+               retro_message("Keyboard transparency only working on 16/24bpp modes, IGNORED!");
                retro_video.draw_keyboard_func = draw_image_linear_blend;
             }
             else {
@@ -1016,7 +1016,7 @@ void computer_load_bios() {
    {
       int result = cart_start(retro_content_filepath);
       if(result != 0) {
-         retro_message("[computer_load_bios] Error Loading Cart...");
+         LOGE("[computer_load_bios] Error Loading Cart...\n");
       }
    }
 }
@@ -1040,7 +1040,8 @@ void computer_hash_file(char* filepath)
    else
    {
       // warn user is a unsupported ROM
-      retro_message("[computer_hash_file] ROM marked as NOT WORKING.");
+      LOGI("[computer_hash_file] ROM marked as NOT WORKING.\n");
+      retro_message("ROM marked as NOT WORKING.");
    }
 
    LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ btn=%u, cmd=%u, bad=%u, clean=%u ]\n",
@@ -1121,8 +1122,8 @@ void computer_load_file() {
       LOGI("[computer_load_file] Disk (%d) inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
       int error = retro_attach_disk((char *)dc->files[dc->index]);
       if (error) {
-         retro_message("[computer_load_file] Error Loading DSK...");
          LOGE("[computer_load_file] DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+         retro_message("Error Loading DSK...");
       } else {
          computer_autoload();
       }
@@ -1242,7 +1243,7 @@ void retro_init(void)
    #endif
    gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * retro_video.pitch;
 
-   fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
+   LOGE("[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
          EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size);
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
@@ -1419,7 +1420,8 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
    {
       update_variables();
-      retro_message("[retro_run] options updated, changes applied!");
+      LOGI("[retro_run] Options updated, changes applied!\n");
+      retro_message("Options updated, changes applied!");
    }
 
    retro_loop();
