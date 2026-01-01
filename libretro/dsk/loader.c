@@ -147,9 +147,8 @@ bool _loader_find (char * key_buffer, retro_format_info_t *format)
 
 bool _loader_one_listed(char * key_buffer)
 {
-
    #ifdef LOADER_DEBUG
-   printf("ONE: CPM:%i, ENTRIES:%i, HIDDEN:%i\n", game_configuration.is_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found);
+   printf("[  LOADER  ] ONE LISTED: CPM(%i), ENTRIES(%i), HIDDEN(%i)\n", game_configuration.is_cpm, catalogue.entries_listed_found, catalogue.entries_hidden_found);
    #endif
 
    if (!game_configuration.is_cpm && catalogue.entries_listed_found != 1)
