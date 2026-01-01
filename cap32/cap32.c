@@ -176,12 +176,16 @@ int HandleExtension(char *path,char *ext);
 #include "retro_utils.h"
 #include "libretro/gfx/video.h"
 
+#include <libretro.h>
+
 extern void kbd_update_table(int lang);
 
 extern char diskA_name[RETRO_PATH_MAX];
 extern char diskB_name[RETRO_PATH_MAX];
 extern char savdif_name[RETRO_PATH_MAX+16];
 extern char cart_name[RETRO_PATH_MAX];
+
+extern retro_log_printf_t log_cb;
 
 #include "cap32.h"
 #include "crtc.h"
@@ -1279,14 +1283,16 @@ void emulator_shutdown (void)
 int cart_start (char *pchFileName) {
 
    if(retro_computer_cfg.model != 3) {
-      fprintf(stderr, "Cartridge ERROR: Please select CPC6128+.\n");
+      LOGE("Cartridge ERROR: Please select CPC6128+.\n");
+      retro_message("Please select CPC6128+");
       return ERR_CPR_INVALID;
    }
 
    int result = cpr_fload(pchFileName);
 
    if(result != 0) {
-      fprintf(stderr, "Load of cartridge failed. Aborting. [%u]\n", result);
+      LOGE("Load of cartridge failed. Aborting. [%u]\n", result);
+      retro_message("Error Loading Cart...");
       return result;
    }
 
@@ -2053,19 +2059,19 @@ int capmain (int argc, char **argv)
 
    if (video_init())
    {
-      fprintf(stderr, "video_init() failed. Aborting.\n");
+      LOGE("video_init() failed. Aborting.\n");
       exit(-1);
    }
 
    if (audio_init())
    {
-      fprintf(stderr, "audio_init() failed. Disabling sound.\n");
+      LOGE("audio_init() failed. Disabling sound.\n");
       CPC.snd_enabled = 0; // disable sound emulation
    }
 
    if (emulator_init())
    {
-      fprintf(stderr, "emulator_init() failed. Aborting.\n");
+      LOGE("emulator_init() failed. Aborting.\n");
       exit(-1);
    }
 

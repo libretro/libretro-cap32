@@ -283,7 +283,7 @@ int pre_main(const char *argv)
 
 void parse_cmdline(const char *argv)
 {
-   char *p,*p2,*start_of_word;
+   char *p,*p2,*start_of_word = NULL;
    int c,c2;
    static char buffer[512*4];
    enum states { DULL, IN_WORD, IN_STRING } state = DULL;
@@ -384,6 +384,396 @@ void retro_message(const char *text) {
 
 }
 
+static struct retro_core_option_v2_category option_categories[] = {
+   { "system",         "System",         NULL },
+   { "video",          "Video",          NULL },
+   { "controls",       "Controls",       NULL },
+   { "light_gun",      "Light Gun",      NULL },
+   { "advanced",       "Advanced",       NULL },
+   { NULL, NULL, NULL },
+};
+
+static struct retro_core_option_v2_definition option_definitions[] = {
+   {
+      "cap32_retrojoy0",
+      "User 1 Controller Config",
+      NULL,
+      NULL,
+      NULL,
+      "controls",
+      {
+         { "auto",           NULL },
+         { "qaop",           NULL },
+         { "incentive",      NULL },
+         { "joystick_port1", NULL },
+         { NULL, NULL },
+      },
+      "auto"
+   },
+   {
+      "cap32_retrojoy1",
+      "User 2 Controller Config",
+      NULL,
+      NULL,
+      NULL,
+      "controls",
+      {
+         { "auto",           NULL },
+         { "qaop",           NULL },
+         { "incentive",      NULL },
+         { "joystick_port1", NULL },
+         { "joystick_port2", NULL },
+         { NULL, NULL },
+      },
+      "auto"
+   },
+   {
+      "cap32_combokey",
+      "Combo Key",
+      NULL,
+      NULL,
+      NULL,
+      "controls",
+      {
+         { "select",   NULL },
+         { "y",        NULL },
+         { "b",        NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "select"
+   },
+   {
+      "cap32_db_mapkeys",
+      "Use internal Remap DB",
+      NULL,
+      NULL,
+      NULL,
+      "controls",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "enabled"
+   },
+   {
+      "cap32_lightgun_input",
+      "Input",
+      NULL,
+      NULL,
+      NULL,
+      "light_gun",
+      {
+         { "disabled", NULL },
+         { "phaser",   NULL },
+         { "gunstick", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
+      "cap32_lightgun_show",
+      "Show Crosshair",
+      NULL,
+      NULL,
+      NULL,
+      "light_gun",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
+      "cap32_model",
+      "Model",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "464",                  NULL },
+         { "664",                  NULL },
+         { "6128",                 NULL },
+         { "6128+ (experimental)", NULL },
+         { NULL, NULL },
+      },
+      "6128"
+   },
+   // rcheevos disallowed_setting: cap32_autorun disabled
+   {
+      "cap32_autorun",
+      "Autorun",
+      NULL,
+      NULL,
+      NULL,
+      "advanced",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "enabled"
+   },
+   {
+      "cap32_ram",
+      "Ram size",
+      NULL,
+      NULL,
+      NULL,
+      "advanced",
+      {
+         { "64",  NULL },
+         { "128", NULL },
+         { "192", NULL },
+         { "576", NULL },
+         { NULL, NULL },
+      },
+      "128"
+   },
+   {
+      "cap32_advanced_green_phosphor",
+      "Green Phosphor blueish",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "5",  NULL },
+         { "10", NULL },
+         { "15", NULL },
+         { "20", NULL },
+         { "30", NULL },
+         { NULL, NULL },
+      },
+      "15"
+   },
+   {
+      "cap32_scr_intensity",
+      "Monitor Intensity",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "5",  NULL },
+         { "6",  NULL },
+         { "7",  NULL },
+         { "8",  NULL },
+         { "9",  NULL },
+         { "10", NULL },
+         { "11", NULL },
+         { "12", NULL },
+         { "13", NULL },
+         { "14", NULL },
+         { "15", NULL },
+         { NULL, NULL },
+      },
+      "8"
+   },
+   {
+      "cap32_gfx_colors",
+      "Color Depth",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+#if defined (M16BPP)
+         { "16bit", NULL },
+#elif defined (M8BPP)
+         { "8bit", NULL },
+#else
+         { "8bit",  NULL },
+         { "16bit", NULL },
+         { "24bit", NULL },
+#endif
+         { NULL, NULL },
+      },
+#if defined (M16BPP)
+      "16bit"
+#elif defined (M8BPP)
+      "8bit"
+#else
+      "16bit"
+#endif
+   },
+   {
+      "cap32_scr_crop",
+      "Crop Screen Borders",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
+      "cap32_statusbar",
+      "Status Bar",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "onloading", NULL },
+         { "enabled",   NULL },
+         { "disabled",  NULL },
+         { NULL, NULL },
+      },
+      "onloading"
+   },
+   {
+      "cap32_keyboard_transparency",
+      "Keyboard Transparency",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
+      "cap32_floppy_sound",
+      "Floppy Sound",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "enabled"
+   },
+   {
+      "cap32_scr_tube",
+      "Monitor Type",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "color", NULL },
+         { "green", NULL },
+         { "white", NULL },
+         { NULL, NULL },
+      },
+      "color"
+   },
+   {
+      "cap32_lang_layout",
+      "CPC Language",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "english", NULL },
+         { "french",  NULL },
+         { "spanish", NULL },
+         { NULL, NULL },
+      },
+      "english"
+   },
+   { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL },
+};
+
+static struct retro_variable variables[] = {
+   {
+      "cap32_retrojoy0",
+      "Controls > User 1 Controller Config; auto|qaop|incentive|joystick_port1",
+   },
+   {
+      "cap32_retrojoy1",
+      "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port1|joystick_port2",
+   },
+   {
+      "cap32_combokey",
+      "Controls > Combo Key; select|y|b|disabled",
+   },
+   {
+      "cap32_db_mapkeys",
+      "Controls > Use internal Remap DB; enabled|disabled",
+   },
+   {
+      "cap32_lightgun_input",
+      "Light Gun > Input; disabled|phaser|gunstick",
+   },
+   {
+      "cap32_lightgun_show",
+      "Light Gun > Show Crosshair; disabled|enabled",
+   },
+   {
+      "cap32_model",
+      "Model; 6128|464|664|6128+ (experimental)",
+   },
+   // rcheevos disallowed_setting: cap32_autorun disabled
+   {
+      "cap32_autorun",
+      "Advanced > Autorun; enabled|disabled",
+   },
+   {
+      "cap32_ram",
+      "Advanced > Ram size; 128|64|192|576",
+   },
+   {
+      "cap32_advanced_green_phosphor",
+      "Video > Green Phosphor blueish; 15|20|30|5|10",
+   },
+   {
+      "cap32_scr_intensity",
+      "Video > Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
+   },
+   {
+      "cap32_gfx_colors",
+#if defined (M16BPP)
+      "Video > Color Depth; 16bit",
+#elif defined (M8BPP)
+      "Video > Color Depth; 8bit",
+#else
+      "Video > Color Depth; 16bit|24bit|8bit",
+#endif
+   },
+   {
+      "cap32_scr_crop",
+      "Video > Crop Screen Borders; disabled|enabled",
+   },
+   {
+      "cap32_statusbar",
+      "Status Bar; onloading|enabled|disabled",
+   },
+   {
+      "cap32_keyboard_transparency",
+      "Keyboard Transparency; disabled|enabled",
+   },
+   {
+      "cap32_floppy_sound",
+      "Floppy Sound; enabled|disabled",
+   },
+   {
+      "cap32_scr_tube",
+      "Monitor Type; color|green|white",
+   },
+   {
+      "cap32_lang_layout",
+      "CPC Language; english|french|spanish",
+   },
+
+   { NULL, NULL },
+};
+
 void retro_set_environment(retro_environment_t cb)
 {
    environ_cb = cb;
@@ -393,102 +783,19 @@ void retro_set_environment(retro_environment_t cb)
 
    environ_cb( RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports );
 
-   struct retro_variable variables[] = {
-      {
-         "cap32_retrojoy0",
-         "Controls > User 1 Controller Config; auto|qaop|incentive|joystick_port1",
-      },
-      {
-         "cap32_retrojoy1",
-         "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port1|joystick_port2",
-      },
-      {
-         "cap32_combokey",
-         "Controls > Combo Key; select|y|b|disabled",
-      },
-      {
-         "cap32_db_mapkeys",
-         "Controls > Use internal Remap DB; enabled|disabled",
-      },
-      {
-         "cap32_lightgun_input",
-         "Light Gun > Input; disabled|phaser|gunstick",
-      },
-      {
-         "cap32_lightgun_show",
-         "Light Gun > Show Crosshair; disabled|enabled",
-      },
-      {
-         "cap32_model",
-         "Model; 6128|464|664|6128+ (experimental)",
-      },
-      // rcheevos disallowed_setting: cap32_autorun disabled
-      {
-         "cap32_autorun",
-         "Advanced > Autorun; enabled|disabled",
-      },
-      {
-         "cap32_ram",
-         "Advanced > Ram size; 128|64|192|576",
-      },
-      {
-         "cap32_advanced_green_phosphor",
-         "Video > Green Phosphor blueish; 15|20|30|5|10",
-      },
-      {
-         "cap32_scr_intensity",
-         "Video > Monitor Intensity; 8|9|10|11|12|13|14|15|5|6|7",
-      },
-      {
-         "cap32_gfx_colors",
-         #if defined (M16BPP)
-         "Video Advanced > Color Depth; 16bit",
-         #elif defined (M8BPP)
-         "Video Advanced > Color Depth; 8bit",
-         #else
-         "Video Advanced > Color Depth; 16bit|24bit|8bit",
-         #endif
-      },
-      {
-         "cap32_scr_crop",
-         "Video Advanced > Crop Screen Borders; disabled|enabled",
-      },
-      #if 0
-      {
-         "cap32_resolution",
-         #ifdef ANDROID
-         // TODO: removed on android, need debug crash on hires is selected (issue #48)
-         "Internal resolution; 384x272",
-         #else
-         "Internal resolution; 384x272|768x272",
-         #endif
-      },
-      #endif
-      {
-         "cap32_statusbar",
-         "Status Bar; onloading|enabled|disabled",
-      },
-      {
-         "cap32_keyboard_transparency",
-         "Keyboard Transparency; disabled|enabled",
-      },
-      {
-         "cap32_floppy_sound",
-         "Floppy Sound; enabled|disabled",
-      },
-      {
-         "cap32_scr_tube",
-         "Monitor Type; color|green|white",
-      },
-      {
-         "cap32_lang_layout",
-         "CPC Language; english|french|spanish",
-      },
-
-      { NULL, NULL },
-   };
-
-   environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
+   unsigned options_version = 0;
+   if (cb(RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION, &options_version) && (options_version >= 2))
+   {
+      struct retro_core_options_v2 options = {
+         option_categories,
+         option_definitions
+      };
+      cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2, &options);
+   }
+   else
+   {
+      environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
+   }
 }
 
 /**
@@ -770,7 +1077,7 @@ static void update_variables(void)
 
    if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
    {
-      retro_message("[Option] Model 6128+ only working on 24bpp modes, IGNORED!");
+      retro_message("Model 6128+ only working on 24bpp modes, IGNORED!");
    }
 
    var.key = "cap32_keyboard_transparency";
@@ -784,7 +1091,7 @@ static void update_variables(void)
             if (retro_video.depth == DEPTH_8BPP)
             {
                LOGI("[update_variables::warn] keyboard transparency only working on 16/24bpp modes.\n");
-               retro_message("[Option] Keyboard transparency only working on 16/24bpp modes, IGNORED!");
+               retro_message("Keyboard transparency only working on 16/24bpp modes, IGNORED!");
                retro_video.draw_keyboard_func = draw_image_linear_blend;
             }
             else {
@@ -1016,7 +1323,7 @@ void computer_load_bios() {
    {
       int result = cart_start(retro_content_filepath);
       if(result != 0) {
-         retro_message("[computer_load_bios] Error Loading Cart...");
+         LOGE("[computer_load_bios] Error Loading Cart...\n");
       }
    }
 }
@@ -1040,7 +1347,8 @@ void computer_hash_file(char* filepath)
    else
    {
       // warn user is a unsupported ROM
-      retro_message("[computer_hash_file] ROM marked as NOT WORKING.");
+      LOGI("[computer_hash_file] ROM marked as NOT WORKING.\n");
+      retro_message("ROM marked as NOT WORKING.");
    }
 
    LOGI("[computer_hash_file][DB] >>> file hash: 0x%x [ btn=%u, cmd=%u, bad=%u, clean=%u ]\n",
@@ -1121,8 +1429,8 @@ void computer_load_file() {
       LOGI("[computer_load_file] Disk (%d) inserted into drive A: %s\n", dc->index+1, dc->files[dc->index]);
       int error = retro_attach_disk((char *)dc->files[dc->index]);
       if (error) {
-         retro_message("[computer_load_file] Error Loading DSK...");
          LOGE("[computer_load_file] DSK Error (%d): %s\n", error, (char *)retro_content_filepath);
+         retro_message("Error Loading DSK...");
       } else {
          computer_autoload();
       }
@@ -1242,7 +1550,7 @@ void retro_init(void)
    #endif
    gfx_buffer_size = EMULATION_SCREEN_WIDTH * EMULATION_SCREEN_HEIGHT * retro_video.pitch;
 
-   fprintf(stderr, "[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
+   LOGE("[libretro-cap32]: Got size: %u x %u (s%d rs%d).\n",
          EMULATION_SCREEN_WIDTH, EMULATION_SCREEN_HEIGHT, retro_scr_style, gfx_buffer_size);
 
    video_buffer = (uint32_t *) retro_malloc(gfx_buffer_size * PIXEL_DEPTH_DEFAULT_SIZE);
@@ -1419,7 +1727,8 @@ void retro_run(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
    {
       update_variables();
-      retro_message("[retro_run] options updated, changes applied!");
+      LOGI("[retro_run] Options updated, changes applied!\n");
+      retro_message("Options updated, changes applied!");
    }
 
    retro_loop();
