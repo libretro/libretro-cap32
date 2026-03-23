@@ -846,9 +846,17 @@ static void update_variables(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
    retro_computer_cfg.padcfg[ID_PLAYER2] = controller_port_variable(ID_PLAYER2, &var);
 
-   LOGI("[update_variables] default CFG applied p1(%i) p2(%i).\n", retro_computer_cfg.padcfg[ID_PLAYER1], retro_computer_cfg.padcfg[ID_PLAYER2]);
-   memcpy(btnPAD[ID_PLAYER1].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER1]].buttons, sizeof(t_button_cfg));
-   memcpy(btnPAD[ID_PLAYER2].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER2]].buttons, sizeof(t_button_cfg));
+   // check keys
+   if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
+   {
+      LOGI("[update_variables][DB] game remap applied.\n");
+      memcpy(btnPAD[ID_PLAYER1].buttons, game_configuration.btn_config_player_1.buttons, sizeof(t_button_cfg));
+      memcpy(btnPAD[ID_PLAYER2].buttons, game_configuration.btn_config_player_2.buttons, sizeof(t_button_cfg));
+   } else {
+      LOGI("[update_variables][BASE] default CFG applied p1(%i) p2(%i).\n", retro_computer_cfg.padcfg[ID_PLAYER1], retro_computer_cfg.padcfg[ID_PLAYER2]);
+      memcpy(btnPAD[ID_PLAYER1].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER1]].buttons, sizeof(t_button_cfg));
+      memcpy(btnPAD[ID_PLAYER2].buttons, cfgPAD[retro_computer_cfg.padcfg[ID_PLAYER2]].buttons, sizeof(t_button_cfg));
+   }
 
    var.key = "cap32_autorun";
    var.value = NULL;

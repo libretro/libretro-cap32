@@ -2092,6 +2092,18 @@ t_file_entry dbinfo[] = {
       },
       0,
    },
+   { // Silent Shadow (1988).rmp
+      {0x32baf3a8},
+      {
+         {RETROK_x, RETROK_ESCAPE, RETROK_SPACE, RETROK_0, RETROK_q, RETROK_a, RETROK_w, RETROK_e, RETROK_z, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN, DB_CLEAN},
+         {3, 64, 0, 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0},
+      },
+      {
+         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      },
+      0,
+   },
    { // Silkworm (1988).rmp
       {0x75b52a3b},
       {
@@ -2984,5 +2996,5 @@ char input_names[] = {
 };
 
 
-// gen hash: 1746451299.5363889
+// gen hash: 1774267977.103124
 

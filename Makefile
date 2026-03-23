@@ -113,7 +113,7 @@ else ifeq ($(platform), rg35xx)
 	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
 
 	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DINLINE="inline" -DLOWRES 
-	CFLAGS += -marm -mtune=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard
+	CFLAGS += -marm -mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard
 
 	CFLAGS += -flto=4 -fwhole-program -fuse-linker-plugin \
 		-fdata-sections -ffunction-sections -Wl,--gc-sections \
