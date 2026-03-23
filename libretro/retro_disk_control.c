@@ -217,21 +217,27 @@ unsigned retro_get_num_images(void)
 
 bool retro_replace_image_index(unsigned index, const struct retro_game_info *info)
 {
-if (dc)
-    {
-        if (info != NULL)
-        {
-            dc_replace_file(dc, index, info->path);
-        }
-        else
-        {
-            dc_remove_file(dc, index);
-        }
-        return true;
-    }
+   bool result = false;
 
-    return false;	
-    
+   if (dc)
+   {
+      if (info != NULL)
+      {
+         result = dc_replace_file(dc, index, info->path);
+
+         // is current image selected, then update it.
+         if (result && dc->index == index )
+         {
+            retro_insert_image();
+         }
+      }
+      else
+      {
+         result = dc_remove_file(dc, index);
+      }
+   }
+
+   return result;
 }
 
 /* Adds a new valid index (get_num_images()) to the internal disk list.
@@ -561,7 +567,7 @@ bool dc_replace_file(dc_storage* dc, int index, const char* filename)
          dc->names[index] = !string_is_empty(name) ? strdup(name) : NULL;
          dc->types[index]  = dc_get_image_type(filename);
 
-         LOGI(">>> dc replace %s - %s [%u].\n", filename, name, dc->types[index]);
+         LOGI(">>> dc replace [%i] %s - %s [%u].\n", index, filename, name, dc->types[index]);
       }
    }
 
