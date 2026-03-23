@@ -1666,10 +1666,14 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   info->geometry.base_width = retro_video.screen_crop
-      ? CPC_SCREEN_WIDTH - 64
-      : CPC_SCREEN_WIDTH;
-   info->geometry.base_height = retro_video.screen_render_height;
+   info->geometry.base_width= retro_video.screen_crop
+        ? EMULATION_SCREEN_WIDTH - 64
+        : EMULATION_SCREEN_WIDTH;
+
+   info->geometry.base_height = retro_video.screen_crop
+        ? CPC_SCREEN_HEIGHT - 32
+        : CPC_SCREEN_HEIGHT;
+
    info->geometry.max_width = TEX_MAX_WIDTH;
    info->geometry.max_height = TEX_MAX_HEIGHT;
    info->geometry.aspect_ratio = 24.0 / 17.0;
