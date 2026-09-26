@@ -49,6 +49,7 @@
 #include "retro_ui.h"
 #include "lightgun/lightgun.h"
 #include "retro_gun.h"
+#include "retro_gun_calibration.h"
 #include "retro_disk_control.h"
 
 /**
@@ -342,6 +343,40 @@ static unsigned do_action(const retro_action_t* action)
       retro_message(action->message);
 
    return action->type;
+}
+
+static bool vkeyboard_mouse_down[2];
+static unsigned vkeyboard_mouse_button[2] = { RETRO_DEVICE_ID_MOUSE_MIDDLE, RETRO_DEVICE_ID_MOUSE_MIDDLE };
+
+void ev_vkeyboard_set_mouse(unsigned port, const char *value)
+{
+   unsigned button = RETRO_DEVICE_ID_MOUSE_MIDDLE;
+   if (port >= 2)
+      return;
+   if (value && !strcmp(value, "off")) button = 0;
+   else if (value && !strcmp(value, "left")) button = RETRO_DEVICE_ID_MOUSE_LEFT;
+   else if (value && !strcmp(value, "right")) button = RETRO_DEVICE_ID_MOUSE_RIGHT;
+   if (vkeyboard_mouse_button[port] != button) {
+      vkeyboard_mouse_button[port] = button;
+      vkeyboard_mouse_down[port] = button && input_state_cb &&
+         input_state_cb(port, RETRO_DEVICE_MOUSE, 0, button);
+   }
+}
+
+void ev_vkeyboard_poll(void)
+{
+   bool toggle = false;
+   unsigned port;
+   for (port = 0; port < 2; port++) {
+      bool pressed = vkeyboard_mouse_button[port] && (amstrad_devices[port] & RETRO_DEVICE_MASK) == RETRO_DEVICE_LIGHTGUN &&
+         input_state_cb(port, RETRO_DEVICE_MOUSE, 0, vkeyboard_mouse_button[port]);
+      toggle |= pressed && !vkeyboard_mouse_down[port];
+      vkeyboard_mouse_down[port] = pressed;
+   }
+   if (toggle) {
+      ev_toggle_call();
+      retro_ui_toggle_status(UI_KEYBOARD);
+   }
 }
 
 /**
@@ -686,6 +721,7 @@ void init_keyboard_table() {
  * TODO: patch keyboard with user selected LANGUAGE/LAYOUT
  **/
 void ev_init(){
+   memset(vkeyboard_mouse_down, 0, sizeof(vkeyboard_mouse_down));
 
    struct retro_input_descriptor inputDescriptors[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
@@ -704,7 +740,7 @@ void ev_init(){
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
-      { 0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun Trigger" },
+      { 0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun 1 Trigger" },
 
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A, "A" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B, "B" },
@@ -722,7 +758,7 @@ void ev_init(){
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2, "L2" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3, "R3" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3, "L3" },
-      { 1, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun Trigger" },
+      { 1, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER, "Gun 2 Trigger" },
 
       { 0 }
    };
@@ -949,24 +985,29 @@ void ev_process_cursor()
    );
 }
 
-void ev_lightgun()
+void ev_lightgun(unsigned port)
 {
-   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN))
-   {
-      gun.state = GUN_PREPARE;
-      gun.x = 0xfff;
-      gun.y = 0xfff;
+   t_lightgun *g = &gun[port];
+   int x, y;
+   g->pressed = false;
+   if (!lightgun_active(port)) {
+      g->state = GUN_SLEEP;
+      g->x = g->y = -1;
       return;
    }
-
-   gun.x = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X) + 0x7fff) * EMULATION_SCREEN_WIDTH) / 0xfffe;
-   gun.y = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y) + 0x7fff) * EMULATION_SCREEN_HEIGHT) / 0xfffe;
-
-   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER)
-      || (input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT)))
-   {
-      gun.pressed = true;
-   } else {
-      gun.pressed = false;
+   /* Query each frontend port independently. Never merge the global mouse. */
+   g->pressed = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER) != 0;
+   x = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X);
+   y = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y);
+   if (x == -0x8000 || y == -0x8000 ||
+       input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN) ||
+       !gun_calibration_apply(port, &x, &y)) {
+      g->state = GUN_PREPARE;
+      g->x = g->y = -1;
+      return;
    }
+   g->x = ((x + 0x7fff) * (retro_video.screen_render_width - 1)) / 0xfffe;
+   g->y = ((y + 0x7fff) * (retro_video.screen_render_height - 1)) / 0xfffe;
+   if (retro_video.screen_crop)
+      g->x += EMULATION_CROP;
 }

@@ -51,6 +51,7 @@ typedef struct
    lightgun_type gunconfigured;
    bool show;
    unsigned int whitecolor;
+   unsigned int greycolor;
    // TODO: prepare color (gunstick)
 
    void (*gun_update)(void);
@@ -60,5 +61,7 @@ extern t_lightgun_cfg lightgun_cfg;
 
 void lightgun_prepare(lightgun_type guntype);
 void lightgun_draw(void);
+void lightgun_restore(void);
+bool lightgun_active(unsigned port);
 
 #endif

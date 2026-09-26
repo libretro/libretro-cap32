@@ -229,4 +229,7 @@ void Core_PollEvent(void);
 
 void ev_process_cursor();
 
+void ev_vkeyboard_set_mouse(unsigned port, const char *value);
+void ev_vkeyboard_poll(void);
+
 #endif

@@ -53,21 +53,21 @@
 #include "retro_gun.h"
 
 extern uint32_t * video_buffer;
-extern uint8_t keyboard_matrix[16];
 extern t_CPC CPC;
 
 typedef struct{
    int x, y;
    unsigned int timer;
 } t_light;
-t_light light = {0,0,0};
+static t_light light[2];
 
-void ev_lightgun();
+void gunstick_reset(void)
+{
+   memset(light, 0, sizeof(light));
+}
 
 #define GUNSTICK_NONE          0xff
 #define GUNSTICK_HIT           0xfd
-#define GUNSTICK_PREPARE_COLOR 0x0
-#define GUNSTICK_FIRE_KEYCODE  0x94
 #define GUNSTICK_FIRE_MASK     0x10
 #define GUNSTICK_TIMER         4
 
@@ -79,34 +79,60 @@ void ev_lightgun();
 
 uint32_t _gunstick_get_screen(int x, int y)
 {
-   return *(
-      (video_buffer + (x >> retro_video.raw_density_byte)) +
-      (y * retro_video.bps)
-   );
+   if (x < 0 || y < 0 || x >= EMULATION_SCREEN_WIDTH || y >= EMULATION_SCREEN_HEIGHT)
+      return 0;
+   if (retro_video.depth == DEPTH_16BPP)
+      return ((uint16_t *)video_buffer)[y * EMULATION_SCREEN_WIDTH + x];
+   if (retro_video.depth == DEPTH_8BPP)
+      return ((uint8_t *)video_buffer)[y * EMULATION_SCREEN_WIDTH + x];
+   return video_buffer[y * EMULATION_SCREEN_WIDTH + x];
 }
 
-bool _gunstick_check(void)
+/* The sensor responds to brightness, not an exact palette colour.
+ * Decode the renderer's packed pixel before comparing with the existing
+ * grey sensitivity level, so coloured flashes work in every pixel format. */
+static unsigned gunstick_luminance(uint32_t pixel)
+{
+   unsigned r, g, b;
+   if (retro_video.depth == DEPTH_16BPP) {
+      r = ((pixel >> 11) & 31) * 255 / 31;
+      g = ((pixel >> 5) & 63) * 255 / 63;
+      b = (pixel & 31) * 255 / 31;
+   } else if (retro_video.depth == DEPTH_8BPP) {
+      r = ((pixel >> 5) & 7) * 255 / 7;
+      g = ((pixel >> 2) & 7) * 255 / 7;
+      b = (pixel & 3) * 255 / 3;
+   } else {
+      r = (pixel >> 16) & 255;
+      g = (pixel >> 8) & 255;
+      b = pixel & 255;
+   }
+   return 299*r + 587*g + 114*b;
+}
+
+bool _gunstick_check(unsigned port)
 {
    uint32_t gcolor;
+   unsigned threshold;
 
-   if (gun.state == GUN_XYGET)
+   if (gun[port].state == GUN_XYGET)
    {
-      light.x = gun.x;
-      light.y = gun.y;
-      gun.state = GUN_SSEND;
+      light[port].x = gun[port].x;
+      light[port].y = gun[port].y;
+      gun[port].state = GUN_SSEND;
    }
 
-   gcolor = _gunstick_get_screen(light.x, light.y);
+   gcolor = _gunstick_get_screen(light[port].x, light[port].y);
    #ifdef DEBUG_GUNSTICK
-   printf("gunstick: 0x%X (%u,%u) [0x%X]\n", gcolor, light.x, light.y, lightgun_cfg.whitecolor);
+   printf("gunstick: 0x%X (%u,%u) [0x%X]\n", gcolor, light[port].x, light[port].y, lightgun_cfg.whitecolor);
    #endif
 
-   if (gcolor == GUNSTICK_PREPARE_COLOR)
-      gun.state = GUN_PREPARE;
-
-   if ((gun.state != GUN_PREPARE) && (gcolor == lightgun_cfg.whitecolor))
+   /* Guillermo Tell uses a light-yellow flash. Keep grey targets (Solo)
+    * and allow a black sample followed by a flash (Mike Gunner). */
+   threshold = gunstick_luminance(lightgun_cfg.greycolor);
+   if (threshold && gunstick_luminance(gcolor) >= threshold)
    {
-      gun.state = GUN_SLEEP;
+      gun[port].state = GUN_SLEEP;
       return true;
    }
 
@@ -115,43 +141,51 @@ bool _gunstick_check(void)
 
 void gunstick_emulator_update(void)
 {
-   if (light.timer)
-     light.timer --;
-
-   ev_lightgun();
-
-   // send joy fire on gunstick pressed and update state
-   if (gun.pressed)
-   {
-      keyboard_matrix[GUNSTICK_FIRE_KEYCODE >> 4] &= ~GUNSTICK_FIRE_MASK;
-      gun.state = GUN_SHOOT;
-   } else {
-      keyboard_matrix[GUNSTICK_FIRE_KEYCODE >> 4] |= GUNSTICK_FIRE_MASK;
+   unsigned port;
+   for (port = 0; port < 2; port++) {
+      if (light[port].timer)
+         light[port].timer--;
+      ev_lightgun(port);
+      if (!lightgun_active(port)) {
+         light[port].timer = 0;
+         continue;
+      }
+      if (gun[port].pressed && gun[port].x >= 0)
+         gun[port].state = GUN_SHOOT;
    }
 }
 
 unsigned char gunstick_emulator_IN()
 {
-   if (gun.state == GUN_SLEEP)
+   unsigned line = CPC.keyboard_line & 0x0f;
+   unsigned port = line == 9 ? 0 : 1;
+   unsigned char result;
+   if ((line != 9 && line != 6) || !lightgun_active(port))
       return GUNSTICK_NONE;
+   result = gun[port].pressed ? (GUNSTICK_NONE & ~GUNSTICK_FIRE_MASK) : GUNSTICK_NONE;
+   if (gun[port].x < 0)
+      return result;
+
+   if (gun[port].state == GUN_SLEEP)
+      return result;
 
    // on shoot update current light X/Y
    // some games prove that the light is not always on target.
-   if (gun.state == GUN_SHOOT)
+   if (gun[port].state == GUN_SHOOT)
    {
-      light.timer = GUNSTICK_TIMER;
-      gun.state = GUN_XYGET;
+      light[port].timer = GUNSTICK_TIMER;
+      gun[port].state = GUN_XYGET;
    }
 
    // wait timer finished
    // TODO: after shoot maybe we need another timer (better dettection if user press long)
-   if (!light.timer)
-      gun.state = GUN_SLEEP;
-   else if (_gunstick_check())
-      return GUNSTICK_HIT;
+   if (!light[port].timer)
+      gun[port].state = GUN_SLEEP;
+   else if (_gunstick_check(port))
+      return result & GUNSTICK_HIT;
 
    // need a fail answer when you have missed or in any other case
-   return GUNSTICK_NONE;
+   return result;
 }
 
 void gunstick_emulator_OUT(){}

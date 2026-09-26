@@ -48,6 +48,7 @@ SOURCES_C := \
 	$(CORE_DIR)/libretro/retro_render.c \
 	$(CORE_DIR)/libretro/retro_ui.c \
 	$(CORE_DIR)/libretro/retro_gun.c \
+	$(CORE_DIR)/libretro/retro_gun_calibration.c \
 	$(CORE_DIR)/libretro/retro_keyboard.c
 
 ifneq ($(STATIC_LINKING), 1)

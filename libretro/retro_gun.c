@@ -62,9 +62,29 @@ extern uint32_t colours[32];
 t_lightgun_cfg lightgun_cfg;
 
 static uint32_t cursor_color = 0;
+/* Keep the overlay out of the emulated light sensor's framebuffer. */
+static uint8_t cursor_pixels[2][16][32 * 4];
+static int cursor_x[2], cursor_y[2];
+static bool cursor_saved[2];
+
+bool lightgun_active(unsigned port)
+{
+   return port < 2 &&
+      (amstrad_devices[port] & RETRO_DEVICE_MASK) == RETRO_DEVICE_LIGHTGUN &&
+      (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_GUNSTICK ||
+       (port == 0 && lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_PHASER));
+}
 
 void lightgun_prepare(lightgun_type guntype)
 {
+   if ((amstrad_devices[0] & RETRO_DEVICE_MASK) != RETRO_DEVICE_LIGHTGUN &&
+       (amstrad_devices[1] & RETRO_DEVICE_MASK) != RETRO_DEVICE_LIGHTGUN)
+      guntype = LIGHTGUN_TYPE_NONE;
+   if (lightgun_cfg.gunconfigured != guntype) {
+      memset(gun, 0, sizeof(gun));
+      gunstick_reset();
+   }
+   lightgun_cfg.gun_draw = NULL;
    cursor_color = retro_video.cursor_color;
    lightgun_cfg.gunconfigured = guntype;
 
@@ -102,10 +122,17 @@ void lightgun_prepare(lightgun_type guntype)
    {
       case DEPTH_24BPP:
          lightgun_cfg.whitecolor = colours[11];
+         lightgun_cfg.greycolor = colours[0];
          break;
       
       case DEPTH_16BPP:
-         lightgun_cfg.whitecolor = colours[11] + (colours[11] << 16);
+         lightgun_cfg.whitecolor = colours[11] & 0xffff;
+         lightgun_cfg.greycolor = colours[0] & 0xffff;
+         break;
+
+      case DEPTH_8BPP:
+         lightgun_cfg.whitecolor = colours[11] & 0xff;
+         lightgun_cfg.greycolor = colours[0] & 0xff;
          break;
 
       default:
@@ -118,9 +145,40 @@ void lightgun_prepare(lightgun_type guntype)
 
 void lightgun_draw(void)
 {
-   // check margins
-   if (gun.x < 16 || gun.y < 16)
-      return;
+   unsigned port;
+   unsigned row;
+   for (port = 0; port < 2; port++) {
+      cursor_saved[port] = false;
+      if (!lightgun_active(port) || gun[port].x < 16 || gun[port].y < 16 ||
+          gun[port].x >= EMULATION_SCREEN_WIDTH - 16 ||
+          gun[port].y >= EMULATION_SCREEN_HEIGHT - 16)
+         continue;
+      cursor_x[port] = (gun[port].x - 16) & ~3;
+      cursor_y[port] = gun[port].y - 8;
+      cursor_saved[port] = true;
+      for (row = 0; row < 16; row++)
+         memcpy(cursor_pixels[port][row],
+            (uint8_t *)video_buffer + (((cursor_y[port] + row) * EMULATION_SCREEN_WIDTH + cursor_x[port]) << retro_video.bytes),
+            32 << retro_video.bytes);
+   }
+   /* Save both rectangles before drawing, including overlapping crosshairs. */
+   for (port = 0; port < 2; port++) {
+      if (!cursor_saved[port])
+         continue;
+      draw_char(video_buffer, gun[port].x - (4 * EMULATION_SCALE),
+         gun[port].y - 4, FNT_CROSS, cursor_color);
+   }
+}
 
-   draw_char(video_buffer, gun.x - (4 * EMULATION_SCALE), gun.y - 4, FNT_CROSS, cursor_color);
+void lightgun_restore(void)
+{
+   unsigned port, row;
+   for (port = 0; port < 2; port++) {
+      if (!cursor_saved[port])
+         continue;
+      for (row = 0; row < 16; row++)
+         memcpy((uint8_t *)video_buffer + (((cursor_y[port] + row) * EMULATION_SCREEN_WIDTH + cursor_x[port]) << retro_video.bytes),
+            cursor_pixels[port][row], 32 << retro_video.bytes);
+      cursor_saved[port] = false;
+   }
 }

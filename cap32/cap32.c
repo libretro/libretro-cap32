@@ -374,7 +374,7 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
-t_lightgun gun = { 0, 0, GUN_SLEEP, 0 };
+t_lightgun gun[2] = {{ 0, 0, GUN_SLEEP, 0 }, { 0, 0, GUN_SLEEP, 0 }};
 
 #define psg_write \
 { \
@@ -516,7 +516,7 @@ uint8_t z80_IN_handler (reg_pair port)
                         if (!(PSG.RegisterAY.Index[7] & 0x40)) { // port A in input mode?
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
 
-                           if ((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
+                           if ((CPC.keyboard_line & 0x0f) == 9 || (CPC.keyboard_line & 0x0f) == 6) { // joystick 1/2 Gunstick inputs
                               //checking and return gun value
                               ret_val &= CPC.gun_IN
                                  ? CPC.gun_IN()

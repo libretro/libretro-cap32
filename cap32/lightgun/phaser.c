@@ -36,20 +36,17 @@ extern t_CPC CPC;
 extern t_CRTC CRTC;
 extern t_VDU VDU;
 
-// libretro update lightgun position
-void ev_lightgun();
-
 #define PHASER_SCREEN_SHIFT 4
 
 void phaser_emulator_update(void)
 {
-   ev_lightgun();
+   ev_lightgun(0);
 
-   if(gun.pressed)
+   if(gun[0].pressed)
    {
-      gun.state = GUN_SHOOT;
+      gun[0].state = GUN_SHOOT;
    } else {
-      gun.state = GUN_PREPARE;
+      gun[0].state = GUN_PREPARE;
    }
 
 }
@@ -58,7 +55,7 @@ void phaser_emulator_update(void)
 // https://www.cpcwiki.eu/index.php/Amstrad_Magnum_Phaser
 void phaser_emulator_OUT()
 {
-   if (gun.state != GUN_PREPARE)
+   if (gun[0].state != GUN_PREPARE)
       return;
 
    CRTC.registers[17] += 1;
@@ -67,7 +64,7 @@ void phaser_emulator_OUT()
 void phaser_emulator_CRTC()
 {
    // If the trigger is pressed, it only updates it when the phazer receives light from the screen.
-   if (gun.state != GUN_SHOOT)
+   if (gun[0].state != GUN_SHOOT)
       return;
 
    unsigned int x = CPC.scr_pos - CPC.scr_base;
@@ -75,7 +72,7 @@ void phaser_emulator_CRTC()
 
    unsigned int address = CRTC.addr + CRTC.char_count + PHASER_SCREEN_SHIFT;
 
-   if (gun.x >= x && gun.x < x + 16 && gun.y >= y && gun.y < y + 2)
+   if (gun[0].x >= x && gun[0].x < x + 16 && gun[0].y >= y && gun[0].y < y + 2)
    {
       CRTC.registers[16] = address >> 8;
       CRTC.registers[17] = address & 0xff;
