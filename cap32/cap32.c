@@ -1204,7 +1204,21 @@ void emulator_reset (bool bolMF2Reset)
       membank_write[n] = membank_config[0][n];
    }
    membank_read[0] = pbROMlo; // 'page in' lower ROM
-   membank_read[3] = pbROMhi; // 'page in' upper ROM
+
+   /*
+    * Upper ROM Initialization
+    * 
+    * On classic CPC models (464/664/6128), the Upper ROM is paged in by default at reset.
+    * However, on CPC Plus models, the Upper ROM is NOT paged in at reset; instead,
+    * RAM remains visible in the 0xC000 - 0xFFFF range.
+    * 
+    * Emulating this accurately is critical for poorly programmed cartridges like "No Exit".
+    * "No Exit" contains a startup bug: it executes a CALL instruction before initializing
+    * the Stack Pointer (SP = 0x0000). This causes a stack underflow, writing the return
+    * address to 0xFFFF and 0xFFFE.
+    */
+   if (CPC.model <= CPC_MODEL_6128)
+      membank_read[3] = pbROMhi; // 'page in' upper ROM
 
    // Multiface 2
    dwMF2Flags = 0;
