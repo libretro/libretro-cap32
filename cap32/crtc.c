@@ -813,39 +813,48 @@ void prerender_sync_half(void)
    RendPos += 2;
 }
 
-
 static INLINE uint8_t get_sprite_asic(unsigned short offset)
 {
-   const int borderWidth = 64 + (asic.extend_border ? 16 : 0);
-   const int borderHeight = 40 + 8*(30 - CRTC.registers[7]);
-   const int screenWidth = 640 + borderWidth;
-   const int screenHeight = 400 + borderHeight; // FIXME 200¿?
-   int i = 0;
-   /* scr_pos is typed as uint32_t *, but the framebuffer may be 8/16/32-bit. */
-   int pixel = ((uint8_t *)CPC.scr_pos - (uint8_t *)CPC.scr_base) / (CPC.scr_bpp / 8);
-   int x = 2 * (pixel + offset) / dwXScale - borderWidth;
-   int y = VDU.scrln - borderHeight;
-   if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
-      for(i = 0; i < ASIC_SPRITES; i++) {
-         int sx = asic.sprites_x[i];
-         int mx = asic.sprites_mag_x[i];
-         if(mx > 0 && x >= sx && x < sx + 16 * mx) {
-            int sy = asic.sprites_y[i];
-            int my = asic.sprites_mag_y[i];
-            if(my > 0 && y >= sy && y < sy + 16 * my) {
-               int px = (x - sx) / mx;
-               int py = (y - sy) / my;
-               uint8_t pcol = asic.sprites[i][px][py];
-               if(pcol != 0) {
-                  return pcol;
-               }
+   /* 
+    * In CPC+, the sprite coordinates (X=0, Y=0) are tied to the physical 
+    * hardware sync signals (HSYNC/VSYNC), not the start of the active DE 
+    * (Display Enable) area. 
+    * Cap32's 'pixel' already counts from the left edge of the emulator window.
+    * Therefore, we only need to adjust for the ASIC 'extend_border' feature,
+    * which shifts the background active area by 16 Mode 2 pixels.
+    */
+   
+   // character width 16 píxeles (Mode 2). hstart for the extend border
+   int active_x = ((CRTC.char_count - CRTC.hstart) * 16) + offset;
+   
+   // The internal ASIC counter ASIC has 8 scanlines (rasters) per character row
+   int active_y = (CRTC.line_count * 8) + CRTC.raster_count;
+
+   for(int i = 0; i < ASIC_SPRITES; i++) {
+      int sx = (int16_t)asic.sprites_x[i];
+      int mx = asic.sprites_mag_x[i];
+      
+      if(mx > 0 && active_x >= sx && active_x < sx + 16 * mx) {
+         
+         int sy = (int16_t)asic.sprites_y[i];
+         int my = asic.sprites_mag_y[i];
+         
+         if(my > 0 && active_y >= sy && active_y < sy + 16 * my) {
+            
+            /* Calculate which internal sprite pixel to draw */
+            int px = (active_x - sx) / mx;
+            int py = (active_y - sy) / my;
+            uint8_t pcol = asic.sprites[i][px][py];
+            
+            if(pcol != 0) {
+               return pcol;
             }
          }
       }
    }
+
    return 0;
 }
-
 
 void prerender_normal(void)
 {
