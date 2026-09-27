@@ -247,7 +247,6 @@ uint8_t asic_int()
 		asic.dma.dcsr &= ~0x80;  // not a raster interrupt, so this bit is reset
       return (asic.irq_vector & 0xf8) | asic.irq_cause;
    }
-   CRTC.hsw_count &= 0x1F;
    if(asic.irq_cause == 0x06)  // bit 7 is set "if last interrupt acknowledge cycle was caused by a raster interrupt"
       asic.dma.dcsr |= 0x80;
    else {

@@ -941,6 +941,7 @@ static INLINE uint8_t SRL(uint8_t val) {
 #define z80_int_handler \
 { \
    if (_IFF1) { /* process interrupts? */ \
+      uint8_t interrupt_vector = read_ptr(); /* ASIC acknowledge also occurs in IM1. */ \
       _R++; \
       _IFF1 = _IFF2 = 0; /* clear interrupt flip-flops */ \
       z80.int_pending = 0; \
@@ -965,7 +966,7 @@ static INLINE uint8_t SRL(uint8_t val) {
          } \
          write_mem(--_SP, z80.PC.b.h); /* store high byte of current PC */ \
          write_mem(--_SP, z80.PC.b.l); /* store low byte of current PC */ \
-         addr.b.l = read_ptr(); /* assemble pointer */ \
+         addr.b.l = interrupt_vector; /* assemble pointer */ \
          addr.b.h = _I; \
          z80.PC.b.l = read_mem(addr.w.l); /* retrieve low byte of vector */ \
          z80.PC.b.h = read_mem(addr.w.l+1); /* retrieve high byte of vector */ \
