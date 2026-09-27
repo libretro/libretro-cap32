@@ -835,8 +835,7 @@ void fdc_seek(void)
 {
    check_unit(); // switch to target drive
    /* SEEK/RECALIBRATE move the head independently of the spindle motor. */
-   memset(&FDC.result, 0, sizeof(FDC.result));
-   FDC.result[RES_ST0] = FDC.command[CMD_UNIT] & 7;
+   init_status_regs(); // preserve readiness status without gating head movement
    active_drive->current_track = FDC.command[CMD_C];
    if (active_drive->current_track >= DSK_TRACKMAX) {
       active_drive->current_track = DSK_TRACKMAX-1;
