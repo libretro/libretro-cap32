@@ -26,9 +26,9 @@ void test_loader(t_drive * drive, char * format_expected, char * loader_buffer)
 
 int hextoi(char * str)
 {
-   char newstr[4];
+   char newstr[3];
    memcpy(newstr, str, 2);
-   newstr[3]='\0';
+   newstr[2] = '\0';
    return strtol(newstr, NULL, 16);
 }
 
