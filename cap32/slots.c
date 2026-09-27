@@ -809,7 +809,15 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
          drive->sides--; // zero base number of sides
          for (track = 0; track < drive->tracks; track++) { // loop for all tracks
             for (side = 0; side <= drive->sides; side++) { // loop for all sides
-               if(!fread(pbGPBuffer+0x100, 0x100, 1, pfileObject)) { // read track header
+               size_t bytes_read = fread(pbGPBuffer+0x100, 1, 0x100, pfileObject);
+               if (bytes_read != 0x100) { // read track header
+                  /* Some 40-track dumps advertise up to two extra tracks.
+                   * Keep complete cylinders only; never invent sector data. */
+                  if (!bytes_read && feof(pfileObject) && !ferror(pfileObject) &&
+                      track >= 40 && drive->tracks <= 42 && side == 0) {
+                     drive->tracks = track;
+                     goto standard_loaded;
+                  }
                   iRetCode = ERR_DSK_INVALID;
                   goto exit;
                }
@@ -840,12 +848,22 @@ int dsk_load (char *pchFileName, t_drive *drive, char chID)
                   pbDataPtr += dwSectorSize;
                   pbPtr += 8;
                }
-               if (dwTrackSize > 0 && !fread(pbTempPtr, dwTrackSize, 1, pfileObject)) { // read entire track data in one go
+               bytes_read = dwTrackSize ? fread(pbTempPtr, 1, dwTrackSize, pfileObject) : 0;
+               if (bytes_read != dwTrackSize) {
+                  /* Also tolerate an extra track header with no payload. */
+                  if (!bytes_read && feof(pfileObject) && !ferror(pfileObject) &&
+                      track >= 40 && drive->tracks <= 42 && side == 0) {
+                     free(drive->track[track][side].data);
+                     memset(&drive->track[track][side], 0, sizeof(t_track));
+                     drive->tracks = track;
+                     goto standard_loaded;
+                  }
                   iRetCode = ERR_DSK_INVALID;
                   goto exit;
                }
             }
          }
+standard_loaded:
          drive->extended = false; // normal disk - used on loader
          drive->altered = 0; // disk is as yet unmodified
       } else {
