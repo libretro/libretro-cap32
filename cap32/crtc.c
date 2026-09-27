@@ -823,7 +823,9 @@ static INLINE uint8_t get_sprite_asic(unsigned short offset)
    const int screenWidth = 640 + borderWidth;
    const int screenHeight = 400 + borderHeight; // FIXME 200¿?
    int i = 0;
-   int x = 2 * (CPC.scr_pos + offset - CPC.scr_base) / dwXScale - borderWidth;
+   /* scr_pos is typed as uint32_t *, but the framebuffer may be 8/16/32-bit. */
+   int pixel = ((uint8_t *)CPC.scr_pos - (uint8_t *)CPC.scr_base) / (CPC.scr_bpp / 8);
+   int x = 2 * (pixel + offset) / dwXScale - borderWidth;
    int y = VDU.scrln - borderHeight;
    if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
       for(i = 0; i < ASIC_SPRITES; i++) {
