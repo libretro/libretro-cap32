@@ -371,3 +371,159 @@ void generate_corrupt_disk(const char *filepath) {
    fwrite(garbage, 1, 1024, f);
    fclose(f);
 }
+
+/*
+ * BIN selection
+ */
+
+/* Disk generator matching the Python logic */
+void generate_autorun_disk(const char *filepath, autorun_opts_t opts) {
+    uint8_t logical[40 * 9 * 512];
+    memset(logical, 0, sizeof(logical));
+    memset(logical, 0xe5, 2048); // Directory area
+
+    const char* names[] = {opts.name0, opts.name1};
+    uint16_t starts[] = {opts.start0, opts.start1};
+
+    // We only process up to 2 files based on Python logic
+    for (int i = 0; i < 2; i++) {
+        if (!names[i]) continue;
+
+        // Parse "NAME.EXT"
+        char stem[9] = "        ";
+        char ext[4] = "   ";
+        const char *dot = strchr(names[i], '.');
+        if (dot) {
+            int stem_len = dot - names[i];
+            memcpy(stem, names[i], stem_len > 8 ? 8 : stem_len);
+            memcpy(ext, dot + 1, strlen(dot + 1) > 3 ? 3 : strlen(dot + 1));
+        }
+
+        // Create Directory Entry
+        uint8_t entry[32] = {0};
+        memcpy(&entry[1], stem, 8);
+        memcpy(&entry[9], ext, 3);
+        entry[15] = 2; entry[16] = i + 2;
+        
+        if (opts.bad_block && i == 0) entry[16] = 255;
+        if (opts.hidden && i == 1) entry[10] |= 128;
+        
+        memcpy(&logical[i * 32], entry, 32);
+
+        // Create AMSDOS Header
+        uint8_t h[128] = {0};
+        memcpy(&h[1], stem, 8);
+        memcpy(&h[9], ext, 3);
+        h[18] = 2;
+        h[21] = opts.load & 0xff; h[22] = opts.load >> 8;
+        h[24] = opts.length & 0xff; h[25] = opts.length >> 8;
+        h[26] = starts[i] & 0xff; h[27] = starts[i] >> 8;
+        
+        uint16_t csum = 0;
+        for (int j = 0; j < 67; j++) csum += h[j];
+        h[67] = csum & 0xff; h[68] = csum >> 8;
+
+        if (opts.bad_header_idx == i) h[67] ^= 1;
+        if (opts.headerless && i == 0) memset(h, 0, 128);
+
+        // PLUS3DOS injection
+        if (opts.plus3_idx == i) {
+            memset(h, 0, 128);
+            memcpy(h, "PLUS3DOS\x1a", 9);
+            h[9] = 1;
+            h[11] = 0; h[12] = 1; // 256 bytes
+            if (opts.bad_signature) h[8] = 0;
+            
+            uint16_t p3_csum = 0;
+            for (int j = 0; j < 127; j++) p3_csum += h[j];
+            h[127] = p3_csum & 0xff;
+            
+            if (opts.bad_plus3_csum) h[127] ^= 1;
+        }
+
+        // Copy header to logical track memory
+        memcpy(&logical[(i + 2) * 1024], h, 128);
+    }
+
+    // Build physical DSK
+    FILE *f = fopen(filepath, "wb");
+    uint8_t result[256] = {0};
+    memcpy(result, "MV - CPC", 8);
+    
+    if (opts.empty_tracks) {
+        memcpy(result, "EXTENDED CPC DSK File\r\nDisk-Info\r\n", 34);
+        result[48] = 99; // Tracks
+    } else {
+        result[48] = 40; 
+    }
+    result[49] = 1; 
+    result[50] = 4864 & 0xff; result[51] = 4864 >> 8;
+    
+    if (opts.empty_tracks) {
+        memset(&result[52], 19, 40); // Track sizes table
+    }
+    fwrite(result, 1, 256, f);
+
+    int order[] = {0, 5, 1, 6, 2, 7, 3, 8, 4};
+    int seq[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    int *sectors = opts.interleave ? order : seq;
+
+    for (int t = 0; t < 40; t++) {
+        uint8_t h_track[256] = {0};
+        memcpy(h_track, "Track-Info", 10);
+        h_track[16] = t;
+        h_track[20] = 2; h_track[21] = 9;
+        
+        for (int s = 0; s < 9; s++) {
+            int offset = 24 + s * 8;
+            h_track[offset] = t;
+            h_track[offset + 2] = (opts.system ? 0x41 : 0xc1) + sectors[s];
+            h_track[offset + 3] = 2;
+        }
+        fwrite(h_track, 1, 256, f);
+
+        for (int s = 0; s < 9; s++) {
+            int source = (t - (opts.system ? 2 : 0)) * 9 + sectors[s];
+            if (source >= 0 && source < (40 * 9)) {
+                fwrite(&logical[source * 512], 1, 512, f);
+            } else {
+                uint8_t empty[512] = {0};
+                fwrite(empty, 1, 512, f);
+            }
+        }
+    }
+    
+    // Fix extended disk sizes if needed
+    if (opts.empty_tracks) {
+        fseek(f, 256, SEEK_SET);
+        for (int t = 0; t < 40; t++) {
+            for (int s = 0; s < 9; s++) {
+                long offset = 256 + (t * 4864) + 24 + (s * 8) + 6;
+                fseek(f, offset, SEEK_SET);
+                uint8_t size[2] = {0, 2}; // 512
+                fwrite(size, 1, 2, f);
+            }
+        }
+    }
+    fclose(f);
+}
+
+/* Helper to execute and check autorun commands */
+void check_autorun(autorun_opts_t opts, const char* expected_filename) {
+    const char* filepath = "test_autorun.dsk";
+    generate_autorun_disk(filepath, opts);
+    
+    memset(&catalogue, 0, sizeof(catalogue_info_t));
+    memset(&driveA, 0, sizeof(t_drive));
+
+    dsk_load((char *)filepath, &driveA, 'A');
+    
+    char command[256] = {0};
+    loader_run(command);
+    
+    char expected_command[256];
+    snprintf(expected_command, sizeof(expected_command), "RUN\"%s", expected_filename);
+    
+    assert_string_equal(command, expected_command);
+    remove(filepath);
+}

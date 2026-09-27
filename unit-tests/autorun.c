@@ -178,6 +178,41 @@ static void test_edge_corrupt_disk_header(void **state) {
    remove("test_corrupt.dsk");
 }
 
+/* --- CMocka bin selection test cases --- */
+
+/* Default options initializer */
+static autorun_opts_t default_opts() {
+    autorun_opts_t opts = {
+        .name0 = "DATA.BIN", .name1 = "START.BIN",
+        .start0 = 0, .start1 = 0x4000,
+        .load = 0x4000, .length = 128,
+        .bad_header_idx = -1, .bad_block = false, .headerless = false,
+        .system = false, .interleave = true, .hidden = false,
+        .plus3_idx = -1, .bad_plus3_csum = false, .bad_signature = false,
+        .empty_tracks = false
+    };
+    return opts;
+}
+
+static void test_prefer_entry_point(void **state) {
+    autorun_opts_t opts = default_opts();
+    check_autorun(opts, "START.BIN");
+}
+
+static void test_plus3_disk(void **state) {
+    autorun_opts_t opts = default_opts();
+    opts.name0 = "DISK."; 
+    opts.name1 = "MENU.BAS";
+    opts.plus3_idx = 0;
+    check_autorun(opts, "MENU.BAS");
+}
+
+static void test_unknown_first_header(void **state) {
+    autorun_opts_t opts = default_opts();
+    opts.bad_header_idx = 0;
+    check_autorun(opts, "DATA.BIN");
+}
+
 
 int main(void) {
    pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
@@ -196,6 +231,9 @@ int main(void) {
       cmocka_unit_test(test_edge_empty_unformatted_disk),
       cmocka_unit_test(test_edge_full_catalog_disk),
       cmocka_unit_test(test_edge_corrupt_disk_header),
+      cmocka_unit_test(test_prefer_entry_point),
+      cmocka_unit_test(test_plus3_disk),
+      cmocka_unit_test(test_unknown_first_header),
    };
 
    cmocka_run_group_tests(tests, NULL, NULL);

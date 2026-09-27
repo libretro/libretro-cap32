@@ -135,7 +135,6 @@ uint32_t dbfail[] = {
    0xb84f3627, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side B).dsk
    0x34dc1faa, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side A).dsk
    0xf9bc30df, // Molecularr (1990)(Amstrad Cent Pour Cent)[cr].dsk
-   0x82f0d494, // Mindfighter (1988)(Activision).dsk
    0xaa35d5c2, // Macadam Bumper (1985)(PSS)(es)[cr].dsk
    0x65bdaadd, // Macadam Bumper (1985)(PSS).dsk
    0x16c28934, // Macadam Bumper (1985)(PSS)(de)[cr].dsk
