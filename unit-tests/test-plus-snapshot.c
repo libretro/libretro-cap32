@@ -199,6 +199,37 @@ int main(int argc, char **argv) {
       assert(c->model == CPC_MODEL_PLUS);
       free(s);
    }
+   /* Plus ROM-select port values 0x80..0x9f select cartridge pages 0..31.
+    * Saving the decoded page number would reload most of them as page 1. */
+   uint8_t **read_banks = dlsym(h, "membank_read");
+   uint8_t **cart_pages = dlsym(h, "pbCartridgePages");
+   int (*init_cart)(void) = dlsym(h, "cpr_init");
+   assert(read_banks && cart_pages && init_cart);
+   if (!cart_pages[0]) assert(init_cart() == 0);
+   for (unsigned i = 0; i < 32; i++) memset(cart_pages[i], 0xa0 + i, 16384);
+   c->model = CPC_MODEL_PLUS;
+   reset(false);
+   for (unsigned page_id = 0; page_id < 32; page_id++) {
+      reg_pair port;
+      port.w.l = 0x7f00;
+      portout(port, 0x80); /* Enable the upper ROM. */
+      port.w.l = 0xdf00;
+      portout(port, 0x80 | page_id);
+      assert(read_banks[3] == cart_pages[page_id]);
+      size_t size = retro_serialize_size();
+      uint8_t *s = malloc(size);
+      assert(s && retro_serialize(s, size));
+      assert(s[0x55] == (0x80 | page_id));
+      assert(s[0xa4] == 3);
+      assert(retro_unserialize(s, size));
+      assert(ga->upper_ROM == page_id);
+      assert(read_banks[3] == cart_pages[page_id]);
+      s[0x55] = page_id; /* Previous native Plus snapshot encoding. */
+      assert(retro_unserialize(s, size));
+      assert(read_banks[3] == cart_pages[page_id]);
+      assert(read_banks[3][0] == 0xa0 + page_id);
+      free(s);
+   }
    puts("PASS: Plus sprites/palette/split/scroll/DMA/IRQs/ROM banks/lock state, portable chunks, "
         "bounds");
    for (unsigned model_id = 0; model_id < 3; model_id++)

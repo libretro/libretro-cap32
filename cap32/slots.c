@@ -376,6 +376,10 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    // ROM select
    port.b.h = 0xdf;
    val = sh.upper_ROM; // upper ROM number
+   /* Older native Plus states stored the decoded cartridge page. */
+   if (CPC.model == CPC_MODEL_PLUS && val < 32 &&
+       (continuation || sh.cpc_model == 3))
+      val |= 0x80;
    z80_OUT_handler(port, val);
    // PPI
    port.b.h = 0xf4; // port A
@@ -522,7 +526,8 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
    }
 
    /* ROM select */
-   sh.upper_ROM = GateArray.upper_ROM;
+   sh.upper_ROM = CPC.model == CPC_MODEL_PLUS
+      ? 0x80 | (GateArray.upper_ROM & 31) : GateArray.upper_ROM;
 
    /* PPI */
    sh.ppi_A = PPI.portA;
@@ -603,6 +608,7 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
             break;
       }
    }
+   sh.crtc_type = CPC.model == CPC_MODEL_PLUS ? 3 : 0;
    sh.crtc_addr[0]       = CRTC.addr & 0xff;
    sh.crtc_addr[1]       = (CRTC.addr >> 8) & 0xff;
    sh.crtc_scanline[0]   = VDU.scanline & 0xff;
