@@ -544,6 +544,8 @@ uint8_t z80_IN_handler (reg_pair port)
             // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
             // TODO: verify with CPC (non-plus) if we go in the else in some cases
             if (CPC.model > CPC_MODEL_6128 || PPI.control & 2) { // port B set to input?
+               if (retro_computer_cfg.tape_fastload && CPC.tape_motor && CPC.tape_play_button)
+                  tape_input_reads++;
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz

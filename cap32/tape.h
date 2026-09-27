@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+extern unsigned tape_input_reads;
 void Tape_UpdateLevel(void);
 void Tape_Rewind(void);
 
