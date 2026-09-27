@@ -699,7 +699,7 @@ t_test_entry cleancpcdb[] = {
    {0x32e80769, {"0b076f5733ea394635c803de5aa31659"}, {"Chicago 90 (Mircroids) (France)/Chicago 90 (1989)(Mircroids)(fr).dsk"} },
    {0xe1a074d8, {"6ee7b56a6a6b98d8dc1f354e48d79b50"}, {"Cap-Man (Hebdogiciel) (France)/Cap-Man (1985)(Hebdogiciel)(fr)[cr].dsk"} },
    {0xd895249a, {"3b5ad8e7b4eafe276118d816d37f19a2"}, {"Countdown (Macsen Software)/Countdown (1987)(Macsen Software)[cr].dsk"} },
-   {0x95272ba6, {"3f7dd1aabb6d128438e94f256a3b3bbd"}, {"Chiffres et des Lettres, Des (Loriciels) (France)/Chiffres et des Lettres, Des (1987)(Loriciels)(fr)(Side A)[Juin].dsk"} },
+   {0x95272ba6, {"3209905cfab689595e435a69d8d726be"}, {"Chiffres et des Lettres, Des (Loriciels) (France)/Chiffres et des Lettres, Des (1987)(Loriciels)(fr)(Side A)[Juin].dsk"} },
    {0x003f24cf, {"2453f1a3e4f2293a6c5de1bc2825c36c"}, {"Cauldron II (Palace Software)/Cauldron II (1986)(Palace Software).dsk"} },
    {0x6e991c26, {"0f3ce766494c244fb3e069ee60809d95"}, {"Classic Muncher (Bubble Bus Software)/Classic Muncher (1987)(Bubble Bus Software).dsk"} },
    {0x826c72a5, {"1c5fc72ca682633f198e8b7dc7b71059"}, {"Case of the Obscene Mural, The (Encief Routines)/Case of the Obscene Mural, The (1986)(Encief Routines)[cr].dsk"} },

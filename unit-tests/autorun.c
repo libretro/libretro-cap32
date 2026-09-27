@@ -35,6 +35,9 @@
  *
  ****************************************************************************************/
 
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -42,8 +45,12 @@
 #include <stdlib.h>
 
 #include "cmocka.h"
+#include "cap32/slots.h"
 #include "libretro/dsk/loader.h"
+#include "libretro/dsk/amsdos_catalog.h"
 #include "test-utils.h"
+
+extern t_drive driveA;
 
 static void cpm_tests_success(void **state) {
    (void) state; /* unused */
@@ -94,6 +101,84 @@ static void basic_tests_success(void **state) {
    test_dsk("tests/The_Shadows_of_Sergoth__ENGLISH-FRENCH-SPANISH__Side_A.dsk", "RUN\"DISC.BAS", "DATA");
 }
 
+/* --- TESTS CMOCKA DSK/SYSTEM CASES --- */
+
+static void test_system_boot_is_not_catalogue(void **state) {
+   generate_synthetic_disk("test_synth.dsk", true, true, 1);
+   run_and_check("test_synth.dsk", 2, "DATA.BIN", false, "START.BIN", true, 2);
+}
+
+static void test_hidden_loader_keeps_hidden_attribute(void **state) {
+   generate_synthetic_disk("test_synth.dsk", false, true, 2);
+   run_and_check("test_synth.dsk", 2, "DATA.BIN", false, "START.BIN", true, 0);
+}
+
+static void test_ignore_boot_filename(void **state) {
+   generate_synthetic_disk("test_synth.dsk", true, false, 3);
+   run_and_check("test_synth.dsk", 2, "DATA.BIN", false, "START.BIN", false, 2);
+}
+
+static void test_fallback_track_without_art_leak(void **state) {
+   generate_synthetic_disk("test_synth.dsk", false, false, 4);
+   run_and_check("test_synth.dsk", 2, "DATA.BIN", false, "START.BIN", false, 1);
+}
+
+static void test_directory_art_preserved(void **state) {
+   generate_synthetic_disk("test_synth.dsk", false, false, 5);
+   run_and_check("test_synth.dsk", 1, "START.BIN", true, NULL, false, -1);
+}
+
+/* --- TESTS CMOCKA EDGE CASES --- */
+
+static void test_edge_empty_unformatted_disk(void **state) {
+   memset(&catalogue, 0, sizeof(catalogue_info_t));
+   memset(&driveA, 0, sizeof(t_drive));
+
+   generate_empty_disk("test_empty.dsk");
+   dsk_load((char *)"test_empty.dsk", &driveA, 'A');
+
+   char command[256];
+   loader_run(command);
+
+   // The emulator must not crash and should find 0 files
+   assert_int_equal(catalogue.last_entry, 0);
+
+   remove("test_empty.dsk");
+}
+
+static void test_edge_full_catalog_disk(void **state) {
+   memset(&catalogue, 0, sizeof(catalogue_info_t));
+   memset(&driveA, 0, sizeof(t_drive));
+    
+   generate_full_catalog_disk("test_full.dsk");
+   dsk_load((char *)"test_full.dsk", &driveA, 'A');
+
+   char command[256];
+   loader_run(command);
+
+   // The emulator must parse exactly 64 files without buffer overflows
+   assert_int_equal(catalogue.last_entry, 64);
+
+   remove("test_full.dsk");
+}
+
+static void test_edge_corrupt_disk_header(void **state) {
+   memset(&catalogue, 0, sizeof(catalogue_info_t));
+   memset(&driveA, 0, sizeof(t_drive));
+
+   generate_corrupt_disk("test_corrupt.dsk");
+   dsk_load((char *)"test_corrupt.dsk", &driveA, 'A');
+
+   char command[256];
+   loader_run(command);
+
+   // The emulator must gracefully reject the file, not crash, and find 0 files
+   assert_int_equal(catalogue.last_entry, 0);
+
+   remove("test_corrupt.dsk");
+}
+
+
 int main(void) {
    pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
 
@@ -103,6 +188,14 @@ int main(void) {
       cmocka_unit_test(speedlock_tests_success),
       cmocka_unit_test(hexagon_tests_success),
       cmocka_unit_test(hidden_tests_success),
+      cmocka_unit_test(test_system_boot_is_not_catalogue),
+      cmocka_unit_test(test_hidden_loader_keeps_hidden_attribute),
+      cmocka_unit_test(test_ignore_boot_filename),
+      cmocka_unit_test(test_fallback_track_without_art_leak),
+      cmocka_unit_test(test_directory_art_preserved),
+      cmocka_unit_test(test_edge_empty_unformatted_disk),
+      cmocka_unit_test(test_edge_full_catalog_disk),
+      cmocka_unit_test(test_edge_corrupt_disk_header),
    };
 
    cmocka_run_group_tests(tests, NULL, NULL);
