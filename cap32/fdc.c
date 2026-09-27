@@ -834,11 +834,12 @@ void fdc_intstat(void)
 void fdc_seek(void)
 {
    check_unit(); // switch to target drive
-   if (init_status_regs() == 0) { // drive Ready?
-      active_drive->current_track = FDC.command[CMD_C];
-      if (active_drive->current_track >= DSK_TRACKMAX) { // beyond valid range?
-         active_drive->current_track = DSK_TRACKMAX-1; // limit to maximum
-      }
+   /* SEEK/RECALIBRATE move the head independently of the spindle motor. */
+   memset(&FDC.result, 0, sizeof(FDC.result));
+   FDC.result[RES_ST0] = FDC.command[CMD_UNIT] & 7;
+   active_drive->current_track = FDC.command[CMD_C];
+   if (active_drive->current_track >= DSK_TRACKMAX) {
+      active_drive->current_track = DSK_TRACKMAX-1;
    }
    FDC.flags |= (FDC.command[CMD_UNIT] & 1) ? SEEKDRVB_flag : SEEKDRVA_flag; // signal completion of seek operation
    FDC.phase = CMD_PHASE; // switch back to command phase (fdc_seek has no result phase!)
