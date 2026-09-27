@@ -957,6 +957,11 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
 
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
+      /* Empty drives stay not-ready; repeated motor writes change nothing. */
+      if (FDC.motor != (val & 0x01)) {
+         if (driveA.tracks) FDC.flags |= STATUSDRVA_flag;
+         if (driveB.tracks) FDC.flags |= STATUSDRVB_flag;
+      }
       FDC.motor = val & 0x01;
       if(FDC.motor) {
          retro_snd_cmd(SND_FDCMOTOR, ST_LOOP);
@@ -967,7 +972,6 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       #ifdef DEBUG_FDC
       fprintf(pfoDebug, "%s", FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off");
       #endif
-      FDC.flags |= STATUSDRVA_flag | STATUSDRVB_flag;
    }
    else if (port.b.h == 0xfb)
    {
@@ -1187,7 +1191,7 @@ void emulator_reset (bool bolMF2Reset)
    // FDC
    memset(&FDC, 0, sizeof(FDC)); // clear FDC data structure
    FDC.phase = CMD_PHASE;
-   FDC.flags = STATUSDRVA_flag | STATUSDRVB_flag;
+   /* Motor is off after reset, so neither drive has a ready transition. */
 
    // memory
    if (bolMF2Reset)
