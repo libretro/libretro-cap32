@@ -400,6 +400,7 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
    // ASIC -- palette operation, from 6400h to 6440h
    else if (addr >= 0x6400 && addr < 0x6440) {
       int colour = (addr & 0x3F) >> 1;
+      asic.legacy_palette &= ~(1u << colour);
       // TODO: CLEAN THIS green/color
       if ((addr % 2) == 1) {
          double green = (double) (val & 0x0F)/16;

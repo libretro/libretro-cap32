@@ -1920,9 +1920,7 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
 size_t retro_serialize_size(void)
 {
-   int dwSnapSize = sizeof(t_SNA_header);
-   dwSnapSize += get_ram_size();
-   return dwSnapSize;
+   return snapshot_size();
 }
 
 bool retro_serialize(void *data, size_t size)
