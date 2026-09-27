@@ -121,7 +121,7 @@ Skee Shoot
 ```
 # Known Bugs
 
-- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59) and **need 24bit color depth**.
+- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59).
 
 - Old3DS need some optimizations (~18fps).
 
