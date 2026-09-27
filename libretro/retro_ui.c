@@ -359,6 +359,8 @@ void retro_ui_set_led(bool value)
 
 void retro_ui_process()
 {
+   ev_process_ui_shortcuts();
+
    if (
       statusbar_timer &&
       retro_computer_cfg.statusbar == STATUSBAR_HIDE
