@@ -1127,7 +1127,8 @@ void render32bpp_doubleY(void)
 void crtc_cycle(int repeat_count)
 {
    while (repeat_count) {
-      /* Plus PRI is delayed by 10us from HSYNC start, independent of R3. */
+      /* CPC Plus ASIC: Programmable Raster Interrupt (PRI)
+       * Plus PRI is delayed by 10us from HSYNC start, independent of R3. */
       if (CRTC.raster_interrupt_delay && !--CRTC.raster_interrupt_delay) {
          z80.int_pending = 1;
          asic.irq_cause = 0x06;
@@ -1308,11 +1309,15 @@ void crtc_cycle(int repeat_count)
             flags1.inHSYNC = 0xff; // turn HSYNC on
             CRTC.flag_hadhsync = 1; // prevent GA from processing more than one HSYNC per scan line
             CRTC.hsw_count = 0; // initialize horizontal sync width counter
+
+            /* CPC Plus: Setup 10us delay for Programmable Raster Interrupt
+             * https://cpctech.cpcwiki.de/docs/cpcplus.html */
             if (CRTC.interrupt_sl &&
                 (CRTC.line_count & 0x1f) == (CRTC.interrupt_sl >> 3) &&
                 CRTC.raster_count == (CRTC.interrupt_sl & 7)) {
                CRTC.raster_interrupt_delay = 10;
             }
+
             match_hsw();
          }
       } else {
