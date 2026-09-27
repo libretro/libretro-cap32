@@ -532,13 +532,13 @@ $(CORE_DIR)/unit-tests/cmocka.o:
 unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
-	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
 	$(CORE_DIR)/unit-tests/autorun
 
 unit-test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
-	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/unit-tests/test-db.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/cmocka/include $(INCDIRS)
+	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/unit-tests/test-db.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
 	@echo "Now run: $(CORE_DIR)/unit-tests/test-db <full-path-to clean-cpc-db roms>"
 
 .PHONY: $(TARGET) clean clean-objs

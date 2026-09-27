@@ -172,6 +172,11 @@ uint32_t read_status_delay = 0;
    FDC.result[RES_N] = FDC.command[CMD_N];
 
 
+#define FDC_CHECK_UNIT_FAST \
+{ \
+   active_drive = FDC.command[CMD_UNIT] & 1 ? &driveB : &driveA; \
+}
+
 void sector_set_sizes(t_sector * sector, unsigned int size, unsigned int total_size)
 {
    sector->size = size;
@@ -192,21 +197,6 @@ unsigned char* sector_get_read_data(t_sector * sector)
    #endif
    return &sector->data[sector->weak_read_version * sector->size];
 }
-
-void check_unit(void)
-{
-   switch (FDC.command[CMD_UNIT] & 1) // check unit selection bits of active command
-   {
-      case 0: // target for command is drive A
-         active_drive = &driveA;
-         break;
-      case 1: // target for command is drive B
-         active_drive = &driveB;
-         break;
-   }
-}
-
-
 
 int init_status_regs(void)
 {
@@ -760,7 +750,7 @@ void fdc_drvstat(void)
 {
    uint8_t val;
 
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    val = FDC.command[CMD_UNIT] & 7; // keep head and unit of command
    if ((active_drive->write_protected) || (active_drive->tracks == 0)) { // write protected, or disk missing?
       val |= 0x48; // set Write Protect + Two Sided (?)
@@ -833,7 +823,7 @@ void fdc_intstat(void)
 
 void fdc_seek(void)
 {
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_track = FDC.command[CMD_C];
       if (active_drive->current_track >= DSK_TRACKMAX) { // beyond valid range?
@@ -849,7 +839,7 @@ void fdc_seek(void)
 void fdc_readtrk(void)
 {
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
@@ -886,7 +876,7 @@ void fdc_write(void)
    retro_ui_set_led(true);
 
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
@@ -929,7 +919,7 @@ void fdc_read(void)
    retro_ui_set_led(true);
 
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
@@ -961,7 +951,7 @@ void fdc_read(void)
 void fdc_readID(void)
 {
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0) { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
       uint32_t side = active_drive->sides ? active_drive->current_side : 0; // single sided drives only acccess side 1
@@ -994,7 +984,7 @@ void fdc_readID(void)
 void fdc_writeID(void)
 {
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0)
    { // drive Ready?
       active_drive->current_side = (FDC.command[CMD_UNIT] & 4) >> 2; // extract target side
@@ -1035,7 +1025,7 @@ void fdc_scan(void)
    retro_ui_set_led(true);
 
    FDC.led = 1; // turn the drive LED on
-   check_unit(); // switch to target drive
+   FDC_CHECK_UNIT_FAST; // switch to target drive
    if (init_status_regs() == 0)
    {
       // drive Ready?
