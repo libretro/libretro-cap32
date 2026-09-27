@@ -971,6 +971,15 @@ void ev_process_cursor()
 
 void ev_lightgun()
 {
+   /* A pointer click used by the OSK must not also shoot into the game. */
+   if (retro_ui_captures_pointer())
+   {
+      gun.pressed = false;
+      gun.state = GUN_SLEEP;
+      gun.x = gun.y = 0xfff;
+      return;
+   }
+
    if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN))
    {
       gun.state = GUN_PREPARE;
