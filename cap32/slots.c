@@ -144,13 +144,16 @@ static void snapshot_plus_save(uint8_t *chunk)
    p[0x8c3] = CRTC.split_addr;
    p[0x8c4] = asic.hscroll | (asic.vscroll << 4) | (asic.extend_border << 7);
    p[0x8c5] = asic.interrupt_vector;
+   /* The core exposes fixed analogue inputs (no analogue device attached). */
+   for (c = 0; c < 8; c++) p[0x8c8 + c] = c == 5 || c == 7 ? 0 : 0x3f;
    for (c = 0; c < 3; c++) {
       const t_DMA_channel *ch = &asic.dma.ch[c];
       uint8_t *s = p + 0x8d0 + c * 4, *internal = p + 0x8e0 + c * 7;
       snap_put_word(s, ch->source_address);
       s[2] = ch->prescaler;
       snap_put_word(internal, ch->loops);
-      snap_put_word(internal + 2, ch->loop_address);
+      /* SNA stores the instruction after REPEAT; the core adds 2 on LOOP. */
+      snap_put_word(internal + 2, ch->loop_address + 2);
       snap_put_word(internal + 4, ch->pause_ticks);
       internal[6] = ch->tick_cycles;
    }
@@ -199,7 +202,7 @@ static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
       ch->source_address = snap_word(s);
       ch->prescaler = s[2];
       ch->loops = snap_word(in);
-      ch->loop_address = snap_word(in + 2);
+      ch->loop_address = (snap_word(in + 2) - 2) & 0xffff;
       ch->pause_ticks = snap_word(in + 4);
       ch->tick_cycles = in[6];
       ch->enabled = (p[0x8df] >> c) & 1;

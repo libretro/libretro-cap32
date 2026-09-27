@@ -155,6 +155,9 @@ int main(int argc, char **argv) {
       assert(retro_serialize(s, size));
       for (unsigned i = 0; i < 16; i++)
          assert(s[size + i] == 0xcc);
+      const uint8_t *plus = s + 256 + 128 * 1024 + 8;
+      assert(plus[0x8e2] == 2 && plus[0x8e3] == 0x29);
+      assert(plus[0x8c8] == 0x3f && plus[0x8cd] == 0 && plus[0x8cf] == 0);
       assert(s[0x6d] == 4);
       assert(!memcmp(s + 256 + 128 * 1024, "CPC+", 4));
       assert(retro_unserialize(s, size));
