@@ -1097,11 +1097,6 @@ static void update_variables(void)
       }
    }
 
-   if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
-   {
-      retro_message("Model 6128+ only working on 24bpp modes, IGNORED!");
-   }
-
    var.key = "cap32_keyboard_transparency";
    var.value = NULL;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
