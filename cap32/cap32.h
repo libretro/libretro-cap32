@@ -357,6 +357,7 @@ typedef struct {
    unsigned char split_sl;
    unsigned int sl_count;
    unsigned char interrupt_sl;
+   unsigned char raster_interrupt_delay;
 } t_CRTC;
 
 typedef struct {

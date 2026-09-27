@@ -679,8 +679,6 @@ static INLINE void match_hsw(void)
             z80.int_pending = 1; // queue Z80 interrupt
          }
          GateArray.sl_count = 0; // clear counter
-      } else if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) { // ASIC interrupt
-         z80.int_pending = 1;
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;
@@ -1129,6 +1127,12 @@ void render32bpp_doubleY(void)
 void crtc_cycle(int repeat_count)
 {
    while (repeat_count) {
+      /* Plus PRI is delayed by 10us from HSYNC start, independent of R3. */
+      if (CRTC.raster_interrupt_delay && !--CRTC.raster_interrupt_delay) {
+         z80.int_pending = 1;
+         asic.irq_cause = 0x06;
+         GateArray.sl_count &= 0x1f;
+      }
 
       if (VDU.flag_drawing) { // are we within the rendering area?
          if (HorzChar < HorzMax) { // below horizontal cut-off?
@@ -1304,6 +1308,11 @@ void crtc_cycle(int repeat_count)
             flags1.inHSYNC = 0xff; // turn HSYNC on
             CRTC.flag_hadhsync = 1; // prevent GA from processing more than one HSYNC per scan line
             CRTC.hsw_count = 0; // initialize horizontal sync width counter
+            if (CRTC.interrupt_sl &&
+                (CRTC.line_count & 0x1f) == (CRTC.interrupt_sl >> 3) &&
+                CRTC.raster_count == (CRTC.interrupt_sl & 7)) {
+               CRTC.raster_interrupt_delay = 10;
+            }
             match_hsw();
          }
       } else {
