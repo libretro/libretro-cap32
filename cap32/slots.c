@@ -52,6 +52,7 @@ extern t_flags1 flags1;
 extern t_disk_format disk_format[MAX_DISK_FORMAT];
 extern uint8_t *pbROM;
 extern uint8_t asic_ram[16384];
+extern uint32_t colours[32];
 
 // TODO: remove pbGPBuffer and pbTapeImage dependency
 extern uint8_t *pbTapeImage;
@@ -180,6 +181,10 @@ static void snapshot_plus_save(uint8_t *chunk)
    for (i = 0; i < 4; i++) p[8 + i] = CRTC.sl_count >> (8 * i);
    p[12] = asic.dma.clear;
    p[13] = asic.dma.dcsr;
+   /* The SNA header carries classic ink values; retain their last-writer mask. */
+   p[7] = asic.legacy_palette;
+   p[14] = asic.legacy_palette >> 8;
+   p[15] = asic.legacy_palette >> 16;
 }
 
 static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
@@ -227,6 +232,11 @@ static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
       for (i = 0; i < 4; i++) CRTC.sl_count |= (unsigned)internal[8 + i] << (8 * i);
       asic.dma.clear = internal[12];
       asic.dma.dcsr = internal[13];
+      asic.legacy_palette = (internal[7] | ((uint32_t)internal[14] << 8)
+         | ((uint32_t)internal[15] << 16)) & 0x1ffff;
+      for (i = 0; i < 17; i++)
+         if (asic.legacy_palette & (1u << i))
+            GateArray.palette[i] = colours[GateArray.ink_values[i] & 31];
    }
 }
 

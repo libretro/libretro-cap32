@@ -67,6 +67,9 @@ typedef struct {
    uint8_t interrupt_vector;
    int irq_cause;
    int irq_vector;
+
+   /* Palette entries last written through the classic Gate Array ports. */
+   uint32_t legacy_palette;
 } t_asic;
 
 extern t_asic asic;

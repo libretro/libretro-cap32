@@ -1,5 +1,6 @@
 /* ROM-free SNA round-trip test. Compile with -Ilibretro-common/include
- * -Icap32, then run with a native shared core path (-ldl on Linux). */
+ * -Icap32, then run with a native shared core path (-ldl on Linux).
+ * Optional second argument: 8bit, 16bit or 24bit (default). */
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,9 +74,9 @@ static bool env(unsigned cmd, void *p) {
    __typeof__(&name) name = dlsym(h, #name);                                                       \
    assert(name)
 int main(int argc, char **argv) {
-   assert(argc == 2);
+   assert(argc == 2 || argc == 3);
    model = "6128+ (experimental)";
-   depth = "24bit";
+   depth = argc == 3 ? argv[2] : "24bit";
    out = ".";
    void *h = dlopen(argv[1], RTLD_NOW | RTLD_LOCAL);
    assert(h);
@@ -113,13 +114,22 @@ int main(int argc, char **argv) {
          write_reg(0x6003 + i * 8, i & 1);
          write_reg(0x6004 + i * 8, i);
       }
-      for (unsigned i = 0; i < 64; i++)
+      for (unsigned i = 0; i < (mode == 0 ? 8u : 64u); i++)
          write_reg(0x6400 + i, i * 3);
       for (unsigned i = 0; i < 6; i++)
          write_reg(0x6800 + i, 17 + i * 3);
       reg_pair port;
       port.w.l = 0x7f00;
       portout(port, 0xa0 + mode * 8 + 3);
+      /* Mix classic and ASIC writes, including overwriting a classic colour. */
+      for (unsigned pen = 0; pen < (mode == 0 ? 4u : 17u); pen++) {
+         portout(port, pen);
+         portout(port, 0x40 | ((pen * 3 + 1) & 31));
+      }
+      if (mode & 2) {
+         write_reg(0x6402, 0x73);
+         write_reg(0x6403, 0x09);
+      }
       a->locked = mode & 1;
       a->lock_seq_pos = mode * 5;
       a->lock_prev_data = 0x77;
@@ -142,7 +152,7 @@ int main(int argc, char **argv) {
       for (unsigned i = 0; i < 128 * 1024; i++)
          (*ram)[i] = (i * 3 + i / 256) & 255;
       t_asic before = *a;
-      uint32_t palette[32];
+      uint32_t palette[34];
       memcpy(palette, ga->palette, sizeof(palette));
       unsigned bank = ga->lower_ROM_bank, page_on = ga->registerPageOn;
       uint8_t mirrors[128];
