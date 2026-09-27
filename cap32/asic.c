@@ -63,6 +63,7 @@ extern uint32_t colours[32];
 
 extern t_GateArray GateArray;
 extern t_CRTC CRTC;
+extern t_flags1 flags1;
 extern t_CPC CPC;
 extern t_PSG PSG;
 extern t_z80regs z80;
@@ -420,7 +421,24 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
    // ASIC - Programmable raster, from 6800h to 6806h
    else if (addr >= 0x6800 && addr < 0x6806) {
       switch (addr) {
-         case 0x6800: CRTC.interrupt_sl = val; break;
+         case 0x6800:
+            if (val != CRTC.interrupt_sl) {
+               /* A changed PRI withdraws the previous raster request. DMA
+                * requests and DCSR's last-acknowledge bit are independent.
+                * Zero returns to the classic interrupt without acknowledging
+                * an already asserted request. */
+               CRTC.raster_interrupt_delay = 0;
+               if (val && asic.irq_cause == 6)
+                  z80.int_pending = 0;
+               if (val && flags1.inHSYNC &&
+                   CRTC.line_count == (val >> 3) &&
+                   (CRTC.raster_count & 7) == (val & 7)) {
+                  z80.int_pending = 1;
+                  asic.irq_cause = 6;
+               }
+            }
+            CRTC.interrupt_sl = val;
+            break;
          case 0x6801: CRTC.split_sl = val; break;
          case 0x6802: CRTC.split_addr &= 0x00FF; CRTC.split_addr |= (val << 8); break;
          case 0x6803: CRTC.split_addr &= 0x3F00; CRTC.split_addr |= val; break;

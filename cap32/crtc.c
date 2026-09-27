@@ -881,15 +881,8 @@ static INLINE uint32_t shift_scroll_pixel(int value, int byteShift){
  */
 void prerender_normal_plus(void)
 {
-   unsigned int next_address = CRTC.next_address;
-   if(asic.vscroll) {
-      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
-         next_address += asic.vscroll * 0x0800;
-      } else {
-         next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
-      }
-   }
+   unsigned int next_address = (CRTC.next_address & ~0x3800)
+      | (((CRTC.raster_count + asic.vscroll) & 7) << 11);
 
    uint8_t* bVidMem = pbRAM + next_address;
    // check scroll
@@ -957,15 +950,8 @@ void prerender_normal_plus(void)
 
 void prerender_normal_half_plus(void)
 {
-   unsigned int next_address = CRTC.next_address;
-   if(asic.vscroll) {
-      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
-         next_address += asic.vscroll * 0x0800;
-      } else {
-         next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
-      }
-   }
+   unsigned int next_address = (CRTC.next_address & ~0x3800)
+      | (((CRTC.raster_count + asic.vscroll) & 7) << 11);
 
    uint8_t* bVidMem = pbRAM + next_address;
    // check scroll
@@ -1299,9 +1285,17 @@ void crtc_cycle(int repeat_count)
       }
 
       if (CRTC.char_count == CRTC.registers[1]) { // matches horizontal displayed?
-         if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
+         /* SSCR changes the raster bits immediately, but row advancement is
+          * sampled at R1. A split on this line overrides that advancement. */
+         unsigned raster = CRTC.raster_count;
+         if (CPC.model == CPC_MODEL_PLUS)
+            raster = (raster + asic.vscroll) & 31;
+         if (raster == CRTC.registers[9]) {
             CRTC.next_addr = CRTC.addr + CRTC.char_count;
          }
+         if (CPC.model == CPC_MODEL_PLUS && CRTC.split_sl &&
+             (((CRTC.line_count & 31) << 3) | (CRTC.raster_count & 7)) == CRTC.split_sl)
+            CRTC.next_addr = CRTC.split_addr;
       }
 
       if (!flags1.inHSYNC) { // not in HSYNC?
@@ -1313,7 +1307,7 @@ void crtc_cycle(int repeat_count)
             /* CPC Plus: Setup 10us delay for Programmable Raster Interrupt
              * https://cpctech.cpcwiki.de/docs/cpcplus.html */
             if (CRTC.interrupt_sl &&
-                (CRTC.line_count & 0x1f) == (CRTC.interrupt_sl >> 3) &&
+                CRTC.line_count == (CRTC.interrupt_sl >> 3) &&
                 CRTC.raster_count == (CRTC.interrupt_sl & 7)) {
                CRTC.raster_interrupt_delay = 10;
             }
@@ -1334,9 +1328,6 @@ void crtc_cycle(int repeat_count)
 
       if (CRTC.flag_newscan) { // scanline change requested?
          CRTC.flag_newscan = 0;
-         if (CRTC.split_sl && CRTC.sl_count == CRTC.split_sl) {
-            CRTC.next_addr = CRTC.split_addr;
-         }
          CRTC.addr = CRTC.next_addr; // FIX split screen
          CRTC.sl_count++;            // <-- CPC-PLUS only?
 
