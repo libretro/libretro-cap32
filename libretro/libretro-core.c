@@ -506,12 +506,20 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       "6128"
    },
    {
-      "cap32_tape_fastload", "Tape Loading Speed", NULL,
+      "cap32_tape_fastload",
+      "Tape Loading Speed",
+      NULL,
       "Fast-forward while the tape is running and the program frequently reads its input. Internal timing is unchanged. Toggle frontend fast-forward off to cancel until the tape stops. Requires frontend fast-forward override support.",
-      NULL, NULL,
-      { { "disabled", "Normal" }, { "4", "4x" }, { "8", "8x" },
-        { "maximum", "Maximum" }, { NULL, NULL } },
-      "disabled"
+      NULL,
+      "system",
+      {
+         { "disabled", "Normal" },
+         { "4", "4x" },
+         { "8", "8x" },
+         { "maximum", "Maximum" },
+         { NULL, NULL }
+      },
+      "maximum"
    },
    // rcheevos disallowed_setting: cap32_autorun disabled
    {
@@ -520,7 +528,7 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       NULL,
       NULL,
-      "advanced",
+      "system",
       {
          { "enabled",  NULL },
          { "disabled", NULL },
