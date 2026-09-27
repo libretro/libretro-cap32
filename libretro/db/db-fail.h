@@ -142,10 +142,6 @@ uint32_t dbfail[] = {
    0xd50bb5a1, // Masque (1986)(Ubi Soft)(fr)(Side B).dsk
    0x57f4d790, // Mountie Mick's Death Ride (1987)(Reaktor).dsk
    0x061fb016, // Moon Blaster (1990)(Loriciels).dsk
-   0xd5fc1c36, // Megablasters (1994)(Radical Software)(Disk 2 Side B).dsk
-   0x1eb1e1e1, // Megablasters (1994)(Radical Software)(Disk 2 Side A).dsk
-   0x8f71b89c, // Megablasters (1994)(Radical Software)(Disk 1 Side B).dsk
-   0x75a53bec, // Megablasters (1994)(Radical Software)(Disk 1 Side A).dsk
    0x22dc1fb5, // Necromancien, Le (1987)(Ubi Soft)(fr)(Side B).dsk
    0x3d981755, // Necromancien, Le (1987)(Ubi Soft)(fr)(Side A).dsk
    0x5579ba92, // Nosferatu the Vampyre (1986)(Piranha)[b].dsk
