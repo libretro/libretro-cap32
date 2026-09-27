@@ -72,7 +72,9 @@ bool lightgun_active(unsigned port)
    return port < 2 &&
       (amstrad_devices[port] & RETRO_DEVICE_MASK) == RETRO_DEVICE_LIGHTGUN &&
       (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_GUNSTICK ||
-       (port == 0 && lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_PHASER));
+       (port == 0 && (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_PHASER ||
+                      lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_WEST_PHASER ||
+                      lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_TROJAN_PHAZER)));
 }
 
 void lightgun_prepare(lightgun_type guntype)
@@ -95,6 +97,20 @@ void lightgun_prepare(lightgun_type guntype)
          CPC.gun_CRTC = gunstick_emulator_CRTC;
          CPC.gun_IN = gunstick_emulator_IN;
          CPC.gun_OUT = gunstick_emulator_OUT;
+         break;
+
+      case LIGHTGUN_TYPE_WEST_PHASER:
+         lightgun_cfg.gun_update = phaser_emulator_update;
+         CPC.gun_CRTC = NULL;
+         CPC.gun_IN = westphaser_emulator_IN;
+         CPC.gun_OUT = NULL;
+         break;
+
+      case LIGHTGUN_TYPE_TROJAN_PHAZER:
+         lightgun_cfg.gun_update = phaser_emulator_update;
+         CPC.gun_CRTC = trojan_emulator_CRTC;
+         CPC.gun_IN = trojan_emulator_IN;
+         CPC.gun_OUT = NULL;
          break;
 
       case LIGHTGUN_TYPE_PHASER:

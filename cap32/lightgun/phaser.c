@@ -31,6 +31,8 @@
 
 #include "cap32.h"
 #include "lightgun.h"
+#include "gunstick.h"
+#include "retro_gun.h"
 
 extern t_CPC CPC;
 extern t_CRTC CRTC;
@@ -61,7 +63,7 @@ void phaser_emulator_OUT()
    CRTC.registers[17] += 1;
 }
 
-void phaser_emulator_CRTC()
+static void phaser_latch(unsigned shift)
 {
    // If the trigger is pressed, it only updates it when the phazer receives light from the screen.
    if (gun[0].state != GUN_SHOOT)
@@ -72,7 +74,7 @@ void phaser_emulator_CRTC()
       / (CPC.scr_bpp / 8);
    unsigned int y = VDU.scrln;
 
-   unsigned int address = CRTC.addr + CRTC.char_count + PHASER_SCREEN_SHIFT;
+   unsigned int address = CRTC.addr + CRTC.char_count + shift;
 
    if (gun[0].x >= x && gun[0].x < x + 16 && gun[0].y >= y && gun[0].y < y + 2)
    {
@@ -82,3 +84,50 @@ void phaser_emulator_CRTC()
 }
 
 unsigned char phaser_emulator_IN(){ return 0xff; }
+
+/* The Plus AUX gun has a separate active-low trigger on joystick 1 fire 2.
+ * Unlike the expansion-port Magnum, it does not use writes to port FBFE. */
+unsigned char trojan_emulator_IN(void)
+{
+   if (CPC.model != CPC_MODEL_PLUS || (CPC.keyboard_line & 15) != 9 ||
+       !lightgun_active(0))
+      return 0xff;
+   return gun[0].pressed ? 0xef : 0xff;
+}
+
+void phaser_emulator_CRTC(void)
+{
+   phaser_latch(PHASER_SCREEN_SHIFT);
+}
+
+void trojan_emulator_CRTC(void)
+{
+   if (CPC.model == CPC_MODEL_PLUS && lightgun_active(0))
+      phaser_latch(0);
+}
+
+/* Loriciel connects the trigger to joystick fire 1 and the optical sensor
+ * to joystick up. The sensor remains available with the trigger released.
+ * See the West Phaser circuit documented by Jose Leandro on CPCWiki. */
+unsigned char westphaser_emulator_IN(void)
+{
+   unsigned char value = 0xff;
+   int x, y;
+   if ((CPC.keyboard_line & 15) != 9 || !lightgun_active(0))
+      return value;
+   if (gun[0].pressed)
+      value &= ~0x20;
+   if (gun[0].x < 0 || gun[0].y < 0 || CPC.scr_bpp < 8)
+      return value;
+   x = ((uint8_t *)CPC.scr_pos - (uint8_t *)CPC.scr_base) / (CPC.scr_bpp / 8);
+   y = VDU.scrln;
+   /* West software times the start of the sensor response, then samples
+    * subsequent scanlines. Keep the response for the rest of each visible
+    * line after the aim point; blanking and black pixels produce no light.
+    * Read the current scanline: games change the palette during acquisition. */
+   if (VDU.flag_drawing && y > gun[0].y &&
+       x > gun[0].x && x < EMULATION_SCREEN_WIDTH &&
+       _gunstick_get_screen(gun[0].x, y))
+      value &= ~0x01;
+   return value;
+}

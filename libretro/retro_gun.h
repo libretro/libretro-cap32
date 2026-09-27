@@ -43,6 +43,8 @@ typedef enum {
     LIGHTGUN_TYPE_NONE,
     LIGHTGUN_TYPE_PHASER,
     LIGHTGUN_TYPE_GUNSTICK,
+    LIGHTGUN_TYPE_WEST_PHASER,
+    LIGHTGUN_TYPE_TROJAN_PHAZER,
 } lightgun_type;
 
 typedef struct

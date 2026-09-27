@@ -471,8 +471,10 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       "light_gun",
       {
          { "disabled", NULL },
-         { "phaser",   NULL },
-         { "gunstick", NULL },
+         { "phaser",   "Amstrad Magnum Phaser" },
+         { "gunstick", "MHT Gunstick" },
+         { "west_phaser", "Loriciel West Phaser" },
+         { "trojan_phazer", "Trojan Phazer (CPC Plus / GX4000)" },
          { NULL, NULL },
       },
       "disabled"
@@ -755,7 +757,7 @@ static struct retro_variable variables[] = {
    },
    {
       "cap32_lightgun_input",
-      "Light Gun > Input; disabled|phaser|gunstick",
+      "Light Gun > Input; disabled|phaser|gunstick|west_phaser|trojan_phazer",
    },
    { "cap32_lightgun_scale_x", "Light Gun > X Scale; 1" },
    { "cap32_lightgun_scale_y", "Light Gun > Y Scale; 1" },
@@ -973,6 +975,8 @@ static void update_variables(void)
       lightgun_type val = LIGHTGUN_TYPE_NONE;
       if (strcmp(var.value, "phaser") == 0) val = LIGHTGUN_TYPE_PHASER;
       else if (strcmp(var.value, "gunstick") == 0) val = LIGHTGUN_TYPE_GUNSTICK;
+      else if (strcmp(var.value, "west_phaser") == 0) val = LIGHTGUN_TYPE_WEST_PHASER;
+      else if (strcmp(var.value, "trojan_phazer") == 0) val = LIGHTGUN_TYPE_TROJAN_PHAZER;
 
       if (lightgun_cfg.guntype != val) {
          lightgun_cfg.guntype = val;

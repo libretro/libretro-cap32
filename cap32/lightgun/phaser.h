@@ -39,6 +39,9 @@
 #define LIGHTGUN_PHASER_H__
 
 void phaser_emulator_update(void);
+unsigned char trojan_emulator_IN(void);
+void trojan_emulator_CRTC(void);
+unsigned char westphaser_emulator_IN(void);
 unsigned char phaser_emulator_IN();
 void phaser_emulator_OUT();
 void phaser_emulator_CRTC();
