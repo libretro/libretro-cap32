@@ -70,7 +70,9 @@ void phaser_emulator_CRTC()
    if (gun.state != GUN_SHOOT)
       return;
 
-   unsigned int x = CPC.scr_pos - CPC.scr_base;
+   /* scr_pos is uint32_t *, even for 8/16-bit framebuffers. */
+   unsigned int x = ((uint8_t *)CPC.scr_pos - (uint8_t *)CPC.scr_base)
+      / (CPC.scr_bpp / 8);
    unsigned int y = VDU.scrln;
 
    unsigned int address = CRTC.addr + CRTC.char_count + PHASER_SCREEN_SHIFT;
