@@ -412,6 +412,18 @@ dc_storage* dc_create(void)
    return dc;
 }
 
+/* The image name is the file name without folder and extension. Frontends
+ * that link libretro-common statically (EmulatorJS) define fill_pathname()
+ * with another return type than the bundled header, and WebAssembly traps
+ * on the mismatched call, so the name is built here. */
+static void dc_name_from_path(char *name, const char *filename, size_t size)
+{
+   char *ext;
+   strlcpy(name, path_basename(filename), size);
+   if ((ext = strrchr(name, '.')))
+      *ext = '\0';
+}
+
 bool dc_add_file_int(dc_storage* dc, char* filename, char* name)
 {
    /* Verify */
@@ -458,7 +470,7 @@ bool dc_add_file(dc_storage* dc, const char* filename)
    // Get 'name' - just the filename without extension
    char name[512];
    name[0] = '\0';
-   fill_pathname(name, path_basename(filename), "", sizeof(name));
+   dc_name_from_path(name, filename, sizeof(name));
 
    if(!dc_add_file_int(dc, strdup(filename), strdup(name)))
       return false;
@@ -554,7 +566,7 @@ bool dc_replace_file(dc_storage* dc, int index, const char* filename)
          // Get 'name' - just the filename without extension
          char name[512];
          name[0] = '\0';
-         fill_pathname(name, path_basename(filename), "", sizeof(name));
+         dc_name_from_path(name, filename, sizeof(name));
 
          /* Dupecheck */
          for (unsigned i = 0; i < dc->count - 1; i++)
@@ -622,7 +634,7 @@ void dc_parse_m3u(dc_storage* dc, const char* m3u_file)
             char tmp[512];
             tmp[0] = '\0';
 
-            fill_pathname(tmp, path_basename(filename), "", sizeof(tmp));
+            dc_name_from_path(tmp, filename, sizeof(tmp));
             image_name = strdup(tmp);
 
             // Add the file to the struct
