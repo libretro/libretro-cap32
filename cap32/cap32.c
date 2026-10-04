@@ -1563,6 +1563,7 @@ int video_init (void)
    int error_code;
 
    CPC.scr_bpp = retro_getGfxBpp();
+   CPC.scr_density = 2 >> (CPC.scr_bpp >> 4);
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();
@@ -1690,22 +1691,12 @@ void loadConfiguration (void)
       CPC.keyboard = 0;
    CPC.joysticks     = getConfigValueInt(chFileName, "system", "joysticks", 0) & 1;
 
-   CPC.scr_fs_width  = getConfigValueInt(chFileName, "video", "scr_width", 384);
-   CPC.scr_fs_height = getConfigValueInt(chFileName, "video", "scr_height", 288);
-   CPC.scr_fs_bpp    = getConfigValueInt(chFileName, "video", "scr_bpp", 32);
    CPC.scr_style     = getConfigValueInt(chFileName, "video", "scr_style", 4);
-   CPC.scr_oglfilter = getConfigValueInt(chFileName, "video", "scr_oglfilter", 0) & 1;
-   CPC.scr_vsync     = getConfigValueInt(chFileName, "video", "scr_vsync", 1) & 1;
-   CPC.scr_led       = getConfigValueInt(chFileName, "video", "scr_led", 1) & 1;
-   CPC.scr_fps       = getConfigValueInt(chFileName, "video", "scr_fps", 0) & 1;
    CPC.scr_tube      = getConfigValueInt(chFileName, "video", "scr_tube", 0) & 1;
    CPC.scr_intensity = getConfigValueInt(chFileName, "video", "scr_intensity", 10);
-   CPC.scr_remanency = getConfigValueInt(chFileName, "video", "scr_remanency", 0) & 1;
 
    if ((CPC.scr_intensity < 5) || (CPC.scr_intensity > 15))
       CPC.scr_intensity = 10;
-
-   CPC.scr_window = getConfigValueInt(chFileName, "video", "scr_window", 0) & 1;
 
    CPC.snd_enabled = getConfigValueInt(chFileName, "sound", "enabled", 1) & 1;
    CPC.snd_playback_rate = getConfigValueInt(chFileName, "sound", "playback_rate", 2);

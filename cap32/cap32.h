@@ -234,22 +234,14 @@ typedef struct {
    unsigned int joysticks;
    int cycle_count;
 
-   unsigned int scr_fs_width;
-   unsigned int scr_fs_height;
-   unsigned int scr_fs_bpp;
    unsigned int scr_style;
-   unsigned int scr_oglfilter;
-   unsigned int scr_vsync;
-   unsigned int scr_led;
-   unsigned int scr_fps;
    unsigned int scr_tube;
    unsigned int scr_intensity;
    unsigned int scr_phosphor_intensity;
-   unsigned int scr_remanency;
-   unsigned int scr_window;
    unsigned int scr_bpp;
    unsigned int scr_bps;
    unsigned int scr_line_offs;
+   unsigned int scr_density;
    uint32_t *scr_base;
    uint32_t *scr_pos;
    void (*scr_render)(void);
@@ -258,7 +250,6 @@ typedef struct {
    void (*scr_prerendersync)(void);
    void (*video_set_palette_antialias)(void);
    unsigned int (*rgb2color)(unsigned int r, unsigned int g, unsigned int b);
-   bool scr_is_ogl;
 
    unsigned char (*gun_IN)(void);
    void (*gun_OUT)(void);
