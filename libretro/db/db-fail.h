@@ -152,7 +152,6 @@ uint32_t dbfail[] = {
    0xaffa2688, // Peur Sur Amityville (2019)(Ubi Soft)(es)(Hack)(Side B)[cr].dsk
    0x72046022, // Peur Sur Amityville (1987)(Ubi Soft)(fr)(Side A).dsk
    0xd3d2e2fa, // Peur Sur Amityville (1987)(Ubi Soft)(fr)(Side B).dsk
-   0x7789187a, // Prehistorik (1991)(Titus).dsk
    0x0d4da0fb, // Puffy's Saga (1989)(Ubi Soft)(Side A).dsk
    0x70cd64bc, // Puffy's Saga (1989)(Ubi Soft)(Side B).dsk
    0xad4e58e2, // Pepe Bequilles (1987)(Softhawk)(fr).dsk
@@ -213,7 +212,6 @@ uint32_t dbfail[] = {
    0xc1de5e93, // Top Level (1988)(MBC Informatique)(fr)(Side A).dsk
    0x01945b8c, // Terre et Conquerants (1989)(Ubi Soft)(fr)(Side A).dsk
    0xc2fa28ae, // Terre et Conquerants (1989)(Ubi Soft)(fr)(Side B).dsk
-   0x648dc666, // Wild Streets (1990)(Titus).dsk
    0xdbce3abc, // Winchester (1988)(Chip)(fr).dsk
    0x5b80457c, // Warrior Plus (1986)(Rainbow Productions)(fr)(Side A).dsk
    0x6ce693b1, // Warrior Plus (1986)(Rainbow Productions)(fr)(Side B).dsk
