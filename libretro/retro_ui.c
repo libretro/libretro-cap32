@@ -326,6 +326,11 @@ void retro_ui_free(void)
    mu_end(ctx);
 }
 
+bool retro_ui_captures_pointer(void)
+{
+   return (ui_status & (INTERNAL_UI_KEYBOARD | INTERNAL_UI_MENU)) != 0;
+}
+
 void retro_ui_set_status(retro_commands_ui_t status, bool value)
 {
    if (value)
