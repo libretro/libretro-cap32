@@ -343,6 +343,7 @@ typedef enum {
 #include "rom/rom_mods.h"
 
 #include "rom/464.h"
+#include "rom/664.h"
 #include "rom/6128.h"
 #include "rom/6128p.h"
 #include "rom/amsdos.h"
@@ -544,6 +545,8 @@ uint8_t z80_IN_handler (reg_pair port)
             // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
             // TODO: verify with CPC (non-plus) if we go in the else in some cases
             if (CPC.model > CPC_MODEL_6128 || PPI.control & 2) { // port B set to input?
+               if (retro_computer_cfg.tape_fastload && CPC.tape_motor && CPC.tape_play_button)
+                  tape_input_reads++;
                ret_val = bTapeLevel | // tape level when reading
                          (CPC.printer ? 0 : 0x40) | // ready line of connected printer
                          (CPC.jumpers & 0x7f) | // manufacturer + 50Hz
@@ -955,6 +958,11 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
 
    if ((port.b.h == 0xfa) && (!(port.b.l & 0x80))) { // floppy motor control?
       //printf("FDC motor control access: %u - %u\n",  (int) port.b.l, (int) val);
+      /* Empty drives stay not-ready; repeated motor writes change nothing. */
+      if (FDC.motor != (val & 0x01)) {
+         if (driveA.tracks) FDC.flags |= STATUSDRVA_flag;
+         if (driveB.tracks) FDC.flags |= STATUSDRVB_flag;
+      }
       FDC.motor = val & 0x01;
       if(FDC.motor) {
          retro_snd_cmd(SND_FDCMOTOR, ST_LOOP);
@@ -965,7 +973,6 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       #ifdef DEBUG_FDC
       fprintf(pfoDebug, "%s", FDC.motor ? "\r\n--- motor on" : "\r\n--- motor off");
       #endif
-      FDC.flags |= STATUSDRVA_flag | STATUSDRVB_flag;
    }
    else if (port.b.h == 0xfb)
    {
@@ -1080,10 +1087,14 @@ int emulator_select_ROM (void)
    switch(CPC.model)
    {
       case CPC_MODEL_464:
-         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464
+         memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464
+         break;
+      case CPC_MODEL_464DDI:
+         memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464 and DDI
+         memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_664:
-         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464 and 664
+         memcpy(pbROM, OS664_BASIC664, (32*1024));
          memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_6128:
@@ -1108,9 +1119,10 @@ int emulator_select_ROM (void)
       switch(CPC.model)
       {
          case CPC_MODEL_464:
-         case CPC_MODEL_664:
+         case CPC_MODEL_464DDI:
             pbPtr += 0x1d69; // location of the keyboard translation table
             break;
+         case CPC_MODEL_664:
          case CPC_MODEL_6128:
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
@@ -1185,7 +1197,7 @@ void emulator_reset (bool bolMF2Reset)
    // FDC
    memset(&FDC, 0, sizeof(FDC)); // clear FDC data structure
    FDC.phase = CMD_PHASE;
-   FDC.flags = STATUSDRVA_flag | STATUSDRVB_flag;
+   /* Motor is off after reset, so neither drive has a ready transition. */
 
    // memory
    if (bolMF2Reset)
@@ -1204,7 +1216,21 @@ void emulator_reset (bool bolMF2Reset)
       membank_write[n] = membank_config[0][n];
    }
    membank_read[0] = pbROMlo; // 'page in' lower ROM
-   membank_read[3] = pbROMhi; // 'page in' upper ROM
+
+   /*
+    * Upper ROM Initialization
+    * 
+    * On classic CPC models (464/664/6128), the Upper ROM is paged in by default at reset.
+    * However, on CPC Plus models, the Upper ROM is NOT paged in at reset; instead,
+    * RAM remains visible in the 0xC000 - 0xFFFF range.
+    * 
+    * Emulating this accurately is critical for poorly programmed cartridges like "No Exit".
+    * "No Exit" contains a startup bug: it executes a CALL instruction before initializing
+    * the Stack Pointer (SP = 0x0000). This causes a stack underflow, writing the return
+    * address to 0xFFFF and 0xFFFE.
+    */
+   if (CPC.model <= CPC_MODEL_6128)
+      membank_read[3] = pbROMhi; // 'page in' upper ROM
 
    // Multiface 2
    dwMF2Flags = 0;

@@ -39,4 +39,35 @@
 int test_dsk(char * filename_dsk, char * result_string, char * format_expected);
 int test_dsk_hashed(char * file_path, char * result_string, uint32_t file_hash);
 
+void generate_synthetic_disk(const char *filepath, bool is_system, bool is_hidden, int tweak_case);
+void run_and_check(const char *filepath, int expected_count, const char* name0, bool hide0, const char* name1, bool hide1, int expected_track);
+void generate_empty_disk(const char *filepath);
+void generate_full_catalog_disk(const char *filepath);
+void generate_corrupt_disk(const char *filepath);
+
+
+/* Struct to handle the 24 different test variations */
+typedef struct {
+    const char* name0;
+    const char* name1;
+    uint16_t start0;
+    uint16_t start1;
+    uint16_t load;
+    uint16_t length;
+    int bad_header_idx;  // -1 for none
+    bool bad_block;
+    bool headerless;
+    bool system;
+    bool interleave;
+    bool hidden;
+    int plus3_idx;       // -1 for none
+    bool bad_plus3_csum;
+    bool bad_signature;
+    bool empty_tracks;
+} autorun_opts_t;
+
+
+void generate_autorun_disk(const char *filepath, autorun_opts_t opts);
+void check_autorun(autorun_opts_t opts, const char* expected_filename);
+
 extern uint8_t *pbGPBuffer;

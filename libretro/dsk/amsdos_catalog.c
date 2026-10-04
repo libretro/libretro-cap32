@@ -402,26 +402,40 @@ void _probe_track(t_track *track, unsigned char user, int track_id)
 
 void _find_entries(t_drive *drive, t_track *catalog_track, unsigned char user)
 {
-   bool entries_found = false;
-   t_track *current_track = NULL;
+   int catalog_track_id = (catalog_track == &drive->track[2][0]) ? 2 :
+      (catalog_track == &drive->track[1][0]) ? 1 : 0;
 
-   // parse tracks from 0 to 2 trying to detect valid entries
-   for (int track_idx = 0; (track_idx <= 2) && !entries_found; track_idx++)
-   {
-      current_track = &drive->track[track_idx][0]; // Side = 0
+   /* Boot tracks are not directories. Their bytes can look like catalogue
+    * art and incorrectly mark the real directory's visible files hidden. */
+   if (catalog_track->size) {
+      #ifdef CATALOG_DEBUG_VERBOSE
+      printf("[CATALOG-NEW]: Probing format default track [%02i]\n", catalog_track_id);
+      #endif
+      _probe_track(catalog_track, user, catalog_track_id);
+   }
 
-      // ignore missing or empty tracks
-      if (!current_track->size)
+   if (catalogue.last_entry)
+      return;
+
+   /* Preserve discovery of nonstandard directories, but do not carry art
+    * detected in an unsuccessful probe into the next track. */
+   for (int track_idx = 0; track_idx <= 2; track_idx++) {
+      t_track *track = &drive->track[track_idx][0];
+
+      if (track_idx == catalog_track_id || !track->size)
          continue;
+
+      catalogue.has_cat_art = false;
 
       #ifdef CATALOG_DEBUG_VERBOSE
       printf("[CATALOG-NEW]: Track [%02i] \n", track_idx);
       #endif
 
-      _probe_track(current_track, user, track_idx);
+      _probe_track(track, user, track_idx);
+
+      if (catalogue.last_entry)
+         return;
    }
-
-
 }
 
 void _prepare_catalog(t_drive *drive, unsigned char user)

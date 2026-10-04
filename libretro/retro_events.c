@@ -214,6 +214,8 @@ static retro_combo_event_t events_combo[MAX_JOY_EVENT] =
      { EVENT_DISK_NEXT, "NEXT", NULL} },
 };
 
+static const retro_action_t act_vkeyb_l3 = { EVENT_VKEYB, "VKEYB\n", NULL };
+
 /**
  * ev_press_key:
  * using CPC keyboard matrix sets as pressed
@@ -474,6 +476,24 @@ bool ev_autorun()
    }
 
    return true;
+}
+
+/**
+ * process_ui_shortcuts:
+ * Checks UI buttons regardless of the current EV_JOY/EV_KBD internal state.
+ **/
+void ev_process_ui_shortcuts(void)
+{
+   static bool l3_was_pressed = false;
+
+   /* Check Player 1 L3 status directly */
+   bool l3_is_pressed = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3);
+
+   if (l3_is_pressed && !l3_was_pressed) {
+      do_action(&act_vkeyb_l3);
+   }
+
+   l3_was_pressed = l3_is_pressed;
 }
 
 //-----------------------------------------------------

@@ -63,6 +63,7 @@ extern uint32_t colours[32];
 
 extern t_GateArray GateArray;
 extern t_CRTC CRTC;
+extern t_flags1 flags1;
 extern t_CPC CPC;
 extern t_PSG PSG;
 extern t_z80regs z80;
@@ -204,39 +205,6 @@ void asic_dma_channel(int c)
    channel->source_address += 2;
 }
 
-// TODO: remove
-void asic_dma_mem(int c)
-{
-   uint8_t dcsr = 0;
-   uint16_t addr;
-   bool dcsr_changed = false;
-
-   t_DMA_channel *channel = &asic.dma.ch[c];
-
-   addr = 0x6C00 + (c << 2);
-   *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t) (channel->source_address & 0xFF);
-   addr++;
-   *(membank_write[addr >> 14] + (addr & 0x3fff)) = (uint8_t)((channel->source_address & 0xFF00) >> 8);
-   addr++;
-   *(membank_write[addr >> 14] + (addr & 0x3fff)) = channel->prescaler;
-
-   if (channel->enabled) {
-      dcsr |= (0x1 << c);
-      dcsr_changed = true;
-   }
-   if (channel->interrupt) {
-      dcsr |= (0x40 >> c);
-      dcsr_changed = true;
-   }
-
-   // TODO: ... and here
-   // Run RAM test of testplus.cpr when touching this (this is not a guarantee that this is correct but at least it's a guarantee that it's less wrong !)
-   if (dcsr_changed) {
-      addr = 0x6C0F;
-      *(membank_write[addr >> 14] + (addr & 0x3fff)) = dcsr;
-   }
-}
-
 // z80 interrupts (mode 0/2) - mode 1 ign
 // TODO: make a better implementation, just a first step - http://cpctech.cpc-live.com/docs/ints.html
 uint8_t asic_int()
@@ -244,10 +212,9 @@ uint8_t asic_int()
    LOG("asic int - mode 2 cause: %02x", asic.irq_cause);
    if( asic.irq_cause != 0x06 && asic.dma.clear & 0x1 ) {
       LOG("IRQ: Not cleared, IRQ was called by DMA [%i]", asic.irq_cause);
-		asic.dma.dcsr &= ~0x80;  // not a raster interrupt, so this bit is reset
+      asic.dma.dcsr &= ~0x80;  // not a raster interrupt, so this bit is reset
       return (asic.irq_vector & 0xf8) | asic.irq_cause;
    }
-   CRTC.hsw_count &= 0x1F;
    if(asic.irq_cause == 0x06)  // bit 7 is set "if last interrupt acknowledge cycle was caused by a raster interrupt"
       asic.dma.dcsr |= 0x80;
    else {
@@ -265,7 +232,6 @@ void asic_dma_cycle()
       if (asic.dma.ch[c].enabled)
       {
          asic_dma_channel(c);
-         //asic_dma_mem(c);
       }
    }
 }
@@ -412,15 +378,34 @@ bool asic_register_page_write(uint16_t addr, uint8_t val) {
          asic_colours[colour][2] = blue;
          pbRegisterPage[(addr & 0x3FFF)] = val;
       }
-      GateArray.palette[colour] = CPC.video_monitor( asic_colours[colour][0],
-                                                asic_colours[colour][1],
-                                                asic_colours[colour][2]);
+      GateArray.palette[colour] = CPC.video_monitor(
+         asic_colours[colour][0],
+         asic_colours[colour][1],
+         asic_colours[colour][2]
+      );
    }
    // 0x6440 --- unused
    // ASIC - Programmable raster, from 6800h to 6806h
    else if (addr >= 0x6800 && addr < 0x6806) {
       switch (addr) {
-         case 0x6800: CRTC.interrupt_sl = val; break;
+         case 0x6800:
+            if (val != CRTC.interrupt_sl) {
+               /* A changed PRI withdraws the previous raster request. DMA
+                * requests and DCSR's last-acknowledge bit are independent.
+                * Zero returns to the classic interrupt without acknowledging
+                * an already asserted request. */
+               CRTC.raster_interrupt_delay = 0;
+               if (val && asic.irq_cause == 6)
+                  z80.int_pending = 0;
+               if (val && flags1.inHSYNC &&
+                   CRTC.line_count == (val >> 3) &&
+                   (CRTC.raster_count & 7) == (val & 7)) {
+                  z80.int_pending = 1;
+                  asic.irq_cause = 6;
+               }
+            }
+            CRTC.interrupt_sl = val;
+            break;
          case 0x6801: CRTC.split_sl = val; break;
          case 0x6802: CRTC.split_addr &= 0x00FF; CRTC.split_addr |= (val << 8); break;
          case 0x6803: CRTC.split_addr &= 0x3F00; CRTC.split_addr |= val; break;

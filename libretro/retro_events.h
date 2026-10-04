@@ -224,6 +224,7 @@ void ev_set(int type);
 void ev_init();
 uint8_t get_cpckey (unsigned int keysym);
 void ev_autorun_prepare(char * kbd_buffer);
+void ev_process_ui_shortcuts(void);
 
 void Core_PollEvent(void);
 

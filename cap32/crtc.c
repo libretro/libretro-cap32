@@ -679,8 +679,6 @@ static INLINE void match_hsw(void)
             z80.int_pending = 1; // queue Z80 interrupt
          }
          GateArray.sl_count = 0; // clear counter
-      } else if (CRTC.sl_count == CRTC.interrupt_sl && CRTC.interrupt_sl != 0) { // ASIC interrupt
-         z80.int_pending = 1;
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;
@@ -815,37 +813,48 @@ void prerender_sync_half(void)
    RendPos += 2;
 }
 
-
 static INLINE uint8_t get_sprite_asic(unsigned short offset)
 {
-   const int borderWidth = 64 + (asic.extend_border ? 16 : 0);
-   const int borderHeight = 40 + 8*(30 - CRTC.registers[7]);
-   const int screenWidth = 640 + borderWidth;
-   const int screenHeight = 400 + borderHeight; // FIXME 200¿?
-   int i = 0;
-   int x = 2 * (CPC.scr_pos + offset - CPC.scr_base) / dwXScale - borderWidth;
-   int y = VDU.scrln - borderHeight;
-   if (x >= 0 && x < screenWidth && y >= 0 && y < screenHeight) {
-      for(i = 0; i < ASIC_SPRITES; i++) {
-         int sx = asic.sprites_x[i];
-         int mx = asic.sprites_mag_x[i];
-         if(mx > 0 && x >= sx && x < sx + 16 * mx) {
-            int sy = asic.sprites_y[i];
-            int my = asic.sprites_mag_y[i];
-            if(my > 0 && y >= sy && y < sy + 16 * my) {
-               int px = (x - sx) / mx;
-               int py = (y - sy) / my;
-               uint8_t pcol = asic.sprites[i][px][py];
-               if(pcol != 0) {
-                  return pcol;
-               }
+   /* 
+    * In CPC+, the sprite coordinates (X=0, Y=0) are tied to the physical 
+    * hardware sync signals (HSYNC/VSYNC), not the start of the active DE 
+    * (Display Enable) area. 
+    * Cap32's 'pixel' already counts from the left edge of the emulator window.
+    * Therefore, we only need to adjust for the ASIC 'extend_border' feature,
+    * which shifts the background active area by 16 Mode 2 pixels.
+    */
+   
+   // character width 16 píxeles (Mode 2). hstart for the extend border
+   int active_x = ((CRTC.char_count - CRTC.hstart) * 16) + offset;
+   
+   // The internal ASIC counter ASIC has 8 scanlines (rasters) per character row
+   int active_y = (CRTC.line_count * 8) + CRTC.raster_count;
+
+   for(int i = 0; i < ASIC_SPRITES; i++) {
+      int sx = (int16_t)asic.sprites_x[i];
+      int mx = asic.sprites_mag_x[i];
+      
+      if(mx > 0 && active_x >= sx && active_x < sx + 16 * mx) {
+         
+         int sy = (int16_t)asic.sprites_y[i];
+         int my = asic.sprites_mag_y[i];
+         
+         if(my > 0 && active_y >= sy && active_y < sy + 16 * my) {
+            
+            /* Calculate which internal sprite pixel to draw */
+            int px = (active_x - sx) / mx;
+            int py = (active_y - sy) / my;
+            uint8_t pcol = asic.sprites[i][px][py];
+            
+            if(pcol != 0) {
+               return pcol;
             }
          }
       }
    }
+
    return 0;
 }
-
 
 void prerender_normal(void)
 {
@@ -881,15 +890,8 @@ static INLINE uint32_t shift_scroll_pixel(int value, int byteShift){
  */
 void prerender_normal_plus(void)
 {
-   unsigned int next_address = CRTC.next_address;
-   if(asic.vscroll) {
-      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
-         next_address += asic.vscroll * 0x0800;
-      } else {
-         next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
-      }
-   }
+   unsigned int next_address = (CRTC.next_address & ~0x3800)
+      | (((CRTC.raster_count + asic.vscroll) & 7) << 11);
 
    uint8_t* bVidMem = pbRAM + next_address;
    // check scroll
@@ -957,15 +959,8 @@ void prerender_normal_plus(void)
 
 void prerender_normal_half_plus(void)
 {
-   unsigned int next_address = CRTC.next_address;
-   if(asic.vscroll) {
-      if (CRTC.raster_count + asic.vscroll <= CRTC.registers[9]) {
-         next_address += asic.vscroll * 0x0800;
-      } else {
-         next_address += 80;
-         next_address -= ((CRTC.registers[9] + 1 - asic.vscroll) * 0x0800);
-      }
-   }
+   unsigned int next_address = (CRTC.next_address & ~0x3800)
+      | (((CRTC.raster_count + asic.vscroll) & 7) << 11);
 
    uint8_t* bVidMem = pbRAM + next_address;
    // check scroll
@@ -1127,6 +1122,13 @@ void render32bpp_doubleY(void)
 void crtc_cycle(int repeat_count)
 {
    while (repeat_count) {
+      /* CPC Plus ASIC: Programmable Raster Interrupt (PRI)
+       * Plus PRI is delayed by 10us from HSYNC start, independent of R3. */
+      if (CRTC.raster_interrupt_delay && !--CRTC.raster_interrupt_delay) {
+         z80.int_pending = 1;
+         asic.irq_cause = 0x06;
+         GateArray.sl_count &= 0x1f;
+      }
 
       if (VDU.flag_drawing) { // are we within the rendering area?
          if (HorzChar < HorzMax) { // below horizontal cut-off?
@@ -1292,9 +1294,17 @@ void crtc_cycle(int repeat_count)
       }
 
       if (CRTC.char_count == CRTC.registers[1]) { // matches horizontal displayed?
-         if (CRTC.raster_count == CRTC.registers[9]) { // matches maximum raster address?
+         /* SSCR changes the raster bits immediately, but row advancement is
+          * sampled at R1. A split on this line overrides that advancement. */
+         unsigned raster = CRTC.raster_count;
+         if (CPC.model == CPC_MODEL_PLUS)
+            raster = (raster + asic.vscroll) & 31;
+         if (raster == CRTC.registers[9]) {
             CRTC.next_addr = CRTC.addr + CRTC.char_count;
          }
+         if (CPC.model == CPC_MODEL_PLUS && CRTC.split_sl &&
+             (((CRTC.line_count & 31) << 3) | (CRTC.raster_count & 7)) == CRTC.split_sl)
+            CRTC.next_addr = CRTC.split_addr;
       }
 
       if (!flags1.inHSYNC) { // not in HSYNC?
@@ -1302,6 +1312,15 @@ void crtc_cycle(int repeat_count)
             flags1.inHSYNC = 0xff; // turn HSYNC on
             CRTC.flag_hadhsync = 1; // prevent GA from processing more than one HSYNC per scan line
             CRTC.hsw_count = 0; // initialize horizontal sync width counter
+
+            /* CPC Plus: Setup 10us delay for Programmable Raster Interrupt
+             * https://cpctech.cpcwiki.de/docs/cpcplus.html */
+            if (CRTC.interrupt_sl &&
+                CRTC.line_count == (CRTC.interrupt_sl >> 3) &&
+                CRTC.raster_count == (CRTC.interrupt_sl & 7)) {
+               CRTC.raster_interrupt_delay = 10;
+            }
+
             match_hsw();
          }
       } else {
@@ -1318,9 +1337,6 @@ void crtc_cycle(int repeat_count)
 
       if (CRTC.flag_newscan) { // scanline change requested?
          CRTC.flag_newscan = 0;
-         if (CRTC.split_sl && CRTC.sl_count == CRTC.split_sl) {
-            CRTC.next_addr = CRTC.split_addr;
-         }
          CRTC.addr = CRTC.next_addr; // FIX split screen
          CRTC.sl_count++;            // <-- CPC-PLUS only?
 

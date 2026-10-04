@@ -59,6 +59,7 @@ extern t_CPC CPC;
 extern FILE *pfoDebug;
 #endif
 
+unsigned tape_input_reads;
 uint8_t bTapeLevel;
 uint8_t bTapeData;
 uint8_t *pbTapeBlock;

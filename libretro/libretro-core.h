@@ -169,6 +169,7 @@ typedef struct {
    uint32_t statusbar;
    uint32_t padcfg[PORTS_NUMBER];
    bool is_dirty;
+   bool tape_fastload; /* Enabled and supported by the frontend. */
    bool floppy_snd;
    bool autorun;
    bool use_internal_remap;

@@ -52,9 +52,9 @@ Caprice brings some default keymaps confings, these configs are detailed at libr
 
 If you are using a game that has multiple disks loaded using an M3U for example. You can switch between the loaded discs simply by pressing the **combo button** and the **L** button *(to switch to the previous disc)* or the **R** button *(to switch to the next disc)*.
 
- * New Model: [cap32_model] (6128 | 464 | 664 | 6128+)
+ * New Model: [cap32_model] (6128 | 464 | 464DDI | 664 | 6128+)
 
-Choose which Amstrad CPC model to emulate, currently added 646 to allow BASIC 1.0 games and DSK
+Choose which Amstrad CPC model to emulate, currently added 464DDI to allow BASIC 1.0 games and DSK
 
  * Crop Screen Borders: [cap32_scr_crop] (disabled | enabled)
 
@@ -65,16 +65,17 @@ For small screens you can now enable software screen crop to remove most of the 
 
 ### New filename flags (case insensitive)
 
-* "[664]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
-* "BASIC 1.0": Force 464 model when you load CDT or 664 model if use DSK.
+* "[464]": Force BASIC 1.0 and AMSDOS ROMs, to allow play correctly first CPC games.
+* "BASIC 1.0": Force 464 model when you load CDT or add DDI drive if use DSK.
 * "[CPM]": Force load CPM BIOS first, useful for some infocom CPM games.
 * "[576K]": RAM mode with 512+64KB, useful for some homebrew games. _Also allows [128K] and [064K]_.
 
 Examples :
 
 ```
-Alive (1990)(Company)(fr)[664].dsk => 664
-Manic Miner (UK) (1984) (Version Basic 1.0) [Amsoft].dsk => 664
+Abadia del Crimen, La (1988)(Opera Soft)(es) [464].cdt => 464 (tape)
+Manic Miner (UK) (1984) [Basic 1.0].dsk => 464+DDI
+Donkey Kong (1986)(Ocean Software)[464].dsk => 464+DDI
 Harrier Attack (1986)(Amsoft) [Basic 1.0].cdt => 464
 Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 ```
@@ -121,7 +122,7 @@ Skee Shoot
 ```
 # Known Bugs
 
-- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59) and **need 24bit color depth**.
+- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59).
 
 - Old3DS need some optimizations (~18fps).
 

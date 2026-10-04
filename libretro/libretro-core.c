@@ -46,6 +46,7 @@
 #include "retro_dirent.h"
 
 #include "retro_events.h"
+#include "tape.h"
 #include "retro_utils.h"
 #include "retro_snd.h"
 #include "retro_render.h"
@@ -497,12 +498,29 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       "system",
       {
          { "464",                  NULL },
+         { "464DDI",               NULL },
          { "664",                  NULL },
          { "6128",                 NULL },
          { "6128+ (experimental)", NULL },
          { NULL, NULL },
       },
       "6128"
+   },
+   {
+      "cap32_tape_fastload",
+      "Tape Loading Speed",
+      NULL,
+      "Fast-forward while the tape is running and the program frequently reads its input. Internal timing is unchanged. Toggle frontend fast-forward off to cancel until the tape stops. Requires frontend fast-forward override support.",
+      NULL,
+      "system",
+      {
+         { "disabled", "Normal" },
+         { "4", "4x" },
+         { "8", "8x" },
+         { "maximum", "Maximum" },
+         { NULL, NULL }
+      },
+      "maximum"
    },
    // rcheevos disallowed_setting: cap32_autorun disabled
    {
@@ -511,7 +529,7 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       NULL,
       NULL,
       NULL,
-      "advanced",
+      "system",
       {
          { "enabled",  NULL },
          { "disabled", NULL },
@@ -719,8 +737,9 @@ static struct retro_variable variables[] = {
    },
    {
       "cap32_model",
-      "Model; 6128|464|664|6128+ (experimental)",
+      "Model; 6128|464|464DDI|664|6128+ (experimental)",
    },
+   { "cap32_tape_fastload", "Tape Loading Speed; disabled|4|8|maximum" },
    // rcheevos disallowed_setting: cap32_autorun disabled
    {
       "cap32_autorun",
@@ -812,6 +831,62 @@ void retro_set_environment(retro_environment_t cb)
    }
 }
 
+/* This changes frontend pacing only; Z80/tape cycle timing is untouched.
+ * Frequent PPI reads are a conservative loader heuristic, not a loader trap.
+ */
+static float tape_fast_ratio = -1.0f;
+static bool tape_fast_owned, tape_fast_suspended;
+static unsigned tape_fast_idle;
+
+static void tape_fast_release(void)
+{
+   if (tape_fast_owned) {
+      const struct retro_fastforwarding_override stop = { -1.0f, false, false, false };
+      environ_cb(RETRO_ENVIRONMENT_SET_FASTFORWARDING_OVERRIDE, (void *)&stop);
+   }
+   tape_fast_owned = false;
+   tape_fast_idle = 0;
+}
+
+static void tape_fast_reset(void)
+{
+   tape_fast_release();
+   tape_fast_suspended = false;
+   tape_input_reads = 0;
+}
+
+static void tape_fast_update(void)
+{
+   bool fast = false;
+   unsigned reads = tape_input_reads;
+   tape_input_reads = 0;
+   if (!retro_computer_cfg.tape_fastload || !CPC.tape_motor || !CPC.tape_play_button) {
+      tape_fast_reset();
+      return;
+   }
+   if (!environ_cb(RETRO_ENVIRONMENT_GET_FASTFORWARDING, &fast)) {
+      tape_fast_release();
+      return;
+   }
+   if (tape_fast_owned && !fast) {
+      /* Respect a user's fast-forward toggle until the tape stops. */
+      tape_fast_release();
+      tape_fast_suspended = true;
+   }
+   if (tape_fast_owned) {
+      if (reads < 32) {
+         if (++tape_fast_idle >= 2)
+            tape_fast_release();
+      } else
+         tape_fast_idle = 0;
+   } else if (!tape_fast_suspended && !fast && reads >= 32) {
+      struct retro_fastforwarding_override start = { tape_fast_ratio, true, true, false };
+      tape_fast_owned = environ_cb(RETRO_ENVIRONMENT_SET_FASTFORWARDING_OVERRIDE, &start);
+      if (!tape_fast_owned)
+         tape_fast_suspended = true;
+   }
+}
+
 /**
  * controller_port_variable:
  * @port: user port (see DEVICE AMSTRAD)
@@ -855,6 +930,23 @@ static int controller_port_variable(unsigned port, struct retro_variable *var)
 static void update_variables(void)
 {
    struct retro_variable var;
+
+   var.key = "cap32_tape_fastload";
+   var.value = NULL;
+   {
+      float ratio = -1.0f;
+      if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+         if (strcmp(var.value, "4") == 0) ratio = 4.0f;
+         else if (strcmp(var.value, "8") == 0) ratio = 8.0f;
+         else if (strcmp(var.value, "maximum") == 0) ratio = 0.0f;
+      }
+      if (ratio != tape_fast_ratio) {
+         tape_fast_reset();
+         tape_fast_ratio = ratio;
+      }
+      retro_computer_cfg.tape_fastload = ratio >= 0.0f &&
+         environ_cb(RETRO_ENVIRONMENT_SET_FASTFORWARDING_OVERRIDE, NULL);
+   }
 
    // user 1/2 - input config
    retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
@@ -940,6 +1032,7 @@ static void update_variables(void)
    {
       int val = CPC_MODEL_6128; // DEFAULT 6128
       if (strcmp(var.value, "464") == 0) val = CPC_MODEL_464;
+      else if (strcmp(var.value, "464DDI") == 0) val = CPC_MODEL_464DDI;
       else if (strcmp(var.value, "664") == 0) val = CPC_MODEL_664;
       else if (strcmp(var.value, "6128") == 0) val = CPC_MODEL_6128;
       else if (strcmp(var.value, "6128+ (experimental)") == 0) val = CPC_MODEL_PLUS;
@@ -1097,11 +1190,6 @@ static void update_variables(void)
       }
    }
 
-   if ((retro_video.depth != DEPTH_24BPP) && (retro_computer_cfg.model == CPC_MODEL_PLUS))
-   {
-      retro_message("Model 6128+ only working on 24bpp modes, IGNORED!");
-   }
-
    var.key = "cap32_keyboard_transparency";
    var.value = NULL;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
@@ -1183,6 +1271,7 @@ void retro_shutdown_core(void)
 
 void retro_reset(void)
 {
+   tape_fast_reset();
    emu_reset();
    computer_reset();
 }
@@ -1254,9 +1343,14 @@ void computer_set_ram(int size)
 
 void check_flags(const char *filename, unsigned int size)
 {
-   if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
+   if (file_check_flag(filename, size, FLAG_BIOS_464, 5))
    {
       computer_set_model(1);
+   }
+
+   if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
+   {
+      computer_set_model(2);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_B10, 10))
@@ -1267,7 +1361,7 @@ void check_flags(const char *filename, unsigned int size)
          computer_set_model(0);
    }
 
-   // model 464 using disk => 664
+   // model 464 using disk => 464+DDI
    if (CPC.model == CPC_MODEL_464 && retro_computer_cfg.slot == SLOT_DSK)
    {
       computer_set_model(1);
@@ -1327,6 +1421,7 @@ void computer_autoload()
 
 void computer_reset()
 {
+   tape_fast_reset();
    retro_ui_draw_db();
 
    if (!retro_computer_cfg.autorun)
@@ -1384,6 +1479,7 @@ void computer_hash_file(char* filepath)
 
 // load content
 void computer_load_file() {
+   tape_fast_reset();
    // check custom filename config
    check_flags(retro_content_filepath, sizeof(retro_content_filepath));
 
@@ -1607,6 +1703,7 @@ void retro_init(void)
 
 void retro_deinit(void)
 {
+   tape_fast_reset();
    // disk diff before clean up
    detach_disk(0);
 
@@ -1760,6 +1857,7 @@ void retro_run(void)
    retro_loop();
 
    retro_PollEvent();
+   tape_fast_update();
    retro_ui_process();
 
    if (lightgun_cfg.gun_draw)
@@ -1770,6 +1868,8 @@ void retro_run(void)
 
 bool retro_load_game(const struct retro_game_info *game)
 {
+   tape_fast_reset();
+
    // notify the frontend of the retro_pixel_format we want use.
    enum retro_pixel_format fmt = retro_video.fmt;
 
@@ -1810,7 +1910,10 @@ bool retro_load_game(const struct retro_game_info *game)
    return true;
 }
 
-void retro_unload_game(void){}
+void retro_unload_game(void)
+{
+   tape_fast_reset();
+}
 
 unsigned retro_get_region(void)
 {

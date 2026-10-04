@@ -239,9 +239,10 @@ void retro_ui_update_text()
    char model[16];
    switch (retro_computer_cfg.model)
    {
-      case 0: strncpy(model, "464", sizeof(model)); break;
-      case 1: strncpy(model, "664", sizeof(model)); break;
-      case 3: strncpy(model, "6128+", sizeof(model)); break;
+      case 0:
+      case 1: strncpy(model, "464", sizeof(model)); break;
+      case 2: strncpy(model, "664", sizeof(model)); break;
+      case 4: strncpy(model, "6128+", sizeof(model)); break;
       default: strncpy(model, "6128", sizeof(model)); break;
    }
 
@@ -359,6 +360,8 @@ void retro_ui_set_led(bool value)
 
 void retro_ui_process()
 {
+   ev_process_ui_shortcuts();
+
    if (
       statusbar_timer &&
       retro_computer_cfg.statusbar == STATUSBAR_HIDE
