@@ -527,3 +527,100 @@ void check_autorun(autorun_opts_t opts, const char* expected_filename) {
     assert_string_equal(command, expected_command);
     remove(filepath);
 }
+
+/*
+ * DSK loader
+ */
+
+/**
+ * @brief Generates a synthetic binary DSK file for testing purposes.
+ * 
+ * @param filepath The path where the synthetic DSK file will be written.
+ * @param declared The number of tracks declared in the DSK main header.
+ * @param complete The actual number of complete tracks (cylinders) written to the file.
+ * @param sides    The number of sides (heads) the disk has (1 or 2).
+ * @param tail_mode The corruption mode to append at the end of the file.
+ */
+void generate_dsk_track_test(const char *filepath, int declared, int complete, int sides, tail_mode_t tail_mode) {
+    FILE *f = fopen(filepath, "wb");
+    
+    /* 1. Main disk header (256 bytes) */
+    uint8_t header[256] = {0};
+    memcpy(header, "MV - CPC", 8);
+    header[48] = declared;
+    header[49] = sides;
+    header[50] = 0x00; header[51] = 0x03; /* 768 bytes per track (256 header + 512 data) */
+    fwrite(header, 1, 256, f);
+
+    /* 2. Complete tracks */
+    for (int track = 0; track < complete; track++) {
+        for (int side = 0; side < sides; side++) {
+            uint8_t th[256] = {0};
+            memcpy(th, "Track-Info", 10);
+            th[16] = track; th[17] = side;
+            th[20] = 2; th[21] = 1;
+            th[24] = track; th[25] = side; th[26] = 1; th[27] = 2;
+            fwrite(th, 1, 256, f);
+            
+            /* Track sector data payload */
+            uint8_t payload[512] = {0};
+            memset(payload, track, 512); 
+            fwrite(payload, 1, 512, f);
+        }
+    }
+
+    /* 3. Extra headers or garbage at the end of the file (Tail) */
+    if (tail_mode != TAIL_NONE) {
+        uint8_t tail_th[256] = {0};
+        memcpy(tail_th, "Track-Info", 10);
+        tail_th[16] = complete; tail_th[17] = 0; 
+        tail_th[20] = 2; tail_th[21] = 1;
+        tail_th[24] = complete; tail_th[25] = 0; tail_th[26] = 1; tail_th[27] = 2;
+
+        switch (tail_mode) {
+            case TAIL_EXTRA_HEADER_ONLY:
+                fwrite(tail_th, 1, 256, f);
+                break;
+            case TAIL_PARTIAL_HEADER:
+                fwrite(tail_th, 1, 100, f);
+                break;
+            case TAIL_PARTIAL_SECTOR:
+                fwrite(tail_th, 1, 256, f);
+                fwrite("x", 1, 1, f);
+                break;
+            case TAIL_FULL_SECTOR:
+                fwrite(tail_th, 1, 256, f);
+                uint8_t pad[512] = {0};
+                fwrite(pad, 1, 512, f);
+                break;
+            default: break;
+        }
+    }
+    fclose(f);
+}
+
+/**
+ * @brief Helper function to generate a DSK file, execute the loader, and assert the result.
+ * 
+ * @param declared The number of tracks declared in the DSK main header.
+ * @param complete The actual number of complete tracks (cylinders) written to the file.
+ * @param sides    The number of sides (heads) the disk has (1 or 2).
+ * @param tail_mode The corruption mode to append at the end of the file.
+ * @param expected_result The expected return code from dsk_load.
+ */
+void check_overdump(int declared, int complete, int sides, tail_mode_t tail_mode, int expected_result) {
+    const char *filepath = "test_overdump.dsk";
+    generate_dsk_track_test(filepath, declared, complete, sides, tail_mode);
+
+    memset(&driveA, 0, sizeof(t_drive));
+    
+    /* Ensure the global buffer is available for cap32 memory operations */
+    uint8_t dummy_buffer[128 * 1024];
+    pbGPBuffer = dummy_buffer; 
+
+    /* ERR_DSK_INVALID is internally mapped to 21 in cap32 */
+    int result = dsk_load((char*)filepath, &driveA, 'A');
+    
+    assert_int_equal(result, expected_result);
+    remove(filepath);
+}

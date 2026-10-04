@@ -213,6 +213,51 @@ static void test_unknown_first_header(void **state) {
     check_autorun(opts, "DATA.BIN");
 }
 
+/* --- DSK loader Test Cases --- */
+
+static void test_dsk_complete_40(void **state) {
+    check_overdump(40, 40, 1, TAIL_NONE, 0);
+}
+
+static void test_dsk_complete_42(void **state) {
+    check_overdump(42, 42, 1, TAIL_NONE, 0);
+}
+
+static void test_dsk_extra_tracks_absent(void **state) {
+    check_overdump(42, 40, 1, TAIL_NONE, 0);
+}
+
+static void test_dsk_extra_header_only(void **state) {
+    check_overdump(42, 40, 1, TAIL_EXTRA_HEADER_ONLY, 0);
+}
+
+static void test_dsk_one_extra_complete(void **state) {
+    check_overdump(42, 41, 1, TAIL_NONE, 0);
+}
+
+static void test_dsk_partial_extra_header(void **state) {
+    check_overdump(42, 40, 1, TAIL_PARTIAL_HEADER, 21);
+}
+
+static void test_dsk_partial_extra_sector(void **state) {
+    check_overdump(42, 40, 1, TAIL_PARTIAL_SECTOR, 21);
+}
+
+static void test_dsk_missing_normal_track(void **state) {
+    check_overdump(40, 39, 1, TAIL_NONE, 21);
+}
+
+static void test_dsk_excessive_missing_tracks(void **state) {
+    check_overdump(84, 40, 1, TAIL_NONE, 21);
+}
+
+static void test_dsk_two_sided_complete_cylinders(void **state) {
+    check_overdump(42, 40, 2, TAIL_NONE, 0);
+}
+
+static void test_dsk_two_sided_partial_cylinder(void **state) {
+    check_overdump(42, 40, 2, TAIL_FULL_SECTOR, 21);
+}
 
 int main(void) {
    pbGPBuffer = (uint8_t*) malloc(128 * 1024 * sizeof(uint8_t)); // attempt to allocate the general purpose buffer
@@ -234,6 +279,17 @@ int main(void) {
       cmocka_unit_test(test_prefer_entry_point),
       cmocka_unit_test(test_plus3_disk),
       cmocka_unit_test(test_unknown_first_header),
+      cmocka_unit_test(test_dsk_complete_40),
+      cmocka_unit_test(test_dsk_complete_42),
+      cmocka_unit_test(test_dsk_extra_tracks_absent),
+      cmocka_unit_test(test_dsk_extra_header_only),
+      cmocka_unit_test(test_dsk_one_extra_complete),
+      cmocka_unit_test(test_dsk_partial_extra_header),
+      cmocka_unit_test(test_dsk_partial_extra_sector),
+      cmocka_unit_test(test_dsk_missing_normal_track),
+      cmocka_unit_test(test_dsk_excessive_missing_tracks),
+      cmocka_unit_test(test_dsk_two_sided_complete_cylinders),
+      cmocka_unit_test(test_dsk_two_sided_partial_cylinder),
    };
 
    cmocka_run_group_tests(tests, NULL, NULL);

@@ -70,4 +70,19 @@ typedef struct {
 void generate_autorun_disk(const char *filepath, autorun_opts_t opts);
 void check_autorun(autorun_opts_t opts, const char* expected_filename);
 
+
+/**
+ * @enum tail_mode_t
+ * @brief Defines the tail corruption modes to simulate EOF anomalies in DSK files.
+ */
+typedef enum {
+    TAIL_NONE = 0,               /**< Clean EOF, no extra data appended */
+    TAIL_EXTRA_HEADER_ONLY = 1,  /**< Extra track header present, but no sector data */
+    TAIL_PARTIAL_HEADER = 2,     /**< Truncated track header (e.g., 100 bytes instead of 256) */
+    TAIL_PARTIAL_SECTOR = 3,     /**< Complete track header, but truncated sector payload */
+    TAIL_FULL_SECTOR = 4         /**< Complete track header and sector data for a partial cylinder */
+} tail_mode_t;
+
+void check_overdump(int declared, int complete, int sides, tail_mode_t tail_mode, int expected_result);
+
 extern uint8_t *pbGPBuffer;

@@ -518,7 +518,7 @@ clean:
 	rm -f $(OBJS)
 	rm -f $(HEADERS)
 	rm -f $(TARGET)
-	rm -f unit-tests/*.o unit-tests/autorun unit-tests/test-db
+	rm -f unit-tests/*.o unit-tests/test-dsk unit-tests/test-db
 
 rmp:
 	$(CORE_DIR)/contrib/remap2db.py $(CORE_DIR)/contrib/remaps $(CORE_DIR)/libretro-common/include/libretro.h > $(CORE_DIR)/libretro/db/entries.h
@@ -532,10 +532,10 @@ $(CORE_DIR)/unit-tests/cmocka.o:
 unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
-	@$(CC) -o $(CORE_DIR)/unit-tests/autorun $(CORE_DIR)/unit-tests/autorun.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
-	$(CORE_DIR)/unit-tests/autorun
+	@$(CC) -o $(CORE_DIR)/unit-tests/test-dsk $(CORE_DIR)/unit-tests/test-dsk.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
+	$(CORE_DIR)/unit-tests/test-dsk
 
-unit-test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
+test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils
 	@$(CC) -o $(CORE_DIR)/unit-tests/test-db $(CORE_DIR)/unit-tests/test-db.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/md5.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
