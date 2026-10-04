@@ -69,10 +69,11 @@
 #define CPC_MONITOR_WHITE 2
 
 #define CPC_MODEL_464 0
-#define CPC_MODEL_664 1
-#define CPC_MODEL_6128 2
-#define CPC_MODEL_PLUS 3
-#define CPC_MODEL_MAX 3
+#define CPC_MODEL_464DDI 1
+#define CPC_MODEL_664 2
+#define CPC_MODEL_6128 3
+#define CPC_MODEL_PLUS 4
+#define CPC_MODEL_MAX 4
 
 #define ICN_DISK_WIDTH 14
 #define ICN_DISK_HEIGHT 16

@@ -498,6 +498,7 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       "system",
       {
          { "464",                  NULL },
+         { "464DDI",               NULL },
          { "664",                  NULL },
          { "6128",                 NULL },
          { "6128+ (experimental)", NULL },
@@ -736,7 +737,7 @@ static struct retro_variable variables[] = {
    },
    {
       "cap32_model",
-      "Model; 6128|464|664|6128+ (experimental)",
+      "Model; 6128|464|464DDI|664|6128+ (experimental)",
    },
    { "cap32_tape_fastload", "Tape Loading Speed; disabled|4|8|maximum" },
    // rcheevos disallowed_setting: cap32_autorun disabled
@@ -1031,6 +1032,7 @@ static void update_variables(void)
    {
       int val = CPC_MODEL_6128; // DEFAULT 6128
       if (strcmp(var.value, "464") == 0) val = CPC_MODEL_464;
+      else if (strcmp(var.value, "464DDI") == 0) val = CPC_MODEL_464DDI;
       else if (strcmp(var.value, "664") == 0) val = CPC_MODEL_664;
       else if (strcmp(var.value, "6128") == 0) val = CPC_MODEL_6128;
       else if (strcmp(var.value, "6128+ (experimental)") == 0) val = CPC_MODEL_PLUS;
@@ -1341,9 +1343,14 @@ void computer_set_ram(int size)
 
 void check_flags(const char *filename, unsigned int size)
 {
-   if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
+   if (file_check_flag(filename, size, FLAG_BIOS_464, 5))
    {
       computer_set_model(1);
+   }
+
+   if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
+   {
+      computer_set_model(2);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_B10, 10))
@@ -1354,7 +1361,7 @@ void check_flags(const char *filename, unsigned int size)
          computer_set_model(0);
    }
 
-   // model 464 using disk => 664
+   // model 464 using disk => 464+DDI
    if (CPC.model == CPC_MODEL_464 && retro_computer_cfg.slot == SLOT_DSK)
    {
       computer_set_model(1);

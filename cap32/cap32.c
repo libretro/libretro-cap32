@@ -343,6 +343,7 @@ typedef enum {
 #include "rom/rom_mods.h"
 
 #include "rom/464.h"
+#include "rom/664.h"
 #include "rom/6128.h"
 #include "rom/6128p.h"
 #include "rom/amsdos.h"
@@ -1086,10 +1087,14 @@ int emulator_select_ROM (void)
    switch(CPC.model)
    {
       case CPC_MODEL_464:
-         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464
+         memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464
+         break;
+      case CPC_MODEL_464DDI:
+         memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464 and DDI
+         memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_664:
-         memcpy(pbROM, OS_BASIC10, (32*1024)); // CPC 464 and 664
+         memcpy(pbROM, OS664_BASIC664, (32*1024));
          memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_6128:
@@ -1114,9 +1119,10 @@ int emulator_select_ROM (void)
       switch(CPC.model)
       {
          case CPC_MODEL_464:
-         case CPC_MODEL_664:
+         case CPC_MODEL_464DDI:
             pbPtr += 0x1d69; // location of the keyboard translation table
             break;
+         case CPC_MODEL_664:
          case CPC_MODEL_6128:
             pbPtr += 0x1eef; // location of the keyboard translation table
             break;
