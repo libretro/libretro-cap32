@@ -39,6 +39,14 @@
 #ifndef RETRO_EVENTS_H__
 #define RETRO_EVENTS_H__
 
+#include <libretro.h>
+
+void ev_vkeyboard_set_key(const char *value);
+void ev_vkeyboard_input_init(retro_input_state_t cb);
+int16_t ev_vkeyboard_input(unsigned port, unsigned device, unsigned index, unsigned id);
+void ev_vkeyboard_poll(void);
+void ev_update_input_descriptors(void);
+
 // TAKEN FORM ARNOLD, adapted to caprice using u8
 enum emu_key_id {
    /* line 0, bit 0..bit 7 */

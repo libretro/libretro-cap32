@@ -176,7 +176,8 @@ static const struct retro_controller_info ports[3] = {
 
 void retro_set_input_state(retro_input_state_t cb)
 {
-   input_state_cb = cb;
+   ev_vkeyboard_input_init(cb);
+   input_state_cb = ev_vkeyboard_input;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -429,6 +430,136 @@ static struct retro_core_option_v2_definition option_definitions[] = {
          { NULL, NULL },
       },
       "auto"
+   },
+   {
+      "cap32_vkeyboard_key",
+      "On-screen Keyboard: Keyboard Key", NULL,
+      "Keyboard/IPAC key reserved for toggling the on-screen keyboard.", NULL, "controls",
+      {
+         { "F9", "F9" },
+         { "BACKSPACE", "BACKSPACE" },
+         { "TAB", "TAB" },
+         { "CLEAR", "CLEAR" },
+         { "RETURN", "Enter" },
+         { "PAUSE", "PAUSE" },
+         { "ESCAPE", "ESCAPE" },
+         { "SPACE", "SPACE" },
+         { "QUOTE", "QUOTE" },
+         { "COMMA", "COMMA" },
+         { "MINUS", "MINUS" },
+         { "PERIOD", "PERIOD" },
+         { "SLASH", "SLASH" },
+         { "0", "0" },
+         { "1", "1" },
+         { "2", "2" },
+         { "3", "3" },
+         { "4", "4" },
+         { "5", "5" },
+         { "6", "6" },
+         { "7", "7" },
+         { "8", "8" },
+         { "9", "9" },
+         { "SEMICOLON", "SEMICOLON" },
+         { "EQUALS", "EQUALS" },
+         { "LEFTBRACKET", "LEFTBRACKET" },
+         { "BACKSLASH", "BACKSLASH" },
+         { "RIGHTBRACKET", "RIGHTBRACKET" },
+         { "BACKQUOTE", "BACKQUOTE" },
+         { "a", "A" },
+         { "b", "B" },
+         { "c", "C" },
+         { "d", "D" },
+         { "e", "E" },
+         { "f", "F" },
+         { "g", "G" },
+         { "h", "H" },
+         { "i", "I" },
+         { "j", "J" },
+         { "k", "K" },
+         { "l", "L" },
+         { "m", "M" },
+         { "n", "N" },
+         { "o", "O" },
+         { "p", "P" },
+         { "q", "Q" },
+         { "r", "R" },
+         { "s", "S" },
+         { "t", "T" },
+         { "u", "U" },
+         { "v", "V" },
+         { "w", "W" },
+         { "x", "X" },
+         { "y", "Y" },
+         { "z", "Z" },
+         { "DELETE", "DELETE" },
+         { "KP0", "Keypad 0" },
+         { "KP1", "Keypad 1" },
+         { "KP2", "Keypad 2" },
+         { "KP3", "Keypad 3" },
+         { "KP4", "Keypad 4" },
+         { "KP5", "Keypad 5" },
+         { "KP6", "Keypad 6" },
+         { "KP7", "Keypad 7" },
+         { "KP8", "Keypad 8" },
+         { "KP9", "Keypad 9" },
+         { "KP_PERIOD", "KP_PERIOD" },
+         { "KP_DIVIDE", "KP_DIVIDE" },
+         { "KP_MULTIPLY", "KP_MULTIPLY" },
+         { "KP_MINUS", "KP_MINUS" },
+         { "KP_PLUS", "KP_PLUS" },
+         { "KP_ENTER", "KP_ENTER" },
+         { "KP_EQUALS", "KP_EQUALS" },
+         { "UP", "UP" },
+         { "DOWN", "DOWN" },
+         { "RIGHT", "RIGHT" },
+         { "LEFT", "LEFT" },
+         { "INSERT", "INSERT" },
+         { "HOME", "HOME" },
+         { "END", "END" },
+         { "PAGEUP", "Page Up" },
+         { "PAGEDOWN", "Page Down" },
+         { "F1", "F1" },
+         { "F2", "F2" },
+         { "F3", "F3" },
+         { "F4", "F4" },
+         { "F5", "F5" },
+         { "F6", "F6" },
+         { "F7", "F7" },
+         { "F8", "F8" },
+         { "F10", "F10" },
+         { "F11", "F11" },
+         { "F12", "F12" },
+         { "F13", "F13" },
+         { "F14", "F14" },
+         { "F15", "F15" },
+         { "NUMLOCK", "NUMLOCK" },
+         { "CAPSLOCK", "CAPSLOCK" },
+         { "SCROLLOCK", "SCROLLOCK" },
+         { "RSHIFT", "Right Shift" },
+         { "LSHIFT", "Left Shift" },
+         { "RCTRL", "Right Ctrl" },
+         { "LCTRL", "Left Ctrl" },
+         { "RALT", "Right Alt" },
+         { "LALT", "Left Alt" },
+         { "RMETA", "RMETA" },
+         { "LMETA", "LMETA" },
+         { "LSUPER", "Left Windows/Super" },
+         { "RSUPER", "Right Windows/Super" },
+         { "MODE", "MODE" },
+         { "COMPOSE", "COMPOSE" },
+         { "HELP", "HELP" },
+         { "PRINT", "PRINT" },
+         { "SYSREQ", "SYSREQ" },
+         { "BREAK", "BREAK" },
+         { "MENU", "MENU" },
+         { "POWER", "POWER" },
+         { "EURO", "EURO" },
+         { "UNDO", "UNDO" },
+         { "OEM_102", "ISO extra key (OEM 102)" },
+         { "disabled", "Disabled" },
+         { NULL, NULL }
+      },
+      "F9"
    },
    {
       "cap32_combokey",
@@ -719,6 +850,7 @@ static struct retro_variable variables[] = {
       "cap32_retrojoy1",
       "Controls > User 2 Controller Config; auto|qaop|incentive|joystick_port1|joystick_port2",
    },
+   { "cap32_vkeyboard_key", "Controls > On-screen Keyboard: Keyboard Key; F9|BACKSPACE|TAB|CLEAR|RETURN|PAUSE|ESCAPE|SPACE|QUOTE|COMMA|MINUS|PERIOD|SLASH|0|1|2|3|4|5|6|7|8|9|SEMICOLON|EQUALS|LEFTBRACKET|BACKSLASH|RIGHTBRACKET|BACKQUOTE|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|DELETE|KP0|KP1|KP2|KP3|KP4|KP5|KP6|KP7|KP8|KP9|KP_PERIOD|KP_DIVIDE|KP_MULTIPLY|KP_MINUS|KP_PLUS|KP_ENTER|KP_EQUALS|UP|DOWN|RIGHT|LEFT|INSERT|HOME|END|PAGEUP|PAGEDOWN|F1|F2|F3|F4|F5|F6|F7|F8|F10|F11|F12|F13|F14|F15|NUMLOCK|CAPSLOCK|SCROLLOCK|RSHIFT|LSHIFT|RCTRL|LCTRL|RALT|LALT|RMETA|LMETA|LSUPER|RSUPER|MODE|COMPOSE|HELP|PRINT|SYSREQ|BREAK|MENU|POWER|EURO|UNDO|OEM_102|disabled" },
    {
       "cap32_combokey",
       "Controls > Combo Key; select|y|b|disabled",
@@ -952,6 +1084,17 @@ static void update_variables(void)
    retro_computer_cfg.padcfg[ID_PLAYER1] = controller_port_variable(ID_PLAYER1, &var);
    retro_computer_cfg.padcfg[ID_PLAYER2] = controller_port_variable(ID_PLAYER2, &var);
 
+   var.key = "cap32_db_mapkeys";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "disabled") == 0)
+         retro_computer_cfg.use_internal_remap = false;
+      else
+         retro_computer_cfg.use_internal_remap = true;
+   }
+
    // check keys
    if (game_configuration.has_btn && retro_computer_cfg.use_internal_remap)
    {
@@ -976,6 +1119,10 @@ static void update_variables(void)
          ev_set(EV_AUTO);
    }
 
+   var.key = "cap32_vkeyboard_key";
+   var.value = NULL;
+   ev_vkeyboard_set_key(environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) ? var.value : NULL);
+
    var.key = "cap32_combokey";
    var.value = NULL;
 
@@ -987,17 +1134,8 @@ static void update_variables(void)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_Y);
       else if (strcmp(var.value, "select") == 0)
          ev_combo_set(RETRO_DEVICE_ID_JOYPAD_SELECT);
-   }
-
-   var.key = "cap32_db_mapkeys";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      if (strcmp(var.value, "disabled") == 0)
-         retro_computer_cfg.use_internal_remap = false;
-      else
-         retro_computer_cfg.use_internal_remap = true;
+      else if (strcmp(var.value, "disabled") == 0)
+         ev_combo_set(16);
    }
 
    var.key = "cap32_lightgun_input";
@@ -1238,6 +1376,7 @@ static void update_variables(void)
       retro_ui_update_text();
       computer_reset();
    }
+   ev_update_input_descriptors();
 }
 
 void Emu_init()
@@ -1396,6 +1535,8 @@ void computer_autoload()
       memcpy(btnPAD[ID_PLAYER1].buttons, game_configuration.btn_config_player_1.buttons, sizeof(t_button_cfg));
       memcpy(btnPAD[ID_PLAYER2].buttons, game_configuration.btn_config_player_2.buttons, sizeof(t_button_cfg));
    }
+
+   ev_update_input_descriptors();
 
    if (!retro_computer_cfg.autorun)
       return;
@@ -1830,6 +1971,7 @@ void retro_audio_mix_batch()
 void retro_PollEvent()
 {
    input_poll_cb(); // retroarch get keys
+   ev_vkeyboard_poll();
    if (lightgun_cfg.gun_update)
       lightgun_cfg.gun_update(); // update lightguns
    process_events();
