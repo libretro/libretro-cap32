@@ -22,6 +22,7 @@ SOURCES_C := \
 	$(CORE_DIR)/cap32/asic.c \
 	$(CORE_DIR)/cap32/z80.c \
 	$(CORE_DIR)/cap32/kbdauto.c \
+	$(CORE_DIR)/cap32/lightgun/lightgun.c \
 	$(CORE_DIR)/cap32/lightgun/gunstick.c \
 	$(CORE_DIR)/cap32/lightgun/phaser.c \
 	$(CORE_DIR)/libretro/microui/microui.c \

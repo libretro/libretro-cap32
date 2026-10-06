@@ -90,6 +90,25 @@ void lightgun_prepare(lightgun_type guntype)
          CPC.gun_OUT = phaser_emulator_OUT;
          break;
 
+      case LIGHTGUN_TYPE_WEST_PHASER:
+         lightgun_cfg.gun_update = phaser_emulator_update;
+         CPC.gun_CRTC = NULL;
+         CPC.gun_IN = westphaser_emulator_IN;
+         CPC.gun_OUT = NULL;
+         break;
+
+      case LIGHTGUN_TYPE_TROJAN_PHAZER:
+         if (retro_computer_cfg.model != CPC_MODEL_PLUS) {
+            retro_message("Trojan lightgun is for CPC6128+");
+            break;
+         }
+
+         lightgun_cfg.gun_update = phaser_emulator_update;
+         CPC.gun_CRTC = trojan_emulator_CRTC;
+         CPC.gun_IN = trojan_emulator_IN;
+         CPC.gun_OUT = NULL;
+         break;
+
       default:
          lightgun_cfg.gun_draw = NULL;
          lightgun_cfg.gun_update = NULL;

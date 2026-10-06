@@ -54,4 +54,7 @@ typedef struct{
 extern t_lightgun gun[2];
 void ev_lightgun(unsigned port);
 
+unsigned lightgun_luminance(unsigned int pixel);
+unsigned int lightgun_get_screen(int x, int y);
+
 #endif

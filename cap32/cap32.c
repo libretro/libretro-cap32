@@ -1563,7 +1563,6 @@ int video_init (void)
 
    CPC.scr_bpp = retro_getGfxBpp();
    CPC.scr_density = 2 >> (CPC.scr_bpp >> 4);
-   printf("\n>>>>>>> b:%u d:%u\n", CPC.scr_bpp, CPC.scr_density);
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();

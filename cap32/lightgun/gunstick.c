@@ -69,58 +69,13 @@ static t_light light[2];
 #define GUNSTICK_TIMER         4
 
 
-static unsigned gunstick_luminance(uint32_t pixel)
-{
-   unsigned r, g, b;
-
-   switch (retro_video.depth) {
-      case DEPTH_16BPP:
-         r = (pixel >> 11) & 0x1F; r = (r << 3) | (r >> 2);
-         g = (pixel >> 5)  & 0x3F; g = (g << 2) | (g >> 4);
-         b = pixel         & 0x1F; b = (b << 3) | (b >> 2);
-         break;
-
-      case DEPTH_8BPP:
-         r = ((pixel >> 5) & 0x07) * 36;
-         g = ((pixel >> 2) & 0x07) * 36;
-         b = (pixel & 0x03) * 85;
-         break;
-
-      default:
-         r = (pixel >> 16) & 0xFF;
-         g = (pixel >> 8)  & 0xFF;
-         b = pixel         & 0xFF;
-         break;
-   }
-
-   return (299 * r) + (587 * g) + (114 * b);
-}
-
 void gunstick_reset(void)
 {
    memset(light, 0, sizeof(light));
 
    /* Guillermo Tell uses a light-yellow flash. Keep grey targets (Solo)
     * and allow a black sample followed by a flash (Mike Gunner). */
-   lightgun_cfg.threshold_color = gunstick_luminance(lightgun_cfg.luminance_color);
-}
-
-uint32_t _gunstick_get_screen(int x, int y)
-{
-   if ((unsigned)x >= (unsigned)EMULATION_SCREEN_WIDTH || 
-       (unsigned)y >= (unsigned)EMULATION_SCREEN_HEIGHT)
-      return 0;
-
-   int index = y * EMULATION_SCREEN_WIDTH + x - 1;
-
-   switch (retro_video.depth) {
-      case DEPTH_8BPP:
-         return ((uint8_t *)video_buffer)[index];
-      case DEPTH_16BPP:
-         return ((uint16_t *)video_buffer)[index];
-      default:
-         return video_buffer[index];
-   }
+   lightgun_cfg.threshold_color = lightgun_luminance(lightgun_cfg.luminance_color);
 }
 
 bool _gunstick_check(unsigned port)
@@ -134,8 +89,8 @@ bool _gunstick_check(unsigned port)
       gun[port].state = GUN_SSEND;
    }
 
-   gcolor = _gunstick_get_screen(light[port].x, light[port].y);
-   luminance = gunstick_luminance(gcolor);
+   gcolor = lightgun_get_screen(light[port].x, light[port].y);
+   luminance = lightgun_luminance(gcolor);
    #ifdef DEBUG_GUNSTICK
    printf("gunstick: 0x%X[0x%X] (%u,%u) [0x%X]\n", gcolor, luminance, light[port].x, light[port].y, lightgun_cfg.threshold_color);
    #endif

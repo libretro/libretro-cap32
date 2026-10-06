@@ -2,6 +2,9 @@
  *  Caprice32 libretro port
  *
  *  Copyright David Colmenero - D_Skywalk (2019-2023)
+ *  - original header -
+ *  Pituka - Nintendo Wii/Gamecube Port
+ *  (c) Copyright 2008-2009 David Colmenero (aka D_Skywalk)
  *
  *  Redistribution and use of this code or any derivative works are permitted
  *  provided that the following conditions are met:
@@ -34,34 +37,65 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 
-#ifndef RETROGUN_H__
-#define RETROGUN_H__
+#include <libretro.h>
+#include <libretro-core.h>
 
-typedef enum {
-    LIGHTGUN_TYPE_UNCONFIGURED,
-    LIGHTGUN_TYPE_NONE,
-    LIGHTGUN_TYPE_GUNSTICK,
-    LIGHTGUN_TYPE_PHASER,
-    LIGHTGUN_TYPE_TROJAN_PHAZER,
-    LIGHTGUN_TYPE_WEST_PHASER,
-} lightgun_type;
+#include "gfx/software.h"
+#include "gfx/video.h"
+#include "assets/assets.h"
 
-typedef struct
+#include "cap32.h"
+#include "lightgun.h"
+#include "retro_gun.h"
+
+extern uint32_t * video_buffer;
+
+
+unsigned lightgun_luminance(uint32_t pixel)
 {
-   lightgun_type guntype;
-   lightgun_type gunconfigured;
-   bool show;
-   unsigned int whitecolor;
-   unsigned int luminance_color;
-   unsigned int threshold_color;
+   unsigned r, g, b;
 
-   void (*gun_update)(void);
-   void (*gun_draw)(void);
-} t_lightgun_cfg;
-extern t_lightgun_cfg lightgun_cfg;
+   switch (retro_video.depth) {
+      case DEPTH_16BPP:
+         r = (pixel >> 11) & 0x1F; r = (r << 3) | (r >> 2);
+         g = (pixel >> 5)  & 0x3F; g = (g << 2) | (g >> 4);
+         b = pixel         & 0x1F; b = (b << 3) | (b >> 2);
+         break;
 
-void lightgun_prepare(lightgun_type guntype);
-void lightgun_draw(void);
+      case DEPTH_8BPP:
+         r = ((pixel >> 5) & 0x07) * 36;
+         g = ((pixel >> 2) & 0x07) * 36;
+         b = (pixel & 0x03) * 85;
+         break;
 
-#endif
+      default:
+         r = (pixel >> 16) & 0xFF;
+         g = (pixel >> 8)  & 0xFF;
+         b = pixel         & 0xFF;
+         break;
+   }
+
+   return (299 * r) + (587 * g) + (114 * b);
+}
+
+unsigned int lightgun_get_screen(int x, int y)
+{
+   if ((unsigned)x >= (unsigned)EMULATION_SCREEN_WIDTH || 
+       (unsigned)y >= (unsigned)EMULATION_SCREEN_HEIGHT)
+      return 0;
+
+   int index = y * EMULATION_SCREEN_WIDTH + x - 1;
+
+   switch (retro_video.depth) {
+      case DEPTH_8BPP:
+         return ((uint8_t *)video_buffer)[index];
+      case DEPTH_16BPP:
+         return ((uint16_t *)video_buffer)[index];
+      default:
+         return video_buffer[index];
+   }
+}
