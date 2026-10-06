@@ -75,6 +75,7 @@ extern dc_storage* dc;
 
 // LIGHTGUN
 #include "retro_gun.h"
+#include "lightgun/lightgun.h"
 extern t_lightgun_cfg lightgun_cfg;
 
 // LOG
@@ -1238,6 +1239,8 @@ static void update_variables(void)
       retro_ui_update_text();
       computer_reset();
    }
+
+   lightgun_prepare(lightgun_cfg.guntype);
 }
 
 void Emu_init()
@@ -1742,22 +1745,10 @@ void retro_set_controller_port_device( unsigned port, unsigned device )
    if ( port > 1 )
       return;
 
-   switch (device)
-   {
-      case RETRO_DEVICE_AMSTRAD_LIGHTGUN:
-         lightgun_prepare(lightgun_cfg.guntype);
-         amstrad_devices[port] = RETRO_DEVICE_AMSTRAD_LIGHTGUN;
-         break;
-
-      default:
-         // please do not deinit the lightgun config
-         if (lightgun_cfg.gunconfigured == LIGHTGUN_TYPE_UNCONFIGURED)
-         {
-            lightgun_prepare(LIGHTGUN_TYPE_NONE);
-         }
-         amstrad_devices[port] = device;
-         break;
-   }
+   amstrad_devices[port] = device;
+   gun[port].pressed = 0;
+   gun[port].state = GUN_SLEEP;
+   lightgun_prepare(lightgun_cfg.guntype);
 
    LOGI("retro_set_controller_port_device: (%d)=%d\n", port, device);
 }

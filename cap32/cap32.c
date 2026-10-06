@@ -375,7 +375,7 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
    { "169K Vendor Format", 40, 1, 9, 2, 0x52, 0xe5, {{ 0x41, 0x46, 0x42, 0x47, 0x43, 0x48, 0x44, 0x49, 0x45 }} }
 };
 
-t_lightgun gun = { 0, 0, GUN_SLEEP, 0 };
+t_lightgun gun[2] = {{ 0, 0, GUN_SLEEP, 0 }, { 0, 0, GUN_SLEEP, 0 }};
 
 #define psg_write \
 { \
@@ -516,8 +516,7 @@ uint8_t z80_IN_handler (reg_pair port)
                      if (PSG.reg_select == 14) { // PSG port A?
                         if (!(PSG.RegisterAY.Index[7] & 0x40)) { // port A in input mode?
                            ret_val = keyboard_matrix[CPC.keyboard_line & 0x0f]; // read keyboard matrix node status
-
-                           if ((CPC.keyboard_line & 0x0f) == 9) { //read line 9 GunStick & state != sleep
+                           if ((1 << (CPC.keyboard_line & 0x0f)) & 0x0240) { // joystick gunstick two inputs using bit lines (9 => 0x200 / 6 => 0x40)
                               //checking and return gun value
                               ret_val &= CPC.gun_IN
                                  ? CPC.gun_IN()
@@ -1564,6 +1563,7 @@ int video_init (void)
 
    CPC.scr_bpp = retro_getGfxBpp();
    CPC.scr_density = 2 >> (CPC.scr_bpp >> 4);
+   printf("\n>>>>>>> b:%u d:%u\n", CPC.scr_bpp, CPC.scr_density);
    CPC.scr_style     = retro_getStyle();
    CPC.scr_bps       = retro_getGfxBps();
    CPC.scr_pos       = CPC.scr_base = retro_getScreenPtr();

@@ -51,6 +51,7 @@ typedef struct{
    gun_state state;
    int pressed;
 } t_lightgun;
-extern t_lightgun gun;
+extern t_lightgun gun[2];
+void ev_lightgun(unsigned port);
 
 #endif

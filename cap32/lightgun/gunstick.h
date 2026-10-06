@@ -38,6 +38,7 @@
 #ifndef LIGHTGUN_GUNSTICK_H__
 #define LIGHTGUN_GUNSTICK_H__
 
+void gunstick_reset(void);
 void gunstick_emulator_update(void);
 unsigned char gunstick_emulator_IN();
 void gunstick_emulator_OUT();

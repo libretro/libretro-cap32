@@ -65,6 +65,12 @@ static uint32_t cursor_color = 0;
 
 void lightgun_prepare(lightgun_type guntype)
 {
+   if (lightgun_cfg.gunconfigured != guntype) {
+      memset(gun, 0, sizeof(gun));
+      gunstick_reset();
+   }
+
+   lightgun_cfg.gun_draw = NULL;
    cursor_color = retro_video.cursor_color;
    lightgun_cfg.gunconfigured = guntype;
 
@@ -102,10 +108,17 @@ void lightgun_prepare(lightgun_type guntype)
    {
       case DEPTH_24BPP:
          lightgun_cfg.whitecolor = colours[11];
+         lightgun_cfg.luminance_color = colours[0]; // grey color
          break;
       
       case DEPTH_16BPP:
-         lightgun_cfg.whitecolor = colours[11] + (colours[11] << 16);
+         lightgun_cfg.whitecolor = colours[11] & 0xffff;
+         lightgun_cfg.luminance_color = colours[0] & 0xffff;
+         break;
+      
+      case DEPTH_8BPP:
+         lightgun_cfg.whitecolor = colours[11] & 0xff;
+         lightgun_cfg.luminance_color = colours[0] & 0xff;
          break;
 
       default:
@@ -118,9 +131,15 @@ void lightgun_prepare(lightgun_type guntype)
 
 void lightgun_draw(void)
 {
-   // check margins
-   if (gun.x < 16 || gun.y < 16)
-      return;
+   for (unsigned port = 0; port < 2; port++) {
+      if (
+         gun[port].x < 16 ||
+         gun[port].y < 16 ||
+         gun[port].x >= EMULATION_SCREEN_WIDTH - 16 ||
+         gun[port].y >= EMULATION_SCREEN_HEIGHT - 16
+      )
+         continue;
 
-   draw_char(video_buffer, gun.x - (4 * EMULATION_SCALE), gun.y - 4, FNT_CROSS, cursor_color);
+      draw_char(video_buffer, gun[port].x - (4 * EMULATION_SCALE), gun[port].y - 4, FNT_CROSS, cursor_color);
+   }
 }

@@ -28,4 +28,4 @@ external/cmocka/cmocka-lib
 tests/
 tests-db/
 unit-tests/test-db
-unit-tests/autorun
+unit-tests/test-dsk

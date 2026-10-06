@@ -969,24 +969,24 @@ void ev_process_cursor()
    );
 }
 
-void ev_lightgun()
+void ev_lightgun(unsigned port)
 {
-   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN))
-   {
-      gun.state = GUN_PREPARE;
-      gun.x = 0xfff;
-      gun.y = 0xfff;
+   t_lightgun *g = &gun[port];
+   int x, y;
+   
+   g->pressed = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER) != 0;
+   x = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X);
+   y = input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y);
+   
+   if (x == -0x8000 || y == -0x8000 ||
+       input_state_cb(port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN)) {
+      g->state = GUN_PREPARE;
+      g->x = g->y = -1;
       return;
    }
-
-   gun.x = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X) + 0x7fff) * EMULATION_SCREEN_WIDTH) / 0xfffe;
-   gun.y = ((input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y) + 0x7fff) * EMULATION_SCREEN_HEIGHT) / 0xfffe;
-
-   if(input_state_cb(0, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER)
-      || (input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT)))
-   {
-      gun.pressed = true;
-   } else {
-      gun.pressed = false;
-   }
+   
+   g->x = ((x + 0x7fff) * (retro_video.screen_render_width - 1)) / 0xfffe;
+   g->y = ((y + 0x7fff) * (retro_video.screen_render_height - 1)) / 0xfffe;
+   if (retro_video.screen_crop)
+      g->x += EMULATION_CROP;
 }
