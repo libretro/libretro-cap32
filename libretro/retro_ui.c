@@ -239,10 +239,10 @@ void retro_ui_update_text()
    char model[16];
    switch (retro_computer_cfg.model)
    {
-      case 0:
-      case 1: strncpy(model, "464", sizeof(model)); break;
-      case 2: strncpy(model, "664", sizeof(model)); break;
-      case 4: strncpy(model, "6128+", sizeof(model)); break;
+      case CPC_MODEL_464:
+      case CPC_MODEL_464DDI: strncpy(model, "464", sizeof(model)); break;
+      case CPC_MODEL_664: strncpy(model, "664", sizeof(model)); break;
+      case CPC_MODEL_PLUS: strncpy(model, "6128+", sizeof(model)); break;
       default: strncpy(model, "6128", sizeof(model)); break;
    }
 

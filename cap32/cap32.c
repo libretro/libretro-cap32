@@ -1310,7 +1310,7 @@ void emulator_shutdown (void)
 
 int cart_start (char *pchFileName) {
 
-   if(retro_computer_cfg.model != 3) {
+   if(retro_computer_cfg.model != CPC_MODEL_PLUS) {
       LOGE("Cartridge ERROR: Please select CPC6128+.\n");
       retro_message("Please select CPC6128+");
       return ERR_CPR_INVALID;
