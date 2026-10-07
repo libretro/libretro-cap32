@@ -38,6 +38,8 @@
 #ifndef LIGHTGUN_H__
 #define LIGHTGUN_H__
 
+#include <stdint.h>
+
 typedef enum {
    GUN_SLEEP   = 0,
    GUN_SHOOT   = 1,
@@ -54,7 +56,7 @@ typedef struct{
 extern t_lightgun gun[2];
 void ev_lightgun(unsigned port);
 
-unsigned lightgun_luminance(unsigned int pixel);
+unsigned lightgun_luminance(uint32_t pixel);
 unsigned int lightgun_get_screen(int x, int y);
 
 #endif
