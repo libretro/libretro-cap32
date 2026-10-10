@@ -90,7 +90,9 @@ uint32_t dwBytesTransferred = 0;
 #define RES_N     6
 
 #define OVERRUN_TIMEOUT 128*4
-#define INITIAL_TIMEOUT OVERRUN_TIMEOUT*4
+// Orion Prime requires at least 7 to load successfully.
+// Set to 8 to provide a minimal safe margin without degrading FDC timeout accuracy.
+#define INITIAL_TIMEOUT (OVERRUN_TIMEOUT * 8)
 
 void fdc_specify(void);
 void fdc_drvstat(void);
