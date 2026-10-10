@@ -24,6 +24,7 @@
 
 #include "cap32.h"
 #include "slots.h"
+#include "asic.h"
 #include "crtc.h"
 #include "tape.h"
 #include "cart.h"
@@ -50,6 +51,8 @@ extern uint16_t MaxVSync;
 extern t_flags1 flags1;
 extern t_disk_format disk_format[MAX_DISK_FORMAT];
 extern uint8_t *pbROM;
+extern uint8_t asic_ram[16384];
+extern uint32_t colours[32];
 
 // TODO: remove pbGPBuffer and pbTapeImage dependency
 extern uint8_t *pbTapeImage;
@@ -94,6 +97,149 @@ int cpm_boot (char * comfile)
  * SNA handlers
  */
 
+/* SNA v3 CPC+ chunk, as specified by cpctech.cpcwiki.de/docs/snapshot.html.
+ * Do not dump C structs: their padding and integer layout are host dependent. */
+#define SNAP_PLUS_SIZE 0x8f8
+#define SNAP_PLUS_EXTRA (8 + SNAP_PLUS_SIZE + 8 + 16)
+
+static unsigned snap_word(const uint8_t *p)
+{
+   return p[0] | ((unsigned)p[1] << 8);
+}
+
+static void snap_put_word(uint8_t *p, unsigned value)
+{
+   p[0] = value;
+   p[1] = value >> 8;
+}
+
+uint32_t snapshot_size(void)
+{
+   return sizeof(t_SNA_header) + get_ram_size()
+      + (CPC.model == CPC_MODEL_PLUS ? SNAP_PLUS_EXTRA : 0);
+}
+
+static void snapshot_plus_save(uint8_t *chunk)
+{
+   unsigned i, c;
+   uint8_t *p = chunk + 8;
+   memset(chunk, 0, SNAP_PLUS_EXTRA);
+   memcpy(chunk, "CPC+", 4);
+   snap_put_word(chunk + 4, SNAP_PLUS_SIZE);
+   for (i = 0; i < 2048; i++) {
+      unsigned a = i * 2, id = a >> 8, y = (a >> 4) & 15, x = a & 15;
+      p[i] = ((asic.sprites[id][x][y] & 15) << 4)
+         | (asic.sprites[id][x + 1][y] & 15);
+   }
+   for (i = 0; i < 16; i++) {
+      uint8_t *s = p + 0x800 + i * 8;
+      unsigned mx = asic.sprites_mag_x[i], my = asic.sprites_mag_y[i];
+      snap_put_word(s, asic.sprites_x[i]);
+      snap_put_word(s + 2, asic.sprites_y[i]);
+      s[4] = ((mx == 4 ? 3 : mx) << 2) | (my == 4 ? 3 : my);
+   }
+   memcpy(p + 0x880, asic_ram + 0x2400, 64);
+   p[0x8c0] = CRTC.interrupt_sl;
+   p[0x8c1] = CRTC.split_sl;
+   p[0x8c2] = CRTC.split_addr >> 8;
+   p[0x8c3] = CRTC.split_addr;
+   p[0x8c4] = asic.hscroll | (asic.vscroll << 4) | (asic.extend_border << 7);
+   p[0x8c5] = asic.interrupt_vector;
+   /* The core exposes fixed analogue inputs (no analogue device attached). */
+   for (c = 0; c < 8; c++) p[0x8c8 + c] = c == 5 || c == 7 ? 0 : 0x3f;
+   for (c = 0; c < 3; c++) {
+      const t_DMA_channel *ch = &asic.dma.ch[c];
+      uint8_t *s = p + 0x8d0 + c * 4, *internal = p + 0x8e0 + c * 7;
+      snap_put_word(s, ch->source_address);
+      s[2] = ch->prescaler;
+      snap_put_word(internal, ch->loops);
+      /* SNA stores the instruction after REPEAT; the core adds 2 on LOOP. */
+      snap_put_word(internal + 2, ch->loop_address + 2);
+      snap_put_word(internal + 4, ch->pause_ticks);
+      internal[6] = ch->tick_cycles;
+   }
+   p[0x8df] = asic.dma.dcsr & 0x80;
+   for (c = 0; c < 3; c++)
+      p[0x8df] |= (asic.dma.ch[c].enabled << c)
+         | (asic.dma.ch[c].interrupt << (6 - c));
+   p[0x8f5] = asic.rmr2;
+   p[0x8f6] = !asic.locked;
+   p[0x8f7] = asic.lock_seq_pos < 15 ? asic.lock_seq_pos + 2 : 0;
+
+   /* Emulator-specific continuation state not represented by CPC+. */
+   p += SNAP_PLUS_SIZE;
+   memcpy(p, "C32+", 4);
+   p[4] = 16;
+   p += 8;
+   p[0] = 1;
+   p[1] = asic.lock_seq_pos;
+   p[2] = asic.lock_prev_data;
+   p[3] = asic.raster_interrupt;
+   p[4] = asic.irq_cause;
+   p[5] = asic.irq_vector;
+   p[6] = CRTC.raster_interrupt_delay;
+   for (i = 0; i < 4; i++) p[8 + i] = CRTC.sl_count >> (8 * i);
+   p[12] = asic.dma.clear;
+   p[13] = asic.dma.dcsr;
+   /* The SNA header carries classic ink values; retain their last-writer mask. */
+   p[7] = asic.legacy_palette;
+   p[14] = asic.legacy_palette >> 8;
+   p[15] = asic.legacy_palette >> 16;
+}
+
+static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
+{
+   unsigned i, c;
+   reg_pair port;
+   asic.locked = false;
+   for (i = 0; i < 2048; i++) {
+      asic_register_page_write(0x4000 + i * 2, p[i] >> 4);
+      asic_register_page_write(0x4001 + i * 2, p[i] & 15);
+   }
+   for (i = 0; i < 16; i++)
+      for (c = 0; c < 5; c++)
+         asic_register_page_write(0x6000 + i * 8 + c, p[0x800 + i * 8 + c]);
+   for (i = 0; i < 64; i++) asic_register_page_write(0x6400 + i, p[0x880 + i]);
+   for (i = 0; i < 6; i++) asic_register_page_write(0x6800 + i, p[0x8c0 + i]);
+   for (c = 0; c < 3; c++) {
+      t_DMA_channel *ch = &asic.dma.ch[c];
+      const uint8_t *s = p + 0x8d0 + c * 4, *in = p + 0x8e0 + c * 7;
+      ch->source_address = snap_word(s);
+      ch->prescaler = s[2];
+      ch->loops = snap_word(in);
+      ch->loop_address = (snap_word(in + 2) - 2) & 0xffff;
+      ch->pause_ticks = snap_word(in + 4);
+      ch->tick_cycles = in[6];
+      ch->enabled = (p[0x8df] >> c) & 1;
+      ch->interrupt = (p[0x8df] >> (6 - c)) & 1;
+   }
+   asic.dma.dcsr = p[0x8df];
+   if ((p[0x8f5] & 0xe0) == 0xa0) {
+      port.w.l = 0x7f00;
+      z80_OUT_handler(port, p[0x8f5]);
+   }
+   asic.locked = !p[0x8f6];
+   asic.lock_seq_pos = p[0x8f7] >= 2 && p[0x8f7] <= 16 ? p[0x8f7] - 2 : 0;
+   asic.lock_prev_data = p[0x8f7] == 1 ? 1 : 0;
+   if (internal) {
+      asic.lock_seq_pos = internal[1];
+      asic.lock_prev_data = internal[2];
+      asic.raster_interrupt = internal[3] != 0;
+      asic.irq_cause = internal[4];
+      asic.irq_vector = internal[5];
+      CRTC.raster_interrupt_delay = internal[6];
+      CRTC.sl_count = 0;
+      for (i = 0; i < 4; i++) CRTC.sl_count |= (unsigned)internal[8 + i] << (8 * i);
+      asic.dma.clear = internal[12];
+      asic.dma.dcsr = internal[13];
+      asic.legacy_palette = (internal[7] | ((uint32_t)internal[14] << 8)
+         | ((uint32_t)internal[15] << 16)) & 0x1ffff;
+      for (i = 0; i < 17; i++)
+         if (asic.legacy_palette & (1u << i))
+            GateArray.palette[i] = colours[GateArray.ink_values[i] & 31];
+   }
+}
+
 /**
  * snapshot_load_mem:
  * @pBuffer: snapshot buffer
@@ -107,6 +253,8 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    reg_pair port;
    uint32_t dwSnapSize, dwModel, dwFlags;
    t_SNA_header sh;
+   const uint8_t *plus = NULL, *continuation = NULL;
+   uint32_t offset;
 
    if ((sna_buffer == NULL) || (buffer_size < sizeof(sh)))
       return ERR_SNA_SIZE;
@@ -121,6 +269,8 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
       printf("slots::SNA: detected old format...\n");
       // to fix old position simply move pointer one position: M>V - SNA
       sna_buffer++;
+      buffer_size--;
+      if (buffer_size < sizeof(sh)) return ERR_SNA_SIZE;
    }
 
    memcpy(&sh, sna_buffer, sizeof(sh));
@@ -130,15 +280,40 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    if (!dwSnapSize)
       return ERR_SNA_SIZE;
 
-   // only clean ram and reconfigure CPC.ram_size
-   memset(pbRAM, 0, CPC_MAX_RAM * 1024 * sizeof(uint8_t)); // clean allocated memory
-   if (buffer_size > CPC.ram_size) { // memory dump size differs from current RAM size?
-      CPC.ram_size = dwSnapSize;
+   if (dwSnapSize > CPC_MAX_RAM || dwSnapSize * 1024 > buffer_size - sizeof(sh))
+      return ERR_SNA_SIZE;
+   offset = sizeof(sh) + dwSnapSize * 1024;
+   while (sh.version >= 3 && offset < buffer_size) {
+      uint32_t length;
+      const uint8_t *chunk = sna_buffer + offset;
+      if (buffer_size - offset < 8) return ERR_SNA_SIZE;
+      length = chunk[4] | ((uint32_t)chunk[5] << 8)
+         | ((uint32_t)chunk[6] << 16) | ((uint32_t)chunk[7] << 24);
+      offset += 8;
+      if (length > buffer_size - offset) return ERR_SNA_SIZE;
+      if (!memcmp(chunk, "CPC+", 4)) {
+         if (length != SNAP_PLUS_SIZE) return ERR_SNA_SIZE;
+         plus = chunk + 8;
+      } else if (!memcmp(chunk, "C32+", 4)) {
+         if (length != 16 || chunk[8] != 1 || chunk[9] > 15)
+            return ERR_SNA_INVALID;
+         continuation = chunk + 8;
+      }
+      offset += length;
    }
+   dwModel = sh.version > 1 ? sh.cpc_model : CPC.model;
+   if (plus || (dwModel >= 4 && dwModel <= 6)) dwModel = CPC_MODEL_PLUS;
+   if (dwModel > CPC_MODEL_MAX) return ERR_SNA_CPC_TYPE;
+   if (continuation && !plus) return ERR_SNA_INVALID;
 
+   /* Validate the complete input before resetting the running machine. */
+   CPC.ram_size = dwSnapSize;
+   if (CPC.model != dwModel) {
+      CPC.model = dwModel;
+      emulator_select_ROM();
+   }
+   memset(pbRAM, 0, CPC_MAX_RAM * 1024);
    emulator_reset(false);
-   if (sizeof(sh) + (dwSnapSize * 1024) > buffer_size)
-      return ERR_SNA_INVALID;
 
    memcpy(pbRAM, (uint8_t*)(sna_buffer + sizeof(sh)), dwSnapSize * 1024); // read memory dump into CPC RAM
 
@@ -201,6 +376,10 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    // ROM select
    port.b.h = 0xdf;
    val = sh.upper_ROM; // upper ROM number
+   /* Older native Plus states stored the decoded cartridge page. */
+   if (CPC.model == CPC_MODEL_PLUS && val < 32 &&
+       (continuation || sh.cpc_model == 3))
+      val |= 0x80;
    z80_OUT_handler(port, val);
    // PPI
    port.b.h = 0xf4; // port A
@@ -217,17 +396,6 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    for (n = 0; n < 16; n++) // loop for all PSG registers
       SetAYRegister(n, sh.psg_registers[n]);
 
-   if (sh.version > 1) { // does the snapshot have version 2 data?
-      dwModel = sh.cpc_model; // determine the model it was saved for
-      if (dwModel != CPC.model) { // different from what we're currently running?
-         if (dwModel > CPC_MODEL_MAX) { // not one of the known models?
-            emulator_reset(false);
-            return ERR_SNA_CPC_TYPE;
-         }
-         CPC.model = dwModel;
-         emulator_select_ROM();
-      }
-   }
    if (sh.version > 2) { // does the snapshot have version 3 data?
       FDC.motor = sh.fdc_motor;
       driveA.current_track = sh.drvA_current_track;
@@ -285,6 +453,8 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
       z80.int_pending = sh.z80_int_pending;
    }
 
+   if (plus) snapshot_plus_load(plus, continuation);
+
    return 0; // dump ok!
 }
 
@@ -301,7 +471,7 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
    int n;
    uint32_t dwFlags;
 
-   if(buffer_size < sizeof(sh) + get_ram_size())
+   if (!sna_buffer || buffer_size < snapshot_size())
       return ERR_OUT_OF_MEMORY;
 
    memset(&sh, 0, sizeof(sh));
@@ -356,7 +526,8 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
    }
 
    /* ROM select */
-   sh.upper_ROM = GateArray.upper_ROM;
+   sh.upper_ROM = CPC.model == CPC_MODEL_PLUS
+      ? 0x80 | (GateArray.upper_ROM & 31) : GateArray.upper_ROM;
 
    /* PPI */
    sh.ppi_A = PPI.portA;
@@ -376,7 +547,7 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
    sh.ram_size[0] = CPC.ram_size & 0xff;
    sh.ram_size[1] = (CPC.ram_size >> 8) & 0xff;
    /* version 2 info */
-   sh.cpc_model = CPC.model;
+   sh.cpc_model = CPC.model == CPC_MODEL_PLUS ? 4 : CPC.model;
    /* version 3 info */
    sh.fdc_motor = FDC.motor;
    sh.drvA_current_track = driveA.current_track;
@@ -437,6 +608,7 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
             break;
       }
    }
+   sh.crtc_type = CPC.model == CPC_MODEL_PLUS ? 3 : 0;
    sh.crtc_addr[0]       = CRTC.addr & 0xff;
    sh.crtc_addr[1]       = (CRTC.addr >> 8) & 0xff;
    sh.crtc_scanline[0]   = VDU.scanline & 0xff;
@@ -463,6 +635,8 @@ int snapshot_save_mem (uint8_t *sna_buffer, uint32_t buffer_size)
 
    memcpy(sna_buffer, &sh, sizeof(sh));
    memcpy(sna_buffer + sizeof(sh), pbRAM, CPC.ram_size*1024);
+   if (CPC.model == CPC_MODEL_PLUS)
+      snapshot_plus_save(sna_buffer + sizeof(sh) + get_ram_size());
 
    return 0;
 
@@ -500,7 +674,7 @@ int snapshot_save (char *pchFileName)
    int error;
    uint32_t dwSnapSize;
 
-   dwSnapSize = sizeof(t_SNA_header) + get_ram_size();
+   dwSnapSize = snapshot_size();
    pbSnaImage = (uint8_t*) malloc(dwSnapSize);
    if(!pbSnaImage)
       return ERR_OUT_OF_MEMORY;
