@@ -61,7 +61,6 @@ uint32_t dbfail[] = {
    0x7234d56e, // Big League Soccer (1985)(Viper)(es)(Hack)[cr].dsk
    0xe23c20be, // Bataille d'Angleterre, La (1985)(PSS)(fr).dsk
    0x12a094b3, // Bivouac - Chamonix Challenge (1987)(Infogrames)(fr).dsk
-   0xe55eb7d9, // Bonanza Bros (1991)(US Gold).dsk
    0x4f3022bc, // Camelot Warriors (1987)(Dinamic Software).dsk
    0x585cbc31, // Cite Perdu, La (1987)(Excalibur)(fr)(Disk 2 Side A).dsk
    0xf490084a, // Cite Perdu, La (1987)(Excalibur)(fr)(Disk 1 Side A).dsk
@@ -95,6 +94,7 @@ uint32_t dbfail[] = {
    0x8442d3bb, // Exit (1988)(Ubi Soft)(fr)(Side A).dsk
    0x0e6de21c, // Exit (1988)(Ubi Soft)(fr)(Side B).dsk
    0xacf41d84, // E-SWAT (1990)(US Gold).dsk
+   0x2f33f2a9, // Empire (F) (1985) [Loriciels] [Original].dsk
    0xca2062f6, // Faial (1986)(Excalibur)(fr)(Side B).dsk
    0xbca5acb2, // Faial (1986)(Excalibur)(fr)(Side A).dsk
    0xdd86f049, // Fantome City (1986)(Coktel Vision)(fr).dsk
@@ -107,8 +107,6 @@ uint32_t dbfail[] = {
    0x1a07c6cc, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 2 Side B).dsk
    0xc8d40fe6, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side A).dsk
    0x9951e870, // Globe-Trotter (1986)(Excalibur)(fr)(Disk 1 Side B).dsk
-   0x44998f95, // Golden Eagle (1991)(Loriciels)(es)(Side B).dsk
-   0x5256b156, // Golden Eagle (1991)(Loriciels)(es)(Side A).dsk
    0x47f7f71f, // Hamsters en Folie (1989)(Generation 5)(fr).dsk
    0x1ac09f99, // Infernal House (1991)(Lankhor)(fr)(Side A).dsk
    0xce141c60, // Infernal House (1991)(Lankhor)(fr)(Side B).dsk
@@ -117,7 +115,6 @@ uint32_t dbfail[] = {
    0xfb10b3bb, // Knight Force (1989)(Titus)(Side B).dsk
    0xaa6728e1, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side B).dsk
    0x23af9eb4, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side A).dsk
-   0x888d910d, // Macrocosmica (1986)(Datacom Publications).dsk
    0x3edfb68f, // Mission Delta (1985)(ERE Informatique)(fr).dsk
    0xb84f3627, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side B).dsk
    0x34dc1faa, // M'enfin - Gaston (1987)(Ubi Soft)(fr)(Side A).dsk
@@ -185,13 +182,12 @@ uint32_t dbfail[] = {
    0x2bfd2901, // SRAM 2 (1986)(ERE Informatique)(fr)(Side B).dsk
    0xbe597faa, // SRAM (1986)(ERE Informatique)(M3)(Side B).dsk
    0x3f4b2026, // SRAM (1986)(ERE Informatique)(M3)(Side A).dsk
-   0xd5e3633d, // Satellite Warrior (1985)(Amsoft).dsk
    0xeea7a690, // Sai Combat (1986)(Mirrorsoft)(fr).dsk
    0x0ccf7406, // Turbo Cup (1988)(Loriciels).dsk
    0x3036e305, // They Stole a Million (1986)(39 Steps)(fr).dsk
-   0xd36c1fdc, // They Stole a Million (1986)(39 Steps)(de).dsk
    0xb9ddb20d, // Tensions (1986)(ERE Informatique)(es).dsk
-   0x0e7422d2, // Thunder Blade (1988)(US Gold).dsk
+   0xb3038254, // Templiers d'Orven, Les (1986)(Loriciels)(fr)(Side A).dsk
+   0x80b90976, // Templiers d'Orven, Les (1986)(Loriciels)(fr)(Side B).dsk
    0x425b6165, // Top Level (1988)(MBC Informatique)(fr)(Side B).dsk
    0xc1de5e93, // Top Level (1988)(MBC Informatique)(fr)(Side A).dsk
    0x01945b8c, // Terre et Conquerants (1989)(Ubi Soft)(fr)(Side A).dsk
