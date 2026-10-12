@@ -45,7 +45,7 @@ void test_cmd(char * cmd, char * hash)
    MD5_Update(&ctx, cmd, strlen(cmd));
    MD5_Final(output, &ctx);
 
-#ifdef TEST_DEBUG
+#ifdef _UNITTEST_DEBUG
    printf("MD5: ");
 
    for (int o = 0, c = 0; o < 16; o++, c+=2)

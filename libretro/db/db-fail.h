@@ -47,24 +47,19 @@ uint32_t dbfail[] = {
    0x2a7ad414, // Alphakhor (1989)(Loriciels)(fr)(Side B).dsk
    0x4cffaa69, // Aventures de Moktar, Les (1992)(Titus)(fr).dsk
    0xdd29fe62, // Basun (1986)(Multicrom).dsk
-   0x1bb90675, // Birdie (1987)(Ere Informatique).dsk
-   0x925415df, // Birdie (1987)(Ere Informatique)(fr).dsk
    0x646b68a9, // Beurk Roger (1985)(Amstrad Computer User)(fr)(Hack)[cr].dsk
    0xe0e1a064, // Blue Crystal, The (1985)(Rainbow Arts)(fr)(Side A).dsk
    0x2db6da2a, // Blaue Kristall, Der (1985)(Rainbow Arts)(de)(Side B).dsk
    0x47659579, // Blue Crystal, The (1985)(Rainbow Arts)(fr)(Side B).dsk
    0x0e63c83e, // Blaue Kristall, Der (1985)(Rainbow Arts)(de)(Side A).dsk
-   0x0c27ad3d, // Battle of the Bulge (1990)(Cases Computer Simulators).dsk
    0x43ce2bae, // Bob Morane - Science Fiction (1987)(Infogrames)(fr).dsk
    0x3bf52bf5, // Bounty Hunter (19xx)(The Adventure Workshop)[cr].dsk
-   0x84052472, // Blues Brothers, The (1991)(Titus).dsk
    0x9f759eb0, // Back To The Future III (1990)(Image Works)(Side A).dsk
    0x2fc30262, // Back To The Future III (1990)(Image Works)(Side B).dsk
    0x304b0e30, // Back To The Future III (1990)(Image Works)(es)(Side A).dsk
    0x891011d8, // Back To The Future III (1990)(Image Works)(es)(Side B).dsk
    0x7234d56e, // Big League Soccer (1985)(Viper)(es)(Hack)[cr].dsk
    0xe23c20be, // Bataille d'Angleterre, La (1985)(PSS)(fr).dsk
-   0x02914bd1, // Blockhaus (1986)(Amstrad Magazine)(fr)[cr].dsk
    0x12a094b3, // Bivouac - Chamonix Challenge (1987)(Infogrames)(fr).dsk
    0xe55eb7d9, // Bonanza Bros (1991)(US Gold).dsk
    0x4f3022bc, // Camelot Warriors (1987)(Dinamic Software).dsk
@@ -85,7 +80,6 @@ uint32_t dbfail[] = {
    0xeb8ab156, // Daley Thompson's Olympic Challenge (1988)(Ocean).dsk
    0x6b36fb72, // Derniere Mission, La (1988)(MBC Informatique)(fr)(Side A).dsk
    0x7b411704, // Derniere Mission, La (1988)(MBC Informatique)(fr)(Side B).dsk
-   0xbe2eb246, // Dark Century (1990)(Titus).dsk
    0xb857f5ca, // Defender of the Crown (1987)(Cinemaware)(fr)(Side A).dsk
    0xff0a5212, // Defender of the Crown (1987)(Cinemaware)(fr)(Side B).dsk
    0x3bd70a17, // Despotik Design (1987)(ERE Informatique)(M3).dsk
@@ -118,16 +112,9 @@ uint32_t dbfail[] = {
    0x47f7f71f, // Hamsters en Folie (1989)(Generation 5)(fr).dsk
    0x1ac09f99, // Infernal House (1991)(Lankhor)(fr)(Side A).dsk
    0xce141c60, // Infernal House (1991)(Lankhor)(fr)(Side B).dsk
-   0xc874fc01, // Jaws - Le Dernier Etalon (1988)(MBC Informatique)(fr)(Side B).dsk
-   0xb21fb6b0, // Jaws - Le Dernier Etalon (1988)(MBC Informatique)(fr)(Side A).dsk
-   0xfaa04721, // James Debug - El Misterio De La Isla Perdida (1986)(Coktel Vision)(es)[cr].dsk
    0x21de51e7, // James Debug - Mystere de l'Ile Perdue (1986)(Coktel Vision).dsk
    0x0e81f696, // Knight Force (1989)(Titus)(Side A).dsk
    0xfb10b3bb, // Knight Force (1989)(Titus)(Side B).dsk
-   0x5ca0fd3c, // L'Aigle D'Or Le Retour (1991)(Loriciels)(fr)(Side A)[codes].dsk
-   0xb91dc1a9, // L'Aigle D'Or Le Retour (1991)(Loriciels)(fr)(Side B).dsk
-   0x70021b43, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side B).dsk
-   0xb0a1e816, // Labyrinthe D'Anglomania 2, Le (1990)(Retz)(fr)(Side A).dsk
    0xaa6728e1, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side B).dsk
    0x23af9eb4, // Maitre Absolu, Le (1989)(Ubi Soft)(fr)(Side A).dsk
    0x888d910d, // Macrocosmica (1986)(Datacom Publications).dsk
@@ -202,10 +189,7 @@ uint32_t dbfail[] = {
    0xeea7a690, // Sai Combat (1986)(Mirrorsoft)(fr).dsk
    0x0ccf7406, // Turbo Cup (1988)(Loriciels).dsk
    0x3036e305, // They Stole a Million (1986)(39 Steps)(fr).dsk
-   0x21b3e058, // They Stole a Million (1986)(39 Steps).dsk
    0xd36c1fdc, // They Stole a Million (1986)(39 Steps)(de).dsk
-   0xb2ea5762, // Titus the Fox (1992)(Titus).dsk
-   0x98fc3b45, // Thomas The Tank Engine's Fun With Words (1990)(Alternative Software).dsk
    0xb9ddb20d, // Tensions (1986)(ERE Informatique)(es).dsk
    0x0e7422d2, // Thunder Blade (1988)(US Gold).dsk
    0x425b6165, // Top Level (1988)(MBC Informatique)(fr)(Side B).dsk
@@ -223,6 +207,4 @@ uint32_t dbfail[] = {
    0x6b941913, // Zombi (1986)(Ubi Soft)(fr)(Side A).dsk
    0xf4fe2bba, // Zombi (1986)(Ubi Soft)(de)(Side B).dsk
    0x7526075f, // Zombi (1986)(Ubi Soft)(es)(Side B).dsk
-   0xf23f30d4, // 3D Boxing (1985)(Amsoft).dsk
-   0x638c76d0, // 3D Stunt Rider (1985)(Amsoft).dsk
 };
