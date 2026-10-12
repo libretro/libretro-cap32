@@ -1,15 +1,42 @@
 # Future
-- RMP: Added 2 players support and added some RMPs from great two players games as start.
-- RMP: updated new binds, added Afterburner and Oh Mummy! Thanks to Haritz and Pablo from LOVG to point me.
-- TEST: some fixes added and minor cmocka updates.
-- VIDEO: Added 8bpp mode thx @fjtrujy for your help.
-- DB: sync clean-cpc-db v1.3
-- GUN: Fixed gunstick init.
-- DB: sync clean-cpc-db v1.2
-- RMP: Added Amsoft loader fixes and new classics and puzzle games.
-- KBD: allow autorun commands without press return at the end.
+- AUTORUN: Avoid unsuitable files, skip verified PLUS3DOS files during CPC autorun selection, and prefer startable binary.
+- BUILD: Optimized build for RG35XX, small buildfix for ctr, and build compat/fopen_utf8.c.
+- BUILD: Add webOS to CI, thx @cscd98, and linux-aarch64 build, thx @warmenhoven.
+- CORE: Added CPC+ loader flag and better, simplified DDI support.
+- CORE: Use CPC_MODEL to correctly set/check the expected model.
+- CORE: Build disk names without fill_pathname(), thx @jbdemonte.
+- CORE: Route all file I/O through the frontend VFS, thx @WizzardSK.
+- CORE: Clean up logging messages and added retro_core_options_v2, thx @rtomasa.
+- CPC+: Correct hardware sprite screen alignment, clipping, and coordinates for non-32-bit framebuffers.
+- CPC+: Fix Eerie Forest crashes, vertical scrolling and PRI reprogramming, thx @LilaQ.
+- CPC+: Acknowledge Plus ASIC interrupts in all Z80 interrupt modes and schedule raster interrupts independently of HSYNC width, thx @LilaQ.
+- CPC+: Fix Upper ROM initialization on CPC Plus models, thx @LilaQ.
+- CPC+: Fix a bug where sprites disappear sometimes (Dick Tracy), thx @ColinPitrat.
+- CPC+: Fix plus rom, now using english PLUS rom, thx @2play.
+- CRTC: Changed MinVHOLD to have more tolerance range (fixes Bonanza Bros, Thunder Blade), thx @ArcadeWithin.
+- DB: Updated clean-cpc-db v1.2 to release 1.4.
+- DSK: Probe format directory before scanning fallback tracks, thx @LilaQ.
+- DSK: Tolerate absent extra tracks in over-dumped images and add warnings.
+- DSK: Insert disk after change as fceumm does.
+- DSK: Added granularity to loader DISC/DISK and better debug logs.
+- DSK: Fix m3u loading, thx @rtomasa.
 - DSK: New save game DSK diff support. Allows save games and do not modify original DSK file, reported by @Jamiras.
 - DSK: Added disk swap functionality using Combo and L/R buttons. Partially based on @madcock [work](https://github.com/libretro/libretro-cap32/commit/a7f6f74c0467051a67e6203e200213658173a08a), thx!
+- FDC: Add support for Orion Prime.
+- FDC: Allow head seeks and recalibration with the spindle motor stopped.
+- FDC: Avoid spurious drive-ready notifications and separate read startup from the byte overrun deadline.
+- GUN: Added Loriciel West Phaser and Trojan Phazer lightgun modes, thx @LilaQ.
+- GUN: Fixed gunstick init.
+- KBD: allow autorun commands without press return at the end.
+- KBD: Add L3 shortcut to toggle on-screen keyboard.
+- RMP: Added 2 players support and added some RMPs from great two players games as start.
+- RMP: updated new binds, added Afterburner and Oh Mummy! Thanks to Haritz and Pablo from LOVG to point me.
+- RMP: Added Amsoft loader fixes and new classics and puzzle games.
+- RMP: Reapply binds after update_variables, added Silent Shadow RMP.
+- TAPE: Add optional automatic fast-forward during tape loading and gate polling through shared frontend capability state.
+- TEST: Refactor python tests to cmocka, added some fixes.
+- UI: Fix wrong height for status bar and missing statusbar on fullscreen after crop changes.
+- VIDEO: Fixed cropped geometry and added 8bpp mode thx @fjtrujy.
 
 # 4.5.4
 - FIX: Check retro_set_controller_port_device to avoid third-party UI problems
