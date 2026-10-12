@@ -534,6 +534,7 @@ unit-test: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -o $(CORE_DIR)/unit-tests/test-dsk $(CORE_DIR)/unit-tests/test-dsk.c $(OBJS) $(CORE_DIR)/unit-tests/cmocka.o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/unit-tests/test-utils.o $(LDFLAGS) $(TEST_FLAGS) $(CFLAGS) -Wno-unused-function -I$(CORE_DIR)/external/cmocka/cmocka-lib/include $(INCDIRS)
 	$(CORE_DIR)/unit-tests/test-dsk
 
+# to get more info: make DEBUG_TEST=1 test-db && ./unit-tests/test-db <full-path-to clean-cpc-db roms>
 test-db: $(CORE_DIR)/unit-tests/cmocka.o $(OBJS)
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/test-utils.o $(CORE_DIR)/unit-tests/test-utils.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/external/cmocka/cmocka-lib/include
 	@$(CC) -c -o $(CORE_DIR)/unit-tests/md5.o $(CORE_DIR)/libretro-common/utils/md5.c $(CFLAGS) -Wno-implicit-function-declaration $(INCDIRS) -I$(CORE_DIR)/libretro-common/include/utils

@@ -1360,7 +1360,12 @@ void check_flags(const char *filename, unsigned int size)
 
    if (file_check_flag(filename, size, FLAG_BIOS_B10, 10))
    {
-         computer_set_model(CPC_MODEL_464);
+      computer_set_model(CPC_MODEL_464);
+   }
+
+   if (file_check_flag(filename, size, FLAG_BIOS_CPCPLUS, 6))
+   {
+      computer_set_model(CPC_MODEL_PLUS);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_CPM, 5))
