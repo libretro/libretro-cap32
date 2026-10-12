@@ -68,10 +68,11 @@
 #define CPC_MONITOR_GREEN 1
 #define CPC_MONITOR_WHITE 2
 
+// https://web.archive.org/web/20200918114551/http://cpctech.cpcwiki.de/docs/snapshot.html
 #define CPC_MODEL_464 0
-#define CPC_MODEL_464DDI 1
-#define CPC_MODEL_664 2
-#define CPC_MODEL_6128 3
+#define CPC_MODEL_664 1
+#define CPC_MODEL_6128 2
+#define CPC_MODEL_UNKNOWN 3
 #define CPC_MODEL_PLUS 4
 #define CPC_MODEL_MAX 4
 

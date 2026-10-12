@@ -1087,10 +1087,8 @@ int emulator_select_ROM (void)
    {
       case CPC_MODEL_464:
          memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464
-         break;
-      case CPC_MODEL_464DDI:
-         memcpy(pbROM, OS464_BASIC10, (32*1024)); // CPC 464 and DDI
-         memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
+         if (retro_computer_cfg.slot == SLOT_DSK) // CPC 464 and DDI
+            memmap_ROM[7] = (uint8_t*)&AMSDOS[0];
          break;
       case CPC_MODEL_664:
          memcpy(pbROM, OS664_BASIC664, (32*1024));
@@ -1118,7 +1116,6 @@ int emulator_select_ROM (void)
       switch(CPC.model)
       {
          case CPC_MODEL_464:
-         case CPC_MODEL_464DDI:
             pbPtr += 0x1d69; // location of the keyboard translation table
             break;
          case CPC_MODEL_664:

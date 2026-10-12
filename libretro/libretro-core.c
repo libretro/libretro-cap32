@@ -1037,7 +1037,6 @@ static void update_variables(void)
    {
       int val = CPC_MODEL_6128; // DEFAULT 6128
       if (strcmp(var.value, "464") == 0) val = CPC_MODEL_464;
-      else if (strcmp(var.value, "464DDI") == 0) val = CPC_MODEL_464DDI;
       else if (strcmp(var.value, "664") == 0) val = CPC_MODEL_664;
       else if (strcmp(var.value, "6128") == 0) val = CPC_MODEL_6128;
       else if (strcmp(var.value, "6128+ (experimental)") == 0) val = CPC_MODEL_PLUS;
@@ -1319,7 +1318,6 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void computer_set_model(int model)
 {
-
    if (CPC.model == model)
       return;
 
@@ -1352,26 +1350,17 @@ void check_flags(const char *filename, unsigned int size)
 {
    if (file_check_flag(filename, size, FLAG_BIOS_464, 5))
    {
-      computer_set_model(1);
+      computer_set_model(CPC_MODEL_464);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_664, 5))
    {
-      computer_set_model(2);
+      computer_set_model(CPC_MODEL_664);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_B10, 10))
    {
-      if (retro_computer_cfg.slot == SLOT_DSK)
-         computer_set_model(1);
-      else
-         computer_set_model(0);
-   }
-
-   // model 464 using disk => 464+DDI
-   if (CPC.model == CPC_MODEL_464 && retro_computer_cfg.slot == SLOT_DSK)
-   {
-      computer_set_model(1);
+         computer_set_model(CPC_MODEL_464);
    }
 
    if (file_check_flag(filename, size, FLAG_BIOS_CPM, 5))
