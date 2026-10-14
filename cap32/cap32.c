@@ -623,6 +623,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                uint8_t colour = val & 0x1f; // isolate colour value
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] =colours[colour];
+               asic.legacy_palette |= 1u << GateArray.pen;
                // mode 2 - 'anti-aliasing' colour
                if (GateArray.pen < 2) {
                   CPC.video_set_palette_antialias();
