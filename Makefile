@@ -121,6 +121,24 @@ else ifeq ($(platform), rg35xx)
 		-fno-unwind-tables -fno-asynchronous-unwind-tables \
 		-fmerge-all-constants -fno-math-errno
 
+# R36S / RK3326 handhelds (aarch64 cortex-a35, 640x480 screen)
+else ifeq ($(platform), rk3326)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = $(CROSS_COMPILE)gcc
+	CC_AS = $(CROSS_COMPILE)as
+	AR = $(CROSS_COMPILE)ar
+	fpic := -fPIC
+	SHARED := -shared -Wl,-version-script=link.T -Wl,-no-undefined
+
+	CFLAGS := -DFRONTEND_SUPPORTS_RGB565 -DINLINE="inline" -DLOWRES -DM16BPP
+	CFLAGS += -mcpu=cortex-a35
+
+	CFLAGS += -flto=4 -fwhole-program -fuse-linker-plugin \
+		-fdata-sections -ffunction-sections -Wl,--gc-sections \
+		-fno-stack-protector -fno-ident -fomit-frame-pointer \
+		-fno-unwind-tables -fno-asynchronous-unwind-tables \
+		-fmerge-all-constants -fno-math-errno
+
 # OS X
 else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
