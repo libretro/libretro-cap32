@@ -60,11 +60,10 @@ typedef enum
    ST_LOOP
 } audio_status_t;
 
-bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size);
+bool init_retro_snd(void);
 void free_retro_snd();
 
 void retro_snd_cmd(int snd_type, audio_status_t new_status);
-void retro_snd_mixer_batch();
-void retro_snd_mixer_sample(int16_t* left, int16_t* right);
+void retro_snd_mixer_batch(int16_t* dest_buffer, unsigned frames);
 
 #endif

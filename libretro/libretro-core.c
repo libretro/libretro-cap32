@@ -111,7 +111,6 @@ uint32_t * temp_buffer;
 uint32_t * work_buffer;
 __attribute__((aligned(16))) uint16_t retro_palette[256];
 
-int32_t* audio_buffer = NULL;
 int audio_buffer_size = 0;
 
 // almost deprecated
@@ -129,7 +128,6 @@ int emu_status = COMPUTER_OFF;
 #include "slots.h"
 //#include "z80.h"
 extern t_CPC CPC;
-extern uint8_t *pbSndBuffer;
 //CAP32 DEF END
 
 extern void update_input(void);
@@ -150,7 +148,6 @@ static inline void screen_draw(void);
 /*static*/ retro_input_state_t input_state_cb;
 /*static*/ retro_input_poll_t input_poll_cb;
 static retro_video_refresh_t video_cb;
-static retro_audio_sample_t audio_cb;
 /*static*/ retro_audio_sample_batch_t audio_batch_cb;
 /*static*/ retro_environment_t environ_cb;
 /*static*/ retro_mouse_t mouse =
@@ -1248,21 +1245,12 @@ static void update_variables(void)
 
 void Emu_init()
 {
-   audio_buffer = (int32_t*) retro_malloc(retro_getAudioBuffer());
-   if(!audio_buffer){
-      LOGI("emu init - audio error: when allocation mem...\n");
-      return;
-   }
    emu_status = COMPUTER_BOOTING;
    pre_main(retro_content_filepath);
 }
 
 void Emu_uninit()
 {
-   if(audio_buffer)
-      retro_free(audio_buffer);
-
-   audio_buffer = NULL;
    //quit_cap32_emu();
 }
 
@@ -1694,7 +1682,7 @@ void retro_init(void)
 
    Emu_init();
 
-   if(!init_retro_snd((int16_t*) pbSndBuffer, audio_buffer_size))
+   if(!init_retro_snd())
       LOGI("AUDIO FORMAT is not supported.\n");
 
    // Some third-party retroarch UI do not call retro_set_controller_port_device
@@ -1786,7 +1774,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
-   audio_cb = cb;
+   (void)cb; // audio is sent per frame via audio_batch_cb
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
@@ -1799,21 +1787,12 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
-void retro_audio_mix_sample(int16_t left, int16_t right)
+void retro_audio_mix_batch(int16_t* buffer, unsigned frames)
 {
    if(retro_computer_cfg.floppy_snd)
-      retro_snd_mixer_sample(&left, &right);
+      retro_snd_mixer_batch(buffer, frames);
 
-   audio_cb(left, right);
-}
-
-void retro_audio_mix_batch()
-{
-   if(retro_computer_cfg.floppy_snd)
-      retro_snd_mixer_batch();
-
-   memcpy(audio_buffer, pbSndBuffer, audio_buffer_size);
-   audio_batch_cb((int16_t*) audio_buffer, audio_buffer_size / AUDIO_BYTES / AUDIO_CHANNELS);
+   audio_batch_cb((const int16_t*) buffer, frames);
 }
 
 void retro_PollEvent()
@@ -1843,7 +1822,7 @@ void retro_run(void)
       retro_message("Options updated, changes applied!");
    }
 
-   retro_loop();
+   retro_loop(); // runs one CPC frame and flushes its audio
 
    retro_PollEvent();
    tape_fast_update();

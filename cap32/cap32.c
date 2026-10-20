@@ -167,7 +167,6 @@ void retro_loop(void);
 void doCleanUp (void);
 int theloop(void);
 int capmain (int argc, char **argv);
-void retro_audio_mix_batch (void);
 int HandleExtension(char *path,char *ext);
 
 #include "libretro-core.h"
@@ -179,6 +178,7 @@ int HandleExtension(char *path,char *ext);
 #include <libretro.h>
 
 extern void kbd_update_table(int lang);
+extern void retro_audio_mix_batch(int16_t* buffer, unsigned frames);
 
 extern char diskA_name[RETRO_PATH_MAX];
 extern char diskB_name[RETRO_PATH_MAX];
@@ -1970,9 +1970,11 @@ void change_lang(int val){
    retro_computer_cfg.is_dirty = true;
 }
 
-void mixsnd(void)
+// sends 'bytes' of new samples from the start of pbSndBuffer.
+static void mixsnd(unsigned bytes)
 {
-   retro_audio_mix_batch();
+   if (bytes)
+      retro_audio_mix_batch((int16_t*) pbSndBuffer, bytes / (AUDIO_BYTES * AUDIO_CHANNELS));
 }
 
 int skel_main(int argc, char *argv[])
@@ -2042,17 +2044,24 @@ void retro_loop(void)
 
       iExitCondition = z80_execute(); // run the emulation until an exit condition is met
 
-      /*
-       * now using per sample sound mixer, this part is unused now
+      // write cursor wrapped mid-frame: the whole buffer holds new samples
       if (iExitCondition == EC_SOUND_BUFFER)
-      {
-         mixsnd();
-      }
-      */
+         mixsnd(CPC.snd_buffersize);
 
    // emulation finished rendering a complete frame?
    // iExitCondition == EC_FRAME_COMPLETE (val 0)
    } while (iExitCondition);
+
+   // buffer wrapped on the same instruction that completed the frame
+   if (PSG.buffer_full)
+   {
+      PSG.buffer_full = 0;
+      mixsnd(CPC.snd_buffersize);
+   }
+
+   // flush the samples generated this frame and rewind the write cursor
+   mixsnd(CPC.snd_bufferptr - pbSndBuffer);
+   CPC.snd_bufferptr = pbSndBuffer;
    // exit retro_loop for retro_run
 }
 

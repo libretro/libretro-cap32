@@ -77,9 +77,6 @@ typedef struct {
    bool ready_to_play;
 } retro_guisnd_t;
 
-static int16_t* snd_buffer;
-static int snd_buffer_size;
-
 #ifndef MSB_FIRST
 #include "snd/motor.h"
 #include "snd/seek_drive.h"
@@ -148,12 +145,10 @@ bool sound_load(retro_guisnd_t* snd, const void* buffer, const int buffer_size) 
 
 /**
  * init_retro_snd:
- * @pbuffer: emulator sound buffer, to be used by the mixer
- *
  * load internal sounds and prepare mixer to be used
  * return false if cannot allocate memory or invalid wav file is used.
  */
-bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size){
+bool init_retro_snd(void){
    memset(sounds, 0, sizeof(sounds));
 
    if(!sound_load(&sounds[SND_FDCMOTOR], motor, motor_size))
@@ -163,8 +158,6 @@ bool init_retro_snd(int16_t* ptr_buffer, int audio_buffer_size){
    if(!sound_load(&sounds[SND_FDCSEEK], seek_drive, seek_size))
       return false;
 
-   snd_buffer = ptr_buffer;
-   snd_buffer_size = audio_buffer_size/AUDIO_BYTES/AUDIO_CHANNELS;
    return true;
 }
 
@@ -177,8 +170,6 @@ void free_retro_snd(){
    sound_free(&sounds[SND_FDCMOTOR]);
    sound_free(&sounds[SND_FDCREAD]);
    sound_free(&sounds[SND_FDCSEEK]);
-   snd_buffer = NULL;
-   snd_buffer_size = 0;
 }
 
 
@@ -192,18 +183,35 @@ void sound_stop(retro_guisnd_t* snd) {
    snd->state = ST_OFF;
 }
 
+/**
+ * clamp_16:
+ * @val: The 32-bit audio sample value to be clamped.
+ *
+ * Restricts a 32-bit integer to the valid range of a signed 16-bit integer 
+ * (-32768 to 32767). Used during audio mixing to prevent integer overflow
+ * and audio clipping when combining multiple sound sources.
+ *
+ * Returns: The clamped 16-bit audio sample.
+ */
+static inline int16_t clamp_16(int32_t val)
+{
+   if (val > 32767) return 32767;
+   if (val < -32768) return -32768;
+   return (int16_t)val;
+}
 
 /**
  * mix_audio_batch:
- * @snd: sample struct to mix in emulator buffer
+ * @snd:         Sample structure to be mixed.
+ * @dest_buffer: Pointer to the emulator's main stereo audio buffer.
+ * @frames:      Number of audio frames to process.
  *
- * this is a very simple mixer loop that just send a full snd_buffer_size
- * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
+ * A lightweight mixer loop that adds a 16-bit mono internal sound 
+ * (e.g., floppy drive noise) into the main 16-bit stereo output buffer.
  */
-static void mix_audio_batch(retro_guisnd_t* snd)
+static void mix_audio_batch(retro_guisnd_t* snd, int16_t* dest_buffer, unsigned frames)
 {
-   if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
-      // exits if no loop sound...
+   if (snd->sample_pos + frames > snd->samples_tot) {
       if(snd->state == ST_ON) {
          sound_stop(snd);
          return;
@@ -211,23 +219,21 @@ static void mix_audio_batch(retro_guisnd_t* snd)
       snd->sample_pos = 0;
    }
 
-
-   // prepare loop vars
-   int16_t* samples = snd_buffer;
+   int16_t* samples = dest_buffer;
    int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (AUDIO_BYTES * snd->sample_pos));
-   unsigned i = snd_buffer_size;
+   unsigned i = frames;
 
    while (i--)
    {
-      *samples += *rawsamples16;
-      *(samples + 1) += *rawsamples16;
+      // addd 32bits and limit to 16 bits to avoid any distorsion (clamping)
+      samples[0] = clamp_16((int32_t)samples[0] + (int32_t)*rawsamples16);
+      samples[1] = clamp_16((int32_t)samples[1] + (int32_t)*rawsamples16);
 
-      // prepare next loop
       rawsamples16++;
       samples += 2;
    }
 
-   snd->sample_pos     += snd_buffer_size;
+   snd->sample_pos += frames;
 }
 
 
@@ -235,11 +241,12 @@ static void mix_audio_batch(retro_guisnd_t* snd)
  * retro_snd_mixer_batch:
  * mixes each sound (active or looped) into emulator buffer for batch audio cb
  */
-void retro_snd_mixer_batch() {
+void retro_snd_mixer_batch(int16_t* dest_buffer, unsigned frames)
+{
    int n;
    for(n = 0; n < SND_LAST; n++) {
       if (sounds[n].state != ST_OFF) {
-         mix_audio_batch(&sounds[n]);
+         mix_audio_batch(&sounds[n], dest_buffer, frames);
       }
    }
 }
@@ -261,46 +268,3 @@ void retro_snd_cmd(int snd_type, audio_status_t new_status) {
       sounds[snd_type].sample_pos = 0;
 }
 
-
-/**
- * mix_audio_sample:
- * @snd: sample struct to mix in emulator buffer
- * @sample_buffer: stereo sample buffer to be mixed
- *
- * this is a very simple mixer that just writes to the sample_buffer (L/R)
- * mix 16bits / mono (internal audio) into a 16bits stereo buffer (emulator)
- */
-static void mix_audio_sample(retro_guisnd_t* snd, int16_t* left, int16_t* right)
-{
-   if (snd->sample_pos + snd_buffer_size > snd->samples_tot) {
-      // exits if no loop sound...
-      if(snd->state == ST_ON) {
-         sound_stop(snd);
-         return;
-      }
-      snd->sample_pos = 0;
-   }
-
-   int16_t* rawsamples16 = (int16_t*) ((uint8_t*) snd->rawsamples + (AUDIO_BYTES * snd->sample_pos));
-
-   *left += *rawsamples16;
-   *right += *rawsamples16;
-
-   snd->sample_pos ++;
-}
-
-
-/**
- * retro_snd_mixer_sample:
- * @sample_buffer: stereo sample buffer to be mixed
- * 
- * mix fx to current stereo sample
- */
-void retro_snd_mixer_sample(int16_t* left, int16_t* right) {
-   int n;
-   for(n = 0; n < SND_LAST; n++) {
-      if (sounds[n].state != ST_OFF) {
-         mix_audio_sample(&sounds[n], left, right);
-      }
-   }
-}
