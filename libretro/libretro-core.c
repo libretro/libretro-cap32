@@ -1799,12 +1799,27 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
+// batch samples and send them once per frame, per-sample callbacks are slow on weak devices
+static unsigned audio_frames = 0;
+
+static void retro_audio_flush(void)
+{
+   if (audio_frames)
+      audio_batch_cb((int16_t*) audio_buffer, audio_frames);
+   audio_frames = 0;
+}
+
 void retro_audio_mix_sample(int16_t left, int16_t right)
 {
    if(retro_computer_cfg.floppy_snd)
       retro_snd_mixer_sample(&left, &right);
 
-   audio_cb(left, right);
+   int16_t *out = (int16_t*) audio_buffer + audio_frames * AUDIO_CHANNELS;
+   out[0] = left;
+   out[1] = right;
+
+   if (++audio_frames >= audio_buffer_size / AUDIO_BYTES / AUDIO_CHANNELS)
+      retro_audio_flush();
 }
 
 void retro_audio_mix_batch()
@@ -1844,6 +1859,7 @@ void retro_run(void)
    }
 
    retro_loop();
+   retro_audio_flush();
 
    retro_PollEvent();
    tape_fast_update();
