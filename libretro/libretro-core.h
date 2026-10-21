@@ -68,7 +68,7 @@ extern unsigned amstrad_devices[ PORTS_NUMBER ];
 
 #define CPC_SCREEN_WIDTH 384
 #define CPC_SCREEN_HEIGHT 272
-#define CPC_TIMING 838977920.0 / 16777215.0
+#define CPC_TIMING 50.08 // 312 lines * 64us = 19968us per frame
 
 #define TEX_MAX_WIDTH CPC_SCREEN_WIDTH * 2
 #define TEX_MAX_HEIGHT CPC_SCREEN_HEIGHT

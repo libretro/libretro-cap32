@@ -14,7 +14,7 @@
 - CPC+: Fix a bug where sprites disappear sometimes (Dick Tracy), thx @ColinPitrat.
 - CPC+: Fix plus rom, now using english PLUS rom, thx @2play.
 - CRTC: Changed MinVHOLD to have more tolerance range (fixes Bonanza Bros, Thunder Blade), thx @ArcadeWithin.
-- DB: Updated clean-cpc-db v1.2 to release 1.4.
+- DB: Updated clean-cpc-db from v1.2 to release v1.4.
 - DSK: Probe format directory before scanning fallback tracks, thx @LilaQ.
 - DSK: Tolerate absent extra tracks in over-dumped images and add warnings.
 - DSK: Insert disk after change as fceumm does.
