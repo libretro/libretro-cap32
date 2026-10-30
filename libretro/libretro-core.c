@@ -387,14 +387,93 @@ void retro_message(const char *text) {
 
 static struct retro_core_option_v2_category option_categories[] = {
    { "system",         "System",         NULL },
-   { "video",          "Video",          NULL },
    { "controls",       "Controls",       NULL },
    { "light_gun",      "Light Gun",      NULL },
+   { "video",          "Video",          NULL },
    { "advanced",       "Advanced",       NULL },
    { NULL, NULL, NULL },
 };
-
 static struct retro_core_option_v2_definition option_definitions[] = {
+   /* --- SYSTEM --- */
+   {
+      "cap32_model",
+      "Model",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "464",                  NULL },
+         { "464DDI",               NULL },
+         { "664",                  NULL },
+         { "6128",                 NULL },
+         { "6128+",                NULL },
+         { NULL, NULL },
+      },
+      "6128"
+   },
+   {
+      "cap32_lang_layout",
+      "CPC Language",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "english", NULL },
+         { "french",  NULL },
+         { "spanish", NULL },
+         { NULL, NULL },
+      },
+      "english"
+   },
+   // rcheevos disallowed_setting: cap32_autorun disabled
+   {
+      "cap32_autorun",
+      "Autorun",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "enabled"
+   },
+   {
+      "cap32_tape_fastload",
+      "Tape Loading Speed",
+      NULL,
+      "Fast-forward while the tape is running and the program frequently reads its input. Internal timing is unchanged. Toggle frontend fast-forward off to cancel until the tape stops. Requires frontend fast-forward override support.",
+      NULL,
+      "system",
+      {
+         { "disabled", "Normal" },
+         { "4", "4x" },
+         { "8", "8x" },
+         { "maximum", "Maximum" },
+         { NULL, NULL }
+      },
+      "maximum"
+   },
+   {
+      "cap32_floppy_sound",
+      "Floppy Sound",
+      NULL,
+      NULL,
+      NULL,
+      "system",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "enabled"
+   },
+
+   /* --- CONTROLS --- */
    {
       "cap32_retrojoy0",
       "User 1 Controller Config",
@@ -458,6 +537,8 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       },
       "enabled"
    },
+
+   /* --- LIGHT GUN --- */
    {
       "cap32_lightgun_input",
       "Input",
@@ -489,86 +570,36 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       },
       "disabled"
    },
+
+   /* --- VIDEO --- */
    {
-      "cap32_model",
-      "Model",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "464",                  NULL },
-         { "464DDI",               NULL },
-         { "664",                  NULL },
-         { "6128",                 NULL },
-         { "6128+ (experimental)", NULL },
-         { NULL, NULL },
-      },
-      "6128"
-   },
-   {
-      "cap32_tape_fastload",
-      "Tape Loading Speed",
-      NULL,
-      "Fast-forward while the tape is running and the program frequently reads its input. Internal timing is unchanged. Toggle frontend fast-forward off to cancel until the tape stops. Requires frontend fast-forward override support.",
-      NULL,
-      "system",
-      {
-         { "disabled", "Normal" },
-         { "4", "4x" },
-         { "8", "8x" },
-         { "maximum", "Maximum" },
-         { NULL, NULL }
-      },
-      "maximum"
-   },
-   // rcheevos disallowed_setting: cap32_autorun disabled
-   {
-      "cap32_autorun",
-      "Autorun",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "enabled",  NULL },
-         { "disabled", NULL },
-         { NULL, NULL },
-      },
-      "enabled"
-   },
-   {
-      "cap32_ram",
-      "Ram size",
-      NULL,
-      NULL,
-      NULL,
-      "advanced",
-      {
-         { "64",  NULL },
-         { "128", NULL },
-         { "192", NULL },
-         { "576", NULL },
-         { NULL, NULL },
-      },
-      "128"
-   },
-   {
-      "cap32_advanced_green_phosphor",
-      "Green Phosphor blueish",
+      "cap32_scr_tube",
+      "Monitor Type",
       NULL,
       NULL,
       NULL,
       "video",
       {
-         { "5",  NULL },
-         { "10", NULL },
-         { "15", NULL },
-         { "20", NULL },
-         { "30", NULL },
+         { "color", NULL },
+         { "green", NULL },
+         { "white", NULL },
          { NULL, NULL },
       },
-      "15"
+      "color"
+   },
+   {
+      "cap32_scr_crop",
+      "Crop Screen Borders",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
    },
    {
       "cap32_scr_intensity",
@@ -594,12 +625,90 @@ static struct retro_core_option_v2_definition option_definitions[] = {
       "8"
    },
    {
+      "cap32_advanced_green_phosphor",
+      "Green Phosphor blueish",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "5",  NULL },
+         { "10", NULL },
+         { "15", NULL },
+         { "20", NULL },
+         { "30", NULL },
+         { NULL, NULL },
+      },
+      "15"
+   },
+   {
+      "cap32_statusbar",
+      "Status Bar",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "onloading", NULL },
+         { "enabled",   NULL },
+         { "disabled",  NULL },
+         { NULL, NULL },
+      },
+      "onloading"
+   },
+   {
+      "cap32_keyboard_transparency",
+      "Keyboard Transparency",
+      NULL,
+      NULL,
+      NULL,
+      "video",
+      {
+         { "enabled",  NULL },
+         { "disabled", NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+
+   /* --- ADVANCED --- */
+   {
+      "cap32_ram",
+      "Ram size",
+      NULL,
+      NULL,
+      NULL,
+      "advanced",
+      {
+         { "64",  NULL },
+         { "128", NULL },
+         { "192", NULL },
+         { "576", NULL },
+         { NULL, NULL },
+      },
+      "128"
+   },
+   {
+      "cap32_strict_asic_ppi",
+      "Emulate Strict ASIC PPI Bug",
+      NULL,
+      "6128+ only. Reproduces a known design flaw in the CPC+ ASIC (8255 PPI chip) where changing port modes interferes with the AY sound chip. While accurate to real hardware, turning this ON breaks keyboard reading in several classic games (e.g. Comando Quatro, Antiriad). Keep OFF for best compatibility.",
+      NULL,
+      "advanced",
+      {
+         { "disabled", NULL },
+         { "enabled",  NULL },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
       "cap32_gfx_colors",
       "Color Depth",
       NULL,
       NULL,
       NULL,
-      "video",
+      "advanced",
       {
 #if defined (M16BPP)
          { "16bit", NULL },
@@ -619,93 +728,6 @@ static struct retro_core_option_v2_definition option_definitions[] = {
 #else
       "16bit"
 #endif
-   },
-   {
-      "cap32_scr_crop",
-      "Crop Screen Borders",
-      NULL,
-      NULL,
-      NULL,
-      "video",
-      {
-         { "enabled",  NULL },
-         { "disabled", NULL },
-         { NULL, NULL },
-      },
-      "disabled"
-   },
-   {
-      "cap32_statusbar",
-      "Status Bar",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "onloading", NULL },
-         { "enabled",   NULL },
-         { "disabled",  NULL },
-         { NULL, NULL },
-      },
-      "onloading"
-   },
-   {
-      "cap32_keyboard_transparency",
-      "Keyboard Transparency",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "enabled",  NULL },
-         { "disabled", NULL },
-         { NULL, NULL },
-      },
-      "disabled"
-   },
-   {
-      "cap32_floppy_sound",
-      "Floppy Sound",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "enabled",  NULL },
-         { "disabled", NULL },
-         { NULL, NULL },
-      },
-      "enabled"
-   },
-   {
-      "cap32_scr_tube",
-      "Monitor Type",
-      NULL,
-      NULL,
-      NULL,
-      "video",
-      {
-         { "color", NULL },
-         { "green", NULL },
-         { "white", NULL },
-         { NULL, NULL },
-      },
-      "color"
-   },
-   {
-      "cap32_lang_layout",
-      "CPC Language",
-      NULL,
-      NULL,
-      NULL,
-      "system",
-      {
-         { "english", NULL },
-         { "french",  NULL },
-         { "spanish", NULL },
-         { NULL, NULL },
-      },
-      "english"
    },
    { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL },
 };
@@ -737,9 +759,12 @@ static struct retro_variable variables[] = {
    },
    {
       "cap32_model",
-      "Model; 6128|464|464DDI|664|6128+ (experimental)",
+      "Model; 6128|464|464DDI|664|6128+",
    },
-   { "cap32_tape_fastload", "Tape Loading Speed; disabled|4|8|maximum" },
+   {
+      "cap32_strict_asic_ppi", "Emulate Strict ASIC PPI Bug (6128+); disabled|enabled"
+   },
+   { "cap32_tape_fastload", "Tape Loading Speed; maximum|4|8|disabled" },
    // rcheevos disallowed_setting: cap32_autorun disabled
    {
       "cap32_autorun",
@@ -1036,7 +1061,7 @@ static void update_variables(void)
       if (strcmp(var.value, "464") == 0) val = CPC_MODEL_464;
       else if (strcmp(var.value, "664") == 0) val = CPC_MODEL_664;
       else if (strcmp(var.value, "6128") == 0) val = CPC_MODEL_6128;
-      else if (strcmp(var.value, "6128+ (experimental)") == 0) val = CPC_MODEL_PLUS;
+      else if (strcmp(var.value, "6128+") == 0) val = CPC_MODEL_PLUS;
 
       if (retro_computer_cfg.model != val) {
          retro_computer_cfg.model = val;
@@ -1045,6 +1070,15 @@ static void update_variables(void)
             change_model(val);
          }
       }
+   }
+
+   var.key = "cap32_strict_asic_ppi";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      // only read by the CPC+ PPI paths; takes effect immediately
+      CPC.asic_ppi_strict = strcmp(var.value, "enabled") == 0;
    }
 
    var.key = "cap32_ram";

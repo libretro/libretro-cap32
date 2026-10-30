@@ -107,7 +107,7 @@ void trojan_emulator_CRTC(void)
 }
 
 
-/* Loriciel West Phaser - Implementación basada en rastreo del haz de electrones */
+/* Loriciel West Phaser - implementation based on tracking the electron beam */
 unsigned char westphaser_emulator_IN(void)
 {
    unsigned char value = PHASER_NONE;

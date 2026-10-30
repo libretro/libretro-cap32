@@ -13,6 +13,8 @@
 - CPC+: Fix Upper ROM initialization on CPC Plus models, thx @LilaQ.
 - CPC+: Fix a bug where sprites disappear sometimes (Dick Tracy), thx @ColinPitrat.
 - CPC+: Fix plus rom, now using english PLUS rom, thx @2play.
+- CPC+: Fix ASIC interrupt vectors/priority/auto-clear and DMA PAUSE timing (Sonic GX).
+- CPC+: Add strict ASIC PPI option.
 - CRTC: Changed MinVHOLD to have more tolerance range (fixes Bonanza Bros, Thunder Blade), thx @ArcadeWithin.
 - DB: Updated clean-cpc-db from v1.2 to release v1.4.
 - DSK: Probe format directory before scanning fallback tracks, thx @LilaQ.

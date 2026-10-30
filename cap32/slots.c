@@ -158,29 +158,34 @@ static void snapshot_plus_save(uint8_t *chunk)
       snap_put_word(internal + 4, ch->pause_ticks);
       internal[6] = ch->tick_cycles;
    }
-   p[0x8df] = asic.dma.dcsr & 0x80;
-   for (c = 0; c < 3; c++)
-      p[0x8df] |= (asic.dma.ch[c].enabled << c)
-         | (asic.dma.ch[c].interrupt << (6 - c));
+   /* DCSR as the CPU reads it: last acknowledge was raster (bit 7), pending
+    * DMA requests (bits 6-4), channel enables (bits 2-0). */
+   p[0x8df] = asic_dcsr();
    p[0x8f5] = asic.rmr2;
    p[0x8f6] = !asic.locked;
    p[0x8f7] = asic.lock_seq_pos < 15 ? asic.lock_seq_pos + 2 : 0;
 
-   /* Emulator-specific continuation state not represented by CPC+. */
+   /* Emulator-specific continuation state not represented by CPC+.
+    * Version 2 layout (16 bytes):
+    *   0     version
+    *   1-2   unlock sequence position and previous byte
+    *   3     pending interrupt requests (ASIC_INT_* bits, raster included)
+    *   4-5   unused (version 1: interrupt cause and vector)
+    *   6     PRI delay counter
+    *   7     classic palette writer mask, bits 0-7
+    *   8-11  CRTC scan line counter
+    *   12-13 unused (version 1: auto-clear flag and latched DCSR)
+    *   14-15 classic palette writer mask, bits 8-16 */
    p += SNAP_PLUS_SIZE;
    memcpy(p, "C32+", 4);
    p[4] = 16;
    p += 8;
-   p[0] = 1;
+   p[0] = 2;
    p[1] = asic.lock_seq_pos;
    p[2] = asic.lock_prev_data;
-   p[3] = asic.raster_interrupt;
-   p[4] = asic.irq_cause;
-   p[5] = asic.irq_vector;
+   p[3] = asic.int_pending;
    p[6] = CRTC.raster_interrupt_delay;
    for (i = 0; i < 4; i++) p[8 + i] = CRTC.sl_count >> (8 * i);
-   p[12] = asic.dma.clear;
-   p[13] = asic.dma.dcsr;
    /* The SNA header carries classic ink values; retain their last-writer mask. */
    p[7] = asic.legacy_palette;
    p[14] = asic.legacy_palette >> 8;
@@ -191,6 +196,8 @@ static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
 {
    unsigned i, c;
    reg_pair port;
+   /* The SNA header's INT state, read before the PRI write below can change it. */
+   bool int_line = z80.int_pending != 0;
    asic.locked = false;
    for (i = 0; i < 2048; i++) {
       asic_register_page_write(0x4000 + i * 2, p[i] >> 4);
@@ -211,9 +218,14 @@ static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
       ch->pause_ticks = snap_word(in + 4);
       ch->tick_cycles = in[6];
       ch->enabled = (p[0x8df] >> c) & 1;
-      ch->interrupt = (p[0x8df] >> (6 - c)) & 1;
    }
-   asic.dma.dcsr = p[0x8df];
+   /* The standard chunk only stores DMA requests (DCSR bits 6-4). A raster
+    * request is implied by the header's INT line when no DMA request explains
+    * it; the C32+ chunk below overrides this with the exact state. */
+   asic.int_pending = p[0x8df] & ASIC_INT_DMA_MASK;
+   asic.raster_acknowledged = (p[0x8df] & 0x80) != 0;
+   if (int_line && !asic.int_pending)
+      asic.int_pending |= ASIC_INT_RASTER;
    if ((p[0x8f5] & 0xe0) == 0xa0) {
       port.w.l = 0x7f00;
       z80_OUT_handler(port, p[0x8f5]);
@@ -224,20 +236,20 @@ static void snapshot_plus_load(const uint8_t *p, const uint8_t *internal)
    if (internal) {
       asic.lock_seq_pos = internal[1];
       asic.lock_prev_data = internal[2];
-      asic.raster_interrupt = internal[3] != 0;
-      asic.irq_cause = internal[4];
-      asic.irq_vector = internal[5];
+      if (internal[0] >= 2)
+         asic.int_pending = internal[3] & (ASIC_INT_RASTER | ASIC_INT_DMA_MASK);
+      else if (int_line && internal[4] == 6) // version 1: cause 6 was the raster request
+         asic.int_pending |= ASIC_INT_RASTER;
       CRTC.raster_interrupt_delay = internal[6];
       CRTC.sl_count = 0;
       for (i = 0; i < 4; i++) CRTC.sl_count |= (unsigned)internal[8 + i] << (8 * i);
-      asic.dma.clear = internal[12];
-      asic.dma.dcsr = internal[13];
       asic.legacy_palette = (internal[7] | ((uint32_t)internal[14] << 8)
          | ((uint32_t)internal[15] << 16)) & 0x1ffff;
       for (i = 0; i < 17; i++)
          if (asic.legacy_palette & (1u << i))
             GateArray.palette[i] = colours[GateArray.ink_values[i] & 31];
    }
+   z80.int_pending = asic.int_pending != 0;
 }
 
 /**
@@ -295,7 +307,8 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
          if (length != SNAP_PLUS_SIZE) return ERR_SNA_SIZE;
          plus = chunk + 8;
       } else if (!memcmp(chunk, "C32+", 4)) {
-         if (length != 16 || chunk[8] != 1 || chunk[9] > 15)
+         /* version 1: single interrupt cause; version 2: request bit mask */
+         if (length != 16 || chunk[8] < 1 || chunk[8] > 2 || chunk[9] > 15)
             return ERR_SNA_INVALID;
          continuation = chunk + 8;
       }
@@ -303,6 +316,8 @@ int snapshot_load_mem (uint8_t *sna_buffer, uint32_t buffer_size) {
    }
    dwModel = sh.version > 1 ? sh.cpc_model : CPC.model;
    if (plus || (dwModel >= 4 && dwModel <= 6)) dwModel = CPC_MODEL_PLUS;
+   /* "unknown" (3) must never half-enable Plus paths: run it as a 6128 */
+   else if (dwModel == CPC_MODEL_UNKNOWN) dwModel = CPC_MODEL_6128;
    if (dwModel > CPC_MODEL_MAX) return ERR_SNA_CPC_TYPE;
    if (continuation && !plus) return ERR_SNA_INVALID;
 
