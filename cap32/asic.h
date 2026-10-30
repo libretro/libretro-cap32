@@ -16,6 +16,10 @@
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+/* ASIC Logic
+   Base Plus implementation the from caprice fork (c) 2016-2019 Colin Pitrat.
+   ASIC, DMA, PRI, and PPI accurate hardware rewrites (c) 2026 David Colmenero.
+*/
 
 /* CPC Plus ASIC ("Arnold V" enhancements of the 6128+, 464+ and GX4000)
 

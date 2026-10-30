@@ -18,9 +18,8 @@
 
 
 /* ASIC Logic
-   David Skywalker - libretro port CPC+ code
-   based on the new cpc caprice core by Colin Pitrat - https://github.com/ColinPitrat/caprice32
-
+   Base Plus implementation the from caprice fork (c) 2016-2019 Colin Pitrat.
+   ASIC, DMA, PRI, and PPI accurate hardware rewrites (c) 2026 David Colmenero.
 */
 
 // About unlock sequence ...

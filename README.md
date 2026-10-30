@@ -1,23 +1,43 @@
 # CAPRICE32 4.5+ LIBRETRO - [changelog](CHANGES.md)
 
-**All the credit of the caprice32 Emulator to Ulrich Doewich**
+**All credit for the original Caprice32 Emulator goes to Ulrich Doewich.**
+You can download the original Caprice32 source code [here](http://sourceforge.net/projects/caprice32/).
 
-You can download the caprice32 original source code [here](http://sourceforge.net/projects/caprice32/)
+This libretro core brings the classic Amstrad CPC experience back to life. Combine it with CRT shaders and welcome back to the 80s on your good old CPC.
 
-* This core also use some code from [wiituka/pituka](http://code.google.com/p/wiituka/) (c) 2004-2016 David Colmenero
-* CPC464+/CPC6128+/GX4000 (c) 2016-2019 Colin Pitrat : https://github.com/ColinPitrat/caprice32
-* Part of the autorun fixes (see catalog/amsdos_catalog and format.c) are inspired on the great work of Frédéric Coste (Fredouille) on [caprice-forever](https://www.cpc-power.com/cpcarchives/index.php?page=articles&num=445).
+## Credits & Acknowledgements
+- **Original Caprice32 Core:** Ulrich Doewich.
+- **[Wiituka/pituka](http://code.google.com/p/wiituka/) code integration:** (c) 2004-2016 David Colmenero.
+- Pistol Emulation:
+    - Gunstick Emulation from [Wiituka](http://code.google.com/p/wiituka/) (c) 2008-2009 David Colmenero.
+    - Phaser Emulation from [caprice32](https://github.com/ColinPitrat/caprice32/issues/34) (c) 2016-2024 Colin Pitrat.
 
-And of course for the RetroArch/Libretro team : "http://www.libretro.com"
-
-The core works pretty well and give the fantastic ability to use the RetroArch Shaders.
-
-Try some CRT shaders and welcome back to the 80s on your good old CPC.
+- **CPC464+/CPC6128+/GX4000 Emulation:**
+    - [Base Plus implementation](https://github.com/ColinPitrat/caprice32) (c) 2016-2019 Colin Pitrat.
+    - ASIC, DMA, PRI, and PPI accurate hardware rewrites (c) 2026 David Colmenero.
+- **Autorun fixes:** Inspired by the great work of Frédéric Coste (Fredouille) on [caprice-forever](https://www.cpc-power.com/cpcarchives/index.php?page=articles&num=445) (see `catalog/amsdos_catalog` and `format.c`).
+- **RetroArch/Libretro team:** http://www.libretro.com
 
 ## Usage
 
-Launch a TAPE (cdt), DSK or M3U, and game should autostart.
+The core supports automatic loading and execution (autorun) for most standard formats. Just load your content and the game should autostart.
 
+### 📼 Tape Games (.cdt, .voc, .wav)
+Load a tape file and Caprice32 will automatically type the `RUN"` command and press enter. You can use the "Tape Loading Speed" core option to fast-forward the loading process.
+
+![Tape Game Example](docs/cdt_example_01.png) ![Tape Abbey of Crime](docs/cdt_abad_01.png)
+
+### 💾 Disk Games (.dsk, .m3u)
+Load a disk image or an M3U playlist for multi-disk games. The core will read the catalog and automatically launch the executable binary.
+
+![Disk Game Example](docs/dsk_example_01.png) ![Disk Game Example](docs/dsk_dandare_01.png)
+
+### 🕹️ CPC+ & GX4000 Cartridges (.cpr)
+To play cartridge games or use Plus features, ensure the **Model** core option is set to **6128+**.
+
+![Sonic GX running on Caprice32](docs/sonicgx_frame01.png) ![Shadow of the Beast running on Caprice32](docs/shadow_frame01.png)
+
+*After latest accurate ASIC emulation rewrites, highly demanding titles requiring pixel-perfect raster timings, DMA instructions, and hardware sprite multiplexing—like the *Sonic GX* port and the *Shadow of the Beast* demo—now render flawlessly for the first time in Caprice32!*
 
 ## Game Database
 
@@ -82,7 +102,6 @@ Shadows Of Sergoth, The (2018)(PD)(M3)(v1.0)(Side A)[576K].dsk => 576 RAM
 
 # Lightgun Emulation
 
-Gunstick and Phaser (phaser code thanks to [Colin Pitrat](https://github.com/ColinPitrat/caprice32/issues/34)).
 
 ## Configure your Weapon
 You need set on Options > Controls > Device Type: **Amstrad Lightgun** and on Core Options > Light Gun Input (and show cross if your want).
@@ -121,8 +140,6 @@ The Enforcer
 Skee Shoot
 ```
 # Known Bugs
-
-- [CPC+ Emulation have some issues](https://github.com/libretro/libretro-cap32/issues/59).
 
 - Old3DS need some optimizations (~18fps).
 
