@@ -360,9 +360,12 @@ static uint8_t cc_ex[256] = {
 
 extern uint8_t *membank_read[4], *membank_write[4];
 
+/* The Plus register page (&4000-&7FFF) can only be mapped by RMR2 on an
+ * unlocked Plus; the model test is a second guard and costs nothing while
+ * the page is off (registerPageOn is tested first). */
 static INLINE uint8_t read_mem(uint16_t addr)
 {
-   if (GateArray.registerPageOn) {
+   if (GateArray.registerPageOn && CPC_IS_PLUS()) {
       uint8_t value;
       if(!asic_register_page_read(addr, &value))
          return value;
@@ -372,17 +375,23 @@ static INLINE uint8_t read_mem(uint16_t addr)
 
 static INLINE void write_mem(uint16_t addr, uint8_t val)
 {
-   if (GateArray.registerPageOn) {
+   if (GateArray.registerPageOn && CPC_IS_PLUS()) {
       if(!asic_register_page_write(addr, val))
          return;
    }
    *(membank_write[addr >> 14] + (addr & 0x3fff)) = val; // writes a byte to a 16KB memory bank
 }
 
+/* Interrupt acknowledge. Classic CPC: the bus floats (&FF) and the single
+ * Gate Array request is cleared. Plus: the ASIC arbitrates its requests,
+ * supplies the IM2 vector (&FF while locked) and updates z80.int_pending,
+ * see asic_int_acknowledge(). */
 static INLINE uint8_t read_ptr(){
-   if(!asic.locked)
-      return asic_int();
-   return 0xFF;
+   if (!CPC_IS_PLUS()) {
+      z80.int_pending = 0; // classic CPC: the Gate Array request is simply cleared
+      return 0xFF;         // and nothing drives the data bus
+   }
+   return asic_int_acknowledge();
 }
 
 #define z80_wait_states \
@@ -941,10 +950,11 @@ static INLINE uint8_t SRL(uint8_t val) {
 #define z80_int_handler \
 { \
    if (_IFF1) { /* process interrupts? */ \
-      uint8_t interrupt_vector = read_ptr(); /* ASIC acknowledge also occurs in IM1. */ \
+      /* ASIC acknowledge also occurs in IM1. It clears the acknowledged \
+       * request and leaves z80.int_pending set while other requests remain. */ \
+      uint8_t interrupt_vector = read_ptr(); \
       _R++; \
       _IFF1 = _IFF2 = 0; /* clear interrupt flip-flops */ \
-      z80.int_pending = 0; \
       GateArray.sl_count &= 0x1f; /* clear bit 5 of GA scanline counter */ \
       if (_HALT) { /* HALT instruction active? */ \
          _HALT = 0; /* exit HALT 'loop' */ \
@@ -1050,9 +1060,6 @@ int z80_execute(void)
       bOpCode = read_mem(_PC++);
       iCycleCount = cc_op[bOpCode];
       _R++;
-
-
-
 
       switch(bOpCode)
       {

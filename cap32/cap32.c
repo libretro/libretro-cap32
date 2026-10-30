@@ -377,6 +377,25 @@ t_disk_format disk_format[MAX_DISK_FORMAT] = {
 
 t_lightgun gun[2] = {{ 0, 0, GUN_SLEEP, 0 }, { 0, 0, GUN_SLEEP, 0 }};
 
+/* PPI control bits (mode set, bit 7 = 1) */
+#define PPI_PORT_A_INPUT 0x10
+#define PPI_PORT_B_INPUT 0x02
+
+/**
+ * ppi_psg_bus:
+ * byte on the PSG data bus when port C tells the PSG to latch a register
+ * number or to write a value. The bus is wired to PPI port A.
+ *
+ * Classic 8255 and the default CPC+ path: the port A latch, also while port A
+ * is an input.
+ */
+static INLINE uint8_t ppi_psg_bus(void)
+{
+   if (CPC.asic_ppi_strict && CPC_IS_PLUS() && (PPI.control & PPI_PORT_A_INPUT))
+      return 0xff;
+   return PPI.portA;
+}
+
 #define psg_write \
 { \
    uint8_t control = PSG.control & 0xc0; /* isolate PSG control bits */ \
@@ -479,7 +498,7 @@ void ga_memory_manager (void)
          membank_read[GateArray.lower_ROM_bank] = pbROMlo; // 'page in' lower ROM
       }
    }
-   if (CPC.model > CPC_MODEL_6128 && GateArray.registerPageOn) {
+   if (CPC_IS_PLUS() && GateArray.registerPageOn) {
       membank_read[1] = pbRegisterPage;
       membank_write[1] = pbRegisterPage;
    }
@@ -540,10 +559,10 @@ uint8_t z80_IN_handler (reg_pair port)
             break;
 
          case 1: // read from port B?
-            // 6128+: always use port B as input as this fixes Tintin on the moon.
-            // This should always be the case anyway but do not activate it for other model for now, let's validate it before.
-            // TODO: verify with CPC (non-plus) if we go in the else in some cases
-            if (CPC.model > CPC_MODEL_6128 || PPI.control & 2) { // port B set to input?
+            // The CPC+ ASIC forces port B to input (its control byte always
+            // has PPI_PORT_B_INPUT set, see the mode set below); this fixes
+            // Tintin on the Moon. A classic 8255 follows the programmed mode.
+            if (PPI.control & PPI_PORT_B_INPUT) { // port B set to input?
                if (retro_computer_cfg.tape_fastload && CPC.tape_motor && CPC.tape_play_button)
                   tape_input_reads++;
                ret_val = bTapeLevel | // tape level when reading
@@ -576,6 +595,14 @@ uint8_t z80_IN_handler (reg_pair port)
                   }
                }
             }
+            break;
+
+         case 3: // read from the control register
+            // A classic 8255 control register is write only (&FF is read).
+            // The CPC+ ASIC answers &FF while port A is an input and &00
+            // while it is an output.
+            if (CPC_IS_PLUS())
+               ret_val = (PPI.control & PPI_PORT_A_INPUT) ? 0xff : 0x00;
             break;
       }
    }
@@ -623,7 +650,8 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                uint8_t colour = val & 0x1f; // isolate colour value
                GateArray.ink_values[GateArray.pen] = colour;
                GateArray.palette[GateArray.pen] =colours[colour];
-               asic.legacy_palette |= 1u << GateArray.pen;
+               if (CPC_IS_PLUS()) // Plus: classic inks override ASIC colours until rewritten
+                  asic.legacy_palette |= 1u << GateArray.pen;
                // mode 2 - 'anti-aliasing' colour
                if (GateArray.pen < 2) {
                   CPC.video_set_palette_antialias();
@@ -635,7 +663,9 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             }
             break;
          case 2: // set mode
-            if (!asic.locked && (val & 0x20)) {
+            /* RMR2 (%101xxxxx) only exists on a Plus with an unlocked ASIC;
+             * everywhere else this is the classic RMR. */
+            if (CPC_IS_PLUS() && !asic.locked && (val & 0x20)) {
                asic.rmr2 = val; // 6128+ RMR2 register
                int membank = (val >> 3) & 3;
                if (membank == 3) { // Map register page at 0x4000
@@ -659,7 +689,13 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                GateArray.requested_scr_mode = val & 0x03; // request a new CPC screen mode
                ga_memory_manager();
                if (val & 0x10) { // delay Z80 interrupt?
-                  z80.int_pending = 0; // clear pending interrupts
+                  if (CPC_IS_PLUS()) {
+                     /* Clears only the raster (Gate Array) request; Plus DMA
+                      * requests keep INT asserted [A15 2.7]. */
+                     asic_clear_raster_interrupt();
+                  } else {
+                     z80.int_pending = 0; // clear pending interrupts
+                  }
                   GateArray.sl_count = 0; // reset GA scanline counter
                }
                if (CPC.mf2) { // MF2 enabled?
@@ -694,7 +730,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
       uint8_t crtc_port = port.b.h & 3;
       if (crtc_port == 0) { // CRTC register select?
          // 6128+: this is where we should detect the ASIC (un)locking sequence
-         if (CPC.model > CPC_MODEL_6128) {
+         if (CPC_IS_PLUS()) {
             asic_poke_lock_sequence(val);
          }
          CRTC.reg_select = val;
@@ -845,7 +881,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
    if (!(port.b.h & 0x20))
    {
       /* ROM select? */
-      if (CPC.model <= CPC_MODEL_6128) {
+      if (!CPC_IS_PLUS()) {
          GateArray.upper_ROM = val;
          pbExpansionROM = memmap_ROM[val];
 
@@ -912,16 +948,34 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
             if (!(PPI.control & 8)) { // output upper half?
                CPC.tape_motor = val & 0x10; // update tape motor control
                PSG.control = val; // change PSG control
-               uint8_t psg_data = PPI.portA;
+               uint8_t psg_data = ppi_psg_bus();
                psg_write
             }
             break;
          case 3: // modify PPI control
             if (val & 0x80) { // change PPI configuration
-               PPI.control = val; // update control byte
-               PPI.portA = 0; // clear data for all ports
-               PPI.portB = 0;
-               PPI.portC = 0;
+               if (CPC_IS_PLUS()) {
+                  /* CPC+: the 8255 is emulated inside the ASIC [AVR "8255"].
+                   * Only mode 0 and the direction of port A exist: port B is
+                   * always an input and port C always an output, and unlike a
+                   * real 8255 the port latches are not cleared. */
+                  PPI.control = (val & PPI_PORT_A_INPUT) | 0x80 | PPI_PORT_B_INPUT;
+                  if (CPC.asic_ppi_strict) {
+                     /* Strict option: port A now drives &FF (input) or its
+                      * kept latch (output). The PSG function lines are still
+                      * set (they were not cleared), so the PSG latches or
+                      * writes that byte immediately: switching to input while
+                      * port C selects a register selects register &FF, the
+                      * keyboard reading fault described in [AVR "8255"]. */
+                     uint8_t psg_data = ppi_psg_bus();
+                     psg_write
+                  }
+               } else {
+                  PPI.control = val; // update control byte
+                  PPI.portA = 0; // clear data for all ports
+                  PPI.portB = 0;
+                  PPI.portC = 0;
+               }
             } else { // bit manipulation of port C data
                if (val & 1) { // set bit?
                   uint8_t bit = (val >> 1) & 7; // isolate bit to set
@@ -932,7 +986,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                   if (!(PPI.control & 8)) { // output upper half?
                      CPC.tape_motor = PPI.portC & 0x10;
                      PSG.control = PPI.portC; // change PSG control
-                     uint8_t psg_data = PPI.portA;
+                     uint8_t psg_data = ppi_psg_bus();
                      psg_write
                   }
                } else {
@@ -944,7 +998,7 @@ void z80_OUT_handler (reg_pair port, uint8_t val)
                   if (!(PPI.control & 8)) { // output upper half?
                      CPC.tape_motor = PPI.portC & 0x10;
                      PSG.control = PPI.portC; // change PSG control
-                     uint8_t psg_data = PPI.portA;
+                     uint8_t psg_data = ppi_psg_bus();
                      psg_write
                   }
                }
@@ -1143,12 +1197,12 @@ int emulator_select_ROM (void)
 void emulator_reset (bool bolMF2Reset)
 {
    int n;
-   if(CPC.model > CPC_MODEL_6128){
+   if(CPC_IS_PLUS()){
       if (pbCartridgePages[0] != NULL)
          pbROMlo = pbCartridgePages[0];
    }
 
-   asic_reset();
+   asic_reset(); // every model: leaves the ASIC locked and idle
    // FIXME - generate plus palette correctly
    video_set_palette();
 
@@ -1186,6 +1240,8 @@ void emulator_reset (bool bolMF2Reset)
 
    // PPI
    memset(&PPI, 0, sizeof(PPI)); // clear PPI data structure
+   if (CPC_IS_PLUS()) // ASIC reset state: port A input, B input, C output [AVR]
+      PPI.control = 0x80 | PPI_PORT_A_INPUT | PPI_PORT_B_INPUT;
 
    // PSG
    PSG.control = 0;
@@ -1226,7 +1282,7 @@ void emulator_reset (bool bolMF2Reset)
     * the Stack Pointer (SP = 0x0000). This causes a stack underflow, writing the return
     * address to 0xFFFF and 0xFFFE.
     */
-   if (CPC.model <= CPC_MODEL_6128)
+   if (!CPC_IS_PLUS())
       membank_read[3] = pbROMhi; // 'page in' upper ROM
 
    // Multiface 2
@@ -1504,7 +1560,7 @@ void video_set_style (void)
    switch (dwXScale)
    {
       case 1:
-      if (CPC.model > CPC_MODEL_6128) {
+      if (CPC_IS_PLUS()) {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half_plus;
       } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_half;
@@ -1513,7 +1569,7 @@ void video_set_style (void)
          CPC.scr_prerendersync = (void(*)(void))prerender_sync_half;
          break;
       case 2:
-      if (CPC.model > CPC_MODEL_6128) {
+      if (CPC_IS_PLUS()) {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal_plus;
       } else {
          CPC.scr_prerendernorm = (void(*)(void))prerender_normal;

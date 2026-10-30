@@ -1,0 +1,993 @@
+                          "Arnold V" Specification
+
+"Arnold V" Specification
+Issue 1.5
+10th April 1990
+Amstrad PLC
+(c) Copyright Amstrad plc
+
+CONTENTS
+
+1 PRODUCT RANGE OVERVIEW
+
+1.1 Common Features
+1.2 Amstrad 464 Plus
+1.3 Amstrad 6128 Plus
+1.4 Further Variants
+
+2 TECHNICAL SPECIFICATION
+
+2.1 Hardware Sprites
+2.2 Colour palette
+2.3 Split Screen facility
+2.4 Programmable Raster Interrupt
+2.5 Soft scroll facility
+2.6 Automatic feeding of sound generator
+2.7 Interrupt Service
+2.8 Enhanced ROM cartridge support
+2.9 Analogue paddle ports
+2.10 PAL subcarrier locking
+2.11 Locking of enhanced features
+2.12 Eight-bit printer support
+2.13 Floppy disc data separator
+2.14 Power Requirements
+
+3 SOFTWARE SPECIFICATION
+
+3.1 6128
+3.2 464
+
+4 MECHANICAL SPECIFICATION
+
+5 DISPLAY DEVICES
+
+5.1 Monitors
+5.2 Modulator/Power Supply units
+
+6 NATIONAL VARIANTS
+7 PACKING LIST
+APPENDIX I - New Register Map
+APPENDIX II - Connector pinouts
+
+
+
+1 PRODUCT RANGE OVERVIEW
+
+This project provides a more sophisticated and stylish replacement for the
+existing CPC464 and CPC6128 computers. This has been achieved by:
+  o  Redesigning the ASIC and main PCB to incorporate a number of new features
+  o  Restyling the casework to provide a more modern appearance.
+
+1.1 Common Features
+
+The casework consists of a new two piece set of plastic mouldings. This
+contains a horizontally mounted, double-sided PCB assembly on which are
+mounted most of the electronics for the computer.
+
+A small, vertically mounted, daughter PCB provides the connector for a ROM
+cartridge. Any size ROM cartridge from 16k x 8 up to 512k x 8 can be
+installed. The firmware, fitted to the main PCB on earlier CPC computers,
+is supplied instead in a ROM cartridge.
+
+All expansion and peripheral device connectors are mounted on the main PCB.
+In addition to the connectors used on the existing CPC range, there are:
+
+Separate connectors for two joysticks, replacing the old daisy-chain
+arrangement. However, the daisy chain system can still be used on the
+Joystick 1 connector if required.
+
+An additional 15-way female D-type connector will provide four analogue input
+channels and access to the four existing "fire" buttons. This is pin
+compatible with the games control port on the PC200 (PC-8) computer.
+
+All PCB edge connectors have been replaced by types that are easier to screen
+against spurious RF emission. The printer connector is a 25-way female D type,
+as used on the PC1640 etc, and the expansion connector is a 50-way Delta
+(Centronics style) type, as used for the earlier CPC range in Germany.
+
+The 6128's TAPE socket will be replaced by a 6 pin RJ-11 type for the light gun.
+
+The computer provides stereo sound via additional pins on the monitor
+connector, as well as from the stereo sound socket.
+
+All existing CPC electrical features are provided, plus some new features.
+There is complete backward compatibility except that:
+  The border colour is undefined at power-on reset
+  The new 6128 version has no tape socket
+
+The following new features become available once a software "lock" has been
+opened, thus preventing existing CPC software from accidentally invoking them:
+
+16 Sprites, each consisting of 16x16 high resolution pixels, in fifteen
+colours separate from the main screen colours. Each sprite can be magnified
+in X or Y, moved around the screen, and turned on or off independent of the
+main screen. Sprite pixels can be transparent, and sprites have a fixed order
+of priority (i.e. "depth"), so that they can pass in front of each other, in
+front of the main screen, and behind the border.
+
+The colour palette has been extended to allow simultaneous display of up to
+32 colours (16 main + 15 sprite + border) from a palette of 4096, rather
+than the previous 17 from 27.
+
+Additional screen controls have been added, to allow split-screen operation
+and smooth scrolling to be used.
+
+An automated sound generation process allows generation of more complex sound
+effects with greatly reduced software overhead.
+
+Some other internal features to ease implementation of better games software,
+described in the technical specification section.
+
+The functions of display monitor and power supply are provided by either:
+  o  A restyled range of monitors, consisting of a white tube monochrome
+     monitor MM12 and an improved colour monitor CM14.
+  o  An MP2-style modulator/power supply unit.
+  o  A Peritel adaptor/power supply unit.
+
+The old CPC6128 keyboard is used, except that the colour scheme has been
+changed and the connecting cable exits in a different location.
+
+1.2 Amstrad 464 Plus
+
+This variant has an integral cassette tape drive, and 64k bytes of dynamic
+RAM. It is supplied with a ROM cartridge containing the system firmware plus
+the BASIC language, disk firmware and a game, although it is not possible to
+select the disk firmware.
+
+1.3 Amstrad 6128 Plus
+
+This variant has an integral 3" floppy disk drive (5V) plus a 36-way Delta
+(Centronics style) expansion socket allowing a second 3" drive to be added.
+The 6128 Plus is to be supplied with a ROM cartridge containing the system
+firmware plus the BASIC language, disk firmware and a game. 128k bytes of
+dynamic RAM are fitted to the main PCB.
+
+1.4 Further Variants
+
+Unlike the existing CPC range, the size of dynamic RAM and whether or not a
+disk drive is installed are separately configurable options. It is therefore
+possible to produce a "4128" (128k diskless) or "664" (64k with disk) variant.
+Also, it is possible to increase the number of analogue input channels to
+eight.
+
+2 TECHNICAL SPECIFICATION
+
+The technical specification is essentially similar to the earlier CPC
+464/6128 range, with some enhancements. This specification should therefore
+be read in conjunction the "Amstrad CPC 6128 Software Interface Spec" Issue 2,
+17th February 1985. New features have been added by changes to the ASIC and
+main PCB circuitry.
+
+The overriding concern in the specification of this new product range has
+been the need for total backward compatibility with the existing CPC range.
+Many of the new features within the ASIC employ new registers, which can be
+mapped to replace the page of RAM from 4000 to 7FFFh in the CPU memory map,
+by setting a bit pattern in an I/O port. Before this port is allowed to
+"exist", a deliberately obscure I/O sequence is needed. This mechanism
+protects existing CPC range software from accidents such as killing its own
+RAM page.
+
+The following new features are provided by changes to the ASIC and the main
+PCB electronics:
+
+2.1 Hardware Sprites
+
+Sixteen hardware sprites are to be provided by the ASIC.
+
+Each consists of an array of 16x16 pixels of four bits per pixel. A sprite
+pixel will be "transparent" when it has a value of zero, thus allowing 15
+sprite colours. The sprite pixel data exists in memory mapped registers
+within the ASIC, from address 4000h. The lower four bits of each byte will
+contain the data for a single pixel. The first 16 bytes contain the data for
+the upper scan line, starting at the top left hand corner of the sprite.
+15 more similar scan lines of 16 pixels each follow, thus each 256 (0100h)
+byte block of register space contains one sprite. When the data for a sprite
+is read or written, that sprite is removed from the display for the duration
+of the access. Thus sprite data should only be accessed during retraced time
+or while the raster is scanning somewhere else, otherwise there is a risk of
+disruption of the display.
+
+The position on screen of the upper left corner of each sprite, and the X
+and Y magnification, are defined by five registers for each sprite:
+  A2  A1  A0
+  0   0   0   X position LSB
+  0   0   1   X position MSB
+  0   1   0   Y position (scan line) LSB
+  0   1   1   Y position MSB
+  1   0   0   bits 3,2 = X magnification, bits 1,0 = Y magnification
+
+The position registers are read/write, and accept numbers in two's complement
+form. They should only be changed during retrace or when a sprite is off.
+Data written to these registers should be between +767 and -256 for X, and
+between +255 and -256 for Y, otherwise the sprites will appear in strange
+positions. With standard 6845 timing (64us scan lines, 200 visible lines),
+"on screen" positions at maximum sprite magnification are -64 to +639 in x
+and -63 to +199 in y. A sprite will not be displayed if either the vertical
+or the horizontal positions outside the on screen range. The magnification
+registers are cleared to zero at reset, and are write only. They are coded as:
+  0   0   Sprite not displayed
+  0   1   Magnification x1
+  1   0   Magnification x2
+  1   1   Magnification x4
+
+The sprite control registers exist on 8-byte boundaries from addresses 6000
+to 607Fh for sprites 0 to 15 respectively.
+
+All sprite characteristics are independent of the main screen mode, the
+unmagnified pixel size being as for screen mode 2 (640x200). Sprite colours
+are defined by fifteen entries in the colour palette (see section 2.2 below).
+Thus sprites can be in different colours and resolutions from the rest of the
+screen. Sprites may overlay with each other or the border, and are prioritized
+so that the border has the highest priority, followed by sprites 0 to 15 in
+sequence, then the main screen data. Thus sprites always appear "in front of"
+the main screen and "behind" the border.
+
+2.2 Colour palette
+
+The earlier colour palette within the ASIC, which selects 17 of 27 possible
+colours, has been replaced by a new palette which selects 32 of 4096 colours.
+This can be accessed through two ports. The primary port provides full access
+via 32 registers of 12 bits, i.e. 4 bits each for red, green and blue.
+
+For compatibility with existing models a secondary port provides access to the
+first 17 registers only (i.e. main screen colours and border), via the
+existing 5 bit interface. A block of logic maps the five bit colour written
+to the palette at the address selected by the "palette pointer register".
+
+The primary palette port is between addresses 6400 and 643Fh, each pair of
+bytes representing one entry in the palette. The most significant byte will
+contain the GREEN information in the lower nibble (D3-D0), and the other byte
+contains RED (D7-D4) and BLUE (D3-D0).
+
+This ordering of colours has been selected to give the most consistent grey
+scale possible on a monochrome display (green is brighter than red, which is
+brighter than blue). However, because of the need to retain compatibility with
+the existing 27 level grey scale, the colours are summed with a 9:3:1
+weighting rather than the 256:16:1 weighting which would be required to make
+the 12 bit word fully monotonic.
+
+The primary palette registers appear in RAM low byte first, so that they can
+be loaded via a single 16-bit LD instruction, e.g. LD (6400h),0F00h would set
+the main colour zero to bright green. The palette is dual ported so that there
+are no restrictions on when it can be accessed.
+
+The primary port palette registers are:
+  6400-641Fh      main screen colours 0 to 15
+  6420-6421h      border colour
+  6422-643Fh      sprite colours 1 to 15
+
+The secondary port registers are:
+  00-0F           main screen colours 0 to 15
+  10-1F           border colour
+
+2.3 Split Screen facility
+
+Three new memory mapped registers have been added within the ASIC, to provided
+a horizontally split screen facility. One at address 6801h defines the scan
+line after which the screen split occurs. A value of zero (as at power on
+reset) will turn this feature off.
+
+The other register pair at 6802h and 6803h define the start address in memory
+(similar to R12 and R13 respectively in the 6845, and therefore high byte
+first) which represents the location in memory from which to start displaying
+data for the lower screen. This allows the lower part of the picture to come
+from a separate memory area, and be separately scrolled. However, note that
+soft scrolling (Section 2.5 below) will act on the whole screen.
+
+Note that care should be taken with programming this facility such that the
+screen split does not alter the function of address bits A1-A8 and the
+dynamic memory refresh is not upset. This can be accomplished by setting the
+start of the second screen to lie on a 16k boundary. The value in register
+pair 6802h/6803h is the first displayed line, and not the start address of
+the 16k block.
+
+Also, during vertical retrace, the value in register 6801h should not be set
+to 257 less the total number of scan lines on the screen. With a normal screen
+of 312 scan lines, the value 312 - 257 = 55, or 37h should not be programmed
+unless (1) the vertical total adjust register is set to 1 while 6801h contains
+37h, or (2) the raster interrupt (see 2.4 below) should be used such that
+6801h contains 0 during vertical retrace.
+
+2.4 Programmable raster interrupt
+
+A new 8 bit memory mapped register (PRI) has been added within the ASIC at
+address 6800h, which is cleared at power up. If zero, the normal raster
+interrupt mechanism functions as before. Otherwise, an interrupt occurs
+instead at the end of the scan line specified. The PRI can be reprogrammed
+as required to produce multiple interrupts per frame. See section 2.7 below
+for general information on interrupts.
+
+2.5 Soft scroll facility
+
+A memory mapped 8 bit soft scroll control register (SSCR) has been added
+within the ASIC at 6804h, to allow scrolling of the screen by pixels rather
+than just by characters as at present. It is cleared at reset.
+
+This soft scrolling mechanism affects the whole of the main screen, regardless
+of the split screen facility, but it does not affect sprites.
+
+The lower four bits (D3-D0) of the SSCR define a horizontal delay of between
+0 and 15 bits i.e. high resolution (mode 2) pixels. This shifts the screen
+image to the right by the value programmed, "losing" pixels behind the right
+border and instead displaying random data on the left. It is left to the
+programmer to ensure that the delay value is always a multiple of the number
+of bits per pixel.
+
+The next three bits (D6-D4) will be added to the least significant three bits
+of the scan line address, thus determining which of the eight 2k blocks
+contains the data for the first scan line on the screen. The effect of this
+is to shift the display up by the number of scan lines programmed, "losing"
+what would otherwise be the first lines to be displayed, and instead appending
+extra lines to the bottom of the screen.
+
+The most significant bit (D7), when set, causes the border to extend over the
+first two bytes (16 high resolution pixels) of each scan line, masking out
+the bad data caused by the horizontal soft scroll. Software which intends to
+use horizontal soft scroll should have this bit always set, so that the screen
+width does not keep changing.
+
+Setting the SSCR to zero, as at reset, (i.e. no offsets, normal border), will
+of course effectively disable the soft scroll.
+
+2.6 Automatic feeding of sound generator
+
+An automated process has been added to feed data to the sound generator from
+three instruction streams in main RAM without CPU intervention. Three separate
+channels each fetch one 16-bit instruction during horizontal retrace time.
+These instructions must be in usual Z-80 format, i.e. least significant bit
+first, and must be aligned to word boundaries (i.e. address of first byte
+must be even). Once the three instructions have been captured, they are then
+executed sequentially. The maximum achievable update rate to the PSG is thus
+equal to the horizontal scan rate of 15.625 kHz per channel.
+
+The available commands are:
+  0RDDh   LOAD R,D    Load 8 bit data D to PSG register R (0<=R<=15)
+  1NNNh   PAUSE N     Pause for N prescaled ticks (0<N<=4095)
+  2NNNh   REPEAT N    Set loop counter to N for this stream (0<N<=4095), and
+                      mark next instruction as loop start.
+  3xxxh   (reserved)  Do not use
+  4000h   NOP         No operation (64us idle)
+  4001h   LOOP        If loop counter non zero, loop back to the first
+                      instruction after REPEAT instruction and decrement
+                      loop counter.
+  4010h   INT         Interrupt the CPU (see section 2.7 below)
+  4020h   STOP        Stop processing the sound list.
+
+Note that:
+  o  REPEAT Loops cannot be nested. Only one is allowed to be active per
+     instruction stream at any time.
+  o  REPEAT 0 and PAUSE 0 instructions will have no effect, i.e. they are
+     equivalent to NOP.
+  o  Control group (4xxxh) instructions can be logically ORed to produce more
+     complex instructions, e.g. INT|STOP = 4030h = Interrupt and stop.
+  o  The STOP instruction will leave the source address register pointing to
+     the next instruction, so that the instruction stream can be continued
+     after CPU intervention.
+  o  The argument field (N) of the REPEAT instruction is actually the number
+     of times the loop is taken. The block of code between REPEAT and LOOP
+     instructions is therefore executed N+1 times.
+
+A DMA control and status register (DCSR) controls which channels are currently
+enabled, and also tell the CPU which channel is interrupting.
+
+The channel enable bits in this register enable each "DMA" channel separately,
+and can be set by the CPU, and cleared by either the CPU, a STOP instruction,
+or power on reset. The interrupt bits are set when a channel is requesting an
+interrupt, and cleared when the CPU writes a "1" to the appropriate bit.
+
+The control and status register bits are:
+  D7      R       Raster interrupt (see 2.7 below)
+  D6      R/W     Channel 0 interrupt
+  D5      R/W     Channel 1 interrupt
+  D4      R/W     Channel 2 interrupt
+  D3              Unused (write 0)
+  D2      R/W     Channel 2 enable
+  D1      R/W     Channel 1 enable
+  D0      R/W     Channel 0 enable
+
+Each channel has a 16 bit source address register (SAR) and an 8 bit pause
+prescaler register (PPR). These are memory mapped, from address 6C00h, as
+follows:
+  6C00h           Channel 0 address, LSB
+  6C01h           Channel 0 address, MSB
+  6C02h           Channel 0 prescaler
+  6C03h           unused
+  6C04-6C07h      Channel 1, as above
+  6C08-6C0Bh      Channel 2, as above
+  6C0Fh           Control and Status register
+
+The SAR must be loaded by the CPU with a physical RAM address between 0000h
+and FFFEh. This means that the most significant two bits select which pages
+0 to 3 of the DRAM is used, and the remaining bits are the address relative
+to the page start. The DMA process is not affected by the RAM or ROM mapping
+registers, and will always fetch data from RAM and not ROM. Note that the
+least significant bit of the address is ignored, and the instructions are
+always fetched from word boundaries.
+
+The pause prescaler counts N+1 scan lines (where N is the value written by
+the CPU), giving a minimum tick of 64us, and a maximum of 16.384ms. When set
+nonzero by a PAUSE instruction, the pause counter for a particular channel
+is decremented every tick until it reaches zero. Therefore, if the PPR is
+set to a value N and a PAUSE M instruction is executed, the total delay time
+between the instruction before the PAUSE and that following the PAUSE will
+be M * (N+1) * 64us. Pauses of between 64us and 67s may thus be generated.
+
+The ASIC arbitrates accesses to the parallel interface device between the
+"DMA" channels and the CPU, allowing only one to access it at a time. CPU
+accesses to the 8255 could be held off by means of wait states for up to
+a 8 microseconds if the "DMA" channel is currently executing a LOAD
+instruction. After a LOAD is executed, the ASIC must put the PSG address
+register back as it was before. To achieve this the 8255 parallel peripheral
+interface and the 74LS145 decoder have been integrated into the ASIC.
+
+The exact timing is based on 1us cycles as follows. After the leading edge
+of HSYNC from the 6845, there is one dead cycle followed by an instruction
+fetch cycle for each channel which is active (i.e. enabled and not paused).
+The execute cycles then follow for each active channel. All instructions
+execute in one cycle, except that LOAD requires at least 8 cycles. An extra
+cycle is added to a LOAD if the CPU is accessing the 8255, or two extra
+cycles if the CPU access was itself a PSG register write.
+
+2.7 Interrupt Service
+
+The ASIC will produce interrupts from four sources: the raster interrupt and
+the three sound generator "DMA" channels.
+
+Bit D7 is set if the last interrupt acknowledge cycle was for a raster
+interrupt. Bits D6-D4 of the DCSR are set if interrupts from sound channels
+0 to 2 respectively are active. For compatibility with earlier models, the
+raster interrupt is reset either by a CPU interrupt acknowledge cycle, or by
+writing a 1 to bit D4 of the mode and ROM enable register. The sound channel
+interrupts are cleared by writing a 1 to the relevant bit in the DCSR.
+
+Thus interrupt service software in an environment where DMA interrupts are
+used must inspect these bits, giving highest priority to the raster interrupt,
+because this interrupt is always cleared automatically.
+
+Failure to observe this requirement may result in raster interrupts being
+missed. DMA interrupts must be acknowledged by writing a "1" to the relevant
+DCSR bit.
+
+2.8 Enhanced ROM cartridge support
+
+Previously, 32k of firmware ROM existed in two 16k blocks. The low block was
+at addresses 0000 to 3FFFh, and the high block at C000 to FFFFh. Expansion
+ROMs were mapped into C000 to FFFFh by writing a code to I/O address DFxxh.
+The disk ROM was code 0 or 7, depending on the state of an expansion signal.
+
+The new Arnold V range has no on board ROM, but instead has a cartridge slot
+which can support ROM cartridges of up to 4Mbits (512k bytes, or 32 pages of
+16k bytes). This means that cartridge games cannot be copied, because there
+is no firmware available when the game is installed. However, any software
+house producing a game where the intermediate state of play or high score
+table can be saved must produce their own driver software.
+
+The upper 5 ROM cartridge address lines are controlled by the ASIC via the
+existing ROM mapping port (at DFxxh), and hence define which of the 32 pages
+are mapped to the upper ROM block (C000 to FFFFh). The machine is supplied
+with a ROM cartridge containing the firmware and BASIC, and, where applicable,
+the disk ROM.
+
+For values less than 128 written to the mapping port, the "BASIC" page of
+the cartridge is always selected at the high ROM block address, unless the
+value last written to the mapping port matches the current disk ROM code
+(i.e. either 0 or 7), in which case the "Disk" page is selected. For values
+greater than 127, the lower 5 bits set the cartridge ROM page number directly,
+so that the cartridge may be addressed at pages 128-159 (80-9Fh).
+
+The earlier expansion ROM mapping scheme uses port DFxxh and ROMDIS on the
+expansion bus, still functions. The only change is that ROMDIS can now
+disable the disk ROM, and selecting the disk ROM does not cause ROMDIS to
+be activated. An expansion card ROM mapped at any page takes priority over
+the same page number in the cartridge.
+
+In addition, new bits are defined in the mode and ROM enable (MRER) register
+at I/O address 7Fxxh. Previously, D7 = 1 and D6 = 0 to select this register,
+and D5 should be 0. This has been modified such that, if this register is
+written with D5 = 1, the bottom five bits are redefined. This new register
+is known as the secondary ROM mapping register (RMR2). D4 and D3 control the
+address of the low bank, and also whether the memory mapped register page is
+enabled at 4000 to 7FFFh.
+  D4      D3
+  0       0       Low bank ROM = 0000 to 3FFFh, register page off
+  0       1       Low bank ROM = 4000 to 7FFFh, register page off
+  1       0       Low bank ROM = 8000 to BFFFh, register page off
+  1       1       Low bank ROM = 0000 to 3FFFh, register page on
+
+D2 to D0 determine which of the lower 8 pages of the cartridge ROM appear
+at the low bank address. The default is page 0.
+
+The logical (as seen by the CPU) to physical (as appears on the upper five
+cartridge address lines) page translation scheme is thus:
+
+Low bank:
+  Logical page (RMR2)     Physical page
+  0-7                     0-7
+
+High Bank:
+  Logical page (DFxxh)    Physical page
+  0-127 (not disc page)   1
+  0 or 7 (disc page)      3
+  128-255                 0-31
+
+This means that any of the first eight pages of cartridge ROM can be pages
+to either 0000, 4000, or 8000h, while any of the 32 cartridge pages can
+simultaneously appear at C000h.
+
+The two ROM disable bits in the existing mode and ROM enable register disable
+the ROM as before, wherever it is mapped, as will the ROMDIS signal from the
+expansion bus.
+
+The "write through" mechanism, whereby writes to an area which is currently
+mapped as ROM actually write to the underlying RAM, still functions, wherever
+the ROM is mapped. However, the write through mechanism cannot be used to
+access the register page. Write through also does not operate to the RAM
+from the register page.
+
+2.9 Analogue paddle ports
+
+The ASIC includes the logic for an octal A/D converter, in conjunction with
+an external R-2R network, comparator and analogue multiplexer. Eight analogue
+input channels are thus available on the PCB, of which only four have
+connectors. This allows support for four paddles or two joysticks, with
+capacity for twice this many without redesigning the ASIC. The A/D is 6 bits
+wide, to give sufficient resolution after calibrating joysticks. It appears
+to the software as a bank of eight, 6 bit, read-only registers from 6808h to
+680Fh, known as ADC0-7. They are updated approximately 200 times per second.
+The A/D inputs have an input range of 0V (data = 00) to 2.5V (data = 3Fh),
+and an input impedance of 180k to Vcc.
+
+2.10 PAL subcarrier locking
+
+The main oscillator for the ASIC is 40MHz. A divide by 9 output at 4.444MHz
+is provided with a 5:4 mark/space ratio. It is possible to change the main
+crystal to 9 x 4.33619MHz = 39.902571 MHz, slowing the whole system by 0.25%.
+This may or may not upset the disk drives, but even if this is the case, a
+diskless unit could provide PAL subcarrier frequency locked to the master
+oscillator, thus improving the picture quality.
+
+  [note: above should say 4.43619MHz, not 4.33619MHz - nocash 2010]
+
+2.11 Locking of enhanced features
+
+The ASIC contains a locking mechanism, whereby the enhanced features are not
+available until the software has performed an obscure sequence of I/O
+instructions to the ASIC. This prevents any existing software from having
+nasty accidents on the new hardware.
+
+The lock is operated by writing a series of bytes to the 6845 address
+register at address BCxxh. The lock must first be synchronised by writing
+first a non zero byte value then a zero. The following sequence must then
+be written:
+
+  FF,77,B3,51,A8,D4,62,39,9C,46,2B,15,8A,CD,EE
+
+The lock will then be picked. If it required to lock it again, the same
+sequence must be followed but without the terminating "EE".
+
+However, it should be noted that unauthorised use of this mechanism may
+infringe Amstrad's patent .
+
+When the lock is "locked", the secondary ROM mapping register does not exist
+(see Section 2.6). It is therefore impossible to select (or to deselect) the
+memory mapped register page.
+
+2.12 Eight bit printer support
+
+The ASIC can provide support for eight bit printers. If a link on the PCB is
+made, the most significant printer port bit will be controlled by bit 3 in
+register 12 (decimal) of the 6845, i.e. bit 11 of the start address register.
+If the link is not made, the most significant printer port bit will always be
+low.
+
+2.13 Floppy disc data separator
+
+Because of timescale pressures, the data separator design in the ASIC has
+been deleted rather than improved . Thus all models with a disk drive use
+an external SED9420 data separator.
+
+2.14 Power requirements
+
+The Arnold V range is a 5V only design. Power requirements are:
+  Amstrad 464 Plus:       MIN     MAX     UNIT
+  Main PCB                700     1300    mA
+  Cassette unit           TBD     TBD     mA
+  Total consumption       TBD     TBD     mA
+
+  Amstrad 6128 Plus:      MIN     MAX     UNIT
+  Main PCB                700     1300    mA
+  Disk Drive Unit         500     1100    mA
+  Total consumption       1200    2400    mA
+
+3 SOFTWARE SPECIFICATION
+
+The computers are shipped with a cartridge fitted in the cartridge slot.
+Disk based software is supplied with the 6128 Plus by Amstrad. There will
+be no welcome tape or disk.
+
+3.1 6128
+
+1M ROM cartridge (i.e. 128k x 8) Combined firmware, BASIC and Disk ROM, incorporating free game:
+  Page 0:       Firmware
+  Page 1:       BASIC
+  Page 2:       Game
+  Page 3:       Disk
+  Pages 4-6:    Game
+  Page 7:       BASIC
+
+One 3" disk with CP/M Plus and utilities only.
+
+3.2 464
+
+1M ROM cartridge as for 6128.
+
+4 MECHANICAL SPECIFICATION
+
+Both models in the new Arnold V range will share a common plastic cabinet.
+This will be a two-piece design, i.e. upper and lower cabinet halves. The
+name Amstrad will be moulded in to the top cabinet.
+
+The different variants will be handled by breakout sections or tool inserts
+as necessary. The 464 version will have the model name "464 Plus" moulded
+into the cassette door, and the "6128" version will have the model name
+"6128 Plus" moulded into the upper casework above the disk drive, in the
+area of plastic which does not exist for the 464 version.
+
+The monitors will have international symbols for brightness, contrast, volume
+and vertical hold. Apart from these items, there will be no moulded lettering,
+and moving cores must be kept to a minimum. The casework will provide both
+aesthetic and structural functions. Other moulded parts will be needed for
+the ROM cartridge, cartridge slot, cassette door, and the power switch. These
+should be in the same material and the same colour as the main casework
+mouldings.
+
+The power switch will be connected to a "bolt" which engages in the side of
+the ROM cartridge when the power is on, so that the cartridge cannot be
+inserted or withdrawn while power is applied to the machine.
+
+The main PCB, disk drive (6128) and cassette mechanism (464) will be mounted
+to the lower cabinet.
+
+Ideally, the keyboard should be similarly mounted on the lower cabinet, to
+improve serviceability, as should as many minor components as possible. A
+slimmer cassette mechanism must be used, to keep the height of the computer
+low. The cassette mechanism electronics will be mounted below the cassette
+deck, as with the old version.
+
+5 DISPLAY DEVICES
+
+With the CPC range, the display device, i.e. Monitor, Modulator/power supply,
+or peritel adaptor also supplies power to the computer. In view of the fact
+that RFI prevention will be important in Europe after 1992, all display
+devices should be to Class 1 construction, i.e. earthed, so that it is easier
+to prevent the computer radiating, and should themselves be designed to meet
+the RFI standard EN55022 (CISPR 22).
+
+The monitors should operate off both 220V and 240V supplies without
+modification.
+
+The relevant safety standard for this product is BS415 (IEC65).
+
+5.1 Monitors
+
+The new Arnold V range will always be sold with a monitor.
+
+The existing GTM65 and CTM640 monitors have been restyled in the same colour
+as the main cabinet.
+
+The monitor rear cabinet material must be to BS415 Clause 20.2
+
+The MM12 monochrome incorporates a 12" paper white tube, similar to that used
+on the PCW9512.
+
+The input will be the same as the earlier GTM65 versions, i.e. impedance 470
+ohms to 0V, analogue voltage input which is linear between 0.8V (Black) and
+1.75V (Peak white).
+
+The CM14 colour monitor needs to handle a sixteen level input on each of RGB.
+The new monitor must present an input impedance of 100 ohms to 0V, and accept
+an analogue input current of 0-10mA for each gun. The levels shall be defined
+such that 0mA is black and 10mA is full on. The response must be linear
+between these limits.
+
+The monitors also incorporate stereo speakers, amplifiers, and a volume
+control. There is no 12V D.C. output.
+
+5.2 Modulator/Power Supply units
+
+The existing MP2 can be used with the new Arnold V range. However, it would
+be better to produce a new version following the RFI guidelines at the start
+of this section, and preferably including a sound modulator.
+
+The input circuit of the Peritel adaptor will probably need to be redesigned
+to handle the new analogue video signals. It should also have the sound
+channels added.
+
+6 NATIONAL VARIANTS
+
+The existing national variants of the ROM (i.e. UK, France, Spain) will
+continue to be supported, but no others will be added. Steps should be taken
+to limit the amount of national variation to that which really is necessary.
+There should be no need to make any changes for approvals reasons, except to
+power supply input voltages and mains connectors.
+
+There will be different versions of the keyboard, instruction book, and disk,
+as well as the ROM cartridge. It is thus possible to change between, variants
+without dismantling the computer.
+
+7 PACKING LIST
+
+The following items should be included in the computer carton:
+  Polystyrene foam packing pieces
+  The Amstrad 464 Plus or 6128 Plus unit, with ROM cartridge installed.
+  A PD-1 Games Paddle
+  The instruction book
+
+The following should be included in the monitor carton:
+  Polystyrene foam packing pieces
+  The MM12 or CM14 monitor
+
+APPENDIX I
+
+New Register Map
+
+The new register page, from 4000h to 7FFFh appears as follows:
+  ADDR    SIZE    POR   TYPE  MNEM    USE
+  4000h   100H    N     R/W           Sprite 0 image data
+  4100h   100h    N     R/W           Sprite 1 image data
+  |       |       |     |     |       |
+  4F00h   100h    N     R/W           Sprite 15 image data
+  5000h                               (unused)
+  6000h   2       N     R/W   X0      Sprite 0 X position
+  6002h   2       N     R/W   Y0      Sprite 0 Y position
+  6004h   1       Y     W     M0      Sprite 0 magnification
+  6005h   3                           (unused)
+  6008h   2       N     R/W   X1      Sprite 1 X position
+  600Ah   2       N     R/W   Y1      Sprite 1 Y position
+  600Ch   1       Y     W     M1      Sprite 1 magnification
+  600Dh   3                           (unused)
+  |       |       |     |     |       |
+  6078h   2       N     R/W   X15     Sprite 15 X position
+  607Ah   2       N     R/W   Y15     Sprite 15 Y position
+  607Ch   1       N     W     M15     Sprite 15 magnification
+  607Dh   3                           (unused)
+  6080h                               (unused)
+  6400h   2       N     R/W           Colour palette, pen 0
+  6402h   2       N     R/W           Colour palette, pen 1
+  |       |       |     |     |       |
+  641Eh   2       N     R/W           Colour palette, pen 15
+  6420h   2       N     R/W           Colour palette, border
+  6422h   2       N     R/W           Colour palette, sprite colour 1
+  6424h   2       N     R/W           Colour palette, sprite colour 2
+  |       |       |     |     |       |
+  643Eh   2       N     R/W           Colour palette, sprite colour 15
+  6440h                               (unused)
+  6800h   1       Y     W     PRI     Programmable raster interrupt scan line
+  6801h   1       Y     W     SPLT    Screen split scan line
+  6802h   2       N     W     SSA     Screen split secondary start address
+  6804h   1       Y     W     SSCR    Soft scroll control register
+  6805h                               (unused)
+  6806h                               (unused)
+  6808h   1             R     ADC0    Analogue input channel 0
+  6809h   1             R     ADC1    Analogue input channel 1
+  680Ah   1             R     ADC2    Analogue input channel 2
+  680Bh   1             R     ADC3    Analogue input channel 3
+  680Ch   1             R     ADC4    Analogue input channel 4
+  680Dh   1             R     ADC5    Analogue input channel 5
+  680Eh   1             R     ADC6    Analogue input channel 6
+  680Fh   1             R     ADC7    Analogue input channel 7
+  6810h                               (unused)
+  6C00h   2       N     W     SAR0    "DMA" channel 0 address pointer
+  6C02h   1       N     W     PPR0    "DMA" channel 0 pause prescaler
+  6C03h   1                           (unused)
+  6C04h   2       N     W     SAR1    "DMA" channel 1 address pointer
+  6C06h   1       N     W     PPR1    "DMA" channel 1 pause prescaler
+  6C07h   1                           (unused)
+  6C08h   2       N     W     SAR2    "DMA" channel 2 address pointer
+  6C0Ah   1       N     W     PPR2    "DMA" channel 2 pause prescaler
+  6C0Bh   4                           (unused)
+  6C0Fh   1       Y     R/W   DCSR    "DMA" control/status register
+
+Registers in I/O space are generally identical to earlier CPC464/6128
+versions, except as follows:
+
+  ADDR    DATA    POR   TYPE  MNEM    USE
+  7Fxxh   00xxxxxx      N     W               Palette pointer register
+  7Fxxh   01xxxxxx      N     W               Palette memory
+  7Fxxh   100xxxxx      Y     W       MRER    Mode and ROM enable register
+  7Fxxh   101xxxxx      Y     W       RMR2    Secondary ROM mapping register
+  7Fxxh   11xxxxxx      Y     W               Memory mapping register (RAM)
+  DFxxh   xxxxxxxx      Y     W               Expansion/Cartridge ROM select
+
+Note that RMR2 can only be accessed when the new feature lock (Section 2.11
+above) has been "opened". Otherwise, MRER exists in its place.
+
+POR column indicates whether a register has power on reset. A "N" indicates
+that the contents of a register will be undefined at power on.
+
+APPENDIX II
+
+Connector pinouts
+
+From front of left hand side rearwards, then along the rear panel towards
+the right, the connectors will be:
+
+SOUND:  3.5mm stereo jack
+  1 (Shield)      GND
+  2 (Tip)         L Sound
+  3 (Ring)        R Sound
+
+JOYSTICK 1:     9 way male D. Joystick 2 can be daisy chained
+  1       Up      6       Fire 2
+  2       Down    7       Fire 1
+  3       Left    8       Common
+  4       Right   9       Common (joystick 2)
+  5       N.C.
+
+JOYSTICK 2:     9 way male D.
+  1       Up      6       Fire 2
+  2       Down    7       Fire 1
+  3       Left    8       Common
+  4       Right   9       N.C.
+  5       N.C.
+
+ANALOGUE:       15 way female D
+  1       GND (Pot common)        9       GND (Pot common)
+  2       Fire 1                  10      Fire 1
+  3       X1                      11      X2
+  4       COM1 (switches)         12      COM2 (switches)
+  5       +5V                     13      Y2
+  6       Y1                      14      Fire 2
+  7       Fire 2                  15      GND (Pot common)
+  8       GND (Pot common)
+
+AUX:    6 pin RJ-11 type
+  1       +5V
+  2       Common
+  3       LPEN
+  4       Fire 2
+  5       Fire 1
+  6       GND
+
+PRINTER:        25 way female D
+  1       *Strobe 14
+  2       D0      15
+  3       D1      16      +5V
+  4       D2      17      GND
+  5       D3      18      GND
+  6       D4      19      GND
+  7       D5      20      GND
+  8       D6      21      GND
+  9       D7      22      GND
+  10              23      GND
+  11      BUSY    24      GND
+  12              25      GND
+  13
+
+EXPANSION:      50 way Delta range.
+  1       Sound   2       GND
+  3       A15     4       A14
+  5       A13     6       A12
+  7       A11     8       A10
+  9       A9      10      A8
+  11      A7      12      A6
+  13      A5      14      A4
+  15      A3      16      A2
+  17      A1      18      A0
+  19      D7      20      D6
+  21      D5      22      D4
+  23      D3      24      D2
+  25      D1      26      D0
+  27      VCC     28      *MREQ
+  29      *M1     30      *RFSH
+  31      *IORQ   32      *RD
+  33      *WR     34      *HALT
+  35      *INT    36      *NMI
+  37      *BUSRQ  38      *BUSAK
+  39      READY   40      *BRST
+  41      *RSET   42      *ROMEN
+  43      ROMDIS  44      *RAMRD
+  45      RAMDIS  46      CURSOR
+  47      LPEN    48      *EXP
+  49      GND     50      CLK4
+
+5 V DC: 6mm power
+  Centre  +5V
+  Outer   GND
+
+MONITOR:        8 way DIN type A (45326)
+  1       *Sync
+  2       Green
+  3       Lum
+  4       Red
+  5       Blue
+  6       L Sound
+  7       R Sound
+  8       GND
+
+SECOND DRIVE:   36 way Delta range (6128 only)
+  1       N.C. (Disk change)      2       GND
+  3                               4       GND
+  5                               6       GND
+  7       Index                   8       GND
+  9       N.C. (Drive 0 select)   10      GND
+  11      Drive 1 Select          12      GND
+  13                              14      GND
+  15      Motor On                16      GND
+  17      Direction Select        18      GND
+  19      Step                    20      GND
+  21      Write Data              22      GND
+  23      Write Gate              24      GND
+  25      Track 0                 26      GND
+  27      Write Protect           28      GND
+  29      Read Data               30      GND
+  31      Side 1 Select           32      GND
+  33      Ready                   34      GND
+  35      N.C.                    36      GND
+
+The internal connectors will be:
+
+TAPE PORT:      8 way 0.1" pitch connector (464 only)
+  1       +5V
+  2       GND
+  3       +5V
+  4       Write Data
+  5       Read Data
+  6       +5V
+  7       Sound
+  8       *Motor on
+
+DISK POWER:     4 x 0.1" pitch high current PCB header (6128 only)
+  1       +5V
+  2       GND
+  3       GND
+  4       N.C.
+
+INTERNAL DRIVE: 26 way 0.1" pitch ribbon cable connector (6128 only)
+  1       GND     2       Index
+  3       GND     4       Drive 0 Select
+  5       GND     6       N.C. (Drive 1 Select)
+  7       GND     8       Motor On
+  9       GND     10      Direction Select
+  11      GND     12      Step
+  13      GND     14      Write Data
+  15      GND     16      Write Gate
+  17      GND     18      Track 0
+  19      GND     20      Write Protect
+  21      GND     22      Read Data
+  23      GND     24      Side 1 Select
+  25      GND     26      Ready
+
+KEYBOARD:       2 pcs 10 way 0.1" pitch socket for flexible PCB
+  1       N.C.    1       Y1
+  2       X1      2       Y2
+  3       X2      3       Y3
+  4       X3      4       Y4
+  5       X4      5       Y5
+  6       X5      6       Y6
+  7       X6      7       Y7
+  8       X7      8       Y8
+  9       X8      9       Y9
+  10      N.C.    10      Y10
+
+POWER SWITCH:   2 pin 0.1" pitch header
+  1       Input from PSU
+  2       +5V to Computer
+
+POWER ON LED:   2 pin 0.1" pitch header
+  1       LED Anode
+  2       GND
+
+ROM CARTRIDGE:  2 pcs 2 x 9 way 2.5mm pitch sockets.
+  1a      A10     2a      A2      1b      +5V     2b      +5V
+  3a      *CE     4a      A1      3b      CLK     4b      CA18
+  5a      D7      6a      A0      5b      CA16    6b      CA17
+  7a      D6      8a      D0      7b      CA15    8b      CA14
+  9a      D5      10a     D1      9b      A12     10b     A13
+  11a     D4      12a     D2      11b     A7      12b     A8
+  13a     D3      14a     SIN     13b     A9      14b     A9
+  15a     CCLR    16a     GND     15b     A5      16b     A11
+  17a     GND     18a     GND     17b     A4      18b     A3
+
+This document was originally transcribed by Rob Scott and Paul Fairman.
+It was converted into HTML by Kevin Thacker.

@@ -76,6 +76,13 @@
 #define CPC_MODEL_PLUS 4
 #define CPC_MODEL_MAX 4
 
+/* The single test for "this machine has a Plus ASIC". Every CPC+ feature
+ * (ASIC unlock, register page, RMR2, cartridge ROM paging, sprites, soft
+ * scroll, split screen, PRI, DMA, vectored interrupts) is gated on it, so a
+ * classic 464/664/6128 never executes Plus code. Use this instead of
+ * "model > CPC_MODEL_6128", which would also match CPC_MODEL_UNKNOWN. */
+#define CPC_IS_PLUS() (CPC.model == CPC_MODEL_PLUS)
+
 #define ICN_DISK_WIDTH 14
 #define ICN_DISK_HEIGHT 16
 #define ICN_TAPE_WIDTH 18
@@ -262,6 +269,9 @@ typedef struct {
    unsigned int snd_stereo;
    unsigned int snd_volume;
    unsigned int snd_pp_device;
+   /* CPC+ only: reproduce the ASIC PPI fault that drives &FF on port A while
+    * it is an input (core option "cap32_strict_asic_ppi", see asic.h). */
+   unsigned int asic_ppi_strict;
    unsigned int snd_buffersize;
    unsigned char *snd_bufferptr;
 

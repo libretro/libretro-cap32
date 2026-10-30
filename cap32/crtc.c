@@ -516,7 +516,7 @@ void update_skew(void)
       CRTC.hstart = skew; // position at which horizontal display starts
       CRTC.hend = CRTC.hstart + CRTC.registers[1]; // position at which it ends
    }
-   if(asic.extend_border)
+   if(CPC_IS_PLUS() && asic.extend_border) // SSCR bit 7: border over the first 2 bytes
       CRTC.hstart++;
 }
 
@@ -670,21 +670,31 @@ static INLINE void restart_frame(void)
    reload_addr();
 }
 
+/* Gate Array 52-line interrupt request. On a classic CPC this is the whole
+ * interrupt system: one request line. On a Plus it is the ASIC raster request
+ * (vector bits %110) and is suppressed while PRI is non-zero. */
+static INLINE void ga_request_interrupt(int origin)
+{
+   if (!CPC_IS_PLUS()) {
+      z80.int_pending = 1; // queue Z80 interrupt
+   } else if (CRTC.interrupt_sl == 0) {
+      asic_raise_interrupt(ASIC_INT_RASTER); // queue Z80 interrupt
+   }
+}
+
 static INLINE void match_hsw(void)
 {
    if (CRTC.hsw_count == CRTC.hsw) { // matches horizontal sync width?
       GateArray.sl_count++; // update GA scan line counter
       if (GateArray.sl_count == 52) { // trigger interrupt?
-         if (CRTC.interrupt_sl == 0) { // ASIC interrupt
-            z80.int_pending = 1; // queue Z80 interrupt
-         }
+         ga_request_interrupt(0);
          GateArray.sl_count = 0; // clear counter
       }
       if (GateArray.hs_count) { // delaying on VSYNC?
          GateArray.hs_count--;
          if (!GateArray.hs_count) {
-            if (GateArray.sl_count >= 32 && CRTC.interrupt_sl == 0) { // counter above save margin?
-               z80.int_pending = 1; // queue interrupt
+            if (GateArray.sl_count >= 32) { // counter above save margin?
+               ga_request_interrupt(1);
             }
             GateArray.sl_count = 0; // clear counter
          }
@@ -704,7 +714,10 @@ static INLINE void match_hsw(void)
          CRTC.flag_inmonhsync = 1; // enter monitor HSYNC
          iMonHSStartPos = 0;
          iMonHSPeakToStart = iMonHSPeakPos;
-         asic_dma_cycle();
+         /* CPC Plus DMA sound channels: one instruction per channel per scan
+          * line, run 3us after the HSYNC leading edge (asic_dma_channel). */
+         if (CPC_IS_PLUS())
+            asic_dma_cycle();
       } else if (CRTC.hsw_count == 7) { // reached GA HSYNC output cutoff?
          change_mode();
          end_vdu_hsync();
@@ -824,7 +837,10 @@ static INLINE uint8_t get_sprite_asic(unsigned short offset)
     * which shifts the background active area by 16 Mode 2 pixels.
     */
    
-   // character width 16 píxeles (Mode 2). hstart for the extend border
+   /* One character (1us) is 16 mode 2 pixels, the unit of sprite X. hstart
+    * already includes the SSCR bit 7 border extension. Sprite positions are
+    * signed (decoded on write by asic_register_page_write), so a sprite at
+    * X = -16 shows only its right 48 pixels at the left edge. */
    int active_x = ((CRTC.char_count - CRTC.hstart) * 16) + offset;
    
    // The internal ASIC counter ASIC has 8 scanlines (rasters) per character row
@@ -1123,10 +1139,13 @@ void crtc_cycle(int repeat_count)
 {
    while (repeat_count) {
       /* CPC Plus ASIC: Programmable Raster Interrupt (PRI)
-       * Plus PRI is delayed by 10us from HSYNC start, independent of R3. */
+       * The request scheduled at the HSYNC leading edge of the PRI scan line
+       * is raised when its delay (min(HSYNC width, 6) characters of this
+       * loop, see the scheduling code below) runs out.
+      /* Only ever non-zero on a Plus: set by the PRI scheduling below or a
+       * CPC+ snapshot. */
       if (CRTC.raster_interrupt_delay && !--CRTC.raster_interrupt_delay) {
-         z80.int_pending = 1;
-         asic.irq_cause = 0x06;
+         asic_raise_interrupt(ASIC_INT_RASTER);
          GateArray.sl_count &= 0x1f;
       }
 
@@ -1294,8 +1313,12 @@ void crtc_cycle(int repeat_count)
       }
 
       if (CRTC.char_count == CRTC.registers[1]) { // matches horizontal displayed?
-         /* SSCR changes the raster bits immediately, but row advancement is
-          * sampled at R1. A split on this line overrides that advancement. */
+         /* End of the displayed line: decide the address of the next line.
+          * SSCR bits 6-4 change the fetched raster bits immediately (see
+          * prerender_normal_plus), but row advancement is sampled here at R1
+          * using the scrolled raster value. SPLT then overrides it: when the
+          * 8-bit scan line ((VCC & 31) << 3 | VLC & 7) equals SPLT, the next
+          * line starts at SSA, so the split appears after scan line SPLT. */
          unsigned raster = CRTC.raster_count;
          if (CPC.model == CPC_MODEL_PLUS)
             raster = (raster + asic.vscroll) & 31;
@@ -1313,12 +1336,23 @@ void crtc_cycle(int repeat_count)
             CRTC.flag_hadhsync = 1; // prevent GA from processing more than one HSYNC per scan line
             CRTC.hsw_count = 0; // initialize horizontal sync width counter
 
-            /* CPC Plus: Setup 10us delay for Programmable Raster Interrupt
-             * https://cpctech.cpcwiki.de/docs/cpcplus.html */
-            if (CRTC.interrupt_sl &&
+            /* CPC Plus: schedule the Programmable Raster Interrupt.
+             * The scan line matches when VCC == PRI >> 3 and VLC == PRI & 7;
+             * VCC is compared in full, so PRI cannot match past line 255.
+             * The request is raised on the trailing edge of the HSYNC sent
+             * to the monitor [AVR 2.4]: the Gate Array cuts that HSYNC 6us
+             * after the CRTC HSYNC starts, so the delay is the CRTC HSYNC
+             * width (R3 bits 3-0, 0 = 16) limited to 6us; with the usual
+             * R3 = &8E the interrupt comes 6us after the leading edge.
+             * (The previous 10us delay made raster handlers 4us late: in
+             * Shadow of the Beast an SSCR change missed the first visible
+             * character of line 216, showing flickering dots on the left.
+             */
+            if (CPC_IS_PLUS() && CRTC.interrupt_sl &&
                 CRTC.line_count == (CRTC.interrupt_sl >> 3) &&
                 CRTC.raster_count == (CRTC.interrupt_sl & 7)) {
-               CRTC.raster_interrupt_delay = 10;
+               unsigned width = CRTC.hsw ? CRTC.hsw : 16;
+               CRTC.raster_interrupt_delay = width < 6 ? width : 6;
             }
 
             match_hsw();
